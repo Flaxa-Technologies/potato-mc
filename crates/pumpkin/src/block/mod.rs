@@ -466,6 +466,17 @@ pub fn drop_loot(
             // TODO: Re-enable apple and stick drops for leaves once table bonus/drop chances are properly implemented
             items.retain(|stack| stack.item != &Item::APPLE && stack.item != &Item::STICK);
         }
+        if block.has_tag(&tag::Block::MINECRAFT_SHULKER_BOXES) {
+            if let Some(be) = world.get_block_entity(pos)
+                && let Some(shulker) = be.as_any().downcast_ref::<crate::block::entities::shulker_box::ShulkerBoxBlockEntity>()
+            {
+                for stack in &mut items {
+                    if stack.item.has_tag(&tag::Item::MINECRAFT_SHULKER_BOXES) {
+                        shulker.apply_to_item_stack(stack);
+                    }
+                }
+            }
+        }
         if !items.is_empty() {
             let mut event = crate::plugin::block::block_drop_item::BlockDropItemEvent {
                 block_pos: *pos,

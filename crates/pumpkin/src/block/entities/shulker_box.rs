@@ -1,3 +1,4 @@
+use pumpkin_data::data_component_impl::{BlockEntityDataImpl, ContainerImpl};
 use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_nbt::compound::NbtCompound;
@@ -135,6 +136,66 @@ impl ShulkerBoxBlockEntity {
 
         world.play_sound(sound, SoundCategory::Blocks, &position.to_f64());
     }
+
+    #[must_use]
+    pub fn get_container_component(&self) -> ContainerImpl {
+        let items = self
+            .items
+            .read()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut vec = Vec::new();
+        for (slot, stack) in items.iter().enumerate() {
+            if !stack.is_empty() {
+                vec.push((slot as u8, stack.clone()));
+            }
+        }
+        ContainerImpl { items: vec }
+    }
+
+    pub fn load_from_container_component(&self, container: &ContainerImpl) {
+        let mut items = self
+            .items
+            .write()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        items.fill_with(|| ItemStack::EMPTY.clone());
+        for (slot, stack) in &container.items {
+            if (*slot as usize) < Self::INVENTORY_SIZE {
+                items[*slot as usize] = stack.clone();
+            }
+        }
+        self.mark_dirty();
+    }
+
+    pub fn load_from_block_entity_data(&self, nbt: &NbtCompound) {
+        let mut items = self
+            .items
+            .write()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        items.fill_with(|| ItemStack::EMPTY.clone());
+        pumpkin_world::inventory::sync_read_items_from_nbt(nbt, &mut *items);
+        self.mark_dirty();
+    }
+
+    pub fn load_from_item_stack(&self, stack: &ItemStack) {
+        if let Some(container) = stack.get_data_component::<ContainerImpl>() {
+            self.load_from_container_component(container);
+        } else if let Some(bed) = stack.get_data_component::<BlockEntityDataImpl>() {
+            self.load_from_block_entity_data(&bed.nbt);
+        }
+    }
+
+    pub fn apply_to_item_stack(&self, stack: &mut ItemStack) {
+        if !self.is_empty() {
+            let container = self.get_container_component();
+            stack.set_data_component(container);
+            let mut nbt = NbtCompound::new();
+            nbt.put_string("id", Self::ID.to_string());
+            if let Ok(items) = self.items.read() {
+                sync_write_items_to_nbt(items.as_slice(), &mut nbt);
+            }
+            stack.set_data_component(BlockEntityDataImpl { nbt });
+        }
+    }
 }
 
 impl Inventory for ShulkerBoxBlockEntity {
@@ -218,3 +279,69 @@ impl Clearable for ShulkerBoxBlockEntity {
         self.mark_dirty();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pumpkin_data::item::Item;
+
+    #[test]
+    fn test_shulker_box_component_preservation_round_trip() {
+        let pos = BlockPos::new(10, 64, 20);
+        let shulker = ShulkerBoxBlockEntity::new(pos);
+
+        let diamond = Item::from_registry_key("diamond").unwrap();
+        let emerald = Item::from_registry_key("emerald").unwrap();
+
+        // Place items in specific non-zero slots
+        shulker.set_stack(3, ItemStack::new(64, diamond));
+        shulker.set_stack(17, ItemStack::new(12, emerald));
+
+        assert!(!shulker.is_empty());
+
+        // Export to item stack (as drops in creative or survival)
+        let shulker_item = Item::from_registry_key("shulker_box").unwrap();
+        let mut dropped_stack = ItemStack::new(1, shulker_item);
+        shulker.apply_to_item_stack(&mut dropped_stack);
+
+        // Verify container component is attached
+        let container = dropped_stack
+            .get_data_component::<ContainerImpl>()
+            .expect("ContainerImpl component must be attached");
+        assert_eq!(container.items.len(), 2);
+        assert_eq!(container.items[0].0, 3);
+        assert_eq!(container.items[0].1.item.id, diamond.id);
+        assert_eq!(container.items[0].1.item_count, 64);
+        assert_eq!(container.items[1].0, 17);
+        assert_eq!(container.items[1].1.item.id, emerald.id);
+        assert_eq!(container.items[1].1.item_count, 12);
+
+        // Verify block entity data is also attached
+        let be_data = dropped_stack
+            .get_data_component::<BlockEntityDataImpl>()
+            .expect("BlockEntityDataImpl component must be attached");
+        assert_eq!(be_data.nbt.get_string("id"), Some("minecraft:shulker_box"));
+
+        // Simulate placement by a player: load from the dropped stack into a fresh shulker box
+        let new_pos = BlockPos::new(15, 65, 25);
+        let placed_shulker = ShulkerBoxBlockEntity::new(new_pos);
+        assert!(placed_shulker.is_empty());
+
+        placed_shulker.load_from_item_stack(&dropped_stack);
+        assert!(!placed_shulker.is_empty());
+
+        let stack3 = placed_shulker.get_stack(3);
+        assert_eq!(stack3.item.id, diamond.id);
+        assert_eq!(stack3.item_count, 64);
+
+        let stack17 = placed_shulker.get_stack(17);
+        assert_eq!(stack17.item.id, emerald.id);
+        assert_eq!(stack17.item_count, 12);
+
+        // Verify other slots are empty
+        assert!(placed_shulker.get_stack(0).is_empty());
+        assert!(placed_shulker.get_stack(2).is_empty());
+        assert!(placed_shulker.get_stack(4).is_empty());
+    }
+}
+

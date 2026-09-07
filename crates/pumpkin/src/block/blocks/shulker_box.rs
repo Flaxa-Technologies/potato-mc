@@ -3,7 +3,7 @@ use std::sync::Mutex;
 
 use crate::block::{
     GetComparatorOutputArgs, GetScreenHandlerFactoryArgs, OnPlaceArgs, OnSyncedBlockEventArgs,
-    PlacedArgs,
+    PlacedArgs, PlayerPlacedArgs,
 };
 use crate::block::{
     registry::BlockActionResult,
@@ -19,6 +19,7 @@ use pumpkin_inventory::screen_handler::{
     InventoryPlayer, ScreenHandlerFactory, SharedScreenHandler,
 };
 use pumpkin_macros::pumpkin_block_from_tag;
+use pumpkin_util::Hand;
 use pumpkin_util::text::TextComponent;
 use pumpkin_world::inventory::Inventory;
 
@@ -67,6 +68,26 @@ impl BlockBehaviour for ShulkerBoxBlock {
         {
             let barrel_block_entity = ShulkerBoxBlockEntity::new(*args.position);
             args.world.add_block_entity(Arc::new(barrel_block_entity));
+        }
+    }
+
+    fn player_placed(&self, args: PlayerPlacedArgs<'_>) {
+        if let Some(block_entity) = args.world.get_block_entity(args.position)
+            && let Some(shulker) = block_entity.as_any().downcast_ref::<ShulkerBoxBlockEntity>()
+        {
+            let inventory = args.player.inventory();
+            let main_hand = inventory.get_stack_in_hand(Hand::Right);
+            let off_hand = inventory.get_stack_in_hand(Hand::Left);
+            let held_stack = if main_hand.item.id == args.block.item_id {
+                Some(main_hand)
+            } else if off_hand.item.id == args.block.item_id {
+                Some(off_hand)
+            } else {
+                None
+            };
+            if let Some(stack) = held_stack {
+                shulker.load_from_item_stack(&stack);
+            }
         }
     }
 

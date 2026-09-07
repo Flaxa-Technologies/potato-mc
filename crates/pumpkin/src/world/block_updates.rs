@@ -3,6 +3,7 @@ use std::sync::Arc;
 use pumpkin_data::block_properties::is_air;
 use pumpkin_data::fluid::Fluid;
 use pumpkin_data::item_stack::ItemStack;
+use pumpkin_data::tag::Taggable;
 use pumpkin_data::world::WorldEvent;
 use pumpkin_data::{Block, BlockDirection, BlockState, BlockStateId};
 use pumpkin_protocol::bedrock::client::block_event::CBlockEvent as CBedrockBlockEvent;
@@ -456,6 +457,20 @@ impl World {
                 ..Default::default()
             };
             crate::block::drop_loot(self, broken_block, position, true, &params);
+        } else if cause.is_some_and(|p| p.gamemode.load() == pumpkin_util::GameMode::Creative)
+            && broken_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_SHULKER_BOXES)
+        {
+            if let Some(be) = self.get_block_entity(position)
+                && let Some(shulker) = be.as_any().downcast_ref::<crate::block::entities::shulker_box::ShulkerBoxBlockEntity>()
+            {
+                if !shulker.is_empty() {
+                    if let Some(item) = pumpkin_data::item::Item::from_registry_key(broken_block.name) {
+                        let mut stack = ItemStack::new(1, item);
+                        shulker.apply_to_item_stack(&mut stack);
+                        self.drop_stack(position, stack);
+                    }
+                }
+            }
         }
 
         let new_state_id = if broken_block.is_waterlogged(broken_block_state.id) {

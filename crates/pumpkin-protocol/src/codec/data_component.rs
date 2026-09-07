@@ -2692,10 +2692,20 @@ impl DataComponentCodec<Self> for PotDecorationsImpl {
 
 impl DataComponentCodec<Self> for ContainerImpl {
     fn serialize(&self, seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
-        seq.write_var_int(&VarInt::from(self.items.len() as i32))?;
-        for (_slot, stack) in &self.items {
-            seq.write_bool(true)?;
-            serialize_item_stack_template(stack, seq)?;
+        if self.items.is_empty() {
+            seq.write_var_int(&VarInt(0))?;
+            return Ok(());
+        }
+        let max_slot = self.items.iter().map(|(slot, _)| *slot).max().unwrap_or(0);
+        let len = (max_slot as usize) + 1;
+        seq.write_var_int(&VarInt::from(len as i32))?;
+        for slot in 0..len {
+            if let Some((_, stack)) = self.items.iter().find(|(s, _)| *s as usize == slot) {
+                seq.write_bool(true)?;
+                serialize_item_stack_template(stack, seq)?;
+            } else {
+                seq.write_bool(false)?;
+            }
         }
         Ok(())
     }
@@ -2801,5 +2811,48 @@ impl DataComponentCodec<Self> for BreakSoundImpl {
     fn deserialize(seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
         let _ = seq.get_var_int()?;
         Ok(Self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pumpkin_data::item::Item;
+    use pumpkin_data::item_stack::ItemStack;
+
+    #[test]
+    fn test_container_impl_sparse_round_trip() {
+        let mut buf = Vec::new();
+        let item1 = Item::from_registry_key("diamond").unwrap();
+        let item2 = Item::from_registry_key("apple").unwrap();
+        let original = ContainerImpl {
+            items: vec![
+                (2, ItemStack::new(10, item1)),
+                (5, ItemStack::new(3, item2)),
+            ],
+        };
+        original.serialize(&mut buf).unwrap();
+
+        let mut read_slice = &buf[..];
+        let deserialized = ContainerImpl::deserialize(&mut read_slice).unwrap();
+
+        assert_eq!(deserialized.items.len(), 2);
+        assert_eq!(deserialized.items[0].0, 2);
+        assert_eq!(deserialized.items[0].1.item.id, item1.id);
+        assert_eq!(deserialized.items[0].1.item_count, 10);
+        assert_eq!(deserialized.items[1].0, 5);
+        assert_eq!(deserialized.items[1].1.item.id, item2.id);
+        assert_eq!(deserialized.items[1].1.item_count, 3);
+    }
+
+    #[test]
+    fn test_container_impl_empty_round_trip() {
+        let mut buf = Vec::new();
+        let original = ContainerImpl { items: vec![] };
+        original.serialize(&mut buf).unwrap();
+
+        let mut read_slice = &buf[..];
+        let deserialized = ContainerImpl::deserialize(&mut read_slice).unwrap();
+        assert!(deserialized.items.is_empty());
     }
 }

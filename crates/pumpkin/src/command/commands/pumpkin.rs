@@ -16,8 +16,8 @@ use crate::command::context::command_context::CommandContext;
 use crate::command::node::dispatcher::CommandDispatcher;
 use crate::command::node::{CommandExecutor, CommandExecutorResult};
 
-const NAMES: [&str; 3] = ["pumpkin", "version", "ver"];
-const DESCRIPTION: &str = "Display information about Pumpkin.";
+const NAMES: [&str; 5] = ["potato", "potatomc", "pumpkin", "version", "ver"];
+const DESCRIPTION: &str = "Display information about Potato (Fork of PumpkinMC).";
 const PERMISSION: &str = "pumpkin:command.pumpkin";
 
 const CACHE_DURATION: Duration = Duration::from_hours(24);
@@ -374,6 +374,21 @@ impl CommandExecutor for Executor {
 
         msg = msg.add_child(TextComponent::text("  "));
 
+        msg = msg.add_child(
+            TextComponent::text("[Discord]")
+                .click_event(ClickEvent::OpenUrl {
+                    url: Cow::from("https://discord.com/invite/UUaNzfZyc6"),
+                })
+                .hover_event(HoverEvent::show_text(TextComponent::text(
+                    "Join PotatoMC Discord",
+                )))
+                .color_named(NamedColor::Aqua)
+                .bold()
+                .underlined(),
+        );
+
+        msg = msg.add_child(TextComponent::text("  "));
+
         let donators_hover = fetch_donators_hover_cached();
         msg = msg.add_child(
             TextComponent::text("[Donate]")
@@ -390,15 +405,13 @@ impl CommandExecutor for Executor {
 
         let website_translation =
             get_translation_text("pumpkin:commands.pumpkin.website", locale, vec![]);
-        let website_hover_translation =
-            get_translation_text("pumpkin:commands.pumpkin.website.hover", locale, vec![]);
         msg = msg.add_child(
             TextComponent::text(website_translation)
                 .click_event(ClickEvent::OpenUrl {
-                    url: Cow::from("https://pumpkinmc.org/"),
+                    url: Cow::from("https://potatomc.flaxa.in"),
                 })
                 .hover_event(HoverEvent::show_text(TextComponent::text(
-                    website_hover_translation,
+                    "potatomc.flaxa.in",
                 )))
                 .color_named(NamedColor::Blue)
                 .bold()

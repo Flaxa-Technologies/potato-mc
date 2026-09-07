@@ -196,27 +196,21 @@ fn print_support_links_and_warning() {
             .to_pretty_console(),
     );
     info!(
-        "Report upstream issues on {}",
-        TextComponent::text("https://github.com/Pumpkin-MC/Pumpkin/issues")
-            .color_named(NamedColor::DarkAqua)
+        "Visit website: {}",
+        TextComponent::text("https://potatomc.flaxa.in")
+            .color_named(NamedColor::Gold)
             .to_pretty_console()
     );
     info!(
-        "Join upstream {} for community support: {}",
-        TextComponent::text("Discord")
-            .color_named(NamedColor::DarkBlue)
-            .to_pretty_console(),
-        TextComponent::text("https://discord.gg/wT8XjrjKkf")
+        "Join Discord for community support: {}",
+        TextComponent::text("https://discord.com/invite/UUaNzfZyc6")
             .color_named(NamedColor::Aqua)
             .to_pretty_console()
     );
     info!(
-        "Consider {} to upstream {}",
-        TextComponent::text("Donating")
-            .color_named(NamedColor::DarkPurple)
-            .to_pretty_console(),
-        TextComponent::text("https://pumpkinmc.org/donate/")
-            .color_named(NamedColor::Gold)
+        "Upstream project: {}",
+        TextComponent::text("https://github.com/Pumpkin-MC/Pumpkin")
+            .color_named(NamedColor::DarkAqua)
             .to_pretty_console()
     );
 }

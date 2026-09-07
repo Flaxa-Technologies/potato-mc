@@ -55,12 +55,12 @@ pub enum LoaderError {
     InvalidLoaderData,
 
     #[error(
-        "Plugin was built for an incompatible API version. Please rebuild it against this Pumpkin build."
+        "Plugin was built for an incompatible API version. Please rebuild it against this Potato build."
     )]
     ApiVersionMissing,
 
     #[error(
-        "Plugin API version mismatch (plugin {plugin_version}, server {server_version}). Please rebuild it against this Pumpkin build."
+        "Plugin API version mismatch (plugin {plugin_version}, server {server_version}). Please rebuild it against this Potato build."
     )]
     ApiVersionMismatch {
         plugin_version: u32,

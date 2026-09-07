@@ -11,8 +11,57 @@ use std::sync::Arc;
 
 use crate::world::World;
 
-const SEARCH_RADIUS_NETHER: i32 = 128;
-const SEARCH_RADIUS_OVERWORLD: i32 = 128;
+pub(crate) const SEARCH_RADIUS_NETHER: i32 = 16;
+pub(crate) const SEARCH_RADIUS_OVERWORLD: i32 = 128;
+
+#[derive(Debug, Clone)]
+pub struct SpiralIterator {
+    legs: i32,
+    leg: i32,
+    leg_size: i32,
+    leg_index: i32,
+    last_x: i32,
+    last_z: i32,
+}
+
+impl SpiralIterator {
+    #[must_use]
+    pub const fn new(center_x: i32, center_z: i32, radius: i32) -> Self {
+        Self {
+            legs: 4 * radius,
+            leg: -1,
+            leg_size: 0,
+            leg_index: 0,
+            last_x: center_x,
+            last_z: center_z + 1,
+        }
+    }
+}
+
+impl Iterator for SpiralIterator {
+    type Item = (i32, i32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        const DIRS: [(i32, i32); 4] = [(1, 0), (0, 1), (-1, 0), (0, -1)];
+
+        let dir_idx = (self.leg + 4).rem_euclid(4) as usize;
+        let (dx, dz) = DIRS[dir_idx];
+        self.last_x += dx;
+        self.last_z += dz;
+
+        if self.leg_index >= self.leg_size {
+            if self.leg >= self.legs {
+                return None;
+            }
+            self.leg += 1;
+            self.leg_index = 0;
+            self.leg_size = self.leg / 2 + 1;
+        }
+
+        self.leg_index += 1;
+        Some((self.last_x, self.last_z))
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct PortalSearchResult {
@@ -577,6 +626,10 @@ impl NetherPortal {
         best.map(|(result, _, _)| result)
     }
 
+    pub fn spiral_around(center_x: i32, center_z: i32, radius: i32) -> SpiralIterator {
+        SpiralIterator::new(center_x, center_z, radius)
+    }
+
     #[allow(clippy::too_many_lines)]
     pub fn find_safe_location(
         world: &Arc<World>,
@@ -584,7 +637,7 @@ impl NetherPortal {
         axis: HorizontalAxis,
     ) -> Option<(BlockPos, HorizontalAxis, bool)> {
         tracing::debug!(
-            "Finding safe location for portal in {:?} around {:?}",
+            "[PORTAL-FIND-SAFE] Finding safe location in {:?} around target {:?}",
             world.dimension.minecraft_name,
             target_pos
         );
@@ -595,7 +648,7 @@ impl NetherPortal {
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
 
-        let top_y_limit = if world.dimension.has_ceiling {
+        let max_placeable_y = if world.dimension.has_ceiling {
             (min_y + world.dimension.logical_height - 1).min(max_y)
         } else {
             max_y
@@ -604,136 +657,143 @@ impl NetherPortal {
         let direction = if axis == HorizontalAxis::X {
             BlockDirection::East
         } else {
-            BlockDirection::South // Fixed: positive Z direction
+            BlockDirection::South // Positive Z direction
+        };
+        let perpendicular = if axis == HorizontalAxis::X {
+            BlockDirection::South
+        } else {
+            BlockDirection::West
         };
 
-        let mut ideal_pos: Option<(BlockPos, HorizontalAxis, f64)> = None;
-        let mut acceptable_pos: Option<(BlockPos, HorizontalAxis, f64)> = None;
+        let mut closest_full_dist_sq: f64 = -1.0;
+        let mut closest_full_pos: Option<BlockPos> = None;
+        let mut closest_partial_dist_sq: f64 = -1.0;
+        let mut closest_partial_pos: Option<BlockPos> = None;
 
-        for offset_x in -32..=32 {
-            for offset_z in -32..=32 {
-                let check_x = target_pos.0.x + offset_x;
-                let check_z = target_pos.0.z + offset_z;
+        for (check_x, check_z) in SpiralIterator::new(target_pos.0.x, target_pos.0.z, 16) {
+            let column_pos = BlockPos::new(check_x, 0, check_z);
+            let next_pos = column_pos.offset_dir(direction.to_offset(), 1);
 
-                if !worldborder.contains_block(check_x, check_z) {
-                    continue;
-                }
+            if !worldborder.contains_block(column_pos.0.x, column_pos.0.z)
+                || !worldborder.contains_block(next_pos.0.x, next_pos.0.z)
+            {
+                continue;
+            }
 
-                let offset_pos = BlockPos(Vector3::new(check_x, 0, check_z))
-                    .offset_dir(direction.to_offset(), 1);
-                if !worldborder.contains_block(offset_pos.0.x, offset_pos.0.z) {
-                    continue;
-                }
+            let height = world
+                .get_heightmap_height(ChunkHeightmapType::MotionBlocking, check_x, check_z)
+                .min(max_placeable_y);
 
-                let heightmap_y = world.get_heightmap_height(
-                    ChunkHeightmapType::MotionBlocking,
-                    check_x,
-                    check_z,
-                );
-                let start_y = heightmap_y.min(top_y_limit);
+            let mut y = height;
+            while y >= min_y {
+                let test_pos = BlockPos::new(check_x, y, check_z);
+                let state = world.get_block_state(&test_pos);
 
-                let mut y = start_y;
-                while y >= min_y {
-                    let pos = BlockPos(Vector3::new(check_x, y, check_z));
-                    let state = world.get_block_state(&pos);
-
-                    if Self::is_valid_portal_air(state) {
-                        let mut bottom_y = y;
-                        while bottom_y > min_y {
-                            let below = BlockPos(Vector3::new(check_x, bottom_y - 1, check_z));
-                            let below_state = world.get_block_state(&below);
-                            if !Self::is_valid_portal_air(below_state) {
-                                break;
-                            }
-                            bottom_y -= 1;
+                if Self::is_valid_portal_air(state) {
+                    let first_empty_y = y;
+                    while y > min_y {
+                        let below_pos = BlockPos::new(check_x, y - 1, check_z);
+                        let below_state = world.get_block_state(&below_pos);
+                        if !Self::is_valid_portal_air(below_state) {
+                            break;
                         }
+                        y -= 1;
+                    }
 
-                        let air_height = y - bottom_y;
-                        if air_height >= 3 && bottom_y + 4 <= top_y_limit {
-                            let floor_pos = BlockPos(Vector3::new(check_x, bottom_y, check_z));
+                    if y + 4 <= max_placeable_y {
+                        let delta_y = first_empty_y - y;
+                        if delta_y <= 0 || delta_y >= 3 {
+                            let candidate_pos = BlockPos::new(check_x, y, check_z);
+                            if Self::can_host_frame(world, candidate_pos, direction, perpendicular, 0) {
+                                let distance = f64::from(target_pos.0.squared_distance_to(
+                                    candidate_pos.0.x,
+                                    candidate_pos.0.y,
+                                    candidate_pos.0.z,
+                                ));
 
-                            for check_axis in [HorizontalAxis::X, HorizontalAxis::Z] {
-                                if Self::is_valid_portal_pos(world, floor_pos, check_axis, 0) {
-                                    let dist = f64::from(target_pos.0.squared_distance_to(
-                                        floor_pos.0.x,
-                                        floor_pos.0.y,
-                                        floor_pos.0.z,
-                                    ));
+                                if Self::can_host_frame(world, candidate_pos, direction, perpendicular, -1)
+                                    && Self::can_host_frame(world, candidate_pos, direction, perpendicular, 1)
+                                    && (closest_full_dist_sq < 0.0 || distance < closest_full_dist_sq)
+                                {
+                                    closest_full_dist_sq = distance;
+                                    closest_full_pos = Some(candidate_pos);
+                                }
 
-                                    let is_ideal =
-                                        Self::is_valid_portal_pos(world, floor_pos, check_axis, -1)
-                                            && Self::is_valid_portal_pos(
-                                                world, floor_pos, check_axis, 1,
-                                            );
-
-                                    if is_ideal {
-                                        if ideal_pos.as_ref().is_none_or(|p| dist < p.2) {
-                                            ideal_pos = Some((floor_pos, check_axis, dist));
-                                        }
-                                    } else if ideal_pos.is_none()
-                                        && acceptable_pos.as_ref().is_none_or(|p| dist < p.2)
-                                    {
-                                        acceptable_pos = Some((floor_pos, check_axis, dist));
-                                    }
+                                if closest_full_dist_sq < 0.0
+                                    && (closest_partial_dist_sq < 0.0 || distance < closest_partial_dist_sq)
+                                {
+                                    closest_partial_dist_sq = distance;
+                                    closest_partial_pos = Some(candidate_pos);
                                 }
                             }
                         }
-                        y = bottom_y - 1;
-                    } else {
-                        y -= 1;
                     }
                 }
+                y -= 1;
             }
         }
 
-        if let Some((pos, result_axis, _)) = ideal_pos {
-            return Some((pos, result_axis, false));
-        }
-        if let Some((pos, result_axis, _)) = acceptable_pos {
-            return Some((pos, result_axis, false));
+        if closest_full_dist_sq < 0.0 && closest_partial_dist_sq >= 0.0 {
+            closest_full_pos = closest_partial_pos;
+            closest_full_dist_sq = closest_partial_dist_sq;
         }
 
-        // Vanilla: clamp between max(bottomY, 70) and topYLimit - 9
-        let fallback_y = target_pos.0.y.clamp(min_y.max(70), top_y_limit - 9);
-        let fallback_pos = BlockPos(Vector3::new(
+        if let Some(pos) = closest_full_pos {
+            tracing::debug!(
+                "[PORTAL-FIND-SAFE] Found candidate location at {:?} (axis: {:?}, dist: {:.1})",
+                pos,
+                axis,
+                closest_full_dist_sq.sqrt()
+            );
+            return Some((pos, axis, false));
+        }
+
+        // Vanilla safe underground/enclosed fallback:
+        // clamp Y between max(min_y + 1, 70) and max_placeable_y - 9
+        let min_start_y = (min_y + 1).max(70);
+        let max_start_y = max_placeable_y - 9;
+        if max_start_y < min_start_y {
+            tracing::warn!(
+                "[PORTAL-FIND-SAFE] Height limit too constrained for fallback: min {} max {}",
+                min_start_y,
+                max_start_y
+            );
+            return None;
+        }
+
+        let fallback_y = target_pos.0.y.clamp(min_start_y, max_start_y);
+        let fallback_pos = BlockPos::new(
             target_pos.0.x - direction.to_offset().x,
             fallback_y,
             target_pos.0.z - direction.to_offset().z,
-        ));
-        let clamped_pos = worldborder.clamp_block(fallback_pos.0.x, fallback_pos.0.z);
-        Some((
-            BlockPos(Vector3::new(clamped_pos.0, fallback_y, clamped_pos.1)),
-            axis,
-            true,
-        ))
+        );
+        let clamped = worldborder.clamp_block(fallback_pos.0.x, fallback_pos.0.z);
+        let final_pos = BlockPos::new(clamped.0, fallback_y, clamped.1);
+
+        tracing::debug!(
+            "[PORTAL-FIND-SAFE] No natural clearance found; using enclosed fallback at {:?} (axis: {:?})",
+            final_pos,
+            axis
+        );
+        Some((final_pos, axis, true))
     }
 
     const fn is_valid_portal_air(state: &BlockState) -> bool {
         state.replaceable() && !state.is_liquid()
     }
 
-    fn is_valid_portal_pos(
-        world: &Arc<World>,
-        floor_pos: BlockPos,
-        axis: HorizontalAxis,
-        perpendicular_offset: i32,
+    fn can_host_frame(
+        world: &World,
+        origin: BlockPos,
+        direction: BlockDirection,
+        perpendicular: BlockDirection,
+        offset: i32,
     ) -> bool {
-        let direction = if axis == HorizontalAxis::X {
-            BlockDirection::East
-        } else {
-            BlockDirection::South // Fixed: positive Z direction
-        };
-        let perpendicular = if axis == HorizontalAxis::X {
-            BlockDirection::South // Fixed: East.rotateYClockwise()
-        } else {
-            BlockDirection::West // Fixed: South.rotateYClockwise()
-        };
-
-        for portal_dir in -1..3 {
+        for width in -1..3 {
             for height in -1..4 {
-                let pos = floor_pos
-                    .offset_dir(direction.to_offset(), portal_dir)
-                    .offset_dir(perpendicular.to_offset(), perpendicular_offset)
+                let pos = origin
+                    .offset_dir(direction.to_offset(), width)
+                    .offset_dir(perpendicular.to_offset(), offset)
                     .offset_dir(BlockDirection::Up.to_offset(), height);
 
                 let state = world.get_block_state(&pos);
@@ -747,7 +807,6 @@ impl NetherPortal {
                 }
             }
         }
-
         true
     }
 
@@ -958,4 +1017,28 @@ mod tests {
             -45.0
         );
     }
+
+    #[test]
+    fn spiral_iterator_sequence() {
+        let coords: Vec<(i32, i32)> = NetherPortal::spiral_around(0, 0, 1).collect();
+        // First coordinate must be center (0, 0)
+        assert_eq!(coords[0], (0, 0));
+        // Next is EAST (+1, 0)
+        assert_eq!(coords[1], (1, 0));
+        // Next is SOUTH (+1, +1)
+        assert_eq!(coords[2], (1, 1));
+        // Next are WEST (0, 1), (-1, 1)
+        assert_eq!(coords[3], (0, 1));
+        assert_eq!(coords[4], (-1, 1));
+        // Next are NORTH (-1, 0), (-1, -1)
+        assert_eq!(coords[5], (-1, 0));
+        assert_eq!(coords[6], (-1, -1));
+    }
+
+    #[test]
+    fn search_radius_nether_is_16() {
+        assert_eq!(SEARCH_RADIUS_NETHER, 16);
+        assert_eq!(SEARCH_RADIUS_OVERWORLD, 128);
+    }
 }
+

@@ -69,7 +69,10 @@ impl MobCounts {
 
     #[inline]
     pub fn can_spawn(&self, category: &'static MobCategory) -> bool {
-        self.0[category.id].load(Relaxed) < category.max
+        let cap = crate::spawning_config::SPAWNING_CONFIG
+            .load()
+            .get_category_cap(category);
+        self.0[category.id].load(Relaxed) < cap
     }
 }
 

@@ -201,13 +201,11 @@ impl TrackedEntity {
 
         if let ClientPlatform::Java(client) = player.client.as_ref() {
             let version = client.version.load();
-            // TODO: Support older versions
-            if version >= JavaMinecraftVersion::V_26_2
-                && let Some(non_default) = self
-                    .entity
-                    .get_entity()
-                    .synched_data
-                    .get_non_default_values_for_version(&version)
+            if let Some(non_default) = self
+                .entity
+                .get_entity()
+                .synched_data
+                .get_non_default_values_for_version(&version)
             {
                 let packet = CSetEntityMetadata::new(self.entity_id.into(), non_default);
                 if let Ok(packet_data) = JavaClient::serialize_packet_for_version(&packet, version)

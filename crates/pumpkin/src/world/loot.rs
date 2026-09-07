@@ -209,7 +209,20 @@ pub fn generate_loot_with_context(
                     }
 
                     if final_count > 0 {
-                        let item_key = entry.item.strip_prefix("minecraft:").unwrap_or(entry.item);
+                        let mut item_key = entry.item.strip_prefix("minecraft:").unwrap_or(entry.item);
+                        if params.is_on_fire.unwrap_or(false) {
+                            item_key = match item_key {
+                                "beef" => "cooked_beef",
+                                "porkchop" => "cooked_porkchop",
+                                "chicken" => "cooked_chicken",
+                                "mutton" => "cooked_mutton",
+                                "rabbit" => "cooked_rabbit",
+                                "cod" => "cooked_cod",
+                                "salmon" => "cooked_salmon",
+                                "potato" => "baked_potato",
+                                other => other,
+                            };
+                        }
 
                         if let Some(item) = Item::from_registry_key(item_key) {
                             items_to_place.push(ItemStack::new(final_count as u8, item));

@@ -52,7 +52,7 @@ impl Default for CachedBranding {
 }
 
 impl CachedBranding {
-    const BRAND: &'static str = "Pumpkin";
+    const BRAND: &'static str = "PotatoMC";
     const BRAND_BYTES: &'static [u8] = &{
         let brand = Self::BRAND.as_bytes();
         let len = brand.len();
@@ -159,7 +159,13 @@ impl CachedStatus {
         max_players: u32,
     ) -> StatusResponse {
         let favicon = if config.use_favicon {
-            config.favicon_path.as_ref().map_or_else(
+            config.favicon_path.as_deref().or_else(|| {
+                if Path::new("server-icon.png").exists() {
+                    Some("server-icon.png")
+                } else {
+                    None
+                }
+            }).map_or_else(
                 || {
                     debug!("Loading default icon");
 
@@ -224,7 +230,7 @@ impl Default for CachedStatus {
     fn default() -> Self {
         Self::new(
             &BasicConfiguration::default(),
-            "A blazingly fast Pumpkin server!",
+            "PotatoMC\nMinecraft server software for potato PCs.",
             1000,
         )
     }

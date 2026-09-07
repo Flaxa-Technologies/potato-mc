@@ -143,6 +143,7 @@ uuid = { version = "1.26", default-features = false, features = ["serde", "v3", 
 serde = { version = "1.0", default-features = false, features = ["derive", "std"] }
 serde_repr = { version = "0.1", default-features = false }
 serde_json = { version = "1.0", default-features = false, features = ["std"] }
+serde_yaml = "0.9"
 
 tempfile = { version = "3.27.0", default-features = false }
 proc-macro-error2 = { version = "2", default-features = false }
@@ -237,3 +238,16 @@ wasm-encoder = { version = "0.258", default-features = false, features = ["compo
 webpki-root-certs = { version = "1.0.8", default-features = false }
 # ring-only: must match the provider the rest of the tree (wasmtime-wasi-http, rtc) uses
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+
+[profile.release.package.pumpkin-data]
+opt-level = 1
+
+# Ultra-fast release profile for development & testing (3-5 min compile vs 60 min)
+[profile.release-fast]
+inherits = "release"
+opt-level = 2
+codegen-units = 256
+lto = "off"
+
+[profile.release-fast.package.pumpkin-data]
+opt-level = 1

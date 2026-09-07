@@ -72,12 +72,13 @@ async fn main() {
     let vanilla_data = VanillaData::load();
 
     pumpkin::init_logger(&config.advanced);
+    pumpkin::spawning_config::init(&exec_dir);
 
     info!(
         "{}",
         TextComponent::text(format!(
             "Starting {} {} Java Minecraft (Protocol {}) | {} Bedrock (Protocol {})",
-            TextComponent::text("Pumpkin")
+            TextComponent::text("Potato")
                 .color_named(NamedColor::Gold)
                 .to_pretty_console(),
             TextComponent::text(CARGO_PKG_VERSION.to_string())
@@ -109,9 +110,15 @@ async fn main() {
     );
     if cfg!(debug_assertions) {
         warn!(
-            "Pumpkin is running an unoptimized debug build. Do not use this build for performance testing; run `cargo run --release` or use a release binary."
+            "Potato is running an unoptimized debug build. Do not use this build for performance testing; run `cargo run --release` or use a release binary."
         );
     }
+    info!(
+        "{}",
+        TextComponent::text("Potato: Minecraft server software for potato PCs. (Fork of PumpkinMC)")
+            .color_named(NamedColor::Yellow)
+            .to_pretty_console()
+    );
     print_support_links_and_warning();
 
     tokio::spawn(async {
@@ -184,18 +191,18 @@ async fn main() {
 fn print_support_links_and_warning() {
     warn!(
         "{}",
-        TextComponent::text("Pumpkin is currently under heavy development!")
+        TextComponent::text("Potato is currently under heavy development! (Fork of PumpkinMC)")
             .color_named(NamedColor::DarkRed)
             .to_pretty_console(),
     );
     info!(
-        "Report issues on {}",
+        "Report upstream issues on {}",
         TextComponent::text("https://github.com/Pumpkin-MC/Pumpkin/issues")
             .color_named(NamedColor::DarkAqua)
             .to_pretty_console()
     );
     info!(
-        "Join our {} for community support: {}",
+        "Join upstream {} for community support: {}",
         TextComponent::text("Discord")
             .color_named(NamedColor::DarkBlue)
             .to_pretty_console(),
@@ -204,7 +211,7 @@ fn print_support_links_and_warning() {
             .to_pretty_console()
     );
     info!(
-        "Consider {} to {}",
+        "Consider {} to upstream {}",
         TextComponent::text("Donating")
             .color_named(NamedColor::DarkPurple)
             .to_pretty_console(),

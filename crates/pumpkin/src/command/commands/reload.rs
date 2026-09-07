@@ -29,6 +29,9 @@ impl CommandExecutor for ReloadExecutor {
         let server = context.server().clone();
         server.reload_datapacks(&server);
 
+        let exec_dir = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
+        let _ = crate::spawning_config::reload(&exec_dir);
+
         Ok(0)
     }
 }

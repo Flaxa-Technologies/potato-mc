@@ -61,6 +61,7 @@ pub mod logging;
 pub mod net;
 pub mod plugin;
 pub mod server;
+pub mod spawning_config;
 pub mod world;
 
 pub struct LoggingConfig {

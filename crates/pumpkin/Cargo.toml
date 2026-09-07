@@ -1,7 +1,7 @@
 [package]
 name = "pumpkin"
 version.workspace = true
-description = "Empowering everyone to host fast and efficient Minecraft servers."
+description = "Minecraft server software for potato PCs."
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -9,9 +9,9 @@ default-run = "pumpkin"
 
 [package.metadata.tauri-winres]
 # FileDescription is handled as the Program name by Windows!
-FileDescription = "Pumpkin"
+FileDescription = "Potato"
 OriginalFilename = "pumpkin.exe"
-LegalCopyright = "Copyright © 2026 Aleksander Medvedev"
+LegalCopyright = "Copyright © 2026 Aleksander Medvedev, PotatoMC contributors"
 
 # Required to expose pumpkin plugin API
 [lib]
@@ -55,6 +55,7 @@ notify.workspace = true
 serde.workspace = true
 serde_repr.workspace = true
 serde_json.workspace = true
+serde_yaml.workspace = true
 
 colored.workspace = true
 

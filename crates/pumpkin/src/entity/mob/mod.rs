@@ -359,6 +359,11 @@ impl MobEntity {
     }
 
     pub fn is_dark_enough_to_spawn(world: &World, pos: &BlockPos, is_thundering: bool) -> bool {
+        let cfg = crate::spawning_config::SPAWNING_CONFIG.load();
+        if !cfg.categories.monster.requires_darkness {
+            return true;
+        }
+
         let sky_light = world.get_sky_light_level(pos);
         if sky_light > rand::random_range(0..32) {
             return false;
@@ -369,6 +374,13 @@ impl MobEntity {
 
         let block_light = world.get_block_light_level(pos).unwrap_or(0);
         if block_light_limit < 15 && block_light > block_light_limit {
+            return false;
+        }
+
+        if block_light < cfg.categories.monster.min_light_level
+            || (cfg.categories.monster.max_light_level > 0
+                && block_light > cfg.categories.monster.max_light_level)
+        {
             return false;
         }
 
@@ -421,10 +433,15 @@ impl MobEntity {
 
     pub fn check_animal_spawn_rules(world: &World, pos: &BlockPos) -> bool {
         let below = pos.down();
-        world
-            .get_block(&below)
-            .has_tag(&tag::Block::MINECRAFT_ANIMALS_SPAWNABLE_ON)
-            && Self::is_bright_enough_to_spawn(world, pos)
+        let cfg = crate::spawning_config::SPAWNING_CONFIG.load();
+        let valid_block = if cfg.categories.creature.requires_grass_or_valid_block {
+            world
+                .get_block(&below)
+                .has_tag(&tag::Block::MINECRAFT_ANIMALS_SPAWNABLE_ON)
+        } else {
+            world.get_block_state(&below).is_side_solid(BlockDirection::Up)
+        };
+        valid_block && Self::is_bright_enough_to_spawn(world, pos)
     }
 
     pub fn is_bright_enough_to_spawn(world: &World, pos: &BlockPos) -> bool {
@@ -434,11 +451,17 @@ impl MobEntity {
     pub fn check_surface_water_animal_spawn_rules(world: &World, pos: &BlockPos) -> bool {
         let sea_level = world.sea_level;
         let min_spawn_level = sea_level - 13;
-        pos.0.y >= min_spawn_level
-            && pos.0.y <= sea_level
-            && world
+        let cfg = crate::spawning_config::SPAWNING_CONFIG.load();
+        let water_check = if cfg.categories.water_creature.requires_water_source {
+            world
                 .get_fluid(&pos.down())
                 .has_tag(&tag::Fluid::MINECRAFT_WATER)
+        } else {
+            true
+        };
+        pos.0.y >= min_spawn_level
+            && pos.0.y <= sea_level
+            && water_check
             && (world.get_block(&pos.up()) == &Block::WATER
                 || world
                     .get_fluid(&pos.up())

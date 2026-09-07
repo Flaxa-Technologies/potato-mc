@@ -402,11 +402,14 @@ impl SpawnState {
 
     #[inline]
     pub fn can_spawn_for_category_global(&self, category: &'static MobCategory) -> bool {
-        if category.max <= 0 {
+        let base_cap = crate::spawning_config::SPAWNING_CONFIG
+            .load()
+            .get_category_cap(category);
+        if base_cap <= 0 {
             return false;
         }
         let max_count = if self.spawnable_chunk_count > 0 {
-            (category.max * self.spawnable_chunk_count / MAGIC_NUMBER).max(1)
+            (base_cap * self.spawnable_chunk_count / MAGIC_NUMBER).max(1)
         } else {
             0
         };
@@ -519,11 +522,30 @@ pub fn spawn_for_chunk(
     spawn_list: &Vec<&'static MobCategory>,
     is_thundering: bool,
 ) -> Vec<Arc<dyn EntityBase>> {
+    let cfg = crate::spawning_config::SPAWNING_CONFIG.load();
+    let max_attempts = cfg.performance.max_spawn_attempts_per_chunk_per_cycle.max(1);
     let mut entities = Vec::new();
+    let mut attempts = 0;
+
+    let shared_pos = if cfg.performance.batch_per_chunk_column {
+        let pos = get_random_pos_within(world, &chunk_pos, chunk);
+        if pos.0.y > world.min_y { Some(pos) } else { None }
+    } else {
+        None
+    };
+
     for category in spawn_list {
+        if attempts >= max_attempts {
+            break;
+        }
         if spawn_state.can_spawn_for_category_local(world, category, chunk_pos) {
-            let random_pos = get_random_pos_within(world, &chunk_pos, chunk);
+            let random_pos = if let Some(p) = shared_pos {
+                p
+            } else {
+                get_random_pos_within(world, &chunk_pos, chunk)
+            };
             if random_pos.0.y > world.min_y {
+                attempts += 1;
                 entities.extend(spawn_category_for_position(
                     category,
                     world,
@@ -838,8 +860,14 @@ pub fn spawn_category_for_position(
                         break;
                     };
                     current_spawner = Some(spawner);
-                    max = spawner.min_count
-                        + rng().random_range(0..=(spawner.max_count - spawner.min_count).max(0));
+                    let cfg = crate::spawning_config::SPAWNING_CONFIG.load();
+                    let (min_pack, max_pack) = cfg.get_entity_group_bounds(
+                        spawner.r#type,
+                        spawner.min_count,
+                        spawner.max_count,
+                    );
+                    max = min_pack
+                        + rng().random_range(0..=(max_pack - min_pack).max(0));
                 }
 
                 let Some(spawner) = current_spawner else {
@@ -1005,6 +1033,11 @@ pub fn can_spawn_mob_at(
         .strip_prefix("minecraft:")
         .unwrap_or(spawner_type);
 
+    let cfg = crate::spawning_config::SPAWNING_CONFIG.load();
+    if !cfg.is_entity_enabled(spawner_type) && !cfg.is_entity_enabled(target) {
+        return false;
+    }
+
     if is_in_nether_fortress_bounds(world, category, pos) {
         return matches!(
             target,
@@ -1062,7 +1095,7 @@ pub fn get_random_spawn_mob_at(
     {
         None
     } else {
-        let spawner = match category.id {
+        let spawners = match category.id {
             id if id == MobCategory::MONSTER.id => biome.spawners.monster,
             id if id == MobCategory::CREATURE.id => biome.spawners.creature,
             id if id == MobCategory::AMBIENT.id => biome.spawners.ambient,
@@ -1074,8 +1107,38 @@ pub fn get_random_spawn_mob_at(
             id if id == MobCategory::WATER_AMBIENT.id => biome.spawners.water_ambient,
             id if id == MobCategory::MISC.id => biome.spawners.misc,
             _ => biome.spawners.misc,
+        };
+
+        let cfg = crate::spawning_config::SPAWNING_CONFIG.load();
+        let eligible: Vec<&'static Spawner> = spawners
+            .iter()
+            .filter(|s| cfg.is_entity_enabled(s.r#type))
+            .collect();
+
+        if eligible.is_empty() {
+            return None;
         }
-        .choose(&mut rng());
+
+        let total_weight: u32 = eligible
+            .iter()
+            .map(|s| cfg.get_entity_weight(s.r#type, 100))
+            .sum();
+
+        let spawner = if total_weight == 0 {
+            eligible.choose(&mut rng()).copied()
+        } else {
+            let mut roll = rng().random_range(0..total_weight);
+            let mut chosen = eligible.last().copied();
+            for s in &eligible {
+                let w = cfg.get_entity_weight(s.r#type, 100);
+                if roll < w {
+                    chosen = Some(*s);
+                    break;
+                }
+                roll -= w;
+            }
+            chosen
+        };
 
         if let Some(s) = spawner {
             if world.dimension == Dimension::THE_NETHER {

@@ -1159,4 +1159,110 @@ mod tests {
             (1216, 97, -1296)
         );
     }
+
+    #[test]
+    fn test_village_rejects_water_and_submerged_terrain() {
+        use crate::generation::structure::structures::HeightSampler;
+
+        struct MockHeightSampler {
+            surface_height: i32,
+            ocean_floor_height: i32,
+        }
+
+        impl HeightSampler for MockHeightSampler {
+            fn estimate_height(&mut self, _block_x: i32, _block_z: i32) -> i32 {
+                self.surface_height
+            }
+
+            fn estimate_ocean_floor_height(&mut self, _block_x: i32, _block_z: i32) -> i32 {
+                self.ocean_floor_height
+            }
+        }
+
+        let generator = JigsawGenerator::new("minecraft:village/plains/town_centers", 6)
+            .with_expansion_hack(true);
+
+        // Case 1: Submerged in deep water at sea level (water surface at 63, ocean floor at 40)
+        let mut water_sampler = MockHeightSampler {
+            surface_height: 63,
+            ocean_floor_height: 40,
+        };
+        let context1 = StructureGeneratorContext {
+            seed: 12345,
+            chunk_x: 0,
+            chunk_z: 0,
+            random: super::super::create_chunk_random(12345, 0, 0),
+            sea_level: 63,
+            min_y: -64,
+            height_sampler: Some(&mut water_sampler),
+            structure_key: Some(pumpkin_data::structures::StructureKeys::VillagePlains),
+        };
+        assert!(
+            generator.get_structure_position(context1).is_none(),
+            "Village must not generate submerged in deep water"
+        );
+
+        // Case 2: Below sea level (dry depression at Y=50)
+        let mut low_sampler = MockHeightSampler {
+            surface_height: 50,
+            ocean_floor_height: 49,
+        };
+        let context2 = StructureGeneratorContext {
+            seed: 12345,
+            chunk_x: 0,
+            chunk_z: 0,
+            random: super::super::create_chunk_random(12345, 0, 0),
+            sea_level: 63,
+            min_y: -64,
+            height_sampler: Some(&mut low_sampler),
+            structure_key: Some(pumpkin_data::structures::StructureKeys::VillagePlains),
+        };
+        assert!(
+            generator.get_structure_position(context2).is_none(),
+            "Village must not generate below sea level"
+        );
+
+        // Case 3: Water above sea level (surface=70, floor=50)
+        let mut elevated_water_sampler = MockHeightSampler {
+            surface_height: 70,
+            ocean_floor_height: 50,
+        };
+        let context3 = StructureGeneratorContext {
+            seed: 12345,
+            chunk_x: 0,
+            chunk_z: 0,
+            random: super::super::create_chunk_random(12345, 0, 0),
+            sea_level: 63,
+            min_y: -64,
+            height_sampler: Some(&mut elevated_water_sampler),
+            structure_key: Some(pumpkin_data::structures::StructureKeys::VillagePlains),
+        };
+        assert!(
+            generator.get_structure_position(context3).is_none(),
+            "Village must not generate on elevated water"
+        );
+
+        // Case 4: Valid dry terrain above sea level (surface=72, solid ground=71)
+        let mut valid_land_sampler = MockHeightSampler {
+            surface_height: 72,
+            ocean_floor_height: 71,
+        };
+        let context4 = StructureGeneratorContext {
+            seed: 12345,
+            chunk_x: 0,
+            chunk_z: 0,
+            random: super::super::create_chunk_random(12345, 0, 0),
+            sea_level: 63,
+            min_y: -64,
+            height_sampler: Some(&mut valid_land_sampler),
+            structure_key: Some(pumpkin_data::structures::StructureKeys::VillagePlains),
+        };
+        let valid_pos = generator.get_structure_position(context4);
+        assert!(
+            valid_pos.is_some(),
+            "Village should generate successfully on valid dry land above sea level"
+        );
+        let pos = valid_pos.unwrap();
+        assert_eq!(pos.start_pos.0.y, 72);
+    }
 }

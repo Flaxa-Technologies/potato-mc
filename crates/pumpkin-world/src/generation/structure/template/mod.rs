@@ -431,4 +431,17 @@ mod tests {
 
         assert!(placed_templates > 0);
     }
+
+    #[test]
+    fn test_village_template_entities() {
+        let name = "minecraft:village/plains/villagers/unemployed";
+        let template = get_template(name).expect("template must exist");
+        println!("Template size: {:?}", template.size);
+        println!("Entity count: {}", template.entities.len());
+        for entity in &template.entities {
+            println!("Entity pos: {:?}, block_pos: {:?}, nbt id: {:?}", entity.pos, entity.block_pos, entity.nbt.get_string("id"));
+        }
+        assert!(!template.entities.is_empty(), "unemployed villager template must have entities");
+    }
 }
+

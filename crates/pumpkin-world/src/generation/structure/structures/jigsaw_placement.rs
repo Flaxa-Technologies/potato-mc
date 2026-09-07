@@ -613,6 +613,33 @@ impl JigsawPlacement {
             adjusted_position.0.y
         };
 
+        if project_start_to_heightmap {
+            if let Some(key) = context.structure_key {
+                let is_surface_land_structure = matches!(
+                    key,
+                    pumpkin_data::structures::StructureKeys::VillagePlains
+                        | pumpkin_data::structures::StructureKeys::VillageDesert
+                        | pumpkin_data::structures::StructureKeys::VillageSavanna
+                        | pumpkin_data::structures::StructureKeys::VillageSnowy
+                        | pumpkin_data::structures::StructureKeys::VillageTaiga
+                        | pumpkin_data::structures::StructureKeys::PillagerOutpost
+                );
+                if is_surface_land_structure {
+                    // Surface land structures cannot generate submerged in water or at/below sea level
+                    if bottom_y <= context.sea_level {
+                        return None;
+                    }
+                    if let Some(sampler) = context.height_sampler.as_mut() {
+                        let ocean_floor_h = sampler.estimate_ocean_floor_height(center_x, center_z);
+                        if ocean_floor_h < bottom_y - 1 {
+                            // Surface block is fluid / water
+                            return None;
+                        }
+                    }
+                }
+            }
+        }
+
         let ground_level_delta = center_element.get_ground_level_delta();
         let old_absolute_ground_y = box_.min.y + ground_level_delta;
         let y_offset = bottom_y - old_absolute_ground_y;

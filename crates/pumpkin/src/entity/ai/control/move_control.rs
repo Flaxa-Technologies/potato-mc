@@ -41,6 +41,20 @@ impl Control for MoveControl {}
 
 impl MoveControlTrait for MoveControl {
     fn tick(&mut self, mob: &dyn Mob) {
+        if mob.is_sitting() {
+            self.operation = Operation::Wait;
+            let mob_entity = mob.get_mob_entity();
+            mob_entity
+                .living_entity
+                .movement_input
+                .store(Vector3::new(0.0, 0.0, 0.0));
+            mob_entity
+                .living_entity
+                .jumping
+                .store(false, Ordering::Relaxed);
+            return;
+        }
+
         let mob_entity = mob.get_mob_entity();
         let living_entity = &mob_entity.living_entity;
         let entity = &living_entity.entity;

@@ -73,6 +73,18 @@ impl TraderLlamaVariant {
             _ => Self::Creamy,
         }
     }
+
+    #[must_use]
+    pub fn from_name(name: &str) -> Option<Self> {
+        let clean = name.strip_prefix("minecraft:").unwrap_or(name);
+        match clean {
+            "creamy" => Some(Self::Creamy),
+            "white" => Some(Self::White),
+            "brown" => Some(Self::Brown),
+            "gray" => Some(Self::Gray),
+            _ => None,
+        }
+    }
 }
 
 pub struct TraderLlamaEntity {
@@ -382,6 +394,12 @@ impl Mob for TraderLlamaEntity {
         }
 
         self.animal_interact(player, item_stack, Sound::EntityLlamaAmbient)
+    }
+
+    fn mob_set_variant_name(&self, name: &str) {
+        if let Some(variant) = TraderLlamaVariant::from_name(name) {
+            self.set_variant(variant);
+        }
     }
 }
 

@@ -10,6 +10,7 @@ use pumpkin_data::sound::Sound;
 use pumpkin_data::tag::{self, Taggable};
 use pumpkin_nbt::compound::NbtCompound;
 use pumpkin_protocol::codec::var_int::VarInt;
+use rand::RngExt;
 
 use crate::entity::{
     Entity, EntityBase,
@@ -66,6 +67,16 @@ impl FrogVariant {
             _ => Self::Temperate,
         }
     }
+
+    #[must_use]
+    pub fn random_variant() -> Self {
+        let mut rng = rand::rng();
+        match rng.random_range(0..3) {
+            0 => Self::Cold,
+            2 => Self::Warm,
+            _ => Self::Temperate,
+        }
+    }
 }
 
 /// Represents a Frog, an amphibious mob that can eat small slimes and magma cubes.
@@ -81,10 +92,11 @@ pub struct FrogEntity {
 impl FrogEntity {
     pub fn new(entity: Entity) -> Arc<Self> {
         let mob_entity = MobEntity::new(entity);
+        let variant = FrogVariant::random_variant();
         let frog = Self {
             mob_entity,
             ageable_data: AgeableData::default(),
-            variant: AtomicI32::new(FrogVariant::Temperate.id()),
+            variant: AtomicI32::new(variant.id()),
             tongue_target_id: AtomicI32::new(-1),
         };
         let mob_arc = Arc::new(frog);

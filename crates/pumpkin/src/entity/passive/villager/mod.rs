@@ -317,7 +317,8 @@ impl VillagerEntity {
     #[allow(clippy::too_many_lines)]
     pub fn new(entity: Entity) -> Arc<Self> {
         let mob_entity = MobEntity::new(entity);
-        let villager_data = VillagerData::new(VillagerType::Plains, VillagerProfession::None, 1);
+        let villager_data =
+            VillagerData::new(data::random_villager_type(), VillagerProfession::None, 1);
         let inventory = std::sync::Mutex::new((0..8).map(|_| ItemStack::EMPTY.clone()).collect());
 
         let villager = Self {
@@ -590,7 +591,7 @@ impl VillagerEntity {
 
         let world = self.get_entity().world.load().clone();
         let generator = world.level.world_gen();
-        let target = find_nearest_structure_start(
+        let (target, _) = find_nearest_structure_start(
             self.get_entity().block_pos.load(),
             StructureSet::get(structure_set)?,
             &[structure],
@@ -2216,6 +2217,38 @@ impl Mob for VillagerEntity {
             .home_pos
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    fn mob_set_variant_name(&self, name: &str) {
+        let villager_type = data::parse_villager_type(name);
+        let current =
+            *self.villager_data.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        self.set_villager_data(VillagerData::new(
+            villager_type,
+            current.profession_enum(),
+            current.level.0,
+        ));
+    }
+
+    fn mob_on_lightning_strike(
+        &self,
+        caller: &dyn EntityBase,
+        lightning: &crate::entity::lightning::LightningBoltEntity,
+    ) {
+        let entity = self.get_entity();
+        let world = entity.world.load();
+        let pos = entity.pos.load();
+        let witch = crate::entity::r#type::from_type(
+            &EntityType::WITCH,
+            pos,
+            &world,
+            uuid::Uuid::new_v4(),
+        );
+        world.spawn_entity(witch);
+        entity.remove();
+        self.mob_entity
+            .living_entity
+            .on_lightning_strike(caller, lightning);
     }
 
     fn mob_init_data_tracker(&self) {

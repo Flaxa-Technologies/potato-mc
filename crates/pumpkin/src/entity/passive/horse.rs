@@ -250,4 +250,23 @@ impl Mob for HorseEntity {
 
         self.animal_interact(player, item_stack, Sound::EntityHorseAmbient)
     }
+
+    fn mob_set_variant_name(&self, name: &str) {
+        let clean = name.strip_prefix("minecraft:").unwrap_or(name);
+        let color_id = match clean {
+            "white" => Some(0),
+            "creamy" => Some(1),
+            "chestnut" => Some(2),
+            "brown" => Some(3),
+            "black" => Some(4),
+            "gray" => Some(5),
+            "dark_brown" | "dark_bay" => Some(6),
+            _ => clean.parse::<i32>().ok(),
+        };
+        if let Some(color) = color_id {
+            let current = self.get_variant();
+            let style = (current >> 8) & 0xFF;
+            self.set_variant(color | (style << 8));
+        }
+    }
 }

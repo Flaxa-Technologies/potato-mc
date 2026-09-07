@@ -1,8 +1,13 @@
-use std::sync::{Arc, Weak};
+use std::sync::{
+    Arc, Weak,
+    atomic::{AtomicBool, AtomicU8, Ordering},
+};
 
 use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::sound::Sound;
 use pumpkin_data::{entity::EntityType, item::Item};
+use pumpkin_protocol::codec::var_int::VarInt;
+use rand::RngExt;
 
 use crate::entity::{
     Entity,
@@ -35,7 +40,8 @@ pub struct PigEntity {
     pub mob_entity: MobEntity,
     pub ageable_data: crate::entity::ageable::AgeableData,
     pub steering: ItemBasedSteering,
-    pub saddled: std::sync::atomic::AtomicBool,
+    pub saddled: AtomicBool,
+    pub variant: AtomicU8,
 }
 
 impl PigEntity {
@@ -45,7 +51,8 @@ impl PigEntity {
             mob_entity,
             ageable_data: crate::entity::ageable::AgeableData::default(),
             steering: ItemBasedSteering::default(),
-            saddled: std::sync::atomic::AtomicBool::new(false),
+            saddled: AtomicBool::new(false),
+            variant: AtomicU8::new(rand::rng().random_range(0..3u8)),
         };
         let mob_arc = Arc::new(pig);
         let mob_weak: Weak<dyn Mob> = {
@@ -104,12 +111,51 @@ impl Mob for PigEntity {
 
     fn mob_write_nbt(&self, nbt: &mut NbtCompound) {
         nbt.put_bool("Saddle", self.is_saddled());
+        let variant_str = match self.variant.load(Ordering::Relaxed) {
+            0 => "minecraft:cold",
+            2 => "minecraft:warm",
+            _ => "minecraft:temperate",
+        };
+        nbt.put_string("variant", variant_str.to_string());
     }
 
     fn mob_read_nbt(&self, nbt: &NbtCompound) {
         if let Some(saddle) = nbt.get_byte("Saddle") {
             self.set_saddled(saddle == 1);
         }
+        if let Some(variant_str) = nbt.get_string("variant") {
+            let variant = match variant_str.strip_prefix("minecraft:").unwrap_or(variant_str) {
+                "cold" => 0,
+                "warm" => 2,
+                _ => 1,
+            };
+            self.variant.store(variant, Ordering::Relaxed);
+        }
+    }
+
+    fn mob_set_variant_name(&self, name: &str) {
+        let variant = match name.strip_prefix("minecraft:").unwrap_or(name) {
+            "cold" => 0,
+            "warm" => 2,
+            _ => 1,
+        };
+        self.variant.store(variant, Ordering::Relaxed);
+        self.get_entity().set_synced_data(
+            pumpkin_data::tracked_data::pig::VARIANT,
+            VarInt(variant as i32),
+        );
+    }
+
+    fn mob_init_data_tracker(&self) {
+        let entity = self.get_entity();
+        let is_baby = entity.age.load(Ordering::Relaxed) < 0;
+        if is_baby {
+            entity.set_synced_data(pumpkin_data::tracked_data::pig::DATA_BABY_ID, true);
+        }
+        entity.set_synced_data(
+            pumpkin_data::tracked_data::pig::VARIANT,
+            VarInt(self.variant.load(Ordering::Relaxed) as i32),
+        );
     }
 
     fn get_mob_entity(&self) -> &MobEntity {
@@ -121,7 +167,7 @@ impl Mob for PigEntity {
     }
 
     fn is_saddled(&self) -> bool {
-        self.saddled.load(std::sync::atomic::Ordering::Relaxed)
+        self.saddled.load(Ordering::Relaxed)
     }
 
     fn can_be_saddled(&self) -> bool {
@@ -130,8 +176,28 @@ impl Mob for PigEntity {
     }
 
     fn set_saddled(&self, saddled: bool) {
-        self.saddled
-            .store(saddled, std::sync::atomic::Ordering::Relaxed);
+        self.saddled.store(saddled, Ordering::Relaxed);
+    }
+
+    fn mob_on_lightning_strike(
+        &self,
+        caller: &dyn EntityBase,
+        lightning: &crate::entity::lightning::LightningBoltEntity,
+    ) {
+        let entity = self.get_entity();
+        let world = entity.world.load();
+        let pos = entity.pos.load();
+        let zombified = crate::entity::r#type::from_type(
+            &EntityType::ZOMBIFIED_PIGLIN,
+            pos,
+            &world,
+            uuid::Uuid::new_v4(),
+        );
+        world.spawn_entity(zombified);
+        entity.remove();
+        self.mob_entity
+            .living_entity
+            .on_lightning_strike(caller, lightning);
     }
 
     fn mob_interact(&self, player: &Arc<Player>, item_stack: &mut ItemStack) -> bool {

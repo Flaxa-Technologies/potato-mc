@@ -452,6 +452,7 @@ pub trait EntityBase: Send + Sync + std::any::Any {
         }
         if entity.fire_ticks.load(Ordering::Relaxed) < ticks as i32 {
             entity.fire_ticks.store(ticks as i32, Ordering::Relaxed);
+            entity.set_on_fire(true);
         }
         // TODO: defrost
     }
@@ -866,6 +867,11 @@ pub struct Entity {
     pub last_biome_update_pos: AtomicCell<BlockPos>,
 
     pub portal_cooldown: AtomicU32,
+    /// True while an async dimension-transfer task is in flight for this entity.
+    /// Mirrors vanilla ServerPlayer.isChangingDimension — portal cooldown must NOT
+    /// tick down while the transfer is in progress, otherwise the 10-tick player
+    /// cooldown expires before the player has even landed in the new world.
+    pub is_changing_dimension: AtomicBool,
 
     pub portal_manager: std::sync::Mutex<Option<PortalProcessor>>,
     /// Custom name for the entity
@@ -1016,6 +1022,7 @@ impl Entity {
             current_biome: ArcSwap::new(Arc::new(current_biome)),
             last_biome_update_pos: AtomicCell::new(BlockPos::new(floor_x, floor_y, floor_z)),
             portal_cooldown: AtomicU32::new(0),
+            is_changing_dimension: AtomicBool::new(false),
             portal_manager: std::sync::Mutex::new(None),
             custom_name: ArcSwap::new(Arc::new(None)),
             custom_name_visible: AtomicBool::new(false),
@@ -2342,7 +2349,13 @@ impl Entity {
 
     fn tick_portal(&self, caller: &dyn EntityBase) {
         if self.portal_cooldown.load(Ordering::Relaxed) > 0 {
-            self.portal_cooldown.fetch_sub(1, Ordering::Relaxed);
+            // Vanilla ServerPlayer.processPortalCooldown() skips decrement while isChangingDimension.
+            // This prevents the 10-tick cooldown from expiring before the async world-transfer
+            // finishes, which is the root cause of the Overworld→Nether→Overworld bounce loop.
+            if !self.is_changing_dimension.load(Ordering::Relaxed) {
+                self.portal_cooldown.fetch_sub(1, Ordering::Relaxed);
+            }
+            return;
         }
         let Ok(mut manager_guard) = self.portal_manager.try_lock() else {
             return;
@@ -2360,17 +2373,47 @@ impl Entity {
                 let entity_id = self.entity_id;
                 let yaw = self.yaw.load();
 
+                // Clear portal processor immediately so subsequent ticks do not re-trigger teleportation concurrently
+                *manager_guard = None;
+
+                // Mark that a dimension transfer is in flight.
+                // This freezes the portal cooldown (see tick_portal) until the transfer completes,
+                // matching vanilla ServerPlayer.isChangingDimension behavior.
+                self.is_changing_dimension.store(true, Ordering::Relaxed);
+
+                let entity_self_arc = {
+                    // Grab a clone of our own Arc from the world entity map so we can
+                    // clear is_changing_dimension after the transfer, even for players
+                    // who switch worlds (and thus move to a new entity slot).
+                    world_clone.get_entity_by_id(entity_id)
+                };
+
                 let rt_handle = world_clone.server.upgrade().map(|s| s.runtime.clone());
                 rayon::spawn(move || {
                     let _guard = rt_handle.as_ref().map(tokio::runtime::Handle::enter);
                     let Some(entity_arc) = world_clone.get_entity_by_id(entity_id) else {
+                        // Entity was removed; clear flag on the backup Arc if we have it.
+                        if let Some(e) = entity_self_arc {
+                            e.get_entity().is_changing_dimension.store(false, Ordering::Relaxed);
+                        }
                         return;
                     };
+                    // entity_self_arc is no longer needed since entity_arc holds the same entity.
+                    drop(entity_self_arc);
+                    tracing::info!(
+                        "[PORTAL-TASK] Starting portal destination calculation for entity {}",
+                        entity_id
+                    );
                     let transition = portal_type.get_portal_destination(
                         &world_clone,
                         dest_world_opt,
                         entity_arc.as_ref(),
                         src_portal.as_ref(),
+                    );
+                    tracing::info!(
+                        "[PORTAL-TASK] Portal destination calculation for entity {} result: {}",
+                        entity_id,
+                        transition.is_some()
                     );
 
                     if let Some(transition) = transition {
@@ -2380,7 +2423,33 @@ impl Entity {
                         let teleport_pos = transition.position;
 
                         // Teleport the main entity
-                        entity_arc.teleport(teleport_pos, yaw_val, pitch, dest_world.clone());
+                        tracing::info!(
+                            "[DIM-TRANSFER] Teleporting entity {} from {:?} to {:?} at {:?}",
+                            entity_id,
+                            world_clone.dimension.minecraft_name,
+                            dest_world.dimension.minecraft_name,
+                            teleport_pos
+                        );
+                        if entity_arc.get_entity().entity_type == &EntityType::PLAYER {
+                            // For players, is_changing_dimension is cleared by teleport_world()
+                            // after all world-change packets are sent and acknowledged, mirroring
+                            // vanilla ServerPlayer.hasChangedDimension(). Do NOT clear it here.
+                            entity_arc.teleport(teleport_pos, yaw_val, pitch, dest_world.clone());
+                        } else {
+                            let is_cross_world = !Arc::ptr_eq(&world_clone, &dest_world);
+                            if is_cross_world {
+                                world_clone.remove_entity(entity_arc.as_ref());
+                                entity_arc.get_entity().removed.store(false, Ordering::Relaxed);
+                                entity_arc.get_entity().removal_reason.swap(None);
+                                entity_arc.get_entity().set_world(dest_world.clone());
+                                entity_arc.get_entity().teleport(teleport_pos, yaw_val, pitch, &dest_world);
+                                dest_world.add_entity_silent(entity_arc.clone());
+                            } else {
+                                entity_arc.teleport(teleport_pos, yaw_val, pitch, dest_world.clone());
+                            }
+                            // Non-player entities: teleport is synchronous, clear flag immediately.
+                            entity_arc.get_entity().is_changing_dimension.store(false, Ordering::Relaxed);
+                        }
 
                         // Teleport all passengers recursively along with the vehicle
                         let yaw_delta = yaw_val.map(|y| y - yaw);
@@ -2390,6 +2459,19 @@ impl Entity {
                             yaw_delta,
                             &dest_world,
                         );
+
+                        tracing::info!(
+                            "[DIM-TRANSFER] Entity {} teleport dispatched to {:?}",
+                            entity_id,
+                            dest_world.dimension.minecraft_name,
+                        );
+                    } else {
+                        tracing::warn!(
+                            "[PORTAL-TASK] No portal destination transition found for entity {}",
+                            entity_id
+                        );
+                        // Clear the flag on failure so the entity is not stuck waiting forever
+                        entity_arc.get_entity().is_changing_dimension.store(false, Ordering::Relaxed);
                     }
                 });
             } else if portal_processor.portal_time == 0 {
@@ -2428,7 +2510,21 @@ impl Entity {
                 .unwrap_or_else(std::sync::PoisonError::into_inner)
                 .clone();
 
-            passenger.teleport(position, passenger_yaw, None, dest_world.clone());
+            if passenger_entity.entity_type == &EntityType::PLAYER {
+                passenger.teleport(position, passenger_yaw, None, dest_world.clone());
+            } else {
+                let current_pworld = passenger_entity.world.load_full();
+                if !Arc::ptr_eq(&current_pworld, dest_world) {
+                    current_pworld.remove_entity(passenger.as_ref());
+                    passenger_entity.removed.store(false, Ordering::Relaxed);
+                    passenger_entity.removal_reason.swap(None);
+                    passenger_entity.set_world(dest_world.clone());
+                    passenger_entity.teleport(position, passenger_yaw, None, dest_world);
+                    dest_world.add_entity_silent(passenger.clone());
+                } else {
+                    passenger.teleport(position, passenger_yaw, None, dest_world.clone());
+                }
+            }
 
             // Recursively teleport nested passengers
             for nested in nested_passengers {
@@ -2459,6 +2555,11 @@ impl Entity {
         }
 
         if self.portal_cooldown.load(Ordering::Relaxed) > 0 {
+            // Vanilla setAsInsidePortal() resets (extends) the portal cooldown every tick
+            // while the entity is still inside the portal block, to prevent it from expiring
+            // while the async dimension transfer is still in flight or while standing in the
+            // destination portal. Without this reset, a 10-tick cooldown expires instantly
+            // and the destination portal immediately triggers a bounce-back transfer.
             self.portal_cooldown
                 .store(self.default_portal_cooldown(), Ordering::Relaxed);
             return;
@@ -3111,10 +3212,6 @@ impl Entity {
             World::collect_java_recipients_by_version(java_recipients.into_iter());
 
         for (version, recipients) in recipients_by_version {
-            // TODO: Support older versions
-            if version < JavaMinecraftVersion::V_26_2 {
-                continue;
-            }
             if let Some(buf) = self.synched_data.pack_dirty_for_version(&version) {
                 let packet = CSetEntityMetadata::new(self.entity_id.into(), buf);
                 if let Ok(packet_data) = JavaClient::serialize_packet_for_version(&packet, version)

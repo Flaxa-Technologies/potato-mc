@@ -16,7 +16,7 @@ use crate::entity::{
     ai::goal::{
         escape_danger::EscapeDangerGoal, look_around::RandomLookAroundGoal,
         look_at_entity::LookAtEntityGoal, melee_attack::MeleeAttackGoal, revenge::RevengeGoal,
-        swim::SwimGoal, tempt::TemptGoal, try_find_water::TryFindWaterGoal,
+        tempt::TemptGoal, try_find_water::TryFindWaterGoal,
         wander_around::WanderAroundGoal,
     },
     mob::{Mob, MobEntity},
@@ -53,7 +53,6 @@ impl DolphinEntity {
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
 
             goal_selector.add_goal(0, Box::new(TryFindWaterGoal));
-            goal_selector.add_goal(0, Box::new(SwimGoal::default()));
             goal_selector.add_goal(1, EscapeDangerGoal::new(1.6));
             goal_selector.add_goal(2, Box::new(MeleeAttackGoal::new(1.2, true)));
             goal_selector.add_goal(3, Box::new(TemptGoal::new(1.2, TEMPT_ITEMS)));

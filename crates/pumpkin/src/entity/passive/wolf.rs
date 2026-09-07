@@ -1,6 +1,6 @@
 use std::sync::{
     Arc, Weak,
-    atomic::{AtomicU8, Ordering},
+    atomic::{AtomicI64, AtomicU8, Ordering},
 };
 
 use pumpkin_data::entity::EntityType;
@@ -20,7 +20,8 @@ use crate::entity::{
         follow_parent::FollowParentGoal, look_around::RandomLookAroundGoal,
         look_at_entity::LookAtEntityGoal, melee_attack::MeleeAttackGoal,
         owner_hurt_by_target::OwnerHurtByTargetGoal, owner_hurt_target::OwnerHurtTargetGoal,
-        revenge::RevengeGoal, swim::SwimGoal, wander_around::WanderAroundGoal,
+        revenge::RevengeGoal, sit_when_ordered_to::SitWhenOrderedToGoal, swim::SwimGoal,
+        wander_around::WanderAroundGoal,
     },
     mob::{Mob, MobEntity},
     passive::{
@@ -34,17 +35,59 @@ pub struct WolfEntity {
     pub mob_entity: MobEntity,
     pub variant: AtomicU8,
     pub collar_color: AtomicU8,
+    pub anger_end_time: AtomicI64,
     pub tamable_data: TamableData,
     pub ageable_data: crate::entity::ageable::AgeableData,
 }
 
 impl WolfEntity {
+    #[must_use]
+    pub fn random_variant() -> u8 {
+        let mut rng = rand::rng();
+        rng.random_range(0..9)
+    }
+
+    pub fn set_variant(&self, variant: u8) {
+        self.variant.store(variant, Ordering::Relaxed);
+        self.get_entity().set_synced_data(
+            pumpkin_data::tracked_data::wolf::WOLF_VARIANT_ID,
+            VarInt(variant as i32),
+        );
+    }
+
+    pub fn is_angry(&self) -> bool {
+        let end_time = self.anger_end_time.load(Ordering::Relaxed);
+        if end_time <= 0 {
+            return false;
+        }
+        let current_time = self.mob_entity.living_entity.entity.world.load().get_world_age();
+        end_time > current_time
+    }
+
+    pub fn stop_being_angry(&self) {
+        self.anger_end_time.store(-1, Ordering::Relaxed);
+        self.mob_entity.set_target(None);
+        self.mob_entity
+            .living_entity
+            .last_attacker_id
+            .store(0, Ordering::Relaxed);
+        self.mob_entity
+            .living_entity
+            .last_attacked_time
+            .store(0, Ordering::Relaxed);
+        if let Ok(mut nav) = self.mob_entity.navigator.try_lock() {
+            nav.stop();
+        }
+    }
+
     pub fn new(entity: Entity) -> Arc<Self> {
         let mob_entity = MobEntity::new(entity);
+        let variant = Self::random_variant();
         let wolf = Self {
             mob_entity,
-            variant: AtomicU8::new(3),       // Default to pale
+            variant: AtomicU8::new(variant),
             collar_color: AtomicU8::new(14), // Default to red
+            anger_end_time: AtomicI64::new(-1),
             tamable_data: TamableData::default(),
             ageable_data: crate::entity::ageable::AgeableData::default(),
         };
@@ -66,6 +109,8 @@ impl WolfEntity {
             goal_selector.add_goal(1, Box::new(SwimGoal::default()));
             // 1: EscapeDangerGoal (TamableAnimalPanicGoal)
             goal_selector.add_goal(1, EscapeDangerGoal::new(1.5));
+            // 2: SitWhenOrderedToGoal
+            goal_selector.add_goal(2, Box::new(SitWhenOrderedToGoal::new()));
             // 3: Avoid Llama
             goal_selector.add_goal(
                 3,
@@ -104,11 +149,6 @@ impl WolfEntity {
             target_selector.add_goal(2, OwnerHurtTargetGoal::new());
             // 3: HurtByTargetGoal (RevengeGoal)
             target_selector.add_goal(3, Box::new(RevengeGoal::new(true)));
-            // 4: NearestAttackableTarget (Player)
-            target_selector.add_goal(
-                4,
-                ActiveTargetGoal::with_default(&mob_arc.mob_entity, &EntityType::PLAYER, true),
-            );
             // 5: NonTameRandomTarget (Sheep, Rabbit, Fox)
             target_selector.add_goal(
                 5,
@@ -174,6 +214,26 @@ impl Mob for WolfEntity {
 
     fn as_tamable(&self) -> Option<&dyn TamableAnimal> {
         Some(self)
+    }
+
+    fn can_attack(&self, target: &dyn EntityBase) -> bool {
+        if self.is_tame() {
+            if let Some(player) = target.get_player() {
+                if self.is_owned_by(&player.gameprofile.id) {
+                    return false;
+                }
+            }
+            if let Some(target_mob) = target.get_mob()
+                && let Some(target_tamable) = target_mob.as_tamable()
+                && target_tamable.is_tame()
+                && let (Some(my_owner), Some(target_owner)) =
+                    (self.get_owner(), target_tamable.get_owner())
+                && my_owner == target_owner
+            {
+                return false;
+            }
+        }
+        true
     }
 
     fn can_attack_with_owner(&self, target: &dyn EntityBase, owner: &dyn EntityBase) -> bool {
@@ -259,7 +319,9 @@ impl Mob for WolfEntity {
                 "woods" => 8,
                 _ => 3,
             };
-            self.variant.store(variant, Ordering::Relaxed);
+            self.set_variant(variant);
+        } else if let Some(variant_id) = nbt.get_byte("Variant").or_else(|| nbt.get_byte("variant")) {
+            self.set_variant(variant_id as u8);
         }
         if let Some(collar) = nbt.get_byte("CollarColor") {
             self.collar_color.store(collar as u8, Ordering::Relaxed);
@@ -284,7 +346,7 @@ impl Mob for WolfEntity {
             "woods" => 8,
             _ => 3,
         };
-        self.variant.store(variant, Ordering::Relaxed);
+        self.set_variant(variant);
     }
 
     fn mob_init_data_tracker(&self) {
@@ -344,11 +406,12 @@ impl Mob for WolfEntity {
                 }
                 return parent_interaction;
             }
-        } else if item == &Item::BONE && !self.mob_entity.is_attacking() {
+        } else if item == &Item::BONE {
             item_stack.decrement_unless_creative(player.gamemode.load(), 1);
             let mut rng = rand::rng();
             if rng.random_range(0..3) == 0 {
                 TamableAnimal::tame(self, player.gameprofile.id);
+                self.stop_being_angry();
                 self.set_ordered_to_sit(true);
                 self.spawn_taming_particles(true);
             } else {

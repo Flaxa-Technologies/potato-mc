@@ -9,6 +9,7 @@ use std::sync::{Arc, Mutex};
 
 use crate::entity::{
     Entity, EntityBase,
+    decoration::end_crystal::EndCrystalEntity,
     living::LivingEntity,
     mob::{Mob, MobEntity},
     player::Player,
@@ -218,6 +219,7 @@ pub struct EnderDragonEntity {
     pub ticks_sitting: Mutex<i32>,
     pub sit_attack_timer: Mutex<i32>,
     pub breathing_timer: Mutex<i32>,
+    pub current_crystal_id: Mutex<Option<i32>>,
 }
 
 impl EnderDragonEntity {
@@ -269,6 +271,7 @@ impl EnderDragonEntity {
             ticks_sitting: Mutex::new(0),
             sit_attack_timer: Mutex::new(0),
             breathing_timer: Mutex::new(0),
+            current_crystal_id: Mutex::new(None),
         })
     }
 
@@ -636,7 +639,39 @@ impl EnderDragonEntity {
             }
         }
 
-        if let Some(_crystal) = nearest_crystal {
+        let mut current_id_lock = self
+            .current_crystal_id
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+
+        let new_crystal_id = nearest_crystal.as_ref().map(|c| c.get_entity().entity_id);
+
+        if *current_id_lock != new_crystal_id {
+            if let Some(old_id) = *current_id_lock {
+                if let Some(old_ent) = world.get_entity_by_id(old_id) {
+                    if let Some(end_crystal) = old_ent
+                        .cast_any()
+                        .downcast_ref::<EndCrystalEntity>()
+                    {
+                        end_crystal.set_beam_target(None);
+                    }
+                }
+            }
+            *current_id_lock = new_crystal_id;
+        }
+
+        if let Some(ref crystal) = nearest_crystal {
+            let dragon_pos = BlockPos::new(
+                pos.x.floor() as i32,
+                (pos.y + 1.0).floor() as i32,
+                pos.z.floor() as i32,
+            );
+            if let Some(end_crystal) = crystal
+                .cast_any()
+                .downcast_ref::<EndCrystalEntity>()
+            {
+                end_crystal.set_beam_target(Some(dragon_pos));
+            }
             let living = &self.mob_entity.living_entity;
             if living.health.load() < living.get_max_health() {
                 living.heal(1.0);
@@ -863,6 +898,22 @@ impl Mob for EnderDragonEntity {
         let living = &self.mob_entity.living_entity;
         if living.health.load() <= 0.0 {
             self.set_phase(EnderDragonPhase::Dying);
+            if let Some(crystal_id) = self
+                .current_crystal_id
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .take()
+            {
+                let world = self.mob_entity.living_entity.entity.world.load();
+                if let Some(crystal) = world.get_entity_by_id(crystal_id) {
+                    if let Some(end_crystal) = crystal
+                        .cast_any()
+                        .downcast_ref::<EndCrystalEntity>()
+                    {
+                        end_crystal.set_beam_target(None);
+                    }
+                }
+            }
         }
     }
 

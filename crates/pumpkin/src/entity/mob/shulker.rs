@@ -328,6 +328,47 @@ impl Mob for ShulkerEntity {
         0.0
     }
 
+    fn mob_init_data_tracker(&self) {
+        let entity = &self.mob_entity.living_entity.entity;
+        entity.set_synced_data(
+            pumpkin_data::tracked_data::shulker::ATTACH_FACE_ID,
+            VarInt(self.get_attach_face() as i32),
+        );
+        entity.set_synced_data(
+            pumpkin_data::tracked_data::shulker::PEEK_ID,
+            self.get_raw_peek(),
+        );
+        entity.set_synced_data(
+            pumpkin_data::tracked_data::shulker::COLOR,
+            self.color.load(Ordering::Relaxed) as i8,
+        );
+    }
+
+    fn mob_set_variant_name(&self, name: &str) {
+        let clean = name.strip_prefix("minecraft:").unwrap_or(name);
+        let color = match clean {
+            "white" => Some(0),
+            "orange" => Some(1),
+            "magenta" => Some(2),
+            "light_blue" => Some(3),
+            "yellow" => Some(4),
+            "lime" => Some(5),
+            "pink" => Some(6),
+            "gray" => Some(7),
+            "light_gray" => Some(8),
+            "cyan" => Some(9),
+            "purple" => Some(10),
+            "blue" => Some(11),
+            "brown" => Some(12),
+            "green" => Some(13),
+            "red" => Some(14),
+            "black" => Some(15),
+            "default" | "none" => None,
+            s => s.parse::<u8>().ok(),
+        };
+        self.set_color(color);
+    }
+
     fn mob_tick(&self, _caller: &dyn EntityBase) {
         let entity = &self.mob_entity.living_entity.entity;
 

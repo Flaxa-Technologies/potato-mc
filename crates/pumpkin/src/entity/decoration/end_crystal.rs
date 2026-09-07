@@ -94,6 +94,28 @@ impl EntityBase for EndCrystalEntity {
             world.explode(pos, 6.0, crate::world::ExplosionInteraction::Block);
         }
 
+        let crystal_pos = self.entity.pos.load();
+        for ent in world.entities.load().iter() {
+            if ent.get_entity().entity_type == &pumpkin_data::entity::EntityType::ENDER_DRAGON {
+                let d_pos = ent.get_entity().pos.load();
+                let (dx, dy, dz) = (
+                    d_pos.x - crystal_pos.x,
+                    d_pos.y - crystal_pos.y,
+                    d_pos.z - crystal_pos.z,
+                );
+                if dx * dx + dy * dy + dz * dz <= 1024.0 {
+                    let _ = ent.damage_with_context(
+                        ent.as_ref(),
+                        10.0,
+                        DamageType::EXPLOSION,
+                        Some(crystal_pos),
+                        Some(&self.entity),
+                        None,
+                    );
+                }
+            }
+        }
+
         if let Some(ref fight_mutex) = world.dragon_fight
             && let Ok(mut fight) = fight_mutex.lock()
         {

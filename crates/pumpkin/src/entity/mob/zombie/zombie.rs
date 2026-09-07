@@ -14,7 +14,28 @@ impl ZombieEntity {
     pub fn new(entity: Entity) -> Arc<Self> {
         let entity = ZombieEntityBase::new(entity);
         let zombie = Self { entity };
-        Arc::new(zombie)
+        let zombie_arc = Arc::new(zombie);
+
+        // Vanilla parity: 5% chance of baby zombie, 5% of baby zombies spawn as Chicken Jockey
+        if rand::random::<f32>() < 0.05 {
+            zombie_arc.set_baby(true);
+            if rand::random::<f32>() < 0.05 {
+                let world = zombie_arc.entity.mob_entity.living_entity.entity.world.load();
+                let pos = zombie_arc.entity.mob_entity.living_entity.entity.pos.load();
+                let chicken_entity = Entity::new(world.clone(), pos, &pumpkin_data::entity::EntityType::CHICKEN);
+                let chicken = crate::entity::passive::chicken::ChickenEntity::new(chicken_entity);
+                chicken.is_chicken_jockey.store(true, std::sync::atomic::Ordering::Relaxed);
+                world.spawn_entity_non_save(chicken.clone() as Arc<dyn crate::entity::EntityBase>);
+                let chicken_base: Arc<dyn crate::entity::EntityBase> = chicken.clone();
+                let zombie_base: Arc<dyn crate::entity::EntityBase> = zombie_arc.clone();
+                chicken.mob_entity.living_entity.entity.add_passenger(
+                    chicken_base,
+                    zombie_base,
+                );
+            }
+        }
+
+        zombie_arc
     }
 
     #[must_use]

@@ -62,6 +62,19 @@ impl RabbitVariant {
     }
 
     #[must_use]
+    pub fn from_name(name: &str) -> Self {
+        match name.strip_prefix("minecraft:").unwrap_or(name) {
+            "white" => Self::White,
+            "black" => Self::Black,
+            "white_splotched" => Self::WhiteSplotched,
+            "gold" => Self::Gold,
+            "salt" => Self::Salt,
+            "evil" | "killer_bunny" => Self::Evil,
+            _ => Self::Brown,
+        }
+    }
+
+    #[must_use]
     pub fn random_variant() -> Self {
         let mut rng = rand::rng();
         match rng.random_range(0..6) {
@@ -152,6 +165,7 @@ impl RabbitEntity {
                 .goals_selector
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
+            goal_selector.remove_goals::<AvoidEntityGoal>();
             goal_selector.add_goal(4, Box::new(MeleeAttackGoal::new(1.4, true)));
 
             let mut target_selector = self
@@ -171,6 +185,26 @@ impl RabbitEntity {
                 2,
                 ActiveTargetGoal::with_default(&self.mob_entity, &EntityType::FOX, true),
             );
+
+            self.mob_entity.living_entity.update_attribute(
+                &pumpkin_data::attributes::Attributes::ATTACK_DAMAGE,
+                |inst| {
+                    inst.base_value = 8.0;
+                },
+            );
+            self.mob_entity.living_entity.update_attribute(
+                &pumpkin_data::attributes::Attributes::ARMOR,
+                |inst| {
+                    inst.base_value = 8.0;
+                },
+            );
+
+            if entity.custom_name.load().is_none() {
+                entity.set_custom_name(pumpkin_util::text::TextComponent::translate(
+                    "entity.minecraft.killer_bunny",
+                    &[],
+                ));
+            }
         }
     }
 }
@@ -220,6 +254,10 @@ impl Mob for RabbitEntity {
         &self.mob_entity
     }
 
+    fn mob_set_variant_name(&self, name: &str) {
+        self.set_variant(RabbitVariant::from_name(name));
+    }
+
     fn mob_tick(&self, _caller: &dyn EntityBase) {
         self.ageable_ai_step();
     }
@@ -238,5 +276,19 @@ impl Mob for RabbitEntity {
 
     fn mob_interact(&self, player: &Arc<Player>, item_stack: &mut ItemStack) -> bool {
         self.animal_interact(player, item_stack, Sound::EntityRabbitAmbient)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RabbitVariant;
+
+    #[test]
+    fn rabbit_variants_from_name() {
+        assert_eq!(RabbitVariant::from_name("killer_bunny"), RabbitVariant::Evil);
+        assert_eq!(RabbitVariant::from_name("minecraft:white"), RabbitVariant::White);
+        assert_eq!(RabbitVariant::from_name("gold"), RabbitVariant::Gold);
+        assert_eq!(RabbitVariant::from_name("salt"), RabbitVariant::Salt);
+        assert_eq!(RabbitVariant::from_name("brown"), RabbitVariant::Brown);
     }
 }

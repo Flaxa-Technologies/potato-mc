@@ -9,7 +9,7 @@ use pumpkin_util::Difficulty;
 use crate::entity::{
     Entity,
     ai::goal::{
-        active_target::ActiveTargetGoal, bow_attack::BowAttackGoal,
+        active_target::ActiveTargetGoal, avoid_entity::AvoidEntityGoal, bow_attack::BowAttackGoal,
         look_around::RandomLookAroundGoal, look_at_entity::LookAtEntityGoal,
         melee_attack::MeleeAttackGoal, revenge::RevengeGoal, swim::SwimGoal,
         wander_around::WanderAroundGoal,
@@ -32,6 +32,16 @@ pub struct SkeletonEntityBase {
 impl SkeletonEntityBase {
     pub fn new(entity: Entity) -> Arc<Self> {
         let mob_entity = MobEntity::new(entity);
+        {
+            let mut equipment = mob_entity
+                .living_entity
+                .entity_equipment
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if rand::random_range(0..50_000) != 0 {
+                equipment.put(&EquipmentSlot::MAIN_HAND, ItemStack::new(1, &Item::BOW));
+            }
+        }
         let mob = Self { mob_entity };
         let mob_arc = Arc::new(mob);
         let mob_weak: Weak<dyn Mob> = {
@@ -51,19 +61,27 @@ impl SkeletonEntityBase {
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
 
             goal_selector.add_goal(0, Box::new(SwimGoal::default()));
-            goal_selector.add_goal(2, Box::new(BowAttackGoal::new(1.0, 20, 15.0)));
-            goal_selector.add_goal(3, Box::new(MeleeAttackGoal::new(1.2, false)));
-            goal_selector.add_goal(7, Box::new(WanderAroundGoal::new(1.0)));
+            goal_selector.add_goal(2, Box::new(BowAttackGoal::new(1.0, 40, 15.0)));
             goal_selector.add_goal(
-                8,
+                3,
+                Box::new(AvoidEntityGoal::new(&EntityType::WOLF, 6.0, 1.0, 1.2)),
+            );
+            goal_selector.add_goal(4, Box::new(MeleeAttackGoal::new(1.2, false)));
+            goal_selector.add_goal(5, Box::new(WanderAroundGoal::new(1.0)));
+            goal_selector.add_goal(
+                6,
                 LookAtEntityGoal::with_default(mob_weak, &EntityType::PLAYER, 8.0),
             );
-            goal_selector.add_goal(8, Box::new(RandomLookAroundGoal::default()));
+            goal_selector.add_goal(6, Box::new(RandomLookAroundGoal::default()));
 
             target_selector.add_goal(1, Box::new(RevengeGoal::new(true)));
             target_selector.add_goal(
                 2,
                 ActiveTargetGoal::with_default(&mob_arc.mob_entity, &EntityType::PLAYER, true),
+            );
+            target_selector.add_goal(
+                3,
+                ActiveTargetGoal::with_default(&mob_arc.mob_entity, &EntityType::IRON_GOLEM, true),
             );
         };
 
@@ -119,12 +137,14 @@ impl Mob for SkeletonEntityBase {
             }
         }
 
-        // AbstractSkeleton sets BOW on MAIN_HAND
-        let living = &self.mob_entity.living_entity;
-        let mut equipment = living
-            .entity_equipment
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-        equipment.put(&EquipmentSlot::MAIN_HAND, ItemStack::new(1, &Item::BOW));
+        // AbstractSkeleton sets BOW on MAIN_HAND (1 in 50,000 chance without bow)
+        if rand::random_range(0..50_000) != 0 {
+            let living = &self.mob_entity.living_entity;
+            let mut equipment = living
+                .entity_equipment
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            equipment.put(&EquipmentSlot::MAIN_HAND, ItemStack::new(1, &Item::BOW));
+        }
     }
 }

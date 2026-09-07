@@ -1,6 +1,7 @@
 use super::{Controls, Goal};
 use crate::entity::mob::Mob;
 use pumpkin_data::Block;
+use pumpkin_data::entity_status::EntityStatus;
 use pumpkin_data::tag::{self, Taggable};
 use pumpkin_world::world::BlockFlags;
 use rand::RngExt;
@@ -30,7 +31,15 @@ impl EatGrassGoal {
 
 impl Goal for EatGrassGoal {
     fn can_start(&mut self, mob: &dyn Mob) -> bool {
-        if mob.get_random().random_range(0..1000) != 0 {
+        let is_baby = mob
+            .get_mob_entity()
+            .living_entity
+            .entity
+            .age
+            .load(std::sync::atomic::Ordering::Relaxed)
+            < 0;
+        let chance = if is_baby { 50 } else { 1000 };
+        if mob.get_random().random_range(0..chance) != 0 {
             return false;
         }
 
@@ -53,6 +62,9 @@ impl Goal for EatGrassGoal {
 
     fn start(&mut self, mob: &dyn Mob) {
         self.timer = MAX_TIMER;
+        let entity = &mob.get_mob_entity().living_entity.entity;
+        let world = entity.world.load();
+        world.send_entity_status(entity, EntityStatus::EatGrass, None);
         let mut navigator = mob
             .get_mob_entity()
             .navigator
@@ -68,24 +80,29 @@ impl Goal for EatGrassGoal {
             let entity = &mob.get_mob_entity().living_entity.entity;
             let block_pos = entity.block_pos.load();
             let world = entity.world.load_full();
+            let mob_griefing = world.level_info.load().game_rules.mob_griefing;
 
             let block_at_pos = world.get_block(&block_pos);
             if block_at_pos.has_tag(&tag::Block::MINECRAFT_EDIBLE_FOR_SHEEP) {
-                world.set_block_state(
-                    &block_pos,
-                    Block::AIR.default_state.id,
-                    BlockFlags::NOTIFY_ALL,
-                );
+                if mob_griefing {
+                    world.set_block_state(
+                        &block_pos,
+                        Block::AIR.default_state.id,
+                        BlockFlags::NOTIFY_ALL,
+                    );
+                }
                 mob.on_eating_grass();
             } else {
                 let below_pos = block_pos.down();
                 let block_below = world.get_block(&below_pos);
                 if block_below.id == Block::GRASS_BLOCK.id {
-                    world.set_block_state(
-                        &below_pos,
-                        Block::DIRT.default_state.id,
-                        BlockFlags::NOTIFY_ALL,
-                    );
+                    if mob_griefing {
+                        world.set_block_state(
+                            &below_pos,
+                            Block::DIRT.default_state.id,
+                            BlockFlags::NOTIFY_ALL,
+                        );
+                    }
                     mob.on_eating_grass();
                 }
             }

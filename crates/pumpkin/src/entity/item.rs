@@ -239,16 +239,25 @@ impl ItemEntity {
                 (&*high_stack, &*low_stack)
             };
 
+            let max_size = self_stack.get_max_stack_size();
             if !self_stack.are_equal(other_stack)
-                || self_stack.item_count + other_stack.item_count > self_stack.get_max_stack_size()
+                || (self_stack.item_count >= max_size && other_stack.item_count >= max_size)
             {
                 return;
             }
 
+            let target_is_self = if self_stack.item_count >= max_size {
+                false
+            } else if other_stack.item_count >= max_size {
+                true
+            } else {
+                other_stack.item_count <= self_stack.item_count
+            };
+
             (
                 low_stack.clone(),
                 high_stack.clone(),
-                other_stack.item_count < self_stack.item_count,
+                target_is_self,
             )
         };
         let (target, source) = if target_is_self {
@@ -300,9 +309,9 @@ impl ItemEntity {
         } else {
             (high_stack, low_stack)
         };
+        let max_size = self_stack.get_max_stack_size();
         if !self_stack.are_equal(&other_stack)
-            || self_stack.item_count + other_stack.item_count > self_stack.get_max_stack_size()
-            || (other_stack.item_count < self_stack.item_count) != target_is_self
+            || (self_stack.item_count >= max_size && other_stack.item_count >= max_size)
         {
             return;
         }

@@ -64,6 +64,9 @@ impl TemptGoal {
 
 impl Goal for TemptGoal {
     fn can_start(&mut self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         if self.cooldown > 0 {
             self.cooldown -= 1;
             return false;
@@ -73,6 +76,9 @@ impl Goal for TemptGoal {
     }
 
     fn should_continue(&self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         self.target_player
             .as_ref()
             .is_some_and(|player| self.is_player_still_tempting(player, mob))

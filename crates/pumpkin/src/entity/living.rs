@@ -7,7 +7,7 @@ use pumpkin_inventory::build_equipment_slots;
 use pumpkin_inventory::player::player_inventory::PlayerInventory;
 use pumpkin_inventory::screen_handler::InventoryPlayer;
 use pumpkin_protocol::bedrock::client::take_item_actor::CTakeItemActor;
-use pumpkin_protocol::bedrock::server::actor_event::{ActorEventID, SActorEvent};
+use pumpkin_protocol::bedrock::server::actor_event::ActorEventID;
 use pumpkin_protocol::codec::var_ulong::VarULong;
 use pumpkin_util::GameMode;
 use pumpkin_util::Hand;
@@ -16,7 +16,7 @@ use rustc_hash::FxHashMap;
 use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{
-    AtomicBool, AtomicI32, AtomicI64, AtomicU8,
+    AtomicBool, AtomicI32, AtomicI64, AtomicU8, AtomicU32,
     Ordering::{Relaxed, SeqCst},
 };
 use tracing::warn;
@@ -43,7 +43,7 @@ use pumpkin_data::data_component_impl::{
     EquipmentSlot, EquippableImpl, FoodImpl,
 };
 use pumpkin_data::effect::StatusEffect;
-use pumpkin_data::entity::{EntityPose, EntityStatus, EntityType};
+use pumpkin_data::entity::{EntityPose, EntityStatus, EntityType, MobCategory};
 use pumpkin_data::fluid::Fluid;
 use pumpkin_data::item_stack::{DamageResult, ItemStack};
 use pumpkin_data::sound::SoundCategory;
@@ -88,8 +88,13 @@ pub struct LivingEntity {
     pub death_time: AtomicU8,
     /// Indicates whether the entity is dead. (`on_death` called)
     pub dead: AtomicBool,
+    pub pending_experience: AtomicU32,
     /// The distance the entity has been falling.
     pub fall_distance: AtomicCell<f32>,
+    /// Impulse impact pos for wind charge / mace fall damage immunity (vanilla `currentImpulseImpactPos`)
+    pub current_impulse_impact_pos: AtomicCell<Option<Vector3<f64>>>,
+    /// Grace ticks before resetting current impulse context (vanilla `currentImpulseContextResetGraceTime`)
+    pub current_impulse_grace_ticks: AtomicI32,
     pub active_effects: std::sync::Mutex<FxHashMap<&'static StatusEffect, Effect>>,
     pub entity_equipment: Arc<std::sync::Mutex<EntityEquipment>>,
     pub equipment_drop_chances: Arc<std::sync::Mutex<FxHashMap<EquipmentSlot, f32>>>,
@@ -187,8 +192,171 @@ impl LivingEntity {
         &Block::SLIME_BLOCK,
     ];
 
-    fn hurt_sound_for_entity(entity_type: &'static EntityType) -> Sound {
-        entity_type.hurt_sound.unwrap_or(Sound::EntityGenericHurt)
+    pub fn hurt_sound_for_entity(entity_type: &'static EntityType) -> Sound {
+        if let Some(sound) = entity_type.hurt_sound {
+            return sound;
+        }
+        match entity_type.resource_name {
+            "allay" => Sound::EntityAllayHurt,
+            "armadillo" => Sound::EntityArmadilloHurt,
+            "axolotl" => Sound::EntityAxolotlHurt,
+            "bat" => Sound::EntityBatHurt,
+            "bee" => Sound::EntityBeeHurt,
+            "blaze" => Sound::EntityBlazeHurt,
+            "breeze" => Sound::EntityBreezeHurt,
+            "camel" => Sound::EntityCamelHurt,
+            "cat" => Sound::EntityCatHurt,
+            "chicken" => Sound::EntityChickenHurt,
+            "cod" => Sound::EntityCodHurt,
+            "cow" => Sound::EntityCowHurt,
+            "creaking" => Sound::EntityCreakingActivate,
+            "creeper" => Sound::EntityCreeperHurt,
+            "dolphin" => Sound::EntityDolphinHurt,
+            "donkey" => Sound::EntityDonkeyHurt,
+            "drowned" => Sound::EntityDrownedHurt,
+            "elder_guardian" => Sound::EntityElderGuardianHurt,
+            "ender_dragon" => Sound::EntityEnderDragonHurt,
+            "enderman" => Sound::EntityEndermanHurt,
+            "endermite" => Sound::EntityEndermiteHurt,
+            "evoker" => Sound::EntityEvokerHurt,
+            "fox" => Sound::EntityFoxHurt,
+            "frog" => Sound::EntityFrogHurt,
+            "ghast" => Sound::EntityGhastHurt,
+            "glow_squid" => Sound::EntityGlowSquidHurt,
+            "goat" => Sound::EntityGoatHurt,
+            "guardian" => Sound::EntityGuardianHurt,
+            "hoglin" => Sound::EntityHoglinHurt,
+            "horse" => Sound::EntityHorseHurt,
+            "husk" => Sound::EntityHuskHurt,
+            "iron_golem" => Sound::EntityIronGolemHurt,
+            "llama" => Sound::EntityLlamaHurt,
+            "magma_cube" => Sound::EntityMagmaCubeHurt,
+            "mooshroom" => Sound::EntityCowHurt,
+            "mule" => Sound::EntityMuleHurt,
+            "ocelot" => Sound::EntityOcelotHurt,
+            "panda" => Sound::EntityPandaHurt,
+            "parrot" => Sound::EntityParrotHurt,
+            "phantom" => Sound::EntityPhantomHurt,
+            "pig" => Sound::EntityPigHurt,
+            "piglin" => Sound::EntityPiglinHurt,
+            "piglin_brute" => Sound::EntityPiglinBruteHurt,
+            "pillager" => Sound::EntityPillagerHurt,
+            "polar_bear" => Sound::EntityPolarBearHurt,
+            "pufferfish" => Sound::EntityPufferFishHurt,
+            "rabbit" => Sound::EntityRabbitHurt,
+            "ravager" => Sound::EntityRavagerHurt,
+            "salmon" => Sound::EntitySalmonHurt,
+            "sheep" => Sound::EntitySheepHurt,
+            "shulker" => Sound::EntityShulkerHurt,
+            "silverfish" => Sound::EntitySilverfishHurt,
+            "skeleton" => Sound::EntitySkeletonHurt,
+            "skeleton_horse" => Sound::EntitySkeletonHorseHurt,
+            "slime" => Sound::EntitySlimeHurt,
+            "sniffer" => Sound::EntitySnifferHurt,
+            "snow_golem" => Sound::EntitySnowGolemHurt,
+            "spider" => Sound::EntitySpiderHurt,
+            "squid" => Sound::EntitySquidHurt,
+            "stray" => Sound::EntityStrayHurt,
+            "strider" => Sound::EntityStriderHurt,
+            "trader_llama" => Sound::EntityLlamaHurt,
+            "tropical_fish" => Sound::EntityTropicalFishHurt,
+            "turtle" => Sound::EntityTurtleHurt,
+            "vex" => Sound::EntityVexHurt,
+            "villager" => Sound::EntityVillagerHurt,
+            "vindicator" => Sound::EntityVindicatorHurt,
+            "warden" => Sound::EntityWardenHurt,
+            "witch" => Sound::EntityWitchHurt,
+            "wither" => Sound::EntityWitherHurt,
+            "wither_skeleton" => Sound::EntityWitherSkeletonHurt,
+            "wolf" => Sound::EntityWolfHurt,
+            "zoglin" => Sound::EntityZoglinHurt,
+            "zombie" => Sound::EntityZombieHurt,
+            "zombie_villager" => Sound::EntityZombieVillagerHurt,
+            "zombified_piglin" => Sound::EntityZombifiedPiglinHurt,
+            _ => Sound::EntityGenericHurt,
+        }
+    }
+
+    pub fn death_sound_for_entity(entity_type: &'static EntityType) -> Sound {
+        match entity_type.resource_name {
+            "allay" => Sound::EntityAllayDeath,
+            "armadillo" => Sound::EntityArmadilloDeath,
+            "axolotl" => Sound::EntityAxolotlDeath,
+            "bat" => Sound::EntityBatDeath,
+            "bee" => Sound::EntityBeeDeath,
+            "blaze" => Sound::EntityBlazeDeath,
+            "breeze" => Sound::EntityBreezeDeath,
+            "camel" => Sound::EntityCamelDeath,
+            "cat" => Sound::EntityCatDeath,
+            "chicken" => Sound::EntityChickenDeath,
+            "cod" => Sound::EntityCodDeath,
+            "cow" => Sound::EntityCowDeath,
+            "creaking" => Sound::EntityCreakingDeactivate,
+            "creeper" => Sound::EntityCreeperDeath,
+            "dolphin" => Sound::EntityDolphinDeath,
+            "donkey" => Sound::EntityDonkeyDeath,
+            "drowned" => Sound::EntityDrownedDeath,
+            "elder_guardian" => Sound::EntityElderGuardianDeath,
+            "ender_dragon" => Sound::EntityEnderDragonDeath,
+            "enderman" => Sound::EntityEndermanDeath,
+            "endermite" => Sound::EntityEndermiteDeath,
+            "evoker" => Sound::EntityEvokerDeath,
+            "fox" => Sound::EntityFoxDeath,
+            "frog" => Sound::EntityFrogDeath,
+            "ghast" => Sound::EntityGhastDeath,
+            "glow_squid" => Sound::EntityGlowSquidDeath,
+            "goat" => Sound::EntityGoatDeath,
+            "guardian" => Sound::EntityGuardianDeath,
+            "hoglin" => Sound::EntityHoglinDeath,
+            "horse" => Sound::EntityHorseDeath,
+            "husk" => Sound::EntityHuskDeath,
+            "iron_golem" => Sound::EntityIronGolemDeath,
+            "llama" => Sound::EntityLlamaDeath,
+            "magma_cube" => Sound::EntityMagmaCubeDeath,
+            "mooshroom" => Sound::EntityCowDeath,
+            "mule" => Sound::EntityMuleDeath,
+            "ocelot" => Sound::EntityOcelotDeath,
+            "panda" => Sound::EntityPandaDeath,
+            "parrot" => Sound::EntityParrotDeath,
+            "phantom" => Sound::EntityPhantomDeath,
+            "pig" => Sound::EntityPigDeath,
+            "piglin" => Sound::EntityPiglinDeath,
+            "piglin_brute" => Sound::EntityPiglinBruteDeath,
+            "pillager" => Sound::EntityPillagerDeath,
+            "polar_bear" => Sound::EntityPolarBearDeath,
+            "pufferfish" => Sound::EntityPufferFishDeath,
+            "rabbit" => Sound::EntityRabbitDeath,
+            "ravager" => Sound::EntityRavagerDeath,
+            "salmon" => Sound::EntitySalmonDeath,
+            "sheep" => Sound::EntitySheepDeath,
+            "shulker" => Sound::EntityShulkerDeath,
+            "silverfish" => Sound::EntitySilverfishDeath,
+            "skeleton" => Sound::EntitySkeletonDeath,
+            "skeleton_horse" => Sound::EntitySkeletonHorseDeath,
+            "slime" => Sound::EntitySlimeDeath,
+            "sniffer" => Sound::EntitySnifferDeath,
+            "snow_golem" => Sound::EntitySnowGolemDeath,
+            "spider" => Sound::EntitySpiderDeath,
+            "squid" => Sound::EntitySquidDeath,
+            "stray" => Sound::EntityStrayDeath,
+            "strider" => Sound::EntityStriderDeath,
+            "trader_llama" => Sound::EntityLlamaDeath,
+            "tropical_fish" => Sound::EntityTropicalFishDeath,
+            "turtle" => Sound::EntityTurtleDeath,
+            "vex" => Sound::EntityVexDeath,
+            "villager" => Sound::EntityVillagerDeath,
+            "vindicator" => Sound::EntityVindicatorDeath,
+            "warden" => Sound::EntityWardenDeath,
+            "witch" => Sound::EntityWitchDeath,
+            "wither" => Sound::EntityWitherDeath,
+            "wither_skeleton" => Sound::EntityWitherSkeletonDeath,
+            "wolf" => Sound::EntityWolfDeath,
+            "zoglin" => Sound::EntityZoglinDeath,
+            "zombie" => Sound::EntityZombieDeath,
+            "zombie_villager" => Sound::EntityZombieVillagerDeath,
+            "zombified_piglin" => Sound::EntityZombifiedPiglinDeath,
+            _ => Sound::EntityGenericDeath,
+        }
     }
 
     pub fn new(entity: Entity) -> Self {
@@ -219,8 +387,11 @@ impl LivingEntity {
             last_damage_taken: AtomicCell::new(0.0),
             absorption: AtomicCell::new(0.0),
             fall_distance: AtomicCell::new(0.0),
+            current_impulse_impact_pos: AtomicCell::new(None),
+            current_impulse_grace_ticks: AtomicI32::new(0),
             death_time: AtomicU8::new(0),
             dead: AtomicBool::new(false),
+            pending_experience: AtomicU32::new(0),
             item_use_time: AtomicI32::new(0),
             item_in_use: std::sync::Mutex::new(None),
             active_hand: std::sync::Mutex::new(None),
@@ -1638,17 +1809,65 @@ impl LivingEntity {
             );
         }
 
+        let mut effective_fall_distance = fall_distance;
+        if self.is_ignoring_fall_damage_from_current_impulse() {
+            if let Some(impact_pos) = self.current_impulse_impact_pos.load() {
+                effective_fall_distance =
+                    fall_distance.min((impact_pos.y - self.entity.pos.load().y) as f32);
+                let has_landed_above = effective_fall_distance <= 0.0;
+                if has_landed_above {
+                    self.reset_current_impulse_context();
+                    return;
+                }
+                self.try_reset_current_impulse_context();
+            }
+        }
+
         let safe_fall_distance = self.get_attribute_value(&Attributes::SAFE_FALL_DISTANCE) as f32;
-        let unsafe_fall_distance = fall_distance + 1.0E-6 - safe_fall_distance;
+        let unsafe_fall_distance = effective_fall_distance + 1.0E-6 - safe_fall_distance;
 
         let damage = (unsafe_fall_distance * damage_per_distance).floor();
         if damage > 0.0 {
+            self.reset_current_impulse_context();
             let check_damage = self.damage(caller, damage, DamageType::FALL); // Fall
             if check_damage {
                 self.entity
-                    .play_sound(Self::get_fall_sound(fall_distance as i32));
+                    .play_sound(Self::get_fall_sound(effective_fall_distance as i32));
             }
         }
+    }
+
+    pub fn set_ignore_fall_damage_from_current_impulse(
+        &self,
+        ignore: bool,
+        new_impulse_impact_pos: Vector3<f64>,
+    ) {
+        if ignore {
+            self.apply_post_impulse_grace_time(40);
+            self.current_impulse_impact_pos.store(Some(new_impulse_impact_pos));
+        } else {
+            self.current_impulse_grace_ticks.store(0, Relaxed);
+        }
+    }
+
+    pub fn apply_post_impulse_grace_time(&self, ticks: i32) {
+        let _ = self.current_impulse_grace_ticks.fetch_max(ticks, Relaxed);
+    }
+
+    #[must_use]
+    pub fn is_ignoring_fall_damage_from_current_impulse(&self) -> bool {
+        self.current_impulse_impact_pos.load().is_some()
+    }
+
+    pub fn try_reset_current_impulse_context(&self) {
+        if self.current_impulse_grace_ticks.load(Relaxed) == 0 {
+            self.reset_current_impulse_context();
+        }
+    }
+
+    pub fn reset_current_impulse_context(&self) {
+        self.current_impulse_grace_ticks.store(0, Relaxed);
+        self.current_impulse_impact_pos.store(None);
     }
 
     const fn get_fall_sound(distance: i32) -> Sound {
@@ -1719,6 +1938,7 @@ impl LivingEntity {
             .compare_exchange(false, true, Relaxed, Relaxed)
             .is_ok()
         {
+            self.set_health(0.0);
             self.movement_input.store(Vector3::default());
             self.jumping.store(false, Relaxed);
 
@@ -1728,6 +1948,18 @@ impl LivingEntity {
             self.update_death_stats(&*dyn_self, killer);
 
             // Plays the death sound
+            let sound_category = if self.entity.entity_type == &EntityType::PLAYER {
+                SoundCategory::Players
+            } else if self.entity.entity_type.category == &MobCategory::MONSTER {
+                SoundCategory::Hostile
+            } else {
+                SoundCategory::Neutral
+            };
+            world.play_sound(
+                self.death_sound(),
+                sound_category,
+                &self.entity.pos.load(),
+            );
             world.send_entity_status(&self.entity, EntityStatus::Death, Some(ActorEventID::Death));
             let looting_level;
             let tool = if let Some(cause_ent) = cause {
@@ -1778,24 +2010,33 @@ impl LivingEntity {
                     self.entity
                         .fire_ticks
                         .load(std::sync::atomic::Ordering::Relaxed)
-                        > 0,
+                        > 0
+                        || damage_type == DamageType::IN_FIRE
+                        || damage_type == DamageType::ON_FIRE
+                        || damage_type == DamageType::LAVA
+                        || damage_type == DamageType::HOT_FLOOR
+                        || damage_type == DamageType::CAMPFIRE
+                        || damage_type == DamageType::FIREBALL
+                        || damage_type == DamageType::UNATTRIBUTED_FIREBALL,
                 ),
                 ..Default::default()
             };
 
-            // Drop loot
-            self.drop_loot(&params);
+            // Drop loot — allow the Mob impl to override the loot table key (e.g. sheep color)
+            let loot_key_override = dyn_self
+                .get_mob()
+                .and_then(|m| m.get_entity_loot_key());
+            self.drop_loot(&params, loot_key_override.as_deref());
 
-            // Award experience
+            // Award experience upon death completion (tick 20)
             if params.killed_by_player.unwrap_or(false)
                 && world.level_info.load().game_rules.mob_drops
             {
                 let amount = dyn_self.get_experience_reward(killer);
-                if amount > 0 {
-                    ExperienceOrbEntity::spawn(&world, self.entity.pos.load(), amount);
-                }
+                self.pending_experience.store(amount, Relaxed);
             }
-            self.entity.pose.store(EntityPose::Dying);
+
+            self.entity.set_pose(EntityPose::Dying);
 
             self.drop_equipment(looting_level);
 
@@ -1993,10 +2234,11 @@ impl LivingEntity {
         }
     }
 
-    fn drop_loot(&self, params: &LootContextParameters) {
+    fn drop_loot(&self, params: &LootContextParameters, key_override: Option<&str>) {
         let resource_name = self.get_entity().entity_type.resource_name;
-        let key = format!("minecraft:entities/{resource_name}");
-        if let Some(loot_table) = pumpkin_data::loot_table::get_loot_table(&key) {
+        let default_key = format!("minecraft:entities/{resource_name}");
+        let key = key_override.unwrap_or(&default_key);
+        if let Some(loot_table) = pumpkin_data::loot_table::get_loot_table(key) {
             let seed: i64 = rand::random();
             let pos = self.entity.block_pos.load();
             for stack in crate::world::loot::generate_loot_with_context(loot_table, seed, params) {
@@ -2245,6 +2487,10 @@ impl LivingEntity {
             .unwrap_or_else(|| ItemStack::EMPTY.clone())
     }
 
+    pub fn is_alive(&self) -> bool {
+        !self.dead.load(Ordering::Relaxed) && self.health.load() > 0.0 && self.entity.is_alive()
+    }
+
     pub fn can_take_damage(&self) -> bool {
         !self.entity.invulnerable.load(Ordering::Relaxed) && self.is_part_of_game()
     }
@@ -2311,8 +2557,35 @@ impl LivingEntity {
     fn hurt_sound(&self) -> Sound {
         if self.entity.entity_type == &EntityType::SLIME {
             SlimeEntity::hurt_sound_for_size(self.entity.data.load(Relaxed))
+        } else if self.entity.entity_type == &EntityType::MAGMA_CUBE {
+            let size = self.entity.data.load(Relaxed);
+            if size <= 1 {
+                Sound::EntityMagmaCubeHurtSmall
+            } else {
+                Sound::EntityMagmaCubeHurt
+            }
         } else {
             Self::hurt_sound_for_entity(self.entity.entity_type)
+        }
+    }
+
+    pub fn death_sound(&self) -> Sound {
+        if self.entity.entity_type == &EntityType::SLIME {
+            let size = self.entity.data.load(Relaxed);
+            if size <= 1 {
+                Sound::EntitySlimeDeathSmall
+            } else {
+                Sound::EntitySlimeDeath
+            }
+        } else if self.entity.entity_type == &EntityType::MAGMA_CUBE {
+            let size = self.entity.data.load(Relaxed);
+            if size <= 1 {
+                Sound::EntityMagmaCubeDeathSmall
+            } else {
+                Sound::EntityMagmaCubeDeath
+            }
+        } else {
+            Self::death_sound_for_entity(self.entity.entity_type)
         }
     }
 }
@@ -2454,9 +2727,7 @@ impl LivingEntity {
         let breach_level = attacker
             .and_then(|att| {
                 let player = att.get_player()?;
-                let hand_stack = player
-                    .inventory()
-                    .get_stack_in_hand(pumpkin_util::Hand::Right);
+                let hand_stack = player.inventory().held_item();
                 let level = hand_stack.get_enchantment_level(&Enchantment::BREACH);
                 (level > 0).then_some(level as u32)
             })
@@ -2795,43 +3066,44 @@ impl LivingEntity {
         };
         let config = &server.advanced_config.pvp;
 
-        if config.hurt_animation {
+        if config.hurt_animation && let Some(player) = caller.get_player() {
             let entity_id = self.entity.entity_id;
-            let hurt_yaw = source.map_or(0.0, |source| {
-                let src = source.get_entity().pos.load();
+            let hurt_yaw = source.or(cause).map_or(0.0, |src_ent| {
+                let src = src_ent.get_entity().pos.load();
                 let tgt = self.entity.pos.load();
                 (src.z - tgt.z).atan2(src.x - tgt.x).to_degrees() as f32 - self.entity.yaw.load()
             });
-            let hurt_event = SActorEvent {
-                target_runtime_id: VarULong(entity_id as u64),
-                event_id: ActorEventID::Hurt,
-                data: VarInt(0),
-                fire_at_position: None,
-            };
             let hurt_animation = CHurtAnimation::new(entity_id.into(), hurt_yaw);
-            world.send_to_tracking_players_and_self_editioned(
-                &self.entity,
-                &hurt_animation,
-                &hurt_event,
-            );
+            player.try_send_client_packet(&hurt_animation);
         }
 
         world.broadcast_damage_event(
             &self.entity,
             i32::from(damage_type.id),
-            source.map(|e| e.get_entity().entity_id),
             cause.map(|e| e.get_entity().entity_id),
+            source.map(|e| e.get_entity().entity_id),
             position,
         );
 
+        if let Some(mob) = caller.get_mob() {
+            mob.on_damage(damage_type, source.or(cause));
+        }
+
         if play_sound {
+            let sound_category = if self.entity.entity_type == &EntityType::PLAYER {
+                SoundCategory::Players
+            } else if self.entity.entity_type.category == &MobCategory::MONSTER {
+                SoundCategory::Hostile
+            } else {
+                SoundCategory::Neutral
+            };
             world.play_sound(
                 self.hurt_sound(),
-                SoundCategory::Players,
+                sound_category,
                 &self.entity.pos.load(),
             );
 
-            if let Some(source) = source {
+            if let Some(source) = source.or(cause) {
                 let source_pos = source.get_entity().pos.load();
                 let target_pos = self.entity.pos.load();
                 let dx = source_pos.x - target_pos.x;
@@ -3011,7 +3283,7 @@ impl EntityBase for LivingEntity {
         let player = caller.get_player();
         let is_player = player.is_some();
 
-        if !is_player {
+        if !is_player && is_alive {
             self.entity.send_pos_rot();
         }
 
@@ -3199,7 +3471,11 @@ impl EntityBase for LivingEntity {
         if self.hurt_cooldown.load(Relaxed) > 0 {
             self.hurt_cooldown.fetch_sub(1, Relaxed);
         }
-        if self.health.load() <= 0.0 {
+        let grace = self.current_impulse_grace_ticks.load(Relaxed);
+        if grace > 0 {
+            self.current_impulse_grace_ticks.fetch_sub(1, Relaxed);
+        }
+        if self.health.load() <= 0.0 || self.dead.load(Relaxed) {
             let time = self
                 .death_time
                 .fetch_update(Relaxed, Relaxed, |time| Some(time.saturating_add(1)))
@@ -3221,12 +3497,17 @@ impl EntityBase for LivingEntity {
             }
             // Only send death particles once (on the exact tick death_time reaches 20)
             // and then remove the entity, preventing entity_event spam.
-            if time == 20 && !self.entity.removed.swap(true, Ordering::Relaxed) {
-                self.entity.world.load().send_entity_status(
+            if time >= 20 && !self.entity.removed.swap(true, Ordering::Relaxed) {
+                let world = self.entity.world.load();
+                world.send_entity_status(
                     &self.entity,
-                    EntityStatus::Death,
-                    Some(ActorEventID::Death),
+                    EntityStatus::Poof,
+                    None,
                 );
+                let amount = self.pending_experience.load(Relaxed);
+                if amount > 0 {
+                    ExperienceOrbEntity::spawn(&world, self.entity.pos.load(), amount);
+                }
                 self.entity.remove();
             }
         }
@@ -3611,8 +3892,24 @@ mod tests {
     #[test]
     fn hurt_sound_for_entity_defaults_to_generic_hurt() {
         assert_eq!(
-            LivingEntity::hurt_sound_for_entity(&EntityType::CREEPER),
+            LivingEntity::hurt_sound_for_entity(&EntityType::FISHING_BOBBER),
             Sound::EntityGenericHurt
+        );
+    }
+
+    #[test]
+    fn death_sound_for_entity_matches_mobs() {
+        assert_eq!(
+            LivingEntity::death_sound_for_entity(&EntityType::ZOMBIE),
+            Sound::EntityZombieDeath
+        );
+        assert_eq!(
+            LivingEntity::death_sound_for_entity(&EntityType::CREEPER),
+            Sound::EntityCreeperDeath
+        );
+        assert_eq!(
+            LivingEntity::death_sound_for_entity(&EntityType::ENDERMAN),
+            Sound::EntityEndermanDeath
         );
     }
 

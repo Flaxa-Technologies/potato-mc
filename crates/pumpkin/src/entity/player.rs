@@ -411,6 +411,8 @@ pub struct Player {
     pub respawn_point: std::sync::Mutex<Option<RespawnPoint>>,
     /// The player's sleep status
     pub sleeping_since: AtomicCell<Option<u8>>,
+    /// The player's bed head position while sleeping
+    pub sleeping_pos: AtomicCell<Option<BlockPos>>,
     /// Manages the player's breath level
     pub breath_manager: BreathManager,
     /// Manages the player's hunger level.
@@ -745,6 +747,7 @@ impl Player {
             // TODO: Send the CPlayerSpawnPosition packet when the client connects with proper values
             respawn_point: std::sync::Mutex::new(None),
             sleeping_since: AtomicCell::new(None),
+            sleeping_pos: AtomicCell::new(None),
             // We want this to be an impossible watched section so that `chunker::update_position`
             // will mark chunks as watched for a new join rather than a respawn.
             // (We left shift by one so we can search around that chunk)
@@ -1268,9 +1271,23 @@ impl Player {
         }
 
         let is_mace_smash = matches!(attack_type, AttackType::MaceSmash);
+        let fall_distance = if is_mace_smash {
+            self.living_entity.fall_distance.load() as f64
+        } else {
+            0.0
+        };
+
         if is_mace_smash {
-            let fall_distance = self.living_entity.fall_distance.load();
-            damage += 1.5 * f64::from(fall_distance);
+            let base_smash = if fall_distance <= 3.0 {
+                4.0 * fall_distance
+            } else if fall_distance <= 8.0 {
+                12.0 + 2.0 * (fall_distance - 3.0)
+            } else {
+                22.0 + (fall_distance - 8.0)
+            };
+            let density_level = item_stack.get_enchantment_level(&Enchantment::DENSITY) as f64;
+            let density_bonus = 0.5 * density_level * fall_distance;
+            damage += base_smash + density_bonus;
         }
 
         if !victim.damage_with_context(
@@ -1306,17 +1323,140 @@ impl Player {
         }
 
         if is_mace_smash {
-            let fall_distance = self.living_entity.fall_distance.load();
+            // 1. Reset attacker vertical velocity to 0.01 while preserving horizontal momentum (vanilla MaceItem: Direction.Axis.Y, 0.01F)
+            let cur_vel = self.living_entity.entity.velocity.load();
+            self.set_velocity(Vector3::new(cur_vel.x, 0.01, cur_vel.z));
+
+            // 2. Grant safe-fall impulse protection up to current impact Y (vanilla MaceItem::calculateImpactPosition)
+            let current_pos = self.position();
+            let impact_pos = if self.living_entity.is_ignoring_fall_damage_from_current_impulse()
+                && self
+                    .living_entity
+                    .current_impulse_impact_pos
+                    .load()
+                    .is_some_and(|p| p.y <= current_pos.y)
+            {
+                self.living_entity
+                    .current_impulse_impact_pos
+                    .load()
+                    .unwrap_or(current_pos)
+            } else {
+                current_pos
+            };
+            self.living_entity
+                .set_ignore_fall_damage_from_current_impulse(true, impact_pos);
+
+            // 3. Reset fall distance
             self.living_entity.fall_distance.store(0.0);
-            world.play_sound(
+
+            // 4. Play smash sounds: ground smash or air smash at attacker position (vanilla MaceItem.java:66, 68)
+            let is_ground = victim_entity.on_ground.load(Ordering::Relaxed);
+            let smash_sound = if is_ground {
                 if fall_distance > 5.0 {
                     Sound::ItemMaceSmashGroundHeavy
                 } else {
                     Sound::ItemMaceSmashGround
-                },
+                }
+            } else {
+                Sound::ItemMaceSmashAir
+            };
+            world.play_sound(
+                smash_sound,
                 SoundCategory::Players,
-                &pos,
+                &self.living_entity.entity.pos.load(),
             );
+
+            // 5. Particles level event 2013 with data 750 (vanilla levelEvent(2013, entity.getOnPos(), 750))
+            let victim_pos = victim_entity.pos.load();
+            let on_pos = pumpkin_util::math::position::BlockPos::new(
+                victim_pos.x.floor() as i32,
+                (victim_pos.y - 1.0e-5).floor() as i32,
+                victim_pos.z.floor() as i32,
+            );
+            world.sync_world_event(
+                pumpkin_data::world::WorldEvent::ParticlesSmashAttack,
+                on_pos,
+                750,
+            );
+
+            // 6. Nearby entity knockback (radius 3.5, vertical push 0.7F)
+            let radius = 3.5;
+            let bounding_box = pumpkin_util::math::boundingbox::BoundingBox::new(
+                Vector3::new(victim_pos.x - radius, victim_pos.y - radius, victim_pos.z - radius),
+                Vector3::new(victim_pos.x + radius, victim_pos.y + radius, victim_pos.z + radius),
+            );
+            let nearby_entities = world.get_all_at_box(&bounding_box);
+            for nearby in nearby_entities {
+                let ent = nearby.get_entity();
+                if ent.entity_id == self.entity_id() || ent.entity_id == victim_entity.entity_id {
+                    continue;
+                }
+                if nearby.is_spectator() {
+                    continue;
+                }
+                if let Some(player) = nearby.get_player() {
+                    let flying = player.gamemode.load() == pumpkin_util::GameMode::Creative
+                        && player
+                            .abilities
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner)
+                            .flying;
+                    if flying {
+                        continue;
+                    }
+                }
+                let ent_pos = ent.pos.load();
+                let diff = ent_pos - victim_pos;
+                let dist = diff.length();
+                if dist <= radius && dist > 1.0e-5 {
+                    let resistance = nearby.get_living_entity().map_or(0.0, |l| {
+                        l.get_attribute_value(&pumpkin_data::attributes::Attributes::KNOCKBACK_RESISTANCE)
+                    });
+                    let multiplier = if fall_distance > 5.0 { 2.0 } else { 1.0 };
+                    let knockback_power = (3.5 - dist) * 0.7 * multiplier * (1.0 - resistance);
+                    if knockback_power > 0.0 {
+                        let dir = diff / dist;
+                        let push_x = dir.x * knockback_power;
+                        let push_z = dir.z * knockback_power;
+                        let push_vec = Vector3::new(push_x, 0.7, push_z);
+                        if let Some(player) = nearby.get_player() {
+                            let vel = player.living_entity.entity.velocity.load();
+                            player.set_velocity(vel + push_vec);
+                        } else {
+                            ent.add_velocity(push_vec);
+                        }
+                    }
+                }
+            }
+
+            // 7. Wind Burst enchantment: if present, creates wind burst explosion launching the attacker
+            let wind_burst_level = item_stack.get_enchantment_level(&Enchantment::WIND_BURST);
+            if wind_burst_level > 0 {
+                let knockback_mult = match wind_burst_level {
+                    1 => 1.2,
+                    2 => 1.75,
+                    _ => 2.2,
+                };
+                let attacker_pos = self.position();
+                let calculator = Arc::new(crate::world::SimpleExplosionDamageCalculator::new(
+                    false,
+                    false,
+                    Some(knockback_mult as f32),
+                    Some(&pumpkin_data::tag::Block::MINECRAFT_BLOCKS_WIND_CHARGE_EXPLOSIONS),
+                ));
+                world.explode_with_calculator_and_effects(
+                    attacker_pos,
+                    3.5,
+                    crate::world::ExplosionInteraction::Trigger,
+                    Some(calculator),
+                    Some(pumpkin_data::particle::Particle::GustEmitterSmall),
+                    Some(pumpkin_data::sound::Sound::EntityWindChargeWindBurst),
+                    true,
+                );
+                // Ensure attacker gets clean vertical launch with no horizontal deviation
+                let cur = self.living_entity.entity.velocity.load();
+                self.set_velocity(Vector3::new(cur.x, knockback_mult, cur.z));
+            }
         }
 
         player_attack_sound(&pos, &world, attack_type);
@@ -1333,7 +1473,7 @@ impl Player {
             std::sync::atomic::Ordering::Relaxed,
         );
 
-        if victim.get_living_entity().is_some() {
+        if !is_mace_smash && victim.get_living_entity().is_some() {
             // Vanilla `Player.attack` adds `LivingEntity.getKnockback()` - the Knockback
             // enchantment bonus, halved - plus 0.5 for a sprint attack, on top of the base
             // knockback the victim's damage handling applies. A plain hit adds nothing.
@@ -1948,15 +2088,18 @@ impl Player {
     pub fn sleep(&self, bed_head_pos: BlockPos) {
         // TODO: Stop riding
 
+        self.sleeping_pos.store(Some(bed_head_pos));
         self.get_entity().set_pose(EntityPose::Sleeping);
-        self.living_entity
-            .entity
-            .set_pos(bed_head_pos.to_f64().add_raw(0.5, 0.6875, 0.5));
+        let sleep_pos = bed_head_pos.to_f64().add_raw(0.5, 0.6875, 0.5);
+        self.living_entity.entity.set_pos(sleep_pos);
         self.get_entity().set_synced_data(
             pumpkin_data::tracked_data::player::SLEEPING_POS_ID,
             Some(bed_head_pos),
         );
         self.get_entity().set_velocity(Vector3::default());
+
+        let yaw = self.living_entity.entity.yaw.load();
+        self.request_teleport(sleep_pos, yaw, 0.0);
 
         self.sleeping_since.store(Some(0));
         self.set_stat(
@@ -1996,9 +2139,9 @@ impl Player {
         self.living_entity.get_block_speed_factor()
     }
 
-    fn is_sleeping(&self) -> bool {
-        // TODO: Track sleeping position state explicitly (vanilla checks sleepingPosition.isPresent()).
-        self.sleeping_since.load().is_some()
+    #[must_use]
+    pub fn is_sleeping(&self) -> bool {
+        self.sleeping_since.load().is_some() || self.sleeping_pos.load().is_some()
     }
 
     #[must_use]
@@ -2091,28 +2234,31 @@ impl Player {
 
     pub fn wake_up(&self) {
         let world = self.world();
-        let respawn_point = self.respawn_point.try_lock().ok().and_then(|r| r.clone());
-        let Some(respawn_point) = respawn_point.as_ref() else {
-            warn!("Player waking up should have it's respawn point set on the bed");
-            return;
-        };
+        let sleeping_pos = self.sleeping_pos.swap(None);
+        let respawn_pos = self
+            .respawn_point
+            .try_lock()
+            .ok()
+            .and_then(|r| r.as_ref().map(|rp| rp.position));
+        let bed_pos = sleeping_pos.or(respawn_pos);
 
-        if let Some(server) = world.server.upgrade()
-            && let Some(player_arc) = world.get_player_by_uuid(self.gameprofile.id)
-        {
-            let mut event =
-                crate::plugin::api::events::player::player_bed::PlayerBedLeaveEvent::new(
-                    player_arc,
-                    respawn_point.position,
-                );
-            server.plugin_manager.fire_blocking(&server, &mut event);
+        if let Some(bed_pos) = bed_pos {
+            if let Some(server) = world.server.upgrade()
+                && let Some(player_arc) = world.get_player_by_uuid(self.gameprofile.id)
+            {
+                let mut event =
+                    crate::plugin::api::events::player::player_bed::PlayerBedLeaveEvent::new(
+                        player_arc,
+                        bed_pos,
+                    );
+                server.plugin_manager.fire_blocking(&server, &mut event);
+            }
+
+            let (bed, bed_state) = world.get_block_and_state_id(&bed_pos);
+            BedBlock::set_occupied(false, &world, bed, &bed_pos, bed_state);
         }
 
-        let (bed, bed_state) = world.get_block_and_state_id(&respawn_point.position);
-        BedBlock::set_occupied(false, &world, bed, &respawn_point.position, bed_state);
-
         self.living_entity.entity.set_pose(EntityPose::Standing);
-        self.living_entity.entity.set_pos(self.position());
         self.living_entity.entity.set_synced_data(
             pumpkin_data::tracked_data::player::SLEEPING_POS_ID,
             None::<BlockPos>,
@@ -2131,6 +2277,16 @@ impl Player {
         );
 
         self.sleeping_since.store(None);
+
+        if let Some(bed_pos) = bed_pos {
+            let (_, bed_state) = world.get_block_and_state_id(&bed_pos);
+            let facing = pumpkin_data::block_properties::WhiteBedLikeProperties::from_state_id(bed_state).facing;
+            let exit_pos = Self::find_bed_spawn_position(&world, &bed_pos, facing)
+                .unwrap_or_else(|| bed_pos.to_f64().add_raw(0.5, 1.0, 0.5));
+            let yaw = self.living_entity.entity.yaw.load();
+            let pitch = self.living_entity.entity.pitch.load();
+            self.request_teleport(exit_pos, yaw, pitch);
+        }
     }
 
     pub fn show_title(&self, text: &TextComponent, mode: &TitleMode) {
@@ -3726,11 +3882,7 @@ impl Player {
                 let Some(player) = current_world.remove_player(self, false).await else {
                     return;
                 };
-               new_world.players.rcu(|current_list| {
-                    let mut new_list = (**current_list).clone();
-                    new_list.push(player.clone());
-                    new_list
-                });
+                let _ = new_world.add_player(&player);
                 self.unload_watched_chunks(&current_world).await;
 
                 self.change_world_chunks(&current_world.level, &new_world);
@@ -3802,6 +3954,7 @@ impl Player {
                 player.get_entity().set_pos(position);
                 player.get_entity().set_rotation(yaw, pitch);
                 player.get_entity().last_pos.store(position);
+                crate::world::chunker::update_position(&player);
 
                 self.send_abilities_update();
 
@@ -3825,6 +3978,7 @@ impl Player {
                 }
 
                 player.request_teleport(position, yaw, pitch);
+                new_world.pair_new_player_with_tracked_entities(&player);
 
                 let mut changed_world_event = crate::plugin::api::events::player::player_changed_world::PlayerChangedWorldEvent {
                     player: player.clone(),
@@ -3833,6 +3987,16 @@ impl Player {
                     cancelled: false,
                 };
                 server.plugin_manager.fire(&server, &mut changed_world_event).await;
+
+                // Dimension transfer fully complete — mirror vanilla ServerPlayer.hasChangedDimension().
+                // This allows the portal cooldown to resume ticking so the 10-tick cooldown
+                // prevents immediate re-entry into the destination portal.
+                player.get_entity().is_changing_dimension.store(false, Ordering::Relaxed);
+                tracing::info!(
+                    "[DIM-TRANSFER] Player {} dimension transfer fully settled in {:?}",
+                    player.gameprofile.name,
+                    player.world().dimension.minecraft_name
+                );
             }
         }}
     }
@@ -3863,6 +4027,13 @@ impl Player {
         let i = self.teleport_id_count.fetch_add(1, Ordering::Relaxed);
         self.chunk_send_epoch.fetch_add(1, Ordering::Relaxed);
         let teleport_id = i + 1;
+        tracing::info!(
+            "[TELEPORT] player=\"{}\" teleport_id={} position={:?} dimension={:?}",
+            self.gameprofile.name,
+            teleport_id,
+            position,
+            self.world().dimension.minecraft_name,
+        );
         self.living_entity.entity.set_pos(position);
         let entity = &self.living_entity.entity;
         entity.set_rotation(yaw, pitch);

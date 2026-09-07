@@ -117,6 +117,25 @@ mod tests {
             assert_eq!(gossip_type.daily_decay(), decay);
         }
     }
+
+    #[test]
+    fn villager_type_and_profession_helpers() {
+        use super::{
+            VillagerProfession, VillagerType, parse_villager_profession, parse_villager_type,
+            random_villager_profession, random_villager_type,
+        };
+
+        assert_eq!(parse_villager_type("desert"), VillagerType::Desert);
+        assert_eq!(parse_villager_type("minecraft:snow"), VillagerType::Snow);
+        assert_eq!(parse_villager_type("unknown"), VillagerType::Plains);
+
+        assert_eq!(parse_villager_profession("farmer"), VillagerProfession::Farmer);
+        assert_eq!(parse_villager_profession("minecraft:librarian"), VillagerProfession::Librarian);
+        assert_eq!(parse_villager_profession("none"), VillagerProfession::None);
+
+        let _ = random_villager_type();
+        let _ = random_villager_profession();
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -157,5 +176,77 @@ impl VillagerData {
     #[must_use]
     pub fn profession_enum(&self) -> VillagerProfession {
         VillagerProfession::from_i32(self.profession.0).unwrap_or(VillagerProfession::None)
+    }
+}
+
+#[must_use]
+pub fn parse_villager_type(name: &str) -> VillagerType {
+    match name.strip_prefix("minecraft:").unwrap_or(name) {
+        "desert" => VillagerType::Desert,
+        "jungle" => VillagerType::Jungle,
+        "savanna" => VillagerType::Savanna,
+        "snow" => VillagerType::Snow,
+        "swamp" => VillagerType::Swamp,
+        "taiga" => VillagerType::Taiga,
+        _ => VillagerType::Plains,
+    }
+}
+
+#[must_use]
+pub fn random_villager_type() -> VillagerType {
+    use rand::RngExt;
+    let mut rng = rand::rng();
+    match rng.random_range(0..7) {
+        0 => VillagerType::Desert,
+        1 => VillagerType::Jungle,
+        2 => VillagerType::Plains,
+        3 => VillagerType::Savanna,
+        4 => VillagerType::Snow,
+        5 => VillagerType::Swamp,
+        _ => VillagerType::Taiga,
+    }
+}
+
+#[must_use]
+pub fn parse_villager_profession(name: &str) -> VillagerProfession {
+    match name.strip_prefix("minecraft:").unwrap_or(name) {
+        "armorer" => VillagerProfession::Armorer,
+        "butcher" => VillagerProfession::Butcher,
+        "cartographer" => VillagerProfession::Cartographer,
+        "cleric" => VillagerProfession::Cleric,
+        "farmer" => VillagerProfession::Farmer,
+        "fisherman" => VillagerProfession::Fisherman,
+        "fletcher" => VillagerProfession::Fletcher,
+        "leatherworker" => VillagerProfession::Leatherworker,
+        "librarian" => VillagerProfession::Librarian,
+        "mason" => VillagerProfession::Mason,
+        "nitwit" => VillagerProfession::Nitwit,
+        "shepherd" => VillagerProfession::Shepherd,
+        "toolsmith" => VillagerProfession::Toolsmith,
+        "weaponsmith" => VillagerProfession::Weaponsmith,
+        _ => VillagerProfession::None,
+    }
+}
+
+#[must_use]
+pub fn random_villager_profession() -> VillagerProfession {
+    use rand::RngExt;
+    let mut rng = rand::rng();
+    match rng.random_range(0..15) {
+        0 => VillagerProfession::None,
+        1 => VillagerProfession::Armorer,
+        2 => VillagerProfession::Butcher,
+        3 => VillagerProfession::Cartographer,
+        4 => VillagerProfession::Cleric,
+        5 => VillagerProfession::Farmer,
+        6 => VillagerProfession::Fisherman,
+        7 => VillagerProfession::Fletcher,
+        8 => VillagerProfession::Leatherworker,
+        9 => VillagerProfession::Librarian,
+        10 => VillagerProfession::Mason,
+        11 => VillagerProfession::Nitwit,
+        12 => VillagerProfession::Shepherd,
+        13 => VillagerProfession::Toolsmith,
+        _ => VillagerProfession::Weaponsmith,
     }
 }

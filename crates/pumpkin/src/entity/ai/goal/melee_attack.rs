@@ -62,6 +62,9 @@ impl Goal for MeleeAttackGoal {
         if !target.get_entity().is_alive() {
             return false;
         }
+        if mob.is_sitting() || !mob.can_attack(target.as_ref()) {
+            return false;
+        }
         // TODO: add path when is implemented Navigation
         true //TODO: modify that because if a path to the target not exists then call mob.is_in_attack_range(target)
     }
@@ -75,6 +78,21 @@ impl Goal for MeleeAttackGoal {
         if !target.get_entity().is_alive() {
             return false;
         }
+        if mob.is_sitting() || !mob.can_attack(target.as_ref()) {
+            return false;
+        }
+
+        let is_valid_target = !target
+            .get_player()
+            .is_some_and(|p| p.is_spectator() || p.is_creative());
+
+        if !is_valid_target {
+            return false;
+        }
+
+        if mob.get_mob_entity().is_in_attack_range(target.as_ref()) {
+            return true;
+        }
 
         if !self.pause_when_mob_idle {
             let is_idle = mob
@@ -85,15 +103,11 @@ impl Goal for MeleeAttackGoal {
             return !is_idle;
         }
 
-        let is_valid_target = !target
-            .get_player()
-            .is_some_and(|p| p.is_spectator() || p.is_creative());
-
         let in_range = mob
             .get_mob_entity()
             .is_in_position_target_range_pos(&target.get_entity().block_pos.load());
 
-        in_range && is_valid_target
+        in_range
     }
 
     fn start(&mut self, mob: &dyn Mob) {

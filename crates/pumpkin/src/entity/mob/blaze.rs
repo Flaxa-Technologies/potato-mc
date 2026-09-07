@@ -89,6 +89,12 @@ impl Mob for BlazeEntity {
         &self.entity
     }
 
+    fn mob_init_data_tracker(&self) {
+        let entity = self.get_entity();
+        let flags = i8::from(self.is_charged());
+        entity.set_synced_data(pumpkin_data::tracked_data::blaze::DATA_FLAGS_ID, flags);
+    }
+
     fn mob_tick(&self, caller: &dyn EntityBase) {
         let base_entity = &self.entity.living_entity.entity;
         if !base_entity.is_alive() {

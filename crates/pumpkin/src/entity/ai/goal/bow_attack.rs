@@ -4,6 +4,7 @@ use pumpkin_data::item::Item;
 use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_util::Hand;
+use rand::RngExt;
 use std::sync::Arc;
 
 use crate::entity::ai::goal::{Controls, Goal};
@@ -23,6 +24,10 @@ pub struct BowAttackGoal {
     cooldown: i32,
     draw_ticks: i32,
     drawing: bool,
+    see_time: i32,
+    strafing_clockwise: bool,
+    strafing_backwards: bool,
+    strafing_time: i32,
 }
 
 impl BowAttackGoal {
@@ -41,6 +46,10 @@ impl BowAttackGoal {
             cooldown: -1,
             draw_ticks: 0,
             drawing: false,
+            see_time: 0,
+            strafing_clockwise: false,
+            strafing_backwards: false,
+            strafing_time: -1,
         }
     }
 
@@ -74,7 +83,43 @@ impl BowAttackGoal {
         let world_full = entity.world.load_full();
 
         let arrow_entity = Entity::new(world.clone(), entity.pos.load(), &EntityType::ARROW);
-        let projectile = ItemStack::new(1, &Item::ARROW);
+        let projectile = if entity.entity_type == &EntityType::BOGGED {
+            use pumpkin_data::data_component::DataComponent;
+            use pumpkin_data::data_component_impl::{DataComponentImpl, PotionContentsImpl};
+            let mut stack = ItemStack::new(1, &Item::TIPPED_ARROW);
+            stack.patch.push((
+                DataComponent::PotionContents,
+                Some(
+                    PotionContentsImpl {
+                        potion_id: Some(i32::from(pumpkin_data::potion::Potion::POISON.id)),
+                        custom_color: None,
+                        custom_effects: Vec::new(),
+                        custom_name: None,
+                    }
+                    .to_dyn(),
+                ),
+            ));
+            stack
+        } else if entity.entity_type == &EntityType::STRAY {
+            use pumpkin_data::data_component::DataComponent;
+            use pumpkin_data::data_component_impl::{DataComponentImpl, PotionContentsImpl};
+            let mut stack = ItemStack::new(1, &Item::TIPPED_ARROW);
+            stack.patch.push((
+                DataComponent::PotionContents,
+                Some(
+                    PotionContentsImpl {
+                        potion_id: Some(i32::from(pumpkin_data::potion::Potion::SLOWNESS.id)),
+                        custom_color: None,
+                        custom_effects: Vec::new(),
+                        custom_name: None,
+                    }
+                    .to_dyn(),
+                ),
+            ));
+            stack
+        } else {
+            ItemStack::new(1, &Item::ARROW)
+        };
         let bow_item = Self::main_hand_item(mob);
         let arrow = ArrowEntity::new_shot_with_weapon(
             arrow_entity,
@@ -144,6 +189,9 @@ impl BowAttackGoal {
 
 impl Goal for BowAttackGoal {
     fn can_start(&mut self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         let target = mob.get_mob_entity().get_target().clone();
         let Some(target) = target else {
             return false;
@@ -151,26 +199,38 @@ impl Goal for BowAttackGoal {
         if !target.get_entity().is_alive() {
             return false;
         }
+        if !mob.can_attack(target.as_ref()) {
+            return false;
+        }
         Self::is_holding_bow(mob)
     }
 
     fn should_continue(&self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         let target = mob.get_mob_entity().get_target().clone();
         let Some(target) = target else {
             return false;
         };
-        target.get_entity().is_alive() && Self::is_holding_bow(mob)
+        target.get_entity().is_alive()
+            && mob.can_attack(target.as_ref())
+            && Self::is_holding_bow(mob)
     }
 
     fn start(&mut self, _mob: &dyn Mob) {
         self.cooldown = -1;
         self.draw_ticks = 0;
         self.drawing = false;
+        self.see_time = 0;
+        self.strafing_time = -1;
     }
 
     fn stop(&mut self, mob: &dyn Mob) {
         self.stop_drawing(mob);
         self.cooldown = -1;
+        self.see_time = 0;
+        self.strafing_time = -1;
         mob.get_mob_entity()
             .navigator
             .lock()
@@ -185,51 +245,115 @@ impl Goal for BowAttackGoal {
         };
 
         let mob_pos = mob.get_entity().pos.load();
-        let target_pos = target.get_entity().pos.load();
+        let target_entity = target.get_entity();
+        let target_pos = target_entity.pos.load();
         let distance_sq = mob_pos.squared_distance_to_vec(&target_pos);
 
-        mob.get_mob_entity()
-            .look_control
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .look_at_entity_with_range(&target, 30.0, 30.0);
+        let world = mob.get_entity().world.load();
+        let has_line_of_sight = world
+            .raycast(
+                mob.get_entity().get_eye_pos(),
+                target_entity.get_eye_pos(),
+                |block_pos, w| w.get_block_state(block_pos).is_solid(),
+            )
+            .is_none();
 
-        // Close the gap while out of shooting range, otherwise hold position.
-        {
-            let mut navigator = mob
-                .get_mob_entity()
+        let had_line_of_sight = self.see_time > 0;
+        if has_line_of_sight != had_line_of_sight {
+            self.see_time = 0;
+        }
+        if has_line_of_sight {
+            self.see_time += 1;
+        } else {
+            self.see_time -= 1;
+        }
+
+        // Vanilla 26.2 strafe and kiting:
+        if distance_sq <= self.squared_range && self.see_time >= 20 {
+            mob.get_mob_entity()
                 .navigator
                 .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner);
-            if distance_sq > self.squared_range {
-                navigator.set_progress(NavigatorGoal {
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .stop();
+            self.strafing_time += 1;
+        } else {
+            mob.get_mob_entity()
+                .navigator
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .set_progress(NavigatorGoal {
                     current_progress: mob_pos,
                     destination: target_pos,
                     speed: self.speed,
                 });
-            } else {
-                navigator.stop();
+            self.strafing_time = -1;
+        }
+
+        if self.strafing_time >= 20 {
+            let mut rng = rand::rng();
+            if rng.random::<f32>() < 0.3 {
+                self.strafing_clockwise = !self.strafing_clockwise;
             }
+            if rng.random::<f32>() < 0.3 {
+                self.strafing_backwards = !self.strafing_backwards;
+            }
+            self.strafing_time = 0;
+        }
+
+        if self.strafing_time > -1 {
+            if distance_sq > self.squared_range * 0.75 {
+                self.strafing_backwards = false;
+            } else if distance_sq < self.squared_range * 0.25 {
+                // Kite backwards away from the target when close
+                self.strafing_backwards = true;
+            }
+
+            let forward_dir = if self.strafing_backwards { -0.5 } else { 0.5 };
+            let right_dir = if self.strafing_clockwise { 0.5 } else { -0.5 };
+            mob.get_mob_entity()
+                .move_control
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .strafe(forward_dir, right_dir);
+
+            mob.get_mob_entity()
+                .look_control
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .look_at_entity_with_range(&target, 30.0, 30.0);
+        } else {
+            mob.get_mob_entity()
+                .look_control
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .look_at_entity_with_range(&target, 30.0, 30.0);
         }
 
         if self.drawing {
-            self.draw_ticks += 1;
-            if self.draw_ticks >= Self::DRAW_TIME {
+            if !has_line_of_sight && self.see_time < -60 {
                 self.stop_drawing(mob);
-                Self::shoot(mob, &target);
-                self.cooldown = self.attack_interval;
+            } else if has_line_of_sight {
+                self.draw_ticks += 1;
+                if self.draw_ticks >= Self::DRAW_TIME {
+                    self.stop_drawing(mob);
+                    Self::shoot(mob, &target);
+                    let difficulty = world.level_info.load().difficulty;
+                    self.cooldown = match difficulty {
+                        pumpkin_util::Difficulty::Hard => 20,
+                        _ => self.attack_interval,
+                    };
+                }
             }
-            return;
-        }
-
-        self.cooldown -= 1;
-        if self.cooldown <= 0 && distance_sq <= self.squared_range {
-            let stack = Self::main_hand_item(mob);
-            mob.get_mob_entity()
-                .living_entity
-                .set_active_hand(Hand::Right, stack, i32::MAX);
-            self.drawing = true;
-            self.draw_ticks = 0;
+        } else {
+            self.cooldown -= 1;
+            if self.cooldown <= 0 && self.see_time >= -60 && distance_sq <= self.squared_range {
+                let stack = Self::main_hand_item(mob);
+                mob.get_mob_entity()
+                    .living_entity
+                    .set_active_hand(Hand::Right, stack, i32::MAX);
+                self.drawing = true;
+                self.draw_ticks = 0;
+            }
         }
     }
 

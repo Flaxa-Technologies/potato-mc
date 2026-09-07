@@ -19,7 +19,7 @@ use crate::entity::{
         active_target::ActiveTargetGoal, breed::BreedGoal, escape_danger::EscapeDangerGoal,
         follow_parent::FollowParentGoal, look_around::RandomLookAroundGoal,
         look_at_entity::LookAtEntityGoal, melee_attack::MeleeAttackGoal, revenge::RevengeGoal,
-        swim::SwimGoal, tempt::TemptGoal, try_find_water::TryFindWaterGoal,
+        tempt::TemptGoal, try_find_water::TryFindWaterGoal,
         wander_around::WanderAroundGoal,
     },
     mob::{Mob, MobEntity},
@@ -71,6 +71,19 @@ impl AxolotlVariant {
             }
         }
     }
+
+    #[must_use]
+    pub fn from_name(name: &str) -> Option<Self> {
+        let clean = name.strip_prefix("minecraft:").unwrap_or(name);
+        match clean {
+            "lucy" => Some(Self::Lucy),
+            "wild" => Some(Self::Wild),
+            "gold" => Some(Self::Gold),
+            "cyan" => Some(Self::Cyan),
+            "blue" => Some(Self::Blue),
+            _ => None,
+        }
+    }
 }
 
 pub struct AxolotlEntity {
@@ -108,7 +121,6 @@ impl AxolotlEntity {
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
 
             goal_selector.add_goal(0, Box::new(TryFindWaterGoal));
-            goal_selector.add_goal(0, Box::new(SwimGoal::default()));
             goal_selector.add_goal(1, EscapeDangerGoal::new(1.5));
             goal_selector.add_goal(2, BreedGoal::new(1.0));
             goal_selector.add_goal(3, Box::new(TemptGoal::new(1.25, TEMPT_ITEMS)));
@@ -318,5 +330,11 @@ impl Mob for AxolotlEntity {
         }
 
         self.animal_interact(player, item_stack, Sound::EntityAxolotlIdleAir)
+    }
+
+    fn mob_set_variant_name(&self, name: &str) {
+        if let Some(variant) = AxolotlVariant::from_name(name) {
+            self.set_variant(variant);
+        }
     }
 }

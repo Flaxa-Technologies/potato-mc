@@ -21,9 +21,9 @@ use crate::entity::{
             ObtainRaidLeaderBannerGoal, PathfindToRaidGoal, Raider, RaiderCelebrationGoal,
             RaiderData, RaiderMoveThroughVillageGoal,
         },
+        vex::VexEntity,
     },
     projectile::evoker_fangs::EvokerFangsEntity,
-    r#type::from_type,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -483,7 +483,20 @@ impl Goal for EvokerSummonSpellGoal {
                     evoker_pos.z + offset_z,
                 );
 
-                let vex = from_type(&EntityType::VEX, spawn_pos, &world, Uuid::new_v4());
+                let vex = VexEntity::new(Entity::from_uuid(
+                    Uuid::new_v4(),
+                    world.clone(),
+                    spawn_pos,
+                    &EntityType::VEX,
+                ));
+                let life_ticks = (30 + rand::random_range(0..90)) * 20;
+                vex.set_limited_life(life_ticks);
+                vex.set_bound_origin(Some(pumpkin_util::math::position::BlockPos::new(
+                    spawn_pos.x.floor() as i32,
+                    spawn_pos.y.floor() as i32,
+                    spawn_pos.z.floor() as i32,
+                )));
+                vex.set_owner_uuid(Some(evoker_ent.entity_uuid));
                 world.spawn_entity(vex);
             }
         }

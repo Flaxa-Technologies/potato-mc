@@ -63,6 +63,9 @@ impl FollowParentGoal {
 
 impl Goal for FollowParentGoal {
     fn can_start(&mut self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         let age = mob.get_mob_entity().living_entity.entity.age.load(Relaxed);
         if age >= 0 {
             return false;
@@ -72,6 +75,9 @@ impl Goal for FollowParentGoal {
     }
 
     fn should_continue(&self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         let age = mob.get_mob_entity().living_entity.entity.age.load(Relaxed);
         if age >= 0 {
             return false;

@@ -99,10 +99,19 @@ impl SlimeEntity {
         self.set_size(size, true);
     }
 
+    pub fn is_magma_cube(&self) -> bool {
+        self.entity.living_entity.entity.entity_type == &EntityType::MAGMA_CUBE
+    }
+
     pub fn set_size(&self, size: i32, update_health: bool) {
         let actual_size = size.clamp(1, 127);
         let entity = &self.entity.living_entity.entity;
         entity.data.store(actual_size, Ordering::Relaxed);
+
+        let is_magma = self.is_magma_cube();
+        if is_magma {
+            entity.fire_immune.store(true, Ordering::Relaxed);
+        }
 
         // Update attributes
         {
@@ -117,12 +126,26 @@ impl SlimeEntity {
                 health.dirty.store(true, Ordering::Relaxed);
             }
             if let Some(speed) = attributes.get_mut(&Attributes::MOVEMENT_SPEED.id) {
-                speed.base_value = (0.2 + 0.1 * actual_size as f32) as f64;
+                speed.base_value = if is_magma {
+                    0.2
+                } else {
+                    (0.2 + 0.1 * actual_size as f32) as f64
+                };
                 speed.dirty.store(true, Ordering::Relaxed);
             }
             if let Some(damage) = attributes.get_mut(&Attributes::ATTACK_DAMAGE.id) {
-                damage.base_value = actual_size as f64;
+                damage.base_value = if is_magma {
+                    (actual_size + 2) as f64
+                } else {
+                    actual_size as f64
+                };
                 damage.dirty.store(true, Ordering::Relaxed);
+            }
+            if is_magma {
+                if let Some(armor) = attributes.get_mut(&Attributes::ARMOR.id) {
+                    armor.base_value = (actual_size * 3) as f64;
+                    armor.dirty.store(true, Ordering::Relaxed);
+                }
             }
         }
 
@@ -164,27 +187,6 @@ impl SlimeEntity {
             return false;
         }
 
-        // TODO: check spawn reason. if it's spawner, we should return true if block below is valid
-        // For now, we assume natural spawning as that's what we are implementing.
-
-        // Swamp/Surface Spawning
-        // TODO: fix
-        // let biome = world.get_biome(pos);
-        // if biome.has_tag(&pumpkin_data::tag::WorldgenBiome::MINECRAFT_ALLOWS_SURFACE_SLIME_SPAWNS)
-        //     && pos.0.y > 50
-        //     && pos.0.y < 70
-        // {
-        //     let time = world.level_time.lock().await.time_of_day;
-        //     let moon_phase = (time / 24000) % 8;
-        //     let surface_slime_spawn_chance = Self::get_spawn_chance(moon_phase);
-        //     let mut rng = rand::rng();
-        //     if rng.random::<f32>() < surface_slime_spawn_chance
-        //         && world.get_max_local_raw_brightness(pos) <= rng.random_range(0..8)
-        //     {
-        //         return true;
-        //     }
-        // }
-
         // Slime Chunk Spawning
         let chunk_pos = pos.chunk_position();
         let world_seed = world.level.seed.0;
@@ -204,16 +206,6 @@ impl SlimeEntity {
         false
     }
 
-    // const fn get_spawn_chance(moon_phase: i64) -> f32 {
-    //     match moon_phase {
-    //         0 => 1.0,
-    //         1 | 7 => 0.75,
-    //         2 | 6 => 0.5,
-    //         3 | 5 => 0.25,
-    //         _ => 0.0,
-    //     }
-    // }
-
     pub(crate) const fn hurt_sound_for_size(size: i32) -> Sound {
         if size == 1 {
             Sound::EntitySlimeHurtSmall
@@ -222,8 +214,13 @@ impl SlimeEntity {
         }
     }
 
-    fn get_jump_delay() -> i32 {
-        rand::random_range(10..30)
+    fn get_jump_delay(&self) -> i32 {
+        let base = rand::random_range(10..30);
+        if self.is_magma_cube() {
+            base * 4
+        } else {
+            base
+        }
     }
 
     fn rot_lerp(start: f32, end: f32, max_step: f32) -> f32 {
@@ -239,7 +236,9 @@ impl SlimeEntity {
     }
 
     fn get_jump_sound(&self) -> Sound {
-        if self.is_tiny() {
+        if self.is_magma_cube() {
+            Sound::EntityMagmaCubeJump
+        } else if self.is_tiny() {
             Sound::EntitySlimeJumpSmall
         } else {
             Sound::EntitySlimeJump
@@ -247,7 +246,13 @@ impl SlimeEntity {
     }
 
     fn get_squish_sound(&self) -> Sound {
-        if self.is_tiny() {
+        if self.is_magma_cube() {
+            if self.is_tiny() {
+                Sound::EntityMagmaCubeSquishSmall
+            } else {
+                Sound::EntityMagmaCubeSquish
+            }
+        } else if self.is_tiny() {
             Sound::EntitySlimeSquishSmall
         } else {
             Sound::EntitySlimeSquish
@@ -296,8 +301,6 @@ impl Mob for SlimeEntity {
         let was_on_ground = self.was_on_ground.load(Ordering::Relaxed);
 
         if on_ground && !was_on_ground {
-            // TODO: particles
-
             let world = self.entity.living_entity.entity.world.load();
             world.play_sound_fine(
                 self.get_squish_sound(),
@@ -313,21 +316,23 @@ impl Mob for SlimeEntity {
         }
 
         self.was_on_ground.store(on_ground, Ordering::Relaxed);
-        self.target_squish.store(self.target_squish.load() * 0.6);
+        let squish_factor = if self.is_magma_cube() { 0.9 } else { 0.6 };
+        self.target_squish.store(self.target_squish.load() * squish_factor);
 
         self.is_aggressive.store(false, Ordering::Relaxed);
         self.speed_modifier.store(0.0);
     }
 
     fn mob_player_collision(&self, player: &Arc<crate::entity::player::Player>) {
-        if !self.is_tiny() {
+        if self.is_magma_cube() || !self.is_tiny() {
             // dealDamage
             self.entity.try_attack(self, &**player);
         }
     }
 
     fn post_tick(&self) {
-        if self.entity.living_entity.dead.load(Ordering::Relaxed)
+        if (self.entity.living_entity.death_time.load(Ordering::Relaxed) >= 20
+            || self.entity.living_entity.entity.removed.load(Ordering::Relaxed))
             && self.get_size() > 1
             && self
                 .has_split
@@ -347,7 +352,9 @@ impl Mob for SlimeEntity {
                 .entity_dimension
                 .load()
                 .width;
-            let xz_offset = width / 4.0;
+            let xz_offset = width / 2.0;
+
+            let is_magma = self.is_magma_cube();
 
             for i in 0..count {
                 let xd = ((i % 2) as f32 - 0.5) * xz_offset;
@@ -363,15 +370,29 @@ impl Mob for SlimeEntity {
                     new_pos,
                     self.entity.living_entity.entity.entity_type,
                 );
-                let slime_like = Self::new(new_entity);
-                slime_like.set_size(half_size, true);
-                slime_like
-                    .entity
-                    .living_entity
-                    .entity
-                    .yaw
-                    .store(rand::random_range(0.0..360.0));
-                world.spawn_entity_non_save(slime_like as Arc<dyn EntityBase>);
+                let spawned: Arc<dyn EntityBase> = if is_magma {
+                    let magma = crate::entity::mob::magma_cube::MagmaCubeEntity::new(new_entity);
+                    magma.slime.set_size(half_size, true);
+                    magma
+                        .slime
+                        .entity
+                        .living_entity
+                        .entity
+                        .yaw
+                        .store(rand::random_range(0.0..360.0));
+                    magma
+                } else {
+                    let slime_like = Self::new(new_entity);
+                    slime_like.set_size(half_size, true);
+                    slime_like
+                        .entity
+                        .living_entity
+                        .entity
+                        .yaw
+                        .store(rand::random_range(0.0..360.0));
+                    slime_like
+                };
+                world.spawn_entity_non_save(spawned);
             }
         }
     }
@@ -415,7 +436,7 @@ impl MoveControlTrait for SlimeMoveControl {
                 let current_delay = slime.jump_delay.load(Ordering::Relaxed);
                 if current_delay <= 0 {
                     // Start jump
-                    let mut next_delay = SlimeEntity::get_jump_delay();
+                    let mut next_delay = slime.get_jump_delay();
                     if slime.is_aggressive.load(Ordering::Relaxed) {
                         next_delay /= 3;
                     }
@@ -430,6 +451,11 @@ impl MoveControlTrait for SlimeMoveControl {
                             slime.get_sound_volume(),
                             slime.get_sound_pitch(),
                         );
+                    }
+                    if slime.is_magma_cube() {
+                        let boost = slime.get_size() as f64 * 0.1;
+                        let vel = entity.velocity.load();
+                        entity.velocity.store(Vector3::new(vel.x, vel.y + boost, vel.z));
                     }
                     movement_input.z = speed_modifier;
                 } else {

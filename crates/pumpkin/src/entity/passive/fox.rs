@@ -10,6 +10,7 @@ use pumpkin_data::sound::Sound;
 use pumpkin_data::tag::{self, Taggable};
 use pumpkin_nbt::compound::NbtCompound;
 use pumpkin_protocol::codec::var_int::VarInt;
+use rand::RngExt;
 
 use crate::entity::{
     Entity, EntityBase,
@@ -63,6 +64,16 @@ impl FoxVariant {
             _ => Self::Red,
         }
     }
+
+    #[must_use]
+    pub fn random_variant() -> Self {
+        let mut rng = rand::rng();
+        if rng.random_range(0..5) == 0 {
+            Self::Snow
+        } else {
+            Self::Red
+        }
+    }
 }
 
 /// Represents a Fox, a passive/neutral mob.
@@ -78,10 +89,11 @@ pub struct FoxEntity {
 impl FoxEntity {
     pub fn new(entity: Entity) -> Arc<Self> {
         let mob_entity = MobEntity::new(entity);
+        let variant = FoxVariant::random_variant();
         let fox = Self {
             mob_entity,
             ageable_data: AgeableData::default(),
-            variant: AtomicI32::new(FoxVariant::Red.id()),
+            variant: AtomicI32::new(variant.id()),
             flags: AtomicU8::new(0),
         };
         let mob_arc = Arc::new(fox);
@@ -236,6 +248,10 @@ impl Mob for FoxEntity {
 
     fn as_animal(&self) -> Option<&dyn Animal> {
         Some(self)
+    }
+
+    fn is_sitting(&self) -> bool {
+        self.is_sitting() || self.is_sleeping()
     }
 
     fn mob_write_nbt(&self, nbt: &mut NbtCompound) {

@@ -39,12 +39,32 @@ impl Goal for SitWhenOrderedToGoal {
     }
 
     fn start(&mut self, mob: &dyn Mob) {
-        let mut navigator = mob
-            .get_mob_entity()
+        let mob_entity = mob.get_mob_entity();
+        let mut navigator = mob_entity
             .navigator
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
         navigator.stop();
+        mob_entity
+            .living_entity
+            .movement_input
+            .store(pumpkin_util::math::vector3::Vector3::new(0.0, 0.0, 0.0));
+        mob_entity
+            .living_entity
+            .jumping
+            .store(false, Ordering::Relaxed);
+    }
+
+    fn tick(&mut self, mob: &dyn Mob) {
+        let mob_entity = mob.get_mob_entity();
+        mob_entity
+            .living_entity
+            .movement_input
+            .store(pumpkin_util::math::vector3::Vector3::new(0.0, 0.0, 0.0));
+        mob_entity
+            .living_entity
+            .jumping
+            .store(false, Ordering::Relaxed);
     }
 
     fn controls(&self) -> Controls {

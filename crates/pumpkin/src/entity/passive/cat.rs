@@ -19,8 +19,8 @@ use crate::entity::{
         active_target::ActiveTargetGoal, avoid_entity::AvoidEntityGoal, breed::BreedGoal,
         escape_danger::EscapeDangerGoal, follow_owner::FollowOwnerGoal,
         follow_parent::FollowParentGoal, look_around::RandomLookAroundGoal,
-        look_at_entity::LookAtEntityGoal, swim::SwimGoal, tempt::TemptGoal,
-        wander_around::WanderAroundGoal,
+        look_at_entity::LookAtEntityGoal, sit_when_ordered_to::SitWhenOrderedToGoal,
+        swim::SwimGoal, tempt::TemptGoal, wander_around::WanderAroundGoal,
     },
     mob::{Mob, MobEntity},
     passive::{
@@ -82,11 +82,22 @@ pub struct CatEntity {
 }
 
 impl CatEntity {
+    #[must_use]
+    pub fn random_variant() -> u8 {
+        let mut rng = rand::rng();
+        // 11 breeds from vanilla:
+        // Tabby (9), Black (1), Red (7), Siamese (8), British Shorthair (2),
+        // Calico (3), Persian (5), Ragdoll (6), White (10), Jellie (4), All Black (0)
+        let variants = [0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        variants[rng.random_range(0..variants.len())]
+    }
+
     pub fn new(entity: Entity) -> Arc<Self> {
         let mob_entity = MobEntity::new(entity);
+        let variant = Self::random_variant();
         let cat = Self {
             mob_entity,
-            variant: AtomicU8::new(1),       // Default to black
+            variant: AtomicU8::new(variant),
             sound_variant: AtomicU8::new(0), // Default to classic
             collar_color: AtomicU8::new(14), // Default to red
             tamable_data: TamableData::default(),
@@ -110,6 +121,8 @@ impl CatEntity {
             goal_selector.add_goal(1, Box::new(SwimGoal::default()));
             // Goal 1: TamableAnimalPanicGoal (EscapeDangerGoal)
             goal_selector.add_goal(1, EscapeDangerGoal::new(1.5));
+            // Goal 2: SitWhenOrderedToGoal
+            goal_selector.add_goal(2, Box::new(SitWhenOrderedToGoal::new()));
             // Goal 4: CatTemptGoal
             goal_selector.add_goal(4, Box::new(TemptGoal::new(0.6, TEMPT_ITEMS)));
             // Goal 4: CatAvoidEntityGoal (when untamed)
@@ -334,6 +347,10 @@ impl Mob for CatEntity {
             _ => 9,
         };
         self.variant.store(variant, Ordering::Relaxed);
+        self.get_entity().set_synced_data(
+            pumpkin_data::tracked_data::cat::CAT_VARIANT,
+            VarInt(variant as i32),
+        );
     }
 
     fn mob_init_data_tracker(&self) {

@@ -137,20 +137,26 @@ impl Goal for BlazeShootFireballGoal {
                     let world = blaze.entity.living_entity.entity.world.load_full();
                     let uuid = uuid::Uuid::new_v4();
 
-                    let mut pos = blaze.entity.living_entity.entity.pos.load();
-                    pos.y += blaze.entity.living_entity.entity.get_eye_height() - 0.1;
+                    let blaze_ent = &blaze.entity.living_entity.entity;
+                    let blaze_eye = blaze_pos.add_raw(0.0, f64::from(blaze_ent.get_eye_height()) * 0.5 + 0.5, 0.0);
+                    let target_ent = target.get_entity();
+                    let target_eye = target_pos.add_raw(0.0, f64::from(target_ent.get_eye_height()) * 0.5, 0.0);
+
+                    let dir = (target_eye - blaze_eye).normalize();
+                    let spawn_pos = blaze_eye + dir * 0.75;
 
                     let base_entity = Entity::from_uuid(
                         uuid,
                         world.clone(),
-                        pos,
+                        spawn_pos,
                         &pumpkin_data::entity::EntityType::SMALL_FIREBALL,
                     );
 
                     let fireball = SmallFireballEntity::new_shot(
                         base_entity,
-                        &blaze.entity.living_entity.entity,
+                        blaze_ent,
                     );
+                    fireball.thrown.set_velocity(dir.x, dir.y, dir.z, 0.75, 1.0);
                     world.spawn_entity(Arc::new(fireball));
                 }
             }

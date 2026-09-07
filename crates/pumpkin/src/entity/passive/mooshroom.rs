@@ -168,6 +168,39 @@ impl Mob for MooshroomEntity {
         &self.mob_entity
     }
 
+    fn mob_set_variant_name(&self, name: &str) {
+        self.set_variant(MooshroomVariant::from_name(
+            name.strip_prefix("minecraft:").unwrap_or(name),
+        ));
+    }
+
+    fn mob_on_lightning_strike(
+        &self,
+        caller: &dyn EntityBase,
+        lightning: &crate::entity::lightning::LightningBoltEntity,
+    ) {
+        let lightning_uuid = lightning.get_entity().entity_uuid;
+        if self.last_lightning_bolt_uuid.load() != Some(lightning_uuid) {
+            let next_variant = if self.get_variant() == MooshroomVariant::Red {
+                MooshroomVariant::Brown
+            } else {
+                MooshroomVariant::Red
+            };
+            self.set_variant(next_variant);
+            self.last_lightning_bolt_uuid.store(Some(lightning_uuid));
+            let entity = self.get_entity();
+            let world = entity.world.load();
+            world.play_sound(
+                Sound::EntityMooshroomConvert,
+                SoundCategory::Neutral,
+                &entity.pos.load(),
+            );
+        }
+        self.mob_entity
+            .living_entity
+            .on_lightning_strike(caller, lightning);
+    }
+
     fn mob_tick(&self, _caller: &dyn EntityBase) {
         self.ageable_ai_step();
     }

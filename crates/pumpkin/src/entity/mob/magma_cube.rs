@@ -2,6 +2,7 @@ use std::sync::Arc;
 use std::sync::atomic::Ordering;
 
 use pumpkin_data::attributes::Attributes;
+use pumpkin_nbt::compound::NbtCompound;
 
 use crate::entity::{
     Entity, EntityBase,
@@ -14,6 +15,7 @@ pub struct MagmaCubeEntity {
 
 impl MagmaCubeEntity {
     pub fn new(entity: Entity) -> Arc<Self> {
+        entity.fire_immune.store(true, Ordering::Relaxed);
         let slime = SlimeEntity::new(entity);
         let size = slime.get_size();
         {
@@ -57,5 +59,13 @@ impl Mob for MagmaCubeEntity {
         self.slime
             .get_mob_entity()
             .try_attack(&*self.slime, &**player);
+    }
+
+    fn mob_write_nbt(&self, nbt: &mut NbtCompound) {
+        self.slime.mob_write_nbt(nbt);
+    }
+
+    fn mob_read_nbt(&self, nbt: &NbtCompound) {
+        self.slime.mob_read_nbt(nbt);
     }
 }

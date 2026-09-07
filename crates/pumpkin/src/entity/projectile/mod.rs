@@ -81,8 +81,17 @@ pub struct ThrownItemEntity {
 
 impl ThrownItemEntity {
     pub fn new(entity: Entity, owner: &Entity, gravity: f64) -> Self {
+        Self::new_with_eye_offset(entity, owner, gravity, -0.1)
+    }
+
+    pub fn new_with_eye_offset(
+        entity: Entity,
+        owner: &Entity,
+        gravity: f64,
+        eye_offset: f64,
+    ) -> Self {
         let mut owner_pos = owner.pos.load();
-        owner_pos.y += owner.get_eye_height() - 0.1;
+        owner_pos.y += owner.get_eye_height() + eye_offset;
         entity.pos.store(owner_pos);
         Self {
             entity,
@@ -188,7 +197,7 @@ impl ThrownItemEntity {
         // Block collisions
         let (block_cols, block_positions) = world.get_block_collisions(search_box, caller);
         for (idx, bb) in block_cols.iter().enumerate() {
-            if let Some(t) = calculate_ray_intersection(&start_pos, &delta, bb)
+            if let Some((t, face)) = clip_aabb(&start_pos, &delta, bb)
                 && t < closest_t
             {
                 closest_t = t;
@@ -200,7 +209,7 @@ impl ThrownItemEntity {
                         let hit_pos = start_pos.add(&delta.multiply(t, t, t));
                         hit = Some(ProjectileHit::Block {
                             pos: *pos,
-                            face: get_hit_face(hit_pos, *pos),
+                            face,
                             hit_pos,
                             normal: delta.normalize().multiply(-1.0, -1.0, -1.0),
                         });
@@ -261,8 +270,8 @@ impl ThrownItemEntity {
             return true;
         }
 
-        // Skip owner for initial frames
-        if Some(other_ent.entity_id) == self.owner_id && self_ent.age.load(Ordering::Relaxed) < 5 {
+        // Skip collision with owner
+        if Some(other_ent.entity_id) == self.owner_id {
             return true;
         }
 
@@ -322,24 +331,159 @@ fn calculate_ray_intersection(
     (0.0..=1.0).contains(&t_min).then_some(t_min)
 }
 
-/// Get the face of the block that was hit
-fn get_hit_face(hit_pos: Vector3<f64>, block_pos: BlockPos) -> BlockDirection {
-    let local = hit_pos.sub(&block_pos.0.to_f64());
-    let eps = 1.0e-4;
-
-    if local.x <= eps {
-        BlockDirection::West
-    } else if local.x >= 1.0 - eps {
-        BlockDirection::East
-    } else if local.y <= eps {
-        BlockDirection::Down
-    } else if local.y >= 1.0 - eps {
-        BlockDirection::Up
-    } else if local.z <= eps {
-        BlockDirection::North
-    } else {
-        BlockDirection::South
+fn clip_point(
+    scale_reference: &mut f64,
+    direction: &mut Option<BlockDirection>,
+    da: f64,
+    db: f64,
+    dc: f64,
+    point: f64,
+    min_b: f64,
+    max_b: f64,
+    min_c: f64,
+    max_c: f64,
+    new_direction: BlockDirection,
+    from_a: f64,
+    from_b: f64,
+    from_c: f64,
+) {
+    let s = (point - from_a) / da;
+    let pb = from_b + s * db;
+    let pc = from_c + s * dc;
+    if 0.0 < s
+        && s < *scale_reference
+        && min_b - 1.0e-7 < pb
+        && pb < max_b + 1.0e-7
+        && min_c - 1.0e-7 < pc
+        && pc < max_c + 1.0e-7
+    {
+        *scale_reference = s;
+        *direction = Some(new_direction);
     }
+}
+
+/// Vanilla 26.2 `AABB.clip` implementation to determine ray intersection `t` and collision face.
+pub fn clip_aabb(
+    start: &Vector3<f64>,
+    delta: &Vector3<f64>,
+    bb: &BoundingBox,
+) -> Option<(f64, BlockDirection)> {
+    let mut scale = 1.0f64;
+    let mut direction = None;
+
+    let dx = delta.x;
+    let dy = delta.y;
+    let dz = delta.z;
+
+    if dx > 1.0e-7 {
+        clip_point(
+            &mut scale,
+            &mut direction,
+            dx,
+            dy,
+            dz,
+            bb.min.x,
+            bb.min.y,
+            bb.max.y,
+            bb.min.z,
+            bb.max.z,
+            BlockDirection::West,
+            start.x,
+            start.y,
+            start.z,
+        );
+    } else if dx < -1.0e-7 {
+        clip_point(
+            &mut scale,
+            &mut direction,
+            dx,
+            dy,
+            dz,
+            bb.max.x,
+            bb.min.y,
+            bb.max.y,
+            bb.min.z,
+            bb.max.z,
+            BlockDirection::East,
+            start.x,
+            start.y,
+            start.z,
+        );
+    }
+
+    if dy > 1.0e-7 {
+        clip_point(
+            &mut scale,
+            &mut direction,
+            dy,
+            dz,
+            dx,
+            bb.min.y,
+            bb.min.z,
+            bb.max.z,
+            bb.min.x,
+            bb.max.x,
+            BlockDirection::Down,
+            start.y,
+            start.z,
+            start.x,
+        );
+    } else if dy < -1.0e-7 {
+        clip_point(
+            &mut scale,
+            &mut direction,
+            dy,
+            dz,
+            dx,
+            bb.max.y,
+            bb.min.z,
+            bb.max.z,
+            bb.min.x,
+            bb.max.x,
+            BlockDirection::Up,
+            start.y,
+            start.z,
+            start.x,
+        );
+    }
+
+    if dz > 1.0e-7 {
+        clip_point(
+            &mut scale,
+            &mut direction,
+            dz,
+            dx,
+            dy,
+            bb.min.z,
+            bb.min.x,
+            bb.max.x,
+            bb.min.y,
+            bb.max.y,
+            BlockDirection::North,
+            start.z,
+            start.x,
+            start.y,
+        );
+    } else if dz < -1.0e-7 {
+        clip_point(
+            &mut scale,
+            &mut direction,
+            dz,
+            dx,
+            dy,
+            bb.max.z,
+            bb.min.x,
+            bb.max.x,
+            bb.min.y,
+            bb.max.y,
+            BlockDirection::South,
+            start.z,
+            start.x,
+            start.y,
+        );
+    }
+
+    direction.map(|dir| (scale, dir))
 }
 
 pub enum ProjectileHit {

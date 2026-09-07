@@ -54,6 +54,10 @@ impl Goal for RevengeGoal {
             return false;
         };
 
+        if mob.is_sitting() || !mob.can_attack(attacker.as_ref()) {
+            return false;
+        }
+
         if !self
             .target_predicate
             .test(&world, Some(&mob_entity.living_entity), attacker_living)
@@ -66,6 +70,14 @@ impl Goal for RevengeGoal {
     }
 
     fn should_continue(&self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
+        if let Some(target) = mob.get_mob_entity().get_target() {
+            if !mob.can_attack(target.as_ref()) {
+                return false;
+            }
+        }
         self.track_target_goal.should_continue(mob)
     }
 

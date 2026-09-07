@@ -86,6 +86,8 @@ impl AvoidEntityGoal {
         };
 
         let threat_to_mob_sq = threat_pos.squared_distance_to_vec(&mob_pos);
+        let mob_in_water = mob.get_entity().is_in_water()
+            || mob.get_entity().touching_water.load(std::sync::atomic::Ordering::Relaxed);
 
         for (dx, dy, dz) in candidates {
             if dx.abs() > HORIZONTAL_RANGE || dz.abs() > HORIZONTAL_RANGE {
@@ -98,22 +100,34 @@ impl AvoidEntityGoal {
                 (mob_pos.z + dz) as i32,
             );
 
-            let block_at = world.get_block_state(&candidate);
-            let block_below = world.get_block_state(&BlockPos::new(
-                candidate.0.x,
-                candidate.0.y - 1,
-                candidate.0.z,
-            ));
+            let is_water = super::try_find_water::TryFindWaterGoal::is_water(&world, &candidate);
+            let flee_vec = if mob_in_water {
+                if !is_water {
+                    continue;
+                }
+                Vector3::new(
+                    candidate.0.x as f64 + 0.5,
+                    candidate.0.y as f64 + 0.5,
+                    candidate.0.z as f64 + 0.5,
+                )
+            } else {
+                let block_at = world.get_block_state(&candidate);
+                let block_below = world.get_block_state(&BlockPos::new(
+                    candidate.0.x,
+                    candidate.0.y - 1,
+                    candidate.0.z,
+                ));
 
-            if block_at.is_solid() || !block_below.is_solid() {
-                continue;
-            }
+                if block_at.is_solid() || !block_below.is_solid() {
+                    continue;
+                }
 
-            let flee_vec = Vector3::new(
-                candidate.0.x as f64 + 0.5,
-                candidate.0.y as f64,
-                candidate.0.z as f64 + 0.5,
-            );
+                Vector3::new(
+                    candidate.0.x as f64 + 0.5,
+                    candidate.0.y as f64,
+                    candidate.0.z as f64 + 0.5,
+                )
+            };
 
             if threat_pos.squared_distance_to_vec(&flee_vec) < threat_to_mob_sq {
                 continue;
@@ -128,6 +142,9 @@ impl AvoidEntityGoal {
 
 impl Goal for AvoidEntityGoal {
     fn can_start(&mut self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         let threat = self.find_threat(mob);
         let Some(target) = threat else {
             return false;
@@ -145,6 +162,9 @@ impl Goal for AvoidEntityGoal {
     }
 
     fn should_continue(&self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         let navigator = mob
             .get_mob_entity()
             .navigator

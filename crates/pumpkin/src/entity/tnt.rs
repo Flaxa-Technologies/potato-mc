@@ -56,18 +56,27 @@ impl EntityBase for TNTEntity {
         // FIX: Prevent fuse underflow (vanilla parity)
         let fuse = self.fuse.load(Relaxed);
 
-        if fuse <= 1 {
+        if fuse == 0 {
             // TNT explodes now
             self.entity.remove();
             let world = self.entity.world.load_full();
             let pos = self.entity.pos.load();
             let power = self.power;
             if world.level_info.load().game_rules.tnt_explodes {
-                world.explode(pos, power, crate::world::ExplosionInteraction::Tnt);
+                // Vanilla parity: TNT explosion position is offset by height * 0.0625 (1/16) on Y
+                let explosion_pos =
+                    pos + Vector3::new(0.0, f64::from(self.entity.height()) * 0.0625, 0.0);
+                world.explode(explosion_pos, power, crate::world::ExplosionInteraction::Tnt);
             }
         } else {
             // Safe decrement
-            self.fuse.store(fuse - 1, Relaxed);
+            let new_fuse = fuse - 1;
+            self.fuse.store(new_fuse, Relaxed);
+            // Sync fuse countdown to clients every tick so the visual matches server timing
+            self.entity.set_synced_data(
+                pumpkin_data::tracked_data::tnt::FUSE_ID,
+                pumpkin_protocol::codec::var_int::VarInt(new_fuse as i32),
+            );
             entity.update_fluid_state(caller);
         }
     }
@@ -84,7 +93,7 @@ impl EntityBase for TNTEntity {
         );
         self.entity.set_synced_data(
             pumpkin_data::tracked_data::tnt::BLOCK_STATE_ID,
-            VarInt(i32::from(Block::TNT.default_state.id.as_u16())),
+            Block::TNT.default_state.id,
         );
     }
 

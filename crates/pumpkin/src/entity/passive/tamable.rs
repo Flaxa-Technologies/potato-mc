@@ -100,6 +100,14 @@ pub trait TamableAnimal: Animal {
     fn tame(&self, player_id: Uuid) {
         self.set_tame(true);
         self.set_owner(Some(player_id));
+        let mob_entity = self.get_mob_entity();
+        mob_entity.set_target(None);
+        if let Ok(mut nav) = mob_entity.navigator.try_lock() {
+            nav.stop();
+        }
+        mob_entity.living_entity.last_attacker_id.store(0, Relaxed);
+        mob_entity.living_entity.last_attacked_time.store(0, Relaxed);
+        self.set_ordered_to_sit(true);
     }
 
     fn spawn_taming_particles(&self, success: bool) {

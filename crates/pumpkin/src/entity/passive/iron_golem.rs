@@ -48,6 +48,40 @@ impl IronGolemEntity {
         };
 
         {
+            let mut attributes = mob_arc
+                .mob_entity
+                .living_entity
+                .attributes
+                .write()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if let Some(health) =
+                attributes.get_mut(&pumpkin_data::attributes::Attributes::MAX_HEALTH.id)
+            {
+                health.base_value = 100.0;
+                health.dirty.store(true, Ordering::Relaxed);
+            }
+            if let Some(damage) =
+                attributes.get_mut(&pumpkin_data::attributes::Attributes::ATTACK_DAMAGE.id)
+            {
+                damage.base_value = 14.0;
+                damage.dirty.store(true, Ordering::Relaxed);
+            }
+            if let Some(knockback_res) =
+                attributes.get_mut(&pumpkin_data::attributes::Attributes::KNOCKBACK_RESISTANCE.id)
+            {
+                knockback_res.base_value = 1.0;
+                knockback_res.dirty.store(true, Ordering::Relaxed);
+            }
+            if let Some(speed) =
+                attributes.get_mut(&pumpkin_data::attributes::Attributes::MOVEMENT_SPEED.id)
+            {
+                speed.base_value = 0.25;
+                speed.dirty.store(true, Ordering::Relaxed);
+            }
+        }
+        mob_arc.mob_entity.living_entity.health.store(100.0);
+
+        {
             let mut goal_selector = mob_arc
                 .mob_entity
                 .goals_selector
@@ -69,13 +103,9 @@ impl IronGolemEntity {
             );
             goal_selector.add_goal(8, Box::new(RandomLookAroundGoal::default()));
 
-            target_selector.add_goal(2, Box::new(RevengeGoal::new(true)));
+            target_selector.add_goal(1, Box::new(RevengeGoal::new(true)));
             target_selector.add_goal(
-                3,
-                ActiveTargetGoal::with_default(&mob_arc.mob_entity, &EntityType::PLAYER, false),
-            );
-            target_selector.add_goal(
-                3,
+                2,
                 ActiveTargetGoal::with_default(&mob_arc.mob_entity, &EntityType::ZOMBIE, true),
             );
         };
@@ -164,5 +194,47 @@ impl Mob for IronGolemEntity {
             }
         }
         false
+    }
+
+    fn on_damage(
+        &self,
+        _damage_type: pumpkin_data::damage::DamageType,
+        source: Option<&dyn EntityBase>,
+    ) {
+        if let Some(attacker) = source {
+            if let Some(player) = attacker.get_player() {
+                if !player.is_creative() && !player.is_spectator() {
+                    let world = self.mob_entity.living_entity.entity.world.load();
+                    if let Some(player_arc) =
+                        world.get_player_by_id(player.living_entity.entity.entity_id)
+                    {
+                        self.mob_entity.set_target(Some(player_arc));
+                    }
+                }
+            } else if let Some(living) = attacker.get_living_entity() {
+                let world = self.mob_entity.living_entity.entity.world.load();
+                if let Some(ent_arc) = world.get_entity_by_id(living.entity.entity_id) {
+                    self.mob_entity.set_target(Some(ent_arc));
+                }
+            }
+        }
+    }
+
+    fn on_attack(&self, target: &dyn EntityBase) {
+        let entity = self.get_entity();
+        let world = entity.world.load();
+        let pos = entity.pos.load();
+        world.play_sound(Sound::EntityIronGolemAttack, SoundCategory::Neutral, &pos);
+        world.send_entity_status(entity, EntityStatus::StartAttacking, None);
+        self.attack_animation_tick.store(10, Ordering::Relaxed);
+
+        let target_entity = target.get_entity();
+        let current_vel = target_entity.velocity.load();
+        target_entity.velocity.store(pumpkin_util::math::vector3::Vector3::new(
+            current_vel.x,
+            current_vel.y + 0.4,
+            current_vel.z,
+        ));
+        target_entity.send_velocity();
     }
 }

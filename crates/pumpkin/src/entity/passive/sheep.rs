@@ -33,11 +33,38 @@ pub struct SheepEntity {
 }
 
 impl SheepEntity {
+    #[must_use]
+    pub fn random_natural_color() -> u8 {
+        let mut rng = rand::rng();
+        let roll = rng.random_range(0..50000);
+        // Natural distribution from vanilla SheepColorSpawnRules & variants.md:
+        // Black (15): 5% -> 2500/50000
+        // Gray (7): 5% -> 2500/50000
+        // Light Gray (8): 5% -> 2500/50000
+        // Brown (12): 3% -> 1500/50000
+        // Pink (6): ~0.164% (1 in 500 of 82%) -> 82/50000
+        // White (0): ~81.836% -> remaining
+        if roll < 2500 {
+            15 // Black
+        } else if roll < 5000 {
+            7 // Gray
+        } else if roll < 7500 {
+            8 // Light Gray
+        } else if roll < 9000 {
+            12 // Brown
+        } else if roll < 9082 {
+            6 // Pink
+        } else {
+            0 // White
+        }
+    }
+
     pub fn new(entity: Entity) -> Arc<Self> {
         let mob_entity = MobEntity::new(entity);
+        let color = Self::random_natural_color();
         let sheep = Self {
             mob_entity,
-            color_and_sheared: AtomicU8::new(0),
+            color_and_sheared: AtomicU8::new(color),
             ageable_data: crate::entity::ageable::AgeableData::default(),
         };
         let mob_arc = Arc::new(sheep);
@@ -149,8 +176,46 @@ impl Mob for SheepEntity {
         &self.mob_entity
     }
 
+    fn mob_init_data_tracker(&self) {
+        let entity = self.get_entity();
+        let is_baby = entity.age.load(Ordering::Relaxed) < 0;
+        if is_baby {
+            entity.set_synced_data(pumpkin_data::tracked_data::sheep::DATA_BABY_ID, true);
+        }
+        entity.set_synced_data(
+            pumpkin_data::tracked_data::sheep::WOOL_ID,
+            self.get_packed_byte() as i8,
+        );
+    }
+
     fn on_eating_grass(&self) {
         self.set_sheared(false);
+        if self.can_age_up() {
+            self.age_up(60, false);
+        }
+    }
+
+    fn get_entity_loot_key(&self) -> Option<String> {
+        // Use color-specific loot table so killed sheep drop the correct wool color
+        let color_name = match self.get_color() {
+            0 => "white",
+            1 => "orange",
+            2 => "magenta",
+            3 => "light_blue",
+            4 => "yellow",
+            5 => "lime",
+            6 => "pink",
+            7 => "gray",
+            8 => "light_gray",
+            9 => "cyan",
+            10 => "purple",
+            11 => "blue",
+            12 => "brown",
+            13 => "green",
+            14 => "red",
+            _ => "black",
+        };
+        Some(format!("minecraft:entities/sheep/{color_name}"))
     }
 
     fn mob_interact(&self, player: &Arc<Player>, item_stack: &mut ItemStack) -> bool {
@@ -190,5 +255,22 @@ impl Mob for SheepEntity {
         }
 
         self.animal_interact(player, item_stack, Sound::EntitySheepAmbient)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SheepEntity;
+
+    #[test]
+    fn sheep_natural_colors_only() {
+        let valid_natural = [0, 15, 7, 8, 12, 6];
+        for _ in 0..100 {
+            let color = SheepEntity::random_natural_color();
+            assert!(
+                valid_natural.contains(&color),
+                "Unexpected unnatural sheep color: {color}"
+            );
+        }
     }
 }

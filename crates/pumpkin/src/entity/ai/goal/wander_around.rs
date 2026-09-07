@@ -39,6 +39,10 @@ impl WanderAroundGoal {
 
 impl Goal for WanderAroundGoal {
     fn can_start(&mut self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
+
         if mob.get_random().random_range(0..self.chance) != 0 {
             return false;
         }
@@ -48,6 +52,10 @@ impl Goal for WanderAroundGoal {
     }
 
     fn should_continue(&self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
+
         let navigator = mob
             .get_mob_entity()
             .navigator

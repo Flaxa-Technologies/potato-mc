@@ -105,6 +105,9 @@ impl BreedGoal {
 
 impl Goal for BreedGoal {
     fn can_start(&mut self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         let mob_entity = mob.get_mob_entity();
         if !mob_entity.is_breeding_ready() || !mob_entity.is_in_love() {
             return false;
@@ -114,7 +117,10 @@ impl Goal for BreedGoal {
         self.mate.is_some()
     }
 
-    fn should_continue(&self, _mob: &dyn Mob) -> bool {
+    fn should_continue(&self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         let Some(mate) = &self.mate else {
             return false;
         };

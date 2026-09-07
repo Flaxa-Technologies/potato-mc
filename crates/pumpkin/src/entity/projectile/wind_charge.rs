@@ -74,6 +74,10 @@ impl WindChargeEntity {
         }
     }
 
+    pub fn set_velocity(&self, x: f64, y: f64, z: f64, power: f64, uncertainty: f64) {
+        self.thrown_item_entity.set_velocity(x, y, z, power, uncertainty);
+    }
+
     pub const fn deflect_cooldown(&self) -> Option<&AtomicU8> {
         if let WindChargeKind::Normal {
             deflect_cooldown, ..
@@ -86,15 +90,29 @@ impl WindChargeEntity {
     }
 
     pub fn create_explosion(&self, position: Vector3<f64>) {
-        let (power, calculator) = match self.kind {
-            WindChargeKind::Normal { .. } => (1.2, WIND_CHARGE_EXPLOSION_DAMAGE_CALCULATOR.clone()),
-            WindChargeKind::Breeze => (3.0, BREEZE_WIND_CHARGE_EXPLOSION_DAMAGE_CALCULATOR.clone()),
+        let (power, calculator, sound, particle) = match self.kind {
+            WindChargeKind::Normal { .. } => (
+                1.2,
+                WIND_CHARGE_EXPLOSION_DAMAGE_CALCULATOR.clone(),
+                pumpkin_data::sound::Sound::EntityWindChargeWindBurst,
+                pumpkin_data::particle::Particle::GustEmitterSmall,
+            ),
+            WindChargeKind::Breeze => (
+                3.0,
+                BREEZE_WIND_CHARGE_EXPLOSION_DAMAGE_CALCULATOR.clone(),
+                pumpkin_data::sound::Sound::EntityBreezeWindBurst,
+                pumpkin_data::particle::Particle::GustEmitterLarge,
+            ),
         };
-        self.get_entity().world.load().explode_with_calculator(
+        let world = self.get_entity().world.load();
+        world.explode_with_calculator_and_effects(
             position,
             power,
             crate::world::ExplosionInteraction::Trigger,
             Some(calculator),
+            Some(particle),
+            Some(sound),
+            true,
         );
     }
 
@@ -143,21 +161,31 @@ impl EntityBase for WindChargeEntity {
     }
 
     fn on_hit(&self, hit: ProjectileHit) {
-        let hit_pos = hit.hit_pos();
-        if let ProjectileHit::Entity { ref entity, .. } = hit {
-            let world = self.get_entity().world.load();
-            let owner_id = self.thrown_item_entity.owner_id;
-            let owner = owner_id.and_then(|id| world.get_entity_by_id(id));
+        match hit {
+            ProjectileHit::Block { hit_pos, face, .. } => {
+                let offset = face.to_offset();
+                let scaled_normal = Vector3::new(
+                    f64::from(offset.x) * 0.25,
+                    f64::from(offset.y) * 0.25,
+                    f64::from(offset.z) * 0.25,
+                );
+                self.create_explosion(hit_pos + scaled_normal);
+            }
+            ProjectileHit::Entity { entity, hit_pos, .. } => {
+                let world = self.get_entity().world.load();
+                let owner_id = self.thrown_item_entity.owner_id;
+                let owner = owner_id.and_then(|id| world.get_entity_by_id(id));
 
-            let _ = entity.damage_with_context(
-                entity.as_ref(),
-                1.0,
-                DamageType::WIND_CHARGE,
-                Some(hit_pos),
-                Some(self.get_entity()),
-                owner.as_deref(),
-            );
+                let _ = entity.damage_with_context(
+                    entity.as_ref(),
+                    1.0,
+                    DamageType::WIND_CHARGE,
+                    Some(hit_pos),
+                    Some(self.get_entity()),
+                    owner.as_deref(),
+                );
+                self.create_explosion(hit_pos);
+            }
         }
-        self.create_explosion(hit_pos);
     }
 }

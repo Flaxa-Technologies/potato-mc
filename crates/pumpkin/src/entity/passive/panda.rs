@@ -91,6 +91,24 @@ impl PandaGene {
     }
 
     #[must_use]
+    pub const fn is_recessive(self) -> bool {
+        matches!(self, Self::Brown | Self::Weak | Self::Aggressive)
+    }
+
+    #[must_use]
+    pub fn get_variant_from_genes(main: Self, hidden: Self) -> Self {
+        if main.is_recessive() {
+            if main == hidden {
+                main
+            } else {
+                Self::Normal
+            }
+        } else {
+            main
+        }
+    }
+
+    #[must_use]
     pub fn random_gene() -> Self {
         let mut rng = rand::rng();
         if rng.random_range(0..16) == 0 {
@@ -153,7 +171,31 @@ impl PandaEntity {
                 LookAtEntityGoal::with_default(mob_weak, &EntityType::PLAYER, 6.0),
             );
             goal_selector.add_goal(8, Box::new(RandomLookAroundGoal::default()));
+
+            // Aggressive genotype attack AI
+            if mob_arc.is_aggressive() {
+                goal_selector.add_goal(
+                    3,
+                    Box::new(crate::entity::ai::goal::melee_attack::MeleeAttackGoal::new(1.2, true)),
+                );
+            }
         };
+
+        if mob_arc.is_aggressive() {
+            let mut target_selector = mob_arc
+                .mob_entity
+                .target_selector
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            target_selector.add_goal(
+                1,
+                crate::entity::ai::goal::active_target::ActiveTargetGoal::with_default(
+                    &mob_arc.mob_entity,
+                    &EntityType::PLAYER,
+                    true,
+                ),
+            );
+        }
 
         mob_arc
     }
@@ -163,6 +205,74 @@ impl PandaEntity {
         PandaGene::from_id(self.main_gene.load(Ordering::Relaxed))
     }
 
+    #[must_use]
+    pub fn get_hidden_gene(&self) -> PandaGene {
+        PandaGene::from_id(self.hidden_gene.load(Ordering::Relaxed))
+    }
+
+    #[must_use]
+    pub fn get_variant(&self) -> PandaGene {
+        PandaGene::get_variant_from_genes(self.get_main_gene(), self.get_hidden_gene())
+    }
+
+    #[must_use]
+    pub fn is_aggressive(&self) -> bool {
+        self.get_variant() == PandaGene::Aggressive
+    }
+
+    #[must_use]
+    pub fn is_worried(&self) -> bool {
+        self.get_variant() == PandaGene::Worried
+    }
+
+    #[must_use]
+    pub fn is_lazy(&self) -> bool {
+        self.get_variant() == PandaGene::Lazy
+    }
+
+    #[must_use]
+    pub fn is_playful(&self) -> bool {
+        self.get_variant() == PandaGene::Playful
+    }
+
+    #[must_use]
+    pub fn is_brown(&self) -> bool {
+        self.get_variant() == PandaGene::Brown
+    }
+
+    #[must_use]
+    pub fn is_weak(&self) -> bool {
+        self.get_variant() == PandaGene::Weak
+    }
+
+    pub fn reassess_aggressive_goals(&self) {
+        if self.is_aggressive() {
+            let mut goal_selector = self
+                .mob_entity
+                .goals_selector
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            goal_selector.add_goal(
+                3,
+                Box::new(crate::entity::ai::goal::melee_attack::MeleeAttackGoal::new(1.2, true)),
+            );
+
+            let mut target_selector = self
+                .mob_entity
+                .target_selector
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            target_selector.add_goal(
+                1,
+                crate::entity::ai::goal::active_target::ActiveTargetGoal::with_default(
+                    &self.mob_entity,
+                    &EntityType::PLAYER,
+                    true,
+                ),
+            );
+        }
+    }
+
     pub fn set_main_gene(&self, gene: PandaGene) {
         self.main_gene.store(gene.id(), Ordering::Relaxed);
         let entity = self.get_entity();
@@ -170,11 +280,6 @@ impl PandaEntity {
             pumpkin_data::tracked_data::panda::MAIN_GENE_ID,
             gene.id() as i8,
         );
-    }
-
-    #[must_use]
-    pub fn get_hidden_gene(&self) -> PandaGene {
-        PandaGene::from_id(self.hidden_gene.load(Ordering::Relaxed))
     }
 
     pub fn set_hidden_gene(&self, gene: PandaGene) {
@@ -262,6 +367,10 @@ impl Mob for PandaEntity {
         Some(self)
     }
 
+    fn is_sitting(&self) -> bool {
+        self.is_sitting()
+    }
+
     fn mob_write_nbt(&self, nbt: &mut NbtCompound) {
         self.write_ageable_nbt(nbt);
         nbt.put_string("MainGene", self.get_main_gene().as_str().to_string());
@@ -276,6 +385,18 @@ impl Mob for PandaEntity {
         if let Some(hidden) = nbt.get_string("HiddenGene") {
             self.set_hidden_gene(PandaGene::from_name(hidden));
         }
+        self.reassess_aggressive_goals();
+    }
+
+    fn on_attack(&self, _target: &dyn EntityBase) {
+        let entity = self.get_entity();
+        let world = entity.world.load();
+        let pos = entity.pos.load();
+        world.play_sound(
+            Sound::EntityPandaBite,
+            pumpkin_data::sound::SoundCategory::Neutral,
+            &pos,
+        );
     }
 
     fn get_mob_entity(&self) -> &MobEntity {
@@ -319,6 +440,41 @@ impl Mob for PandaEntity {
     }
 
     fn mob_interact(&self, player: &Arc<Player>, item_stack: &mut ItemStack) -> bool {
-        self.animal_interact(player, item_stack, Sound::EntityPandaAmbient)
+        let sound = if self.is_aggressive() {
+            Sound::EntityPandaAggressiveAmbient
+        } else if self.is_worried() {
+            Sound::EntityPandaWorriedAmbient
+        } else {
+            Sound::EntityPandaAmbient
+        };
+        self.animal_interact(player, item_stack, sound)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::PandaGene;
+
+    #[test]
+    fn panda_genetics_recessive_rules() {
+        // Aggressive is recessive (requires both genes to match)
+        assert_eq!(
+            PandaGene::get_variant_from_genes(PandaGene::Lazy, PandaGene::Aggressive),
+            PandaGene::Lazy
+        );
+        assert_eq!(
+            PandaGene::get_variant_from_genes(PandaGene::Aggressive, PandaGene::Aggressive),
+            PandaGene::Aggressive
+        );
+
+        // Brown is recessive
+        assert_eq!(
+            PandaGene::get_variant_from_genes(PandaGene::Brown, PandaGene::Normal),
+            PandaGene::Normal
+        );
+        assert_eq!(
+            PandaGene::get_variant_from_genes(PandaGene::Brown, PandaGene::Brown),
+            PandaGene::Brown
+        );
     }
 }

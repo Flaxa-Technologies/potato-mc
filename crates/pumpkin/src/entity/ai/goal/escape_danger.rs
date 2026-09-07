@@ -41,7 +41,10 @@ impl EscapeDangerGoal {
     }
 
     fn find_escape_target(mob: &dyn Mob) -> Option<Vector3<f64>> {
-        let pos = mob.get_mob_entity().living_entity.entity.pos.load();
+        let living_ent = &mob.get_mob_entity().living_entity.entity;
+        let pos = living_ent.pos.load();
+        let mob_in_water = living_ent.is_in_water() || living_ent.touching_water.load(Relaxed);
+        let world = living_ent.world.load();
         let mut rng = mob.get_random();
 
         for _ in 0..TARGET_ATTEMPTS {
@@ -50,7 +53,18 @@ impl EscapeDangerGoal {
             if dx == 0 && dz == 0 {
                 continue;
             }
-            return Some(Vector3::new(pos.x + dx as f64, pos.y, pos.z + dz as f64));
+            let target_vec = Vector3::new(pos.x + dx as f64, pos.y, pos.z + dz as f64);
+            if mob_in_water {
+                let target_pos = pumpkin_util::math::position::BlockPos::new(
+                    target_vec.x.floor() as i32,
+                    target_vec.y.floor() as i32,
+                    target_vec.z.floor() as i32,
+                );
+                if !super::try_find_water::TryFindWaterGoal::is_water(&world, &target_pos) {
+                    continue;
+                }
+            }
+            return Some(target_vec);
         }
 
         None
@@ -59,6 +73,9 @@ impl EscapeDangerGoal {
 
 impl Goal for EscapeDangerGoal {
     fn can_start(&mut self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         if !Self::is_in_danger(mob) {
             return false;
         }
@@ -67,6 +84,9 @@ impl Goal for EscapeDangerGoal {
     }
 
     fn should_continue(&self, mob: &dyn Mob) -> bool {
+        if mob.is_sitting() {
+            return false;
+        }
         let navigator = mob
             .get_mob_entity()
             .navigator

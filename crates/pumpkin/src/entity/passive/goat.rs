@@ -9,6 +9,7 @@ use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_data::tag::{self, Taggable};
 use pumpkin_nbt::compound::NbtCompound;
+use rand::RngExt;
 
 use crate::entity::{
     Entity, EntityBase,
@@ -36,10 +37,11 @@ pub struct GoatEntity {
 impl GoatEntity {
     pub fn new(entity: Entity) -> Arc<Self> {
         let mob_entity = MobEntity::new(entity);
+        let is_screaming = rand::rng().random_range(0..50) == 0;
         let goat = Self {
             mob_entity,
             ageable_data: AgeableData::default(),
-            is_screaming: AtomicBool::new(false),
+            is_screaming: AtomicBool::new(is_screaming),
             has_left_horn: AtomicBool::new(true),
             has_right_horn: AtomicBool::new(true),
         };
@@ -157,6 +159,14 @@ impl Mob for GoatEntity {
 
     fn get_mob_entity(&self) -> &MobEntity {
         &self.mob_entity
+    }
+
+    fn mob_set_variant_name(&self, name: &str) {
+        let is_screaming = matches!(
+            name.strip_prefix("minecraft:").unwrap_or(name),
+            "screaming" | "screaming_goat" | "true" | "1"
+        );
+        self.set_screaming(is_screaming);
     }
 
     fn mob_tick(&self, _caller: &dyn EntityBase) {

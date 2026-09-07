@@ -1,11 +1,17 @@
-use std::sync::{Arc, Weak};
+use std::sync::{
+    Arc, Weak,
+    atomic::{AtomicU8, Ordering},
+};
 
 use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::sound::Sound;
 use pumpkin_data::{entity::EntityType, item::Item};
+use pumpkin_nbt::compound::NbtCompound;
+use pumpkin_protocol::codec::var_int::VarInt;
+use rand::RngExt;
 
 use crate::entity::{
-    Entity,
+    Entity, EntityBase,
     ageable::AgeableMob,
     ai::goal::{
         breed::BreedGoal, escape_danger::EscapeDangerGoal, follow_parent::FollowParentGoal,
@@ -24,6 +30,7 @@ const TEMPT_ITEMS: &[&Item] = &[&Item::WHEAT];
 /// Wiki: <https://minecraft.wiki/w/Cow>
 pub struct CowEntity {
     pub mob_entity: MobEntity,
+    pub variant: AtomicU8,
     pub ageable_data: crate::entity::ageable::AgeableData,
 }
 
@@ -32,6 +39,7 @@ impl CowEntity {
         let mob_entity = MobEntity::new(entity);
         let cow = Self {
             mob_entity,
+            variant: AtomicU8::new(rand::rng().random_range(0..3u8)),
             ageable_data: crate::entity::ageable::AgeableData::default(),
         };
         let mob_arc = Arc::new(cow);
@@ -91,6 +99,51 @@ impl Mob for CowEntity {
 
     fn get_mob_entity(&self) -> &MobEntity {
         &self.mob_entity
+    }
+
+    fn mob_write_nbt(&self, nbt: &mut NbtCompound) {
+        let variant_str = match self.variant.load(Ordering::Relaxed) {
+            0 => "minecraft:cold",
+            2 => "minecraft:warm",
+            _ => "minecraft:temperate",
+        };
+        nbt.put_string("variant", variant_str.to_string());
+    }
+
+    fn mob_read_nbt(&self, nbt: &NbtCompound) {
+        if let Some(variant_str) = nbt.get_string("variant") {
+            let variant = match variant_str.strip_prefix("minecraft:").unwrap_or(variant_str) {
+                "cold" => 0,
+                "warm" => 2,
+                _ => 1,
+            };
+            self.variant.store(variant, Ordering::Relaxed);
+        }
+    }
+
+    fn mob_set_variant_name(&self, name: &str) {
+        let variant = match name.strip_prefix("minecraft:").unwrap_or(name) {
+            "cold" => 0,
+            "warm" => 2,
+            _ => 1,
+        };
+        self.variant.store(variant, Ordering::Relaxed);
+        self.get_entity().set_synced_data(
+            pumpkin_data::tracked_data::cow::VARIANT,
+            VarInt(variant as i32),
+        );
+    }
+
+    fn mob_init_data_tracker(&self) {
+        let entity = self.get_entity();
+        let is_baby = entity.age.load(Ordering::Relaxed) < 0;
+        if is_baby {
+            entity.set_synced_data(pumpkin_data::tracked_data::cow::BABY_ID, true);
+        }
+        entity.set_synced_data(
+            pumpkin_data::tracked_data::cow::VARIANT,
+            VarInt(self.variant.load(Ordering::Relaxed) as i32),
+        );
     }
 
     fn mob_interact(&self, player: &Arc<Player>, item_stack: &mut ItemStack) -> bool {

@@ -72,19 +72,53 @@ impl EntityBase for ExperienceOrbEntity {
         let bounding_box = entity.bounding_box.load();
 
         let original_velo = entity.velocity.load();
-
         let mut velo = original_velo;
 
-        let no_physics = !self
-            .entity
-            .world
-            .load()
-            .is_space_empty(bounding_box.expand(-1.0e-7, -1.0e-7, -1.0e-7));
+        let world = self.entity.world.load();
+        let orb_pos = entity.pos.load();
+
+        // Follow nearby players matching vanilla ExperienceOrb.followNearbyPlayer
+        let nearby_players = world.get_nearby_players(orb_pos, 8.0);
+        let mut target_player: Option<(f64, Arc<Player>)> = None;
+
+        for player in nearby_players {
+            if player.is_spectator() || !player.get_entity().is_alive() {
+                continue;
+            }
+            let p_pos = player.get_entity().pos.load();
+            let dist_sq = orb_pos.squared_distance_to_vec(&p_pos);
+            if dist_sq < 64.0 && target_player.as_ref().is_none_or(|(best, _)| dist_sq < *best) {
+                target_player = Some((dist_sq, player));
+            }
+        }
+
+        if let Some((dist_sq, player)) = target_player {
+            let p_pos = player.get_entity().pos.load();
+            let eye_offset = player.get_entity().get_eye_height() as f64 / 2.0;
+            let target_center = Vector3::new(p_pos.x, p_pos.y + eye_offset, p_pos.z);
+            let delta = target_center - orb_pos;
+            let len = dist_sq.sqrt();
+            if len > 0.0001 {
+                let power = (1.0 - len / 8.0).max(0.0);
+                let accel = delta.normalize() * (power * power * 0.1);
+                velo += accel;
+            }
+
+            let p_bb = player.get_entity().bounding_box.load();
+            if dist_sq <= 1.44 || p_bb.intersects(&bounding_box) {
+                self.on_player_collision(&player);
+            }
+        }
+
+        let no_physics = !world.is_space_empty(bounding_box.expand(-1.0e-7, -1.0e-7, -1.0e-7));
         self.entity.no_physics.store(no_physics, Ordering::Relaxed);
         // TODO: isSubmergedIn
         if !no_physics {
             velo.y -= self.get_gravity();
         }
+
+        velo.x *= 0.98;
+        velo.z *= 0.98;
 
         entity.velocity.store(velo);
 
@@ -103,7 +137,10 @@ impl EntityBase for ExperienceOrbEntity {
     }
 
     fn on_player_collision(&self, player: &Arc<Player>) {
-        if player.living_entity.health.load() > 0.0 {
+        if !self.entity.is_alive() {
+            return;
+        }
+        if player.living_entity.health.load() > 0.0 && !player.is_spectator() {
             let can_pickup = if let Ok(mut delay) = player.experience_pick_up_delay.try_lock()
                 && *delay == 0
             {

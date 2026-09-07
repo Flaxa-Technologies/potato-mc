@@ -23,7 +23,7 @@ use crate::block::OnStateReplacedArgs;
 use crate::block::blocks::abstract_wall_mounting::WallMountedBlock;
 use crate::block::blocks::redstone::lever::LeverLikePropertiesExt;
 use crate::block::registry::BlockActionResult;
-use crate::block::{BlockBehaviour, NormalUseArgs};
+use crate::block::{BlockBehaviour, ExplodeArgs, NormalUseArgs};
 use crate::world::World;
 
 fn get_sound(block: &Block, on: bool) -> Sound {
@@ -70,6 +70,10 @@ impl BlockBehaviour for ButtonBlock {
         click_button(args.world, args.position);
 
         BlockActionResult::Success
+    }
+
+    fn explode(&self, args: ExplodeArgs<'_>) {
+        click_button(args.world, args.position);
     }
 
     fn on_scheduled_tick(&self, args: OnScheduledTickArgs<'_>) {

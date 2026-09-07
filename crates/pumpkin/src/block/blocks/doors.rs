@@ -17,6 +17,7 @@ use std::sync::Arc;
 use crate::block::BlockBehaviour;
 use crate::block::BrokenArgs;
 use crate::block::CanPlaceAtArgs;
+use crate::block::ExplodeArgs;
 use crate::block::GetStateForNeighborUpdateArgs;
 use crate::block::NormalUseArgs;
 use crate::block::OnNeighborUpdateArgs;
@@ -399,6 +400,45 @@ impl BlockBehaviour for DoorBlock {
                 DoorProperties::from_state_id(state.id).open
             }
             PathComputationType::Water => false,
+        }
+    }
+
+    fn explode(&self, args: ExplodeArgs<'_>) {
+        let (block, state_id) = args.world.get_block_and_state_id(args.position);
+        if block == &Block::IRON_DOOR {
+            return;
+        }
+        let props = DoorProperties::from_state_id(state_id);
+        let (lower_pos, upper_pos) = match props.half {
+            DoubleBlockHalf::Lower => (*args.position, args.position.up()),
+            DoubleBlockHalf::Upper => (args.position.down(), *args.position),
+        };
+        let (lower_block, lower_state_id) = args.world.get_block_and_state_id(&lower_pos);
+        let mut lower_props = DoorProperties::from_state_id(lower_state_id);
+        if lower_props.powered {
+            return;
+        }
+        if props.half == DoubleBlockHalf::Lower {
+            lower_props.open = !lower_props.open;
+            let (upper_block, upper_state_id) = args.world.get_block_and_state_id(&upper_pos);
+            let mut upper_props = DoorProperties::from_state_id(upper_state_id);
+            upper_props.open = lower_props.open;
+
+            args.world.play_sound(
+                get_sound(lower_block, lower_props.open),
+                SoundCategory::Blocks,
+                &lower_pos.to_f64(),
+            );
+            args.world.set_block_state(
+                &lower_pos,
+                lower_props.to_state_id(lower_block),
+                BlockFlags::NOTIFY_LISTENERS,
+            );
+            args.world.set_block_state(
+                &upper_pos,
+                upper_props.to_state_id(upper_block),
+                BlockFlags::NOTIFY_LISTENERS,
+            );
         }
     }
 }

@@ -88,10 +88,12 @@ mod title;
 mod tps;
 mod transfer;
 mod trigger;
+mod usage;
 mod waypoint;
 mod weather;
 mod whitelist;
 mod worldborder;
+pub mod wgen;
 
 #[allow(clippy::too_many_lines)]
 #[must_use]
@@ -105,6 +107,7 @@ pub fn default_dispatcher(
 
     let mut dispatcher = CommandDispatcher::new();
 
+    wgen::register(&mut dispatcher, registry);
     say::register(&mut dispatcher, registry);
     banlist::register(&mut dispatcher, registry);
     difficulty::register(&mut dispatcher, registry);
@@ -157,6 +160,7 @@ pub fn default_dispatcher(
     me::register(&mut dispatcher, registry);
     msg::register(&mut dispatcher, registry);
     tps::register(&mut dispatcher, registry);
+    usage::register(&mut dispatcher, registry);
     transfer::register(&mut dispatcher, registry);
     gamemode::register(&mut dispatcher, registry);
     defaultgamemode::register(&mut dispatcher, registry);

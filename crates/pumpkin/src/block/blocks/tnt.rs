@@ -95,7 +95,15 @@ impl BlockBehaviour for TNTBlock {
                     args.item_stack.decrement(1);
                 }
             }
-            BlockActionResult::Success
+            if item_id == Item::FLINT_AND_STEEL.id {
+                let sound_pos = args.position.to_f64();
+                args.world.play_sound(
+                    pumpkin_data::sound::Sound::ItemFlintandsteelUse,
+                    SoundCategory::Blocks,
+                    &sound_pos,
+                );
+            }
+            BlockActionResult::SuccessServer
         } else if !args.world.level_info.load().game_rules.tnt_explodes {
             args.player.send_system_message_raw(
                 &TextComponent::translate(translation::java::BLOCK_MINECRAFT_TNT_DISABLED, []),
@@ -103,7 +111,7 @@ impl BlockBehaviour for TNTBlock {
             );
             BlockActionResult::Pass
         } else {
-            BlockActionResult::Success
+            BlockActionResult::SuccessServer
         }
     }
 

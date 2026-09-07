@@ -107,6 +107,13 @@ impl JavaClient {
             EquipmentSlot::OFF_HAND
         };
 
+        let slot_index = if matches!(hand, Hand::Right) {
+            inventory.get_selected_slot() as usize
+        } else {
+            PlayerInventory::OFF_HAND_SLOT
+        };
+        let before = item.clone();
+
         let sneaking = player.get_entity().is_sneaking();
 
         // Code based on the java class ServerPlayerInteractionManager
@@ -128,23 +135,20 @@ impl JavaClient {
                 if matches!(result, BlockActionResult::SuccessServer) {
                     player.swing_hand(hand, true);
                 }
+                let after = item.clone();
+                if !after.are_equal(&before) {
+                    player.sync_hand_slot(slot_index, after.clone());
+                    inventory.set_stack_in_hand(hand, after);
+                }
                 return Ok(());
             }
         }
-
-        let slot_index = if matches!(hand, Hand::Right) {
-            inventory.get_selected_slot() as usize
-        } else {
-            PlayerInventory::OFF_HAND_SLOT
-        };
 
         if item.is_empty() {
             // TODO item cool down
             // If the hand is empty we stop here
             return Ok(());
         }
-
-        let before = item.clone();
 
         server
             .item_registry
@@ -186,6 +190,7 @@ impl JavaClient {
         }
 
         if !after.are_equal(&before) {
+            player.swing_hand(hand, true);
             player.sync_hand_slot(slot_index, after.clone());
             inventory.set_stack_in_hand(hand, after);
         }

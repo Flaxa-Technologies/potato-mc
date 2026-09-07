@@ -58,10 +58,12 @@ fn enchant_target(
         return Err(ERROR_FAILED_INCOMPATIBLE.create_without_context(item.item.translated_name()));
     }
 
-    if let Some(data) = item.get_data_component::<EnchantmentsImpl>()
-        && !enchantment.is_enchantment_compatible(data)
-    {
-        return Err(ERROR_FAILED_INCOMPATIBLE.create_without_context(item.item.translated_name()));
+    if let Some(data) = item.get_data_component::<EnchantmentsImpl>() {
+        for (existing, _) in data.enchantment.iter() {
+            if *existing != enchantment && !enchantment.are_compatible(existing) {
+                return Err(ERROR_FAILED_INCOMPATIBLE.create_without_context(item.item.translated_name()));
+            }
+        }
     }
 
     item.enchant(enchantment, level);

@@ -143,6 +143,9 @@ impl FireBlock {
     fn try_spreading_fire(&self, world: &Arc<World>, pos: &BlockPos, chance: i32, age: u8) {
         let block = world.get_block(pos);
         let odds = Self::get_burn_odds(block);
+        if odds <= 0 {
+            return;
+        }
         if rand::rng().random_range(0..chance) < odds {
             if let Some(server) = world.server.upgrade() {
                 let mut event = crate::plugin::api::events::block::block_burn::BlockBurnEvent {
@@ -227,8 +230,12 @@ impl BlockBehaviour for FireBlock {
     }
 
     fn can_place_at(&self, args: CanPlaceAtArgs<'_>) -> bool {
-        let state = args.block_accessor.get_block_state(&args.position.down());
-        if state.is_side_solid(BlockDirection::Up) {
+        let block_state = args.block_accessor.get_block_state(args.position);
+        if !block_state.is_air() && block_state.id.to_block().id != Block::FIRE.id {
+            return false;
+        }
+        let down_state = args.block_accessor.get_block_state(&args.position.down());
+        if down_state.is_side_solid(BlockDirection::Up) {
             return true;
         }
         Self::are_blocks_around_flammable(args.block_accessor, args.position)
@@ -237,6 +244,11 @@ impl BlockBehaviour for FireBlock {
     #[expect(clippy::too_many_lines)]
     fn on_scheduled_tick(&self, args: OnScheduledTickArgs<'_>) {
         let (world, block, pos) = (args.world, args.block, args.position);
+
+        // Respect fire spreading game rule (0 = disabled)
+        if world.level_info.load().game_rules.fire_spread_radius_around_player == 0 {
+            return;
+        }
 
         // Schedule next tick first
         world.schedule_block_tick(
@@ -309,8 +321,11 @@ impl BlockBehaviour for FireBlock {
         }
 
         if !infiniburn {
+            let is_flammable_below = Self::is_flammable(world.get_block_state_id(&pos.down()));
+            let are_blocks_around_flammable = Self::are_blocks_around_flammable(world.as_ref(), pos);
+
             // Check if fire should extinguish due to lack of fuel
-            if !Self::are_blocks_around_flammable(world.as_ref(), pos) {
+            if !are_blocks_around_flammable {
                 let block_below_state = world.get_block_state(&pos.down());
                 if !block_below_state.is_side_solid(BlockDirection::Up) || new_age > 3 {
                     world.set_block_state(pos, Block::AIR.default_state.id, BlockFlags::NOTIFY_ALL);
@@ -321,7 +336,7 @@ impl BlockBehaviour for FireBlock {
             // At max age, fire has a chance to extinguish if not on flammable block
             if new_age == 15
                 && rand::rng().random_range(0..4) == 0
-                && !Self::is_flammable(world.get_block_state_id(&pos.down()))
+                && !is_flammable_below
             {
                 world.set_block_state(pos, Block::AIR.default_state.id, BlockFlags::NOTIFY_ALL);
                 return;
@@ -387,10 +402,32 @@ impl BlockBehaviour for FireBlock {
                 for yy in -1..=4 {
                     if xx != 0 || yy != 0 || zz != 0 {
                         let offset_pos = pos.offset(Vector3::new(xx, yy, zz));
+
+                        // Only air blocks can become fire
+                        let offset_state = world.get_block_state(&offset_pos);
+                        if !offset_state.is_air() {
+                            continue;
+                        }
+
                         let ignite_odds = self.get_burn_chance(world, &offset_pos);
 
                         if ignite_odds > 0 {
-                            // Skip if spreding is disabled or if there are no players nearby
+                            // Target position must be able to support fire
+                            if !self.can_place_at(CanPlaceAtArgs {
+                                server: None,
+                                world: Some(world),
+                                block_accessor: world.as_ref(),
+                                block,
+                                state: block.default_state,
+                                position: &offset_pos,
+                                direction: None,
+                                player: None,
+                                use_item_on: None,
+                            }) {
+                                continue;
+                            }
+
+                            // Skip if spreading is disabled or if there are no players nearby
                             if spread_radius == 0 {
                                 continue;
                             }

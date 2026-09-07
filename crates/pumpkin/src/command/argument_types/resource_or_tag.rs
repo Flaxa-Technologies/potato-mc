@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use pumpkin_data::structures::StructureSet;
+use pumpkin_data::structures::{StructureKeys, StructureSet};
 use pumpkin_data::tag::{self, RegistryKey};
 use pumpkin_data::translation;
 use pumpkin_util::identifier::Identifier;
@@ -10,6 +10,7 @@ use pumpkin_world::poi::POI_TYPE_NETHER_PORTAL;
 use crate::command::argument_types::FromStringReader;
 use crate::command::argument_types::argument_type::{ArgumentType, JavaClientArgumentType};
 use crate::command::argument_types::resource_key::BIOME_REGISTRY;
+use pumpkin_protocol::java::client::play::SuggestionProviders;
 use crate::command::context::command_context::CommandContext;
 use crate::command::errors::command_syntax_error::CommandSyntaxError;
 use crate::command::errors::error_types::CommandErrorType;
@@ -69,14 +70,15 @@ fn suggest_for_registry(registry: &Identifier, builder: SuggestionsBuilder) -> S
     };
 
     if *registry == STRUCTURE_REGISTRY {
-        // The generator models vanilla's structure sets, so those are the
-        // locatable names. There is no structure tag data to offer.
+        let tag_names = tag_names(RegistryKey::WorldgenStructure);
+        let set_names = StructureSet::NAMES
+            .iter()
+            .map(|name| format!("minecraft:{name}"));
+        let key_names = StructureKeys::all_names()
+            .iter()
+            .map(|name| (*name).to_string());
         builder
-            .filter_and_suggest_iter(
-                StructureSet::NAMES
-                    .iter()
-                    .map(|name| format!("minecraft:{name}")),
-            )
+            .filter_and_suggest_iter(key_names.chain(set_names).chain(tag_names))
             .build()
     } else if *registry == *BIOME_REGISTRY {
         let biomes = pumpkin_data::biome::Biome::ALL
@@ -132,6 +134,10 @@ impl ArgumentType for ResourceOrTagKeyArgument {
         JavaClientArgumentType::ResourceOrTagKey {
             identifier: self.0.clone(),
         }
+    }
+
+    fn override_suggestion_providers(&self) -> Option<SuggestionProviders> {
+        Some(SuggestionProviders::AskServer)
     }
 
     fn examples(&self) -> Vec<String> {
@@ -201,6 +207,10 @@ impl ArgumentType for ResourceOrTagArgument {
         JavaClientArgumentType::ResourceOrTag {
             identifier: self.0.clone(),
         }
+    }
+
+    fn override_suggestion_providers(&self) -> Option<SuggestionProviders> {
+        Some(SuggestionProviders::AskServer)
     }
 
     fn examples(&self) -> Vec<String> {

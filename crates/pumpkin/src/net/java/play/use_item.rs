@@ -8,6 +8,10 @@ impl JavaClient {
         }
         player.update_last_action_time();
 
+        let target_yaw = pumpkin_util::math::wrap_degrees(use_item.yaw);
+        let target_pitch = pumpkin_util::math::wrap_degrees(use_item.pitch);
+        player.get_entity().set_rotation(target_yaw, target_pitch);
+
         let inventory = player.inventory();
         let Ok(hand) = Hand::from_packet_id(use_item.hand.0) else {
             self.try_kick(&TextComponent::text("InvalidHand"));

@@ -103,7 +103,13 @@ impl ArgumentType for ItemStackArgumentType {
         _context: &CommandContext,
         builder: SuggestionsBuilder,
     ) -> Suggestions {
-        builder.build()
+        builder
+            .filter_and_suggest_iter(
+                (0..=2000)
+                    .filter_map(Item::from_id)
+                    .map(|item| format!("minecraft:{}", item.registry_key)),
+            )
+            .build()
     }
 }
 

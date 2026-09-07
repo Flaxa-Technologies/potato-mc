@@ -67,6 +67,9 @@ impl ItemBehaviour for SpearItem {
                 &player.position(),
             );
         }
+
+        // Note: Lunge is a post_piercing_attack enchantment effect, NOT a normal_use effect.
+        // Lunge impulse is applied in on_spear_jab, not here.
     }
 
     fn on_spear_jab(&self, stack: &ItemStack, player: &Player) {
@@ -83,6 +86,50 @@ impl ItemBehaviour for SpearItem {
         let elapsed = f64::from(player.last_attacked_ticks.load(Ordering::Acquire));
         if elapsed + 5.0 < attack_delay {
             return;
+        }
+
+        let lunge_lvl = Self::lunge_level(stack);
+        if lunge_lvl > 0 {
+            let entity = player.get_entity();
+            // Vanilla Lunge conditions (from lunge.json requirements):
+            // - Not riding a vehicle
+            // - Not elytra gliding (is_fall_flying)
+            // - Not in water
+            // - Food level >= 7 OR creative mode
+            let in_vehicle = entity.has_vehicle();
+            let is_elytra = entity.is_fall_flying();
+            let in_water = player.living_entity.is_in_water();
+            let food_ok = player.gamemode.load() == GameMode::Creative
+                || i32::from(player.hunger_manager.level.load()) >= 7;
+
+            if !in_vehicle && !is_elytra && !in_water && food_ok {
+                // Vanilla ApplyEntityImpulse: look.addLocalCoordinates([0,0,1]).multiply([1,0,1]).scale(0.458 * level)
+                // In Minecraft, horizontal forward direction from yaw is (-sin(yaw), 0, cos(yaw)).
+                // We compute the normalized horizontal vector directly from yaw so the impulse has
+                // constant forward strength regardless of pitch and does not accumulate stale server velocity.
+                let (yaw, _) = player.rotation();
+                let f_yaw = yaw.to_radians();
+                let forward = Vector3::new(-f64::from(f_yaw.sin()), 0.0, f64::from(f_yaw.cos()));
+                let magnitude = 0.458 * f64::from(lunge_lvl);
+                let impulse = forward * magnitude;
+                player.set_velocity(impulse);
+
+                // Vanilla exhaustion: LevelBasedValue.perLevel(4.0) per jab, BUT
+                // hunger is tracked via ApplyExhaustion effect, which maps to add_exhaustion
+                let exhaustion = 4.0 * lunge_lvl as f32;
+                player.add_exhaustion(exhaustion);
+
+                let lunge_sound = match lunge_lvl {
+                    1 => pumpkin_data::sound::Sound::ItemSpearLunge1,
+                    2 => pumpkin_data::sound::Sound::ItemSpearLunge2,
+                    _ => pumpkin_data::sound::Sound::ItemSpearLunge3,
+                };
+                world.play_sound(
+                    lunge_sound,
+                    SoundCategory::Players,
+                    &player.position(),
+                );
+            }
         }
 
         let damage = Self::attack_damage(player, stack) as f32;
@@ -430,6 +477,19 @@ impl SpearItem {
                     .enchantment
                     .iter()
                     .find(|(enchantment, _)| **enchantment == Enchantment::KNOCKBACK)
+                    .map(|(_, level)| u32::try_from(*level).unwrap_or(0))
+            })
+            .unwrap_or(0)
+    }
+
+    fn lunge_level(stack: &ItemStack) -> u32 {
+        stack
+            .get_data_component::<EnchantmentsImpl>()
+            .and_then(|enchantments| {
+                enchantments
+                    .enchantment
+                    .iter()
+                    .find(|(enchantment, _)| **enchantment == Enchantment::LUNGE)
                     .map(|(_, level)| u32::try_from(*level).unwrap_or(0))
             })
             .unwrap_or(0)

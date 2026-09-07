@@ -1,7 +1,7 @@
 use crate::block::blocks::redstone::block_receives_redstone_power;
 use crate::block::registry::BlockActionResult;
 use crate::block::{
-    BlockBehaviour, NormalUseArgs, OnNeighborUpdateArgs, OnPlaceArgs, PathComputationType,
+    BlockBehaviour, ExplodeArgs, NormalUseArgs, OnNeighborUpdateArgs, OnPlaceArgs, PathComputationType,
 };
 use crate::entity::EntityBase;
 use crate::entity::player::Player;
@@ -143,5 +143,27 @@ impl BlockBehaviour for TrapDoorBlock {
             PathComputationType::Land | PathComputationType::Air => props.open,
             PathComputationType::Water => props.waterlogged,
         }
+    }
+
+    fn explode(&self, args: ExplodeArgs<'_>) {
+        if !can_open_trapdoor(args.block) {
+            return;
+        }
+        let (block, state_id) = args.world.get_block_and_state_id(args.position);
+        let mut props = TrapDoorProperties::from_state_id(state_id);
+        if props.powered {
+            return;
+        }
+        props.open = !props.open;
+        args.world.play_sound(
+            get_sound(block, props.open),
+            SoundCategory::Blocks,
+            &args.position.to_f64(),
+        );
+        args.world.set_block_state(
+            args.position,
+            props.to_state_id(block),
+            BlockFlags::NOTIFY_LISTENERS,
+        );
     }
 }

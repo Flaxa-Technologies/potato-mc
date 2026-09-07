@@ -15,7 +15,7 @@ use pumpkin_world::world::BlockFlags;
 use crate::{
     block::{
         registry::BlockActionResult,
-        {BlockBehaviour, NormalUseArgs},
+        {BlockBehaviour, ExplodeArgs, NormalUseArgs},
     },
     world::World,
 };
@@ -41,6 +41,10 @@ impl BlockBehaviour for LeverBlock {
     fn normal_use(&self, args: NormalUseArgs<'_>) -> BlockActionResult {
         toggle_lever(args.world, args.position);
         BlockActionResult::Consume
+    }
+
+    fn explode(&self, args: ExplodeArgs<'_>) {
+        toggle_lever(args.world, args.position);
     }
 
     fn emits_redstone_power(&self, _args: EmitsRedstonePowerArgs<'_>) -> bool {

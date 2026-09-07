@@ -153,70 +153,126 @@ impl CommandExecutor for LocateStructureExecutor {
     fn execute(&self, context: &CommandContext) -> CommandExecutorResult {
         let searched = context.get_argument::<ResourceOrTag>(ARG_STRUCTURE)?;
 
-        // The generator's placement data models vanilla's structure sets,
-        // so ids resolve against those. There is no structure tag data,
-        // hence tags cannot name any known structure (yet).
-        let set = if let ResourceOrTag::Resource(id) = searched
-            && id.is_vanilla()
-        {
-            StructureSet::get(id.path())
-        } else {
-            None
-        };
+        let mut candidates: Vec<(&'static StructureSet, Vec<StructureKeys>)> = Vec::new();
+        match &searched {
+            ResourceOrTag::Tag(id) => {
+                let tag_str = id.to_string();
+                let values = tag::get_tag_values(RegistryKey::WorldgenStructure, &tag_str)
+                    .or_else(|| tag::get_tag_values(RegistryKey::WorldgenStructure, id.path()));
+                if let Some(values) = values {
+                    let mut keys: Vec<StructureKeys> = values
+                        .iter()
+                        .filter_map(|val| StructureKeys::from_name(val))
+                        .collect();
+                    keys.sort_unstable_by_key(|k| *k as usize);
+                    keys.dedup();
+                    for key in keys {
+                        let set = key.structure_set();
+                        if let Some(existing) =
+                            candidates.iter_mut().find(|(s, _)| std::ptr::eq(*s, set))
+                        {
+                            if !existing.1.contains(&key) {
+                                existing.1.push(key);
+                            }
+                        } else {
+                            candidates.push((set, vec![key]));
+                        }
+                    }
+                }
+            }
+            ResourceOrTag::Resource(id) => {
+                let path = id.path();
+                // 1. Direct structure key
+                if let Some(key) = StructureKeys::from_name(path) {
+                    candidates.push((key.structure_set(), vec![key]));
+                }
+                // 2. Direct structure set
+                else if let Some(set) = StructureSet::get(path) {
+                    candidates
+                        .push((set, set.structures.iter().map(|e| e.structure).collect()));
+                }
+                // 3. Check if path is a structure tag
+                else if let Some(values) =
+                    tag::get_tag_values(RegistryKey::WorldgenStructure, &id.to_string())
+                        .or_else(|| tag::get_tag_values(RegistryKey::WorldgenStructure, path))
+                {
+                    for val in values {
+                        if let Some(key) = StructureKeys::from_name(val) {
+                            let set = key.structure_set();
+                            if let Some(existing) =
+                                candidates.iter_mut().find(|(s, _)| std::ptr::eq(*s, set))
+                            {
+                                if !existing.1.contains(&key) {
+                                    existing.1.push(key);
+                                }
+                            } else {
+                                candidates.push((set, vec![key]));
+                            }
+                        }
+                    }
+                }
+                // 4. Plural fallback
+                else if let Some(set) = StructureSet::get(&format!("{path}s")) {
+                    candidates
+                        .push((set, set.structures.iter().map(|e| e.structure).collect()));
+                }
+            }
+        }
 
-        let Some(set) = set else {
+        if candidates.is_empty() {
             return Err(STRUCTURE_INVALID_ERROR_TYPE
                 .create_without_context(TextComponent::text(searched.printable())));
-        };
+        }
 
         let origin = BlockPos::floored_v(context.source.position);
-
         let world = context.source.world();
         let seed = world.level.seed.0;
         let world_gen = world.level.world_gen.load_full();
 
-        let found = match &set.placement.placement_type {
-            // Strongholds come out of the pre-computed ring cache, which
-            // already holds positions they really occupy.
-            StructurePlacementType::ConcentricRings(_) => {
-                world_gen.global_structure_cache().and_then(|global_cache| {
-                    find_nearest_structure(
-                        origin,
-                        &[&set.placement],
-                        STRUCTURE_SEARCH_RADIUS,
-                        seed as i64,
-                        global_cache,
-                    )
-                })
-            }
-            // Everything else is spread over a grid whose candidate chunks
-            // are only *possible* sites: the biome at a candidate can still
-            // reject every structure in the set. Resolving the start makes
-            // sure the reported position actually holds one.
-            StructurePlacementType::RandomSpread(_) => {
-                let targets: Vec<StructureKeys> =
-                    set.structures.iter().map(|entry| entry.structure).collect();
-                find_nearest_structure_start(
+        let mut closest_result: Option<(BlockPos, StructureKeys, i32)> = None;
+
+        for (set, targets) in &candidates {
+            let found = match &set.placement.placement_type {
+                StructurePlacementType::ConcentricRings(_) => {
+                    world_gen.global_structure_cache().and_then(|global_cache| {
+                        find_nearest_structure(
+                            origin,
+                            &[&set.placement],
+                            STRUCTURE_SEARCH_RADIUS,
+                            seed as i64,
+                            global_cache,
+                        )
+                        .map(|pos| (pos, StructureKeys::Stronghold))
+                    })
+                }
+                StructurePlacementType::RandomSpread(_) => find_nearest_structure_start(
                     origin,
                     set,
-                    &targets,
+                    targets,
                     STRUCTURE_SEARCH_RADIUS,
                     &world_gen,
-                )
-            }
-        };
+                ),
+            };
 
-        let Some(target) = found else {
+            if let Some((target_pos, found_key)) = found {
+                let dist = horizontal_distance(&origin, &target_pos);
+                if closest_result.as_ref().is_none_or(|(_, _, d)| dist < *d) {
+                    closest_result = Some((target_pos, found_key, dist));
+                }
+            }
+        }
+
+        let Some((target, found_key, distance)) = closest_result else {
             return Err(STRUCTURE_NOT_FOUND_ERROR_TYPE
                 .create_without_context(TextComponent::text(searched.printable())));
         };
 
-        let distance = horizontal_distance(&origin, &target);
+        let display_name = result_name(&searched, &format!("minecraft:{}", found_key.to_name()));
         send_success(
             context,
             translation::java::COMMANDS_LOCATE_STRUCTURE_SUCCESS,
             translation::bedrock::COMMANDS_LOCATE_STRUCTURE_SUCCESS,
-            searched.printable(),
+            display_name,
             &target,
             false,
             distance,

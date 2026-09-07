@@ -9,8 +9,9 @@ use crate::server::Server;
 use crate::world::World;
 use pumpkin_data::data_component_impl::{
     AxolotlVariantImpl, CatVariantImpl, ChickenVariantImpl, CowVariantImpl, FoxVariantImpl,
-    FrogVariantImpl, HorseVariantImpl, LlamaVariantImpl, MooshroomVariantImpl, PigVariantImpl,
-    RabbitVariantImpl, SheepColorImpl, ShulkerColorImpl, VillagerVariantImpl, WolfVariantImpl,
+    FrogVariantImpl, HorseVariantImpl, LlamaVariantImpl, MooshroomVariantImpl, ParrotVariantImpl,
+    PigVariantImpl, RabbitVariantImpl, SheepColorImpl, ShulkerColorImpl, VillagerVariantImpl,
+    WolfVariantImpl,
 };
 use pumpkin_data::entity::entity_from_egg;
 use pumpkin_data::fluid::Fluid;
@@ -56,6 +57,8 @@ pub(crate) fn apply_entity_variant(item: &ItemStack, mob: &dyn EntityBase) {
     } else if let Some(comp) = item.get_data_component::<LlamaVariantImpl>() {
         mob.set_variant_name(&comp.value);
     } else if let Some(comp) = item.get_data_component::<AxolotlVariantImpl>() {
+        mob.set_variant_name(&comp.value);
+    } else if let Some(comp) = item.get_data_component::<ParrotVariantImpl>() {
         mob.set_variant_name(&comp.value);
     } else if let Some(comp) = item.get_data_component::<SheepColorImpl>() {
         mob.set_variant_name(&comp.value);

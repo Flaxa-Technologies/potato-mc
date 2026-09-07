@@ -49,7 +49,13 @@ impl ArgumentType for BlockArgumentType {
         _context: &CommandContext,
         builder: SuggestionsBuilder,
     ) -> Suggestions {
-        builder.build()
+        builder
+            .filter_and_suggest_iter(
+                (0..pumpkin_data::BlockId::COUNT)
+                    .filter_map(pumpkin_data::BlockId::new)
+                    .map(|id| format!("minecraft:{}", pumpkin_data::Block::from_id(id).name)),
+            )
+            .build()
     }
 }
 

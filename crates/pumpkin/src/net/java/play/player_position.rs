@@ -68,6 +68,13 @@ impl JavaClient {
             self.force_tp(player, player.get_entity().pos.load());
             return;
         }
+        if player.is_sleeping() {
+            let current_pos = player.get_entity().pos.load();
+            if current_pos.squared_distance_to_vec(&packet.position) > 4.0 {
+                player.wake_up();
+            }
+            return;
+        }
         // y = feet Y
         let position = packet.position;
         if position.x.is_nan() || position.y.is_nan() || position.z.is_nan() {
@@ -98,6 +105,7 @@ impl JavaClient {
                 let entity = &player.get_entity();
                 let last_pos = entity.pos.load();
                 player.get_entity().set_pos(pos);
+                entity.velocity.store(pos - last_pos);
 
                 let distance = last_pos.squared_distance_to_vec(&pos).sqrt();
                 let cm = (distance * 100.0) as i32;
@@ -206,6 +214,13 @@ impl JavaClient {
             let entity = player.get_entity();
             entity.set_rotation(packet.yaw, packet.pitch);
             self.force_tp(player, entity.pos.load());
+            return;
+        }
+        if player.is_sleeping() {
+            let current_pos = player.get_entity().pos.load();
+            if current_pos.squared_distance_to_vec(&packet.position) > 4.0 {
+                player.wake_up();
+            }
             return;
         }
         // y = feet Y

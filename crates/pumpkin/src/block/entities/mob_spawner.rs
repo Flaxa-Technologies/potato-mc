@@ -178,6 +178,10 @@ impl BlockEntity for MobSpawnerBlockEntity {
             }
             if spawned_any {
                 self.update_spawns(world);
+            } else {
+                // If all spawn attempts failed collision checks, reset to a brief retry delay
+                // so the spawner doesn't busy-loop every tick with delay == 0.
+                self.delay.store(rand::random_range(20..40), Ordering::Relaxed);
             }
         }
     }

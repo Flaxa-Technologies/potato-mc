@@ -1,4 +1,3 @@
-use pumpkin_util::PermissionLvl;
 use pumpkin_util::permission::{Permission, PermissionDefault, PermissionRegistry};
 use pumpkin_util::text::{TextComponent, color::NamedColor};
 
@@ -32,7 +31,11 @@ impl CommandExecutor for TpsExecutor {
             .add_child(TextComponent::text(" MSPT: "))
             .add_child(TextComponent::text(format!("{mspt:.2}ms")).color_named(tps_color));
 
-        context.source.send_message(message);
+        if let Some(player) = context.source.as_player() {
+            player.send_system_message(&message);
+        } else {
+            context.source.send_message(message);
+        }
 
         Ok(tps as i32)
     }
@@ -42,12 +45,11 @@ pub fn register(dispatcher: &mut CommandDispatcher, registry: &PermissionRegistr
     registry.register_permission_or_panic(Permission::new(
         PERMISSION,
         DESCRIPTION,
-        PermissionDefault::Op(PermissionLvl::Two),
+        PermissionDefault::Allow,
     ));
 
     dispatcher.register(
         command("tps", DESCRIPTION)
-            .requires(PERMISSION)
             .executes(TpsExecutor),
     );
 }

@@ -1,4 +1,3 @@
-use pumpkin_util::PermissionLvl;
 use pumpkin_util::permission::{Permission, PermissionDefault, PermissionRegistry};
 use pumpkin_util::text::TextComponent;
 use pumpkin_util::text::hover::HoverEvent;
@@ -87,23 +86,25 @@ impl CommandExecutor for GiveExecutor {
     }
 }
 
+
 pub fn register(dispatcher: &mut CommandDispatcher, registry: &PermissionRegistry) {
     registry.register_permission_or_panic(Permission::new(
         PERMISSION,
         DESCRIPTION,
-        PermissionDefault::Op(PermissionLvl::Two),
+        PermissionDefault::Allow,
     ));
 
     dispatcher.register(
-        command("give", DESCRIPTION).requires(PERMISSION).then(
-            argument("targets", EntityArgumentType::Players).then(
-                argument("item", ItemStackArgumentType)
-                    .executes(GiveExecutor { has_count: false })
-                    .then(
-                        argument("count", IntegerArgumentType::with_min(1))
-                            .executes(GiveExecutor { has_count: true }),
-                    ),
+        command("give", DESCRIPTION)
+            .then(
+                argument("targets", EntityArgumentType::Players).then(
+                    argument("item", ItemStackArgumentType)
+                        .executes(GiveExecutor { has_count: false })
+                        .then(
+                            argument("count", IntegerArgumentType::with_min(1))
+                                .executes(GiveExecutor { has_count: true }),
+                        ),
+                ),
             ),
-        ),
     );
 }

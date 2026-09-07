@@ -14,7 +14,7 @@ use crate::{
         BlockIsReplacing,
         registry::BlockActionResult,
         {
-            BlockBehaviour, CanPlaceAtArgs, CanUpdateAtArgs, NormalUseArgs, OnPlaceArgs,
+            BlockBehaviour, CanPlaceAtArgs, CanUpdateAtArgs, ExplodeArgs, NormalUseArgs, OnPlaceArgs,
             UseWithItemArgs,
         },
     },
@@ -103,6 +103,24 @@ impl BlockBehaviour for CandleBlock {
             );
 
             BlockActionResult::Consume
+        }
+    }
+
+    fn explode(&self, args: ExplodeArgs<'_>) {
+        let state_id = args.world.get_block_state_id(args.position);
+        let mut properties = CandleLikeProperties::from_state_id(state_id);
+        if properties.lit {
+            properties.lit = false;
+            args.world.set_block_state(
+                args.position,
+                properties.to_state_id(args.block),
+                BlockFlags::NOTIFY_ALL,
+            );
+            args.world.play_sound(
+                pumpkin_data::sound::Sound::BlockCandleExtinguish,
+                pumpkin_data::sound::SoundCategory::Blocks,
+                &args.position.to_f64(),
+            );
         }
     }
 

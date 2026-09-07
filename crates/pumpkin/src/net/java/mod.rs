@@ -586,7 +586,12 @@ impl JavaClient {
             }
             _ => {}
         }
-        debug!("Closing connection for {}", self.id);
+        warn!(
+            "Client {} kicked (try_kick in state {:?}): {}",
+            self.id,
+            self.connection_state.load(),
+            reason.clone().get_text()
+        );
         self.close();
     }
 
@@ -612,7 +617,12 @@ impl JavaClient {
                 _ => {}
             }
         }
-        debug!("Closing connection for {}", self.id);
+        warn!(
+            "Client {} kicked (state {:?}): {}",
+            self.id,
+            self.connection_state.load(),
+            reason.clone().get_text()
+        );
         self.close();
     }
 

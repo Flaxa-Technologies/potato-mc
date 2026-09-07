@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::block::blocks::redstone::block_receives_redstone_power;
 use crate::block::registry::BlockActionResult;
 use crate::block::{
-    BlockBehaviour, GetStateForNeighborUpdateArgs, NormalUseArgs, OnNeighborUpdateArgs,
+    BlockBehaviour, ExplodeArgs, GetStateForNeighborUpdateArgs, NormalUseArgs, OnNeighborUpdateArgs,
     OnPlaceArgs, PathComputationType,
 };
 use crate::entity::EntityBase;
@@ -142,6 +142,25 @@ impl BlockBehaviour for FenceGateBlock {
             }
             PathComputationType::Water => false,
         }
+    }
+
+    fn explode(&self, args: ExplodeArgs<'_>) {
+        let (block, state_id) = args.world.get_block_and_state_id(args.position);
+        let mut props = FenceGateProperties::from_state_id(state_id);
+        if props.powered {
+            return;
+        }
+        props.open = !props.open;
+        args.world.play_sound(
+            get_sound(block, props.open),
+            SoundCategory::Blocks,
+            &args.position.to_f64(),
+        );
+        args.world.set_block_state(
+            args.position,
+            props.to_state_id(block),
+            BlockFlags::NOTIFY_LISTENERS,
+        );
     }
 }
 

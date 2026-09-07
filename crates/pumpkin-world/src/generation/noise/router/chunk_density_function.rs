@@ -158,33 +158,8 @@ impl Interpolated {
         buffer: &mut [f32],
         volume: &DensityVolume,
     ) {
-        let min_cell_x = volume.min_block_x.div_euclid(self.cell_size_xz);
-        let min_cell_y = volume.min_block_y.div_euclid(self.cell_size_y);
-        let min_cell_z = volume.min_block_z.div_euclid(self.cell_size_xz);
-        let max_block_x = volume.max_block_x();
-        let max_block_y = volume.max_block_y();
-        let max_block_z = volume.max_block_z();
-        let cell_count_x = (max_block_x.div_euclid(self.cell_size_xz) - min_cell_x + 1) as usize;
-        let cell_count_y = (max_block_y.div_euclid(self.cell_size_y) - min_cell_y + 1) as usize;
-        let cell_count_z = (max_block_z.div_euclid(self.cell_size_xz) - min_cell_z + 1) as usize;
-        let corner_count = |count: usize, max_block: i32, cell_size: i32| {
-            if max_block.rem_euclid(cell_size) == 0 {
-                count
-            } else {
-                count + 1
-            }
-        };
-        let cell_volume = DensityVolume::new(
-            corner_count(cell_count_x, max_block_x, self.cell_size_xz),
-            corner_count(cell_count_y, max_block_y, self.cell_size_y),
-            corner_count(cell_count_z, max_block_z, self.cell_size_xz),
-            min_cell_x * self.cell_size_xz,
-            min_cell_y * self.cell_size_y,
-            min_cell_z * self.cell_size_xz,
-            self.cell_size_xz,
-            self.cell_size_y,
-            self.cell_size_xz,
-        );
+        let (cell_volume, cell_count_x, cell_count_y, cell_count_z) =
+            compute_cell_volume(volume, self.cell_size_xz, self.cell_size_y);
         let mut corners = DensityBuffer::acquire(&cell_volume);
         ChunkNoiseFunctionComponent::sample_volume_from_stack(
             &mut component_stack[..=self.input_index],
@@ -192,70 +167,171 @@ impl Interpolated {
             &cell_volume,
         );
 
-        for cell_z in 0..cell_count_z {
-            let next_z = (cell_z + 1).min(cell_volume.size_z - 1);
-            for cell_x in 0..cell_count_x {
-                let next_x = (cell_x + 1).min(cell_volume.size_x - 1);
-                for cell_y in 0..cell_count_y {
-                    let next_y = (cell_y + 1).min(cell_volume.size_y - 1);
-                    let corner = |x: usize, y: usize, z: usize| {
-                        corners[cell_volume.index_unchecked(x, y, z)]
-                    };
-                    self.fill_cell(
-                        buffer,
-                        volume,
-                        &cell_volume,
-                        [cell_x, cell_y, cell_z],
-                        [
-                            corner(cell_x, cell_y, cell_z),
-                            corner(next_x, cell_y, cell_z),
-                            corner(cell_x, next_y, cell_z),
-                            corner(next_x, next_y, cell_z),
-                            corner(cell_x, cell_y, next_z),
-                            corner(next_x, cell_y, next_z),
-                            corner(cell_x, next_y, next_z),
-                            corner(next_x, next_y, next_z),
-                        ],
-                    );
-                }
+        trilinear_interpolate_corners(
+            &corners,
+            buffer,
+            volume,
+            &cell_volume,
+            cell_count_x,
+            cell_count_y,
+            cell_count_z,
+            self.cell_size_xz,
+            self.cell_size_y,
+        );
+    }
+}
+
+pub fn compute_cell_volume(
+    volume: &DensityVolume,
+    cell_size_xz: i32,
+    cell_size_y: i32,
+) -> (DensityVolume, usize, usize, usize) {
+    let min_cell_x = volume.min_block_x.div_euclid(cell_size_xz);
+    let min_cell_y = volume.min_block_y.div_euclid(cell_size_y);
+    let min_cell_z = volume.min_block_z.div_euclid(cell_size_xz);
+    let max_block_x = volume.max_block_x();
+    let max_block_y = volume.max_block_y();
+    let max_block_z = volume.max_block_z();
+    let cell_count_x = (max_block_x.div_euclid(cell_size_xz) - min_cell_x + 1) as usize;
+    let cell_count_y = (max_block_y.div_euclid(cell_size_y) - min_cell_y + 1) as usize;
+    let cell_count_z = (max_block_z.div_euclid(cell_size_xz) - min_cell_z + 1) as usize;
+    let corner_count = |count: usize, max_block: i32, cell_size: i32| {
+        if max_block.rem_euclid(cell_size) == 0 {
+            count
+        } else {
+            count + 1
+        }
+    };
+    let cell_volume = DensityVolume::new(
+        corner_count(cell_count_x, max_block_x, cell_size_xz),
+        corner_count(cell_count_y, max_block_y, cell_size_y),
+        corner_count(cell_count_z, max_block_z, cell_size_xz),
+        min_cell_x * cell_size_xz,
+        min_cell_y * cell_size_y,
+        min_cell_z * cell_size_xz,
+        cell_size_xz,
+        cell_size_y,
+        cell_size_xz,
+    );
+    (cell_volume, cell_count_x, cell_count_y, cell_count_z)
+}
+
+pub fn trilinear_interpolate_corners(
+    corners: &[f32],
+    buffer: &mut [f32],
+    volume: &DensityVolume,
+    cell_volume: &DensityVolume,
+    cell_count_x: usize,
+    cell_count_y: usize,
+    cell_count_z: usize,
+    cell_size_xz: i32,
+    cell_size_y: i32,
+) {
+    let cell_size_xz_inv = 1.0 / cell_size_xz as f32;
+    let cell_size_y_inv = 1.0 / cell_size_y as f32;
+
+    for cell_z in 0..cell_count_z {
+        let next_z = (cell_z + 1).min(cell_volume.size_z - 1);
+        let z0_offset = cell_z * cell_volume.size_x;
+        let z1_offset = next_z * cell_volume.size_x;
+        for cell_x in 0..cell_count_x {
+            let next_x = (cell_x + 1).min(cell_volume.size_x - 1);
+            let idx_00 = (cell_x + z0_offset) * cell_volume.size_y;
+            let idx_10 = (next_x + z0_offset) * cell_volume.size_y;
+            let idx_01 = (cell_x + z1_offset) * cell_volume.size_y;
+            let idx_11 = (next_x + z1_offset) * cell_volume.size_y;
+            for cell_y in 0..cell_count_y {
+                let next_y = (cell_y + 1).min(cell_volume.size_y - 1);
+                fill_single_cell(
+                    buffer,
+                    volume,
+                    cell_volume,
+                    [cell_x, cell_y, cell_z],
+                    [
+                        corners[idx_00 + cell_y],
+                        corners[idx_10 + cell_y],
+                        corners[idx_00 + next_y],
+                        corners[idx_10 + next_y],
+                        corners[idx_01 + cell_y],
+                        corners[idx_11 + cell_y],
+                        corners[idx_01 + next_y],
+                        corners[idx_11 + next_y],
+                    ],
+                    cell_size_xz,
+                    cell_size_y,
+                    cell_size_xz_inv,
+                    cell_size_y_inv,
+                );
             }
         }
     }
+}
 
-    fn fill_cell(
-        &self,
-        buffer: &mut [f32],
-        volume: &DensityVolume,
-        cell_volume: &DensityVolume,
-        cell: [usize; 3],
-        [v000, v100, v010, v110, v001, v101, v011, v111]: [f32; 8],
-    ) {
-        let cell_out_x = cell_volume.block_x(cell[0]) - volume.min_block_x;
-        let cell_out_y = cell_volume.block_y(cell[1]) - volume.min_block_y;
-        let cell_out_z = cell_volume.block_z(cell[2]) - volume.min_block_z;
-        let x0 = 0.max(-cell_out_x);
-        let y0 = 0.max(-cell_out_y);
-        let z0 = 0.max(-cell_out_z);
-        let x1 = self.cell_size_xz.min(volume.size_x as i32 - cell_out_x) - 1;
-        let y1 = self.cell_size_y.min(volume.size_y as i32 - cell_out_y) - 1;
-        let z1 = self.cell_size_xz.min(volume.size_z as i32 - cell_out_z) - 1;
+fn fill_single_cell(
+    buffer: &mut [f32],
+    volume: &DensityVolume,
+    cell_volume: &DensityVolume,
+    cell: [usize; 3],
+    [v000, v100, v010, v110, v001, v101, v011, v111]: [f32; 8],
+    cell_size_xz: i32,
+    cell_size_y: i32,
+    cell_size_xz_inv: f32,
+    cell_size_y_inv: f32,
+) {
+    let cell_out_x = cell_volume.block_x(cell[0]) - volume.min_block_x;
+    let cell_out_y = cell_volume.block_y(cell[1]) - volume.min_block_y;
+    let cell_out_z = cell_volume.block_z(cell[2]) - volume.min_block_z;
+    let x0 = 0.max(-cell_out_x);
+    let y0 = 0.max(-cell_out_y);
+    let z0 = 0.max(-cell_out_z);
+    let x1 = cell_size_xz.min(volume.size_x as i32 - cell_out_x) - 1;
+    let y1 = cell_size_y.min(volume.size_y as i32 - cell_out_y) - 1;
+    let z1 = cell_size_xz.min(volume.size_z as i32 - cell_out_z) - 1;
 
-        for z in z0..=z1 {
-            let alpha_z = z as f32 * self.cell_size_xz_inv;
-            let out_z = (cell_out_z + z) as usize;
-            let v00 = lerp(alpha_z, v000, v001);
-            let v01 = lerp(alpha_z, v010, v011);
-            let v10 = lerp(alpha_z, v100, v101);
-            let v11 = lerp(alpha_z, v110, v111);
-            for x in x0..=x1 {
-                let alpha_x = x as f32 * self.cell_size_xz_inv;
-                let out_x = (cell_out_x + x) as usize;
-                let v_0 = lerp(alpha_x, v00, v10);
-                let v_1 = lerp(alpha_x, v01, v11);
-                let value_step = (v_1 - v_0) * self.cell_size_y_inv;
-                let mut value = v_0 + value_step * y0 as f32;
-                let start = volume.index_unchecked(out_x, (cell_out_y + y0) as usize, out_z);
-                for slot in &mut buffer[start..start + (y1 - y0 + 1) as usize] {
+    let y_count = (y1 - y0 + 1) as usize;
+    let y_start = (cell_out_y + y0) as usize;
+    let xy_plane = volume.size_x * volume.size_y;
+
+    for z in z0..=z1 {
+        let alpha_z = z as f32 * cell_size_xz_inv;
+        let out_z = (cell_out_z + z) as usize;
+        let z_offset = out_z * xy_plane;
+        let v00 = lerp(alpha_z, v000, v001);
+        let v01 = lerp(alpha_z, v010, v011);
+        let v10 = lerp(alpha_z, v100, v101);
+        let v11 = lerp(alpha_z, v110, v111);
+        for x in x0..=x1 {
+            let alpha_x = x as f32 * cell_size_xz_inv;
+            let out_x = (cell_out_x + x) as usize;
+            let v_0 = lerp(alpha_x, v00, v10);
+            let v_1 = lerp(alpha_x, v01, v11);
+            let value_step = (v_1 - v_0) * cell_size_y_inv;
+            let mut value = v_0 + value_step * y0 as f32;
+            let start = y_start + (out_x * volume.size_y) + z_offset;
+
+            let target = &mut buffer[start..start + y_count];
+            if y_count == 8 {
+                let v = [
+                    value,
+                    value + value_step,
+                    value + value_step * 2.0,
+                    value + value_step * 3.0,
+                    value + value_step * 4.0,
+                    value + value_step * 5.0,
+                    value + value_step * 6.0,
+                    value + value_step * 7.0,
+                ];
+                target.copy_from_slice(&v);
+            } else if y_count == 4 {
+                let v = [
+                    value,
+                    value + value_step,
+                    value + value_step * 2.0,
+                    value + value_step * 3.0,
+                ];
+                target.copy_from_slice(&v);
+            } else {
+                for slot in target.iter_mut() {
                     *slot = value;
                     value += value_step;
                 }

@@ -107,10 +107,10 @@ pub fn find_nearest_structure_start(
     target_structures: &[pumpkin_data::structures::StructureKeys],
     max_search_radius: i32,
     generator: &WorldGenerator,
-) -> Option<BlockPos> {
+) -> Option<(BlockPos, pumpkin_data::structures::StructureKeys)> {
     use crate::{
         ProtoChunk,
-        biome::{BiomeSupplier, MultiNoiseBiomeSupplier},
+        biome::{BiomeSupplier, MultiNoiseBiomeSupplier, end::TheEndBiomeSupplier},
         generation::{
             noise::router::{
                 multi_noise_sampler::MultiNoiseSampler,
@@ -125,7 +125,9 @@ pub fn find_nearest_structure_start(
             },
         },
     };
+    use pumpkin_data::dimension::Dimension;
     use pumpkin_data::structures::Structure;
+    use pumpkin_util::random::{RandomImpl, get_large_feature_seed, legacy_rand::LegacyRand};
 
     let WorldGenerator::Noise(noise_generator) = generator else {
         return None;
@@ -142,8 +144,18 @@ pub fn find_nearest_structure_start(
     let world_seed = noise_generator.random_config.seed as i64;
     let global_cache = &noise_generator.global_structure_cache;
 
+    let biome_supplier: &dyn BiomeSupplier = if noise_generator.dimension == Dimension::THE_END {
+        &TheEndBiomeSupplier
+    } else if noise_generator.dimension == Dimension::THE_NETHER {
+        &MultiNoiseBiomeSupplier::NETHER
+    } else {
+        &MultiNoiseBiomeSupplier::OVERWORLD
+    };
+
+    let placement_chunk = ProtoChunk::new(0, 0, generator);
+
     for radius in 0..=max_search_radius {
-        let mut nearest: Option<FoundStructure> = None;
+        let mut nearest: Option<(FoundStructure, pumpkin_data::structures::StructureKeys)> = None;
         for region_x_offset in -radius..=radius {
             for region_z_offset in -radius..=radius {
                 if region_x_offset.abs() != radius && region_z_offset.abs() != radius {
@@ -156,7 +168,6 @@ pub fn find_nearest_structure_start(
                     region_origin_z + region_z_offset,
                     structure_set.placement.salt,
                 );
-                let placement_chunk = ProtoChunk::new(chunk_x, chunk_z, generator);
                 if !should_generate_structure(
                     &structure_set.placement,
                     &noise_generator.structure_calculator,
@@ -169,7 +180,29 @@ pub fn find_nearest_structure_start(
                     continue;
                 }
 
-                for &key in target_structures {
+                let mut candidates = structure_set.structures.to_vec();
+                let large_feature_seed =
+                    get_large_feature_seed(world_seed as u64, chunk_x, chunk_z);
+                let mut random = LegacyRand::from_seed(large_feature_seed);
+                let mut total_weight: u32 = candidates.iter().map(|e| e.weight).sum();
+
+                while !candidates.is_empty() {
+                    let roll = if candidates.len() == 1 {
+                        0
+                    } else {
+                        random.next_bounded_i32(total_weight as i32)
+                    };
+                    let mut selected_idx = 0;
+                    let mut accum = roll;
+                    for (i, entry) in candidates.iter().enumerate() {
+                        accum -= entry.weight as i32;
+                        if accum < 0 {
+                            selected_idx = i;
+                            break;
+                        }
+                    }
+                    let key = candidates[selected_idx].structure;
+
                     let start =
                         global_cache.get_or_compute_structure_start(key, chunk_x, chunk_z, || {
                             let settings = noise_generator.settings;
@@ -186,8 +219,6 @@ pub fn find_nearest_structure_start(
                             let mut biome_sampler = MultiNoiseSampler::generate(
                                 &noise_generator.base_router.multi_noise,
                             );
-                            let biome_supplier: &dyn BiomeSupplier =
-                                &MultiNoiseBiomeSupplier::OVERWORLD;
                             let context = StructureGeneratorContext {
                                 seed: world_seed,
                                 chunk_x,
@@ -206,27 +237,33 @@ pub fn find_nearest_structure_start(
                                 &mut biome_sampler,
                             )
                         });
-                    let Some(start) = start else {
-                        continue;
-                    };
-                    let position = start.start_pos;
-                    let dx = f64::from(position.0.x - origin.0.x);
-                    let dz = f64::from(position.0.z - origin.0.z);
-                    let found = FoundStructure {
-                        pos: position,
-                        distance_sq: dx * dx + dz * dz,
-                    };
-                    if nearest
-                        .as_ref()
-                        .is_none_or(|current| found.distance_sq < current.distance_sq)
-                    {
-                        nearest = Some(found);
+
+                    if let Some(start) = start {
+                        if target_structures.contains(&key) {
+                            let position = start.start_pos;
+                            let dx = f64::from(position.0.x - origin.0.x);
+                            let dz = f64::from(position.0.z - origin.0.z);
+                            let found = FoundStructure {
+                                pos: position,
+                                distance_sq: dx * dx + dz * dz,
+                            };
+                            if nearest
+                                .as_ref()
+                                .is_none_or(|(current, _)| found.distance_sq < current.distance_sq)
+                            {
+                                nearest = Some((found, key));
+                            }
+                        }
+                        break;
                     }
+
+                    let failed = candidates.remove(selected_idx);
+                    total_weight -= failed.weight;
                 }
             }
         }
-        if let Some(found) = nearest {
-            return Some(found.pos);
+        if let Some((found, key)) = nearest {
+            return Some((found.pos, key));
         }
     }
     None

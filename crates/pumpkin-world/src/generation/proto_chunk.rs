@@ -1,4 +1,5 @@
 use crate::generation::structure::placement::GlobalStructureCache;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 
 use pumpkin_data::block_properties::is_air;
@@ -12,14 +13,11 @@ use pumpkin_data::tag::RegistryKey;
 use pumpkin_data::{Block, BlockState, block_properties::blocks_movement, chunk::Biome};
 use pumpkin_data::{BlockId, BlockStateId, tag};
 use pumpkin_util::random::xoroshiro128::XoroshiroSplitter;
-use pumpkin_util::random::{RandomImpl, get_carver_seed};
+use pumpkin_util::random::{RandomImpl, get_large_feature_seed, legacy_rand::LegacyRand};
 use pumpkin_util::{
     HeightMap,
     math::{block_box::BlockBox, position::BlockPos, vector3::Vector3},
-    random::{
-        RandomGenerator, get_decorator_seed, worldgen_random::WorldgenRandom,
-        xoroshiro128::Xoroshiro,
-    },
+    random::{RandomGenerator, get_decorator_seed, worldgen_random::WorldgenRandom},
 };
 use rustc_hash::FxHashMap;
 
@@ -52,7 +50,6 @@ use crate::generation::structure::placement::should_generate_structure;
 use crate::generation::structure::structures::{
     StructureGeneratorContext, StructureInstance, create_chunk_random,
 };
-use crate::generation::structure::try_generate_structure;
 use crate::generation::surface::rule::try_apply_material_rule;
 use crate::{
     chunk::CHUNK_AREA,
@@ -144,7 +141,7 @@ pub struct ProtoChunk {
     pub flat_ocean_floor_height_map: [i16; CHUNK_AREA],
     pub flat_motion_blocking_height_map: [i16; CHUNK_AREA],
     pub flat_motion_blocking_no_leaves_height_map: [i16; CHUNK_AREA],
-    structure_starts: FxHashMap<StructureKeys, StructureInstance>,
+    pub(crate) structure_starts: FxHashMap<StructureKeys, StructureInstance>,
 
     height: u16,
     bottom_y: i8,
@@ -163,6 +160,7 @@ pub struct TerrainCache {
     pub terrain_builder: SurfaceTerrainBuilder,
     pub surface_noise: DoublePerlinNoiseSampler,
     pub secondary_noise: DoublePerlinNoiseSampler,
+    pub noise_samplers: [std::sync::OnceLock<DoublePerlinNoiseSampler>; DoublePerlinNoiseParameters::COUNT],
 }
 
 impl TerrainCache {
@@ -178,12 +176,90 @@ impl TerrainCache {
             &random_config.base_random_deriver,
             &DoublePerlinNoiseParameters::SURFACE_SECONDARY,
         );
+        const INIT_LOCK: std::sync::OnceLock<DoublePerlinNoiseSampler> = std::sync::OnceLock::new();
         Self {
             terrain_builder,
             surface_noise,
             secondary_noise,
+            noise_samplers: [INIT_LOCK; DoublePerlinNoiseParameters::COUNT],
         }
     }
+
+    #[inline]
+    #[must_use]
+    pub fn get_noise_sampler(
+        &self,
+        params: &DoublePerlinNoiseParameters,
+        random_deriver: &XoroshiroSplitter,
+    ) -> &DoublePerlinNoiseSampler {
+        if params.id < DoublePerlinNoiseParameters::COUNT {
+            self.noise_samplers[params.id].get_or_init(|| {
+                DoublePerlinNoiseBuilder::get_noise_sampler_for_id(random_deriver, params)
+            })
+        } else {
+            &self.surface_noise
+        }
+    }
+}
+
+pub static STRUCT_REF_PROF_ENABLED: AtomicBool = AtomicBool::new(false);
+pub static PROF_CANDIDATE_MATH_NS: AtomicU64 = AtomicU64::new(0);
+pub static PROF_SHOULD_GENERATE_NS: AtomicU64 = AtomicU64::new(0);
+pub static PROF_COMPUTE_START_NS: AtomicU64 = AtomicU64::new(0);
+pub static PROF_BBOX_NS: AtomicU64 = AtomicU64::new(0);
+pub static PROF_TOTAL_NS: AtomicU64 = AtomicU64::new(0);
+pub static PROF_SET_TIMES_NS: [AtomicU64; 20] = [
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+];
+pub static PROF_SET_CALLS: [AtomicU64; 20] = [
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+];
+pub static PROF_SET_HITS: [AtomicU64; 20] = [
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+    AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0), AtomicU64::new(0),
+];
+pub static PROF_JIGSAW_COUNT: AtomicU64 = AtomicU64::new(0);
+pub static PROF_JIGSAW_NS: AtomicU64 = AtomicU64::new(0);
+
+pub fn enable_structure_ref_profiling(enable: bool) {
+    STRUCT_REF_PROF_ENABLED.store(enable, Ordering::Relaxed);
+}
+
+pub fn dump_and_reset_structure_ref_profiling(name: &str) {
+    let total_ns = PROF_TOTAL_NS.swap(0, Ordering::Relaxed);
+    let cand_ns = PROF_CANDIDATE_MATH_NS.swap(0, Ordering::Relaxed);
+    let should_ns = PROF_SHOULD_GENERATE_NS.swap(0, Ordering::Relaxed);
+    let comp_ns = PROF_COMPUTE_START_NS.swap(0, Ordering::Relaxed);
+    let bbox_ns = PROF_BBOX_NS.swap(0, Ordering::Relaxed);
+    let jigsaw_cnt = PROF_JIGSAW_COUNT.swap(0, Ordering::Relaxed);
+    let jigsaw_ns = PROF_JIGSAW_NS.swap(0, Ordering::Relaxed);
+
+    println!("--- [{}] StructureReferences Breakdown ---", name);
+    println!("  Total time inside set_structure_references: {:.3} ms", total_ns as f64 / 1_000_000.0);
+    println!("    - Candidate Chunk Math:     {:.3} ms", cand_ns as f64 / 1_000_000.0);
+    println!("    - should_generate_structure: {:.3} ms", should_ns as f64 / 1_000_000.0);
+    println!("    - compute_structure_start:   {:.3} ms (Jigsaw invocations: {}, Jigsaw time: {:.3} ms)",
+        comp_ns as f64 / 1_000_000.0, jigsaw_cnt, jigsaw_ns as f64 / 1_000_000.0);
+    println!("    - Bounding Box & Collector:  {:.3} ms", bbox_ns as f64 / 1_000_000.0);
+    println!("  Per Structure Set Profile:");
+    for (i, &name) in StructureSet::NAMES.iter().enumerate() {
+        let set_time = PROF_SET_TIMES_NS[i].swap(0, Ordering::Relaxed);
+        let calls = PROF_SET_CALLS[i].swap(0, Ordering::Relaxed);
+        let hits = PROF_SET_HITS[i].swap(0, Ordering::Relaxed);
+        if set_time > 0 || calls > 0 {
+            println!("    - {:<20}: {:8.3} ms | candidates: {:4} | hits: {:2}",
+                name, set_time as f64 / 1_000_000.0, calls, hits);
+        }
+    }
+    println!("--------------------------------------------------");
 }
 
 impl ProtoChunk {
@@ -271,6 +347,67 @@ impl ProtoChunk {
             pending_structure_entities: Vec::new(),
             fluid_ticks: Vec::new(),
         }
+    }
+
+    /// Create a fresh `ProtoChunk` at `(x, z)` inheriting all dimension/seed
+    /// metadata from an existing chunk (without re-deriving from `WorldGenerator`).
+    ///
+    /// Used by `StageCache` to clone biome-stage metadata before running
+    /// structure-start generation on the cloned chunk.
+    #[must_use]
+    pub(crate) fn new_raw(x: i32, z: i32, template: &Self) -> Self {
+        use crate::chunk::format::LightContainer;
+        let height = template.height;
+        let bottom_y = template.bottom_y;
+        let section_count = (height as usize) / 16;
+        let default_heightmap = [i16::MIN; CHUNK_AREA];
+        Self {
+            x,
+            z,
+            default_block: template.default_block,
+            biome_mixer_seed: template.biome_mixer_seed,
+            flat_block_map: vec![
+                pumpkin_data::BlockStateId::AIR;
+                CHUNK_AREA * height as usize
+            ]
+            .into_boxed_slice(),
+            flat_biome_map: template.flat_biome_map.clone(),
+            flat_surface_height_map: default_heightmap,
+            flat_ocean_floor_height_map: default_heightmap,
+            flat_motion_blocking_height_map: default_heightmap,
+            flat_motion_blocking_no_leaves_height_map: default_heightmap,
+            structure_starts: rustc_hash::FxHashMap::default(),
+            height,
+            bottom_y,
+            generation_height: template.generation_height,
+            generation_bottom_y: template.generation_bottom_y,
+            stage: StagedChunkEnum::Biomes,
+            light: ChunkLight {
+                sky_light: (0..section_count)
+                    .map(|_| LightContainer::new_empty(0))
+                    .collect(),
+                block_light: (0..section_count)
+                    .map(|_| LightContainer::new_empty(0))
+                    .collect(),
+            },
+            carving_mask: crate::generation::carver::mask::CarvingMask::new(
+                height as i32,
+                bottom_y as i32,
+            ),
+            blending_data: None,
+            pending_block_entities: Vec::new(),
+            pending_structure_entities: Vec::new(),
+            fluid_ticks: Vec::new(),
+        }
+    }
+
+    /// Copy the completed `structure_starts` map from `src` into `self`.
+    ///
+    /// Used by `StageCache` to transfer the read-only structure data computed on
+    /// a cached chunk into a fresh mutable chunk that will continue through
+    /// StructureReferences and later stages.
+    pub(crate) fn copy_structure_starts_from(&mut self, src: &Self) {
+        self.structure_starts.clone_from(&src.structure_starts);
     }
 
     #[must_use]
@@ -618,105 +755,113 @@ impl ProtoChunk {
             FluidLevel::new(-54, &Block::LAVA),
         );
 
-        let mut beardifier_structures = Vec::new();
-        let mut beardifier_junctions = Vec::new();
-        let mut any_piece_bounding_box: Option<BlockBox> = None;
+        let (beardifier_structures, beardifier_junctions, affected_box) =
+            if self.structure_starts.is_empty() {
+                (Vec::new(), Vec::new(), None)
+            } else {
+                let mut beardifier_structures = Vec::new();
+                let mut beardifier_junctions = Vec::new();
+                let mut any_piece_bounding_box: Option<BlockBox> = None;
 
-        let chunk_start_x = self.start_block_x();
-        let chunk_start_z = self.start_block_z();
+                let chunk_start_x = self.start_block_x();
+                let chunk_start_z = self.start_block_z();
 
-        for (key, instance) in &self.structure_starts {
-            let structure = pumpkin_data::structures::Structure::get(key);
-            let terrain_adaptation = structure.terrain_adaptation;
+                for (key, instance) in &self.structure_starts {
+                    let structure = pumpkin_data::structures::Structure::get(key);
+                    let terrain_adaptation = structure.terrain_adaptation;
 
-            // Vanilla strictly skips filtering Beardifier parts if adaptation is None early-on
-            if terrain_adaptation == pumpkin_data::structures::TerrainAdaptation::None {
-                continue;
-            }
-
-            let collector = match instance {
-                StructureInstance::Start(pos) => &pos.collector,
-                StructureInstance::Reference(collector) => collector,
-            };
-
-            let collector = collector
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner);
-            for piece in &collector.pieces {
-                let bounding_box = piece.get_structure_piece().bounding_box;
-
-                // Match `piece.isCloseToChunk(chunkPos, 12)`
-                // Validates if an expansion 12 blocks out covers the chunk borders
-                if !bounding_box.intersects_raw_xz(
-                    chunk_start_x - 12,
-                    chunk_start_z - 12,
-                    chunk_start_x + 15 + 12,
-                    chunk_start_z + 15 + 12,
-                ) {
-                    continue;
-                }
-
-                let mut ground_level_delta = 0;
-
-                if let Some(jigsaw_piece) = piece.as_any().downcast_ref::<crate::generation::structure::structures::jigsaw::PoolElementStructurePiece>() {
-                    // Java only adds to rigids if projection is RIGID
-                    if jigsaw_piece.projection == crate::generation::structure::structures::jigsaw::JigsawProjection::Rigid {
-                        ground_level_delta = jigsaw_piece.ground_level_delta;
-                        any_piece_bounding_box = any_piece_bounding_box.map_or(Some(bounding_box), |mut b| {
-                            b.encompass(&bounding_box);
-                            Some(b)
-                        });
-
-                        beardifier_structures.push(
-                            crate::generation::noise::router::density_function::beardifier::BeardifierStructure {
-                                bounding_box,
-                                terrain_adaptation,
-                                ground_level_delta,
-                            },
-                        );
+                    // Vanilla strictly skips filtering Beardifier parts if adaptation is None early-on
+                    if terrain_adaptation == pumpkin_data::structures::TerrainAdaptation::None {
+                        continue;
                     }
 
-                    for j in &jigsaw_piece.junctions {
-                        let j_x = j.source_x;
-                        let j_z = j.source_z;
-                        // Junction bounds filter (match vanilla proximity checks)
-                        if j_x > chunk_start_x - 12
-                            && j_z > chunk_start_z - 12
-                            && j_x < chunk_start_x + 15 + 12
-                            && j_z < chunk_start_z + 15 + 12
-                        {
-                            beardifier_junctions.push(
-                                crate::generation::noise::router::density_function::beardifier::BeardifierJunction {
-                                    x: j_x,
-                                    ground_y: j.source_ground_y,
-                                    z: j_z,
-                                },
-                            );
-                            let junction_box = BlockBox::from_pos(BlockPos::new(j_x, j.source_ground_y, j_z));
-                            any_piece_bounding_box = any_piece_bounding_box.map_or(Some(junction_box), |mut b| {
-                                b.encompass(&junction_box);
+                    let collector = match instance {
+                        StructureInstance::Start(pos) => &pos.collector,
+                        StructureInstance::Reference(collector) => collector,
+                    };
+
+                    let collector = collector
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
+                    for piece in &collector.pieces {
+                        let bounding_box = piece.get_structure_piece().bounding_box;
+
+                        // Match `piece.isCloseToChunk(chunkPos, 12)`
+                        // Validates if an expansion 12 blocks out covers the chunk borders
+                        if !bounding_box.intersects_raw_xz(
+                            chunk_start_x - 12,
+                            chunk_start_z - 12,
+                            chunk_start_x + 15 + 12,
+                            chunk_start_z + 15 + 12,
+                        ) {
+                            continue;
+                        }
+
+                        let mut ground_level_delta = 0;
+
+                        if let Some(jigsaw_piece) = piece.as_any().downcast_ref::<crate::generation::structure::structures::jigsaw::PoolElementStructurePiece>() {
+                            // Java only adds to rigids if projection is RIGID
+                            if jigsaw_piece.projection == crate::generation::structure::structures::jigsaw::JigsawProjection::Rigid {
+                                ground_level_delta = jigsaw_piece.ground_level_delta;
+                                any_piece_bounding_box = any_piece_bounding_box.map_or(Some(bounding_box), |mut b| {
+                                    b.encompass(&bounding_box);
+                                    Some(b)
+                                });
+
+                                beardifier_structures.push(
+                                    crate::generation::noise::router::density_function::beardifier::BeardifierStructure {
+                                        bounding_box,
+                                        terrain_adaptation,
+                                        ground_level_delta,
+                                    },
+                                );
+                            }
+
+                            for j in &jigsaw_piece.junctions {
+                                let j_x = j.source_x;
+                                let j_z = j.source_z;
+                                // Junction bounds filter (match vanilla proximity checks)
+                                if j_x > chunk_start_x - 12
+                                    && j_z > chunk_start_z - 12
+                                    && j_x < chunk_start_x + 15 + 12
+                                    && j_z < chunk_start_z + 15 + 12
+                                {
+                                    beardifier_junctions.push(
+                                        crate::generation::noise::router::density_function::beardifier::BeardifierJunction {
+                                            x: j_x,
+                                            ground_y: j.source_ground_y,
+                                            z: j_z,
+                                        },
+                                    );
+                                    let junction_box = BlockBox::from_pos(BlockPos::new(j_x, j.source_ground_y, j_z));
+                                    any_piece_bounding_box = any_piece_bounding_box.map_or(Some(junction_box), |mut b| {
+                                        b.encompass(&junction_box);
+                                        Some(b)
+                                    });
+                                }
+                            }
+                        } else {
+                            any_piece_bounding_box = any_piece_bounding_box.map_or(Some(bounding_box), |mut b| {
+                                b.encompass(&bounding_box);
                                 Some(b)
                             });
+
+                            beardifier_structures.push(
+                                crate::generation::noise::router::density_function::beardifier::BeardifierStructure {
+                                    bounding_box,
+                                    terrain_adaptation,
+                                    ground_level_delta,
+                                },
+                            );
                         }
                     }
-                } else {
-                    any_piece_bounding_box = any_piece_bounding_box.map_or(Some(bounding_box), |mut b| {
-                        b.encompass(&bounding_box);
-                        Some(b)
-                    });
-
-                    beardifier_structures.push(
-                        crate::generation::noise::router::density_function::beardifier::BeardifierStructure {
-                            bounding_box,
-                            terrain_adaptation,
-                            ground_level_delta,
-                        },
-                    );
                 }
-            }
-        }
-
-        let affected_box = any_piece_bounding_box.map(|b| b.expand(24, 24, 24));
+                (
+                    beardifier_structures,
+                    beardifier_junctions,
+                    any_piece_bounding_box.map(|b| b.expand(24, 24, 24)),
+                )
+            };
 
         // Passed the newly mapped beardifier structures & junctions arrays independently!
         let mut noise_sampler = ChunkNoiseGenerator::new(
@@ -868,11 +1013,25 @@ impl ProtoChunk {
     ) {
         let volume = *noise_sampler.volume();
         let densities = noise_sampler.sample_density();
+        let chunk_height = self.height() as usize;
+        let bottom_y = self.bottom_y() as i32;
+
+        let default_state_id = generator.default_block.id;
+        let air_state_id = Block::AIR.default_state.id;
 
         for z in 0..volume.size_z {
             let block_z = volume.block_z(z);
             for x in 0..volume.size_x {
                 let block_x = volume.block_x(x);
+                let hm_index = Self::local_position_to_height_map_index(x as i32, z as i32);
+                let col_base = chunk_height * CHUNK_DIM as usize * x + z;
+                let mut surface_found = false;
+                let mut ocean_floor_found = false;
+                let mut motion_blocking_found = false;
+                let mut motion_no_leaves_found = false;
+                let mut all_hm_found = false;
+
+                let mut block_idx = col_base + CHUNK_DIM as usize * (volume.size_y.saturating_sub(1));
                 for y in (0..volume.size_y).rev() {
                     let block_y = volume.block_y(y);
                     let index = volume.index_unchecked(x, y, z);
@@ -885,7 +1044,65 @@ impl ProtoChunk {
                             surface_height_estimate_sampler,
                         )
                         .unwrap_or(generator.default_block);
-                    self.set_block_state(block_x, block_y, block_z, block_state);
+
+                    let local_y = block_y - bottom_y;
+                    if local_y >= 0 && (local_y as usize) < chunk_height {
+                        self.flat_block_map[block_idx] = block_state.id;
+
+                        if block_state.id != air_state_id {
+                            let y_i16 = block_y as i16;
+                            if !surface_found {
+                                self.flat_surface_height_map[hm_index] = y_i16;
+                                surface_found = true;
+                            }
+                            if !all_hm_found {
+                                if block_state.id == default_state_id {
+                                    if !ocean_floor_found {
+                                        self.flat_ocean_floor_height_map[hm_index] = y_i16;
+                                        ocean_floor_found = true;
+                                    }
+                                    if !motion_blocking_found {
+                                        self.flat_motion_blocking_height_map[hm_index] = y_i16;
+                                        motion_blocking_found = true;
+                                    }
+                                    if !motion_no_leaves_found {
+                                        self.flat_motion_blocking_no_leaves_height_map[hm_index] = y_i16;
+                                        motion_no_leaves_found = true;
+                                    }
+                                    all_hm_found = true;
+                                } else {
+                                    let block = BlockId::from_state_id(block_state.id);
+                                    let blocks_mov = blocks_movement(block_state, block);
+                                    if blocks_mov && !ocean_floor_found {
+                                        self.flat_ocean_floor_height_map[hm_index] = y_i16;
+                                        ocean_floor_found = true;
+                                    }
+                                    let is_liquid = block_state.is_liquid();
+                                    if (blocks_mov || is_liquid) && !motion_blocking_found {
+                                        self.flat_motion_blocking_height_map[hm_index] = y_i16;
+                                        motion_blocking_found = true;
+                                    }
+                                    if (blocks_mov || is_liquid)
+                                        && !block.has_tag(tag::Block::MINECRAFT_LEAVES)
+                                        && !motion_no_leaves_found
+                                    {
+                                        self.flat_motion_blocking_no_leaves_height_map[hm_index] = y_i16;
+                                        motion_no_leaves_found = true;
+                                    }
+                                    if surface_found
+                                        && ocean_floor_found
+                                        && motion_blocking_found
+                                        && motion_no_leaves_found
+                                    {
+                                        all_hm_found = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if block_idx >= CHUNK_DIM as usize {
+                        block_idx -= CHUNK_DIM as usize;
+                    }
                 }
             }
         }
@@ -984,11 +1201,17 @@ impl ProtoChunk {
             &terrain_cache.surface_noise,
             &terrain_cache.secondary_noise,
             settings.sea_level,
-        );
+        )
+        .with_terrain_cache(terrain_cache);
+
+        let chunk_height = self.height() as usize;
+        let min_y_i32 = min_y as i32;
+
         for local_x in 0..16 {
             for local_z in 0..16 {
                 let x = start_x + local_x;
                 let z = start_z + local_z;
+                let col_block_idx = chunk_height * CHUNK_DIM as usize * local_x as usize + local_z as usize;
 
                 let mut top_block = self.top_block_height_exclusive(local_x, local_z);
 
@@ -1016,9 +1239,11 @@ impl ProtoChunk {
                 let mut stone_depth_above = 0;
                 let mut min = i32::MAX;
                 let mut fluid_height = i32::MIN;
-                for y in (min_y as i32..top_block).rev() {
-                    let pos = Vector3::new(x, y, z);
-                    let state = self.get_block_state(&pos).to_state();
+                for y in (min_y_i32..top_block).rev() {
+                    let local_y = y - min_y_i32;
+                    let state = BlockState::from_id(
+                        self.flat_block_map[col_block_idx + CHUNK_DIM as usize * local_y as usize],
+                    );
                     if state.is_air() {
                         stone_depth_above = 0;
                         fluid_height = i32::MIN;
@@ -1034,15 +1259,17 @@ impl ProtoChunk {
                         let shift = min_y << 4;
                         min = shift as i32;
 
-                        for search_y in ((min_y as i32 - 1)..y).rev() {
-                            if search_y < min_y as i32 {
+                        for search_y in ((min_y_i32 - 1)..y).rev() {
+                            if search_y < min_y_i32 {
                                 min = search_y + 1;
                                 break;
                             }
 
-                            let block_id = self
-                                .get_block_state(&Vector3::new(local_x, search_y, local_z))
-                                .to_block_id();
+                            let local_search_y = search_y - min_y_i32;
+                            let block_id = BlockId::from_state_id(
+                                self.flat_block_map
+                                    [col_block_idx + CHUNK_DIM as usize * local_search_y as usize],
+                            );
 
                             if !(block_id != AIR_BLOCK
                                 && block_id != WATER_BLOCK
@@ -1246,6 +1473,14 @@ impl ProtoChunk {
             }
         }
 
+        tasks.sort_by_key(|collector_arc| {
+            let bbox = collector_arc
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .get_bounding_box();
+            (bbox.min.x, bbox.min.y, bbox.min.z, bbox.max.x, bbox.max.z)
+        });
+
         let decorator_seed = get_decorator_seed(population_seed, 0, step as u64);
         let mut random = RandomGenerator::Worldgen(WorldgenRandom::from_seed(decorator_seed));
 
@@ -1288,7 +1523,8 @@ impl ProtoChunk {
         let mut height_sampler =
             crate::generation::structure::height_sampler::NoiseHeightSampler::new(generator);
 
-        for (i, set) in StructureSet::ALL.iter().enumerate() {
+        for &i in &generator.dimension_structure_sets {
+            let set = &StructureSet::ALL[i];
             let allowed_biomes = &generator.structure_allowed_biomes[&i];
 
             if !should_generate_structure(
@@ -1317,9 +1553,8 @@ impl ProtoChunk {
             }
 
             let mut candidates = set.structures.to_vec();
-            let carver_seed = get_carver_seed(seed, self.x, self.z);
-            let mut random: RandomGenerator =
-                RandomGenerator::Xoroshiro(Xoroshiro::from_seed(carver_seed));
+            let large_feature_seed = get_large_feature_seed(seed, self.x, self.z);
+            let mut random = LegacyRand::from_seed(large_feature_seed);
 
             let mut total_weight: u32 = candidates.iter().map(|e| e.weight).sum();
 
@@ -1381,16 +1616,47 @@ impl ProtoChunk {
 
         let chunk_x = self.x;
         let chunk_z = self.z;
+        let seed = generator.random_config.seed as i64;
+        let chunk_min_y = self.bottom_y() as i32;
         let position =
             global_cache.get_or_compute_structure_start(entry.structure, chunk_x, chunk_z, || {
                 let structure = Structure::get(&entry.structure);
-                try_generate_structure(
+                let dimension = &generator.dimension;
+                let active_supplier = if *dimension == Dimension::THE_END {
+                    ActiveSupplier::End(TheEndBiomeSupplier)
+                } else if *dimension == Dimension::THE_NETHER {
+                    ActiveSupplier::Nether(MultiNoiseBiomeSupplier::NETHER)
+                } else {
+                    ActiveSupplier::Overworld(MultiNoiseBiomeSupplier::OVERWORLD)
+                };
+
+                let base_supplier: &dyn BiomeSupplier = match &active_supplier {
+                    ActiveSupplier::End(s) => s,
+                    ActiveSupplier::Nether(s) | ActiveSupplier::Overworld(s) => s,
+                };
+                let blender = Blender::empty();
+                let biome_supplier = blender.get_biome_supplier(base_supplier);
+                let mut multi_noise_sampler =
+                    MultiNoiseSampler::generate(&generator.base_router.multi_noise);
+                let mut height_sampler =
+                    crate::generation::structure::height_sampler::NoiseHeightSampler::new(generator);
+
+                let context = StructureGeneratorContext {
+                    seed,
+                    chunk_x,
+                    chunk_z,
+                    random: create_chunk_random(seed, chunk_x, chunk_z),
+                    sea_level,
+                    min_y: chunk_min_y,
+                    height_sampler: Some(&mut height_sampler),
+                    structure_key: Some(entry.structure),
+                };
+                lazily_generate_structure(
                     &entry.structure,
                     structure,
-                    generator.random_config.seed as i64,
-                    self,
-                    sea_level,
-                    Some(height_sampler),
+                    context,
+                    &biome_supplier,
+                    &mut multi_noise_sampler,
                 )
             });
 
@@ -1402,9 +1668,39 @@ impl ProtoChunk {
         false
     }
 
+    #[inline]
+    pub const fn structure_set_max_chunk_radius(set_index: usize) -> i32 {
+        match set_index {
+            0 => 8,  // ancient_cities (116 blocks max range)
+            1 => 1,  // buried_treasures (1 block footprint)
+            2 => 2,  // desert_pyramids (21x21 blocks)
+            3 => 8,  // end_cities (large towers/bridges up to 8 chunks)
+            4 => 2,  // igloos (10x10 blocks)
+            5 => 2,  // jungle_temples (15x15 blocks)
+            6 => 8,  // mineshafts (corridors up to 8 chunks)
+            7 => 8,  // nether_complexes (fortress bridges up to 8 chunks)
+            8 => 2,  // nether_fossils (small fossil pieces)
+            9 => 4,  // ocean_monuments (58x58 blocks, radius 29 blocks)
+            10 => 3, // ocean_ruins (~40 blocks)
+            11 => 4, // pillager_outposts (watchtower + tents up to 48 blocks)
+            12 => 2, // ruined_portals (~25 blocks)
+            13 => 2, // shipwrecks (~28 blocks)
+            14 => 8, // strongholds (labyrinth up to 8 chunks)
+            15 => 2, // swamp_huts (9x9 blocks)
+            16 => 3, // trail_ruins (~40 blocks)
+            17 => 6, // trial_chambers (80 blocks max distance)
+            18 => 6, // villages (80 blocks max distance)
+            19 => 7, // woodland_mansions (96x96 blocks)
+            _ => 8,
+        }
+    }
+
     #[expect(clippy::too_many_lines)]
     pub fn set_structure_references(&mut self, generator: &super::generator::VanillaGenerator) {
         debug_assert_eq!(self.stage, StagedChunkEnum::StructureStart);
+        let prof = STRUCT_REF_PROF_ENABLED.load(Ordering::Relaxed);
+        let fn_start = if prof { Some(std::time::Instant::now()) } else { None };
+
         let random_config = &generator.random_config;
         let settings = generator.settings;
         let dimension = &generator.dimension;
@@ -1443,9 +1739,12 @@ impl ProtoChunk {
         // and out of the (cached) structure-start computation below.
         let chunk_min_y = self.bottom_y() as i32;
 
-        for (set_index, set) in StructureSet::ALL.iter().enumerate() {
+        for &set_index in &generator.dimension_structure_sets {
+            let set = &StructureSet::ALL[set_index];
+            let set_start = if prof { Some(std::time::Instant::now()) } else { None };
             let mut candidate_chunks = Vec::new();
 
+            let t_cand = if prof { Some(std::time::Instant::now()) } else { None };
             match &set.placement.placement_type {
                 StructurePlacementType::RandomSpread(spread) => {
                     let region_x = pumpkin_util::math::floor_div(self.x, spread.spacing);
@@ -1473,16 +1772,34 @@ impl ProtoChunk {
                         self,
                         &allowed_biomes,
                     );
+                    let max_radius = Self::structure_set_max_chunk_radius(set_index);
                     for &(cx, cz) in strongholds {
-                        if (cx - self.x).abs() <= 8 && (cz - self.z).abs() <= 8 {
+                        if (cx - self.x).abs() <= max_radius && (cz - self.z).abs() <= max_radius {
                             candidate_chunks.push((cx, cz));
                         }
                     }
                 }
             }
+            if prof {
+                if let Some(tc) = t_cand {
+                    PROF_CANDIDATE_MATH_NS.fetch_add(tc.elapsed().as_nanos() as u64, Ordering::Relaxed);
+                }
+            }
 
+            let max_radius = Self::structure_set_max_chunk_radius(set_index);
             for (candidate_chunk_x, candidate_chunk_z) in candidate_chunks {
-                if !should_generate_structure(
+                if (candidate_chunk_x - self.x).abs() > max_radius
+                    || (candidate_chunk_z - self.z).abs() > max_radius
+                {
+                    continue;
+                }
+
+                if prof {
+                    PROF_SET_CALLS[set_index].fetch_add(1, Ordering::Relaxed);
+                }
+
+                let t_should = if prof { Some(std::time::Instant::now()) } else { None };
+                let generates = should_generate_structure(
                     &set.placement,
                     calculator,
                     candidate_chunk_x,
@@ -1490,58 +1807,111 @@ impl ProtoChunk {
                     global_cache,
                     self,
                     &generator.structure_allowed_biomes[&set_index],
-                ) {
+                );
+                if prof {
+                    if let Some(ts) = t_should {
+                        PROF_SHOULD_GENERATE_NS.fetch_add(ts.elapsed().as_nanos() as u64, Ordering::Relaxed);
+                    }
+                }
+
+                if !generates {
                     continue;
                 }
 
-                if (candidate_chunk_x - self.x).abs() <= 8
-                    && (candidate_chunk_z - self.z).abs() <= 8
-                {
-                    for entry in set.structures {
-                        let structure = Structure::get(&entry.structure);
+                // Early biome rejection: verify if the candidate chunk has any allowed biomes for this structure set.
+                // We scan all 16 quart coordinates (4x4) of the candidate chunk and break immediately on the first match.
+                let allowed_biomes = &generator.structure_allowed_biomes[&set_index];
+                let base_bx = candidate_chunk_x * 4;
+                let base_bz = candidate_chunk_z * 4;
+                let test_by = biome_coords::from_block(if *dimension == Dimension::THE_NETHER {
+                    32
+                } else if set_index == 0 {
+                    -27 // ancient_cities
+                } else {
+                    settings.sea_level
+                });
 
-                        // A structure's placement depends only on its start chunk and the
-                        // world seed, so cache it: otherwise every surrounding chunk whose
-                        // references overlap it would re-run the (expensive) jigsaw
-                        // expansion. `context` is only built on a cache miss.
-                        let start_data = global_cache.get_or_compute_structure_start(
-                            entry.structure,
-                            candidate_chunk_x,
-                            candidate_chunk_z,
-                            || {
-                                let context = StructureGeneratorContext {
-                                    seed,
-                                    chunk_x: candidate_chunk_x,
-                                    chunk_z: candidate_chunk_z,
-                                    random: create_chunk_random(
-                                        seed,
-                                        candidate_chunk_x,
-                                        candidate_chunk_z,
-                                    ),
-                                    sea_level: settings.sea_level,
-                                    min_y: chunk_min_y,
-                                    height_sampler: Some(&mut height_sampler),
-                                    structure_key: Some(entry.structure),
-                                };
-                                lazily_generate_structure(
-                                    &entry.structure,
-                                    structure,
-                                    context,
-                                    &biome_supplier,
-                                    &mut multi_noise_sampler,
-                                )
-                            },
-                        );
-
-                        if let Some(start_data) = start_data
-                            && start_data
-                                .get_bounding_box()
-                                .intersects_raw_xz(start_x, start_z, end_x, end_z)
-                        {
-                            references.push((entry.structure, start_data.collector.clone()));
-                            break;
+                let mut has_allowed_biome = false;
+                'biome_check: for dx in 0..4 {
+                    for dz in 0..4 {
+                        let b = biome_supplier.biome(base_bx + dx, test_by, base_bz + dz, &mut multi_noise_sampler).id as u16;
+                        if allowed_biomes.contains(&b) {
+                            has_allowed_biome = true;
+                            break 'biome_check;
                         }
                     }
+                }
+                if !has_allowed_biome {
+                    continue;
+                }
+
+                if prof {
+                    PROF_SET_HITS[set_index].fetch_add(1, Ordering::Relaxed);
+                }
+
+                for entry in set.structures {
+                    let structure = Structure::get(&entry.structure);
+
+                    let t_comp = if prof { Some(std::time::Instant::now()) } else { None };
+                    let start_data = global_cache.get_or_compute_structure_start(
+                        entry.structure,
+                        candidate_chunk_x,
+                        candidate_chunk_z,
+                        || {
+                            let context = StructureGeneratorContext {
+                                seed,
+                                chunk_x: candidate_chunk_x,
+                                chunk_z: candidate_chunk_z,
+                                random: create_chunk_random(
+                                    seed,
+                                    candidate_chunk_x,
+                                    candidate_chunk_z,
+                                ),
+                                sea_level: settings.sea_level,
+                                min_y: chunk_min_y,
+                                height_sampler: Some(&mut height_sampler),
+                                structure_key: Some(entry.structure),
+                            };
+                            lazily_generate_structure(
+                                &entry.structure,
+                                structure,
+                                context,
+                                &biome_supplier,
+                                &mut multi_noise_sampler,
+                            )
+                        },
+                    );
+                    if prof {
+                        if let Some(tc) = t_comp {
+                            PROF_COMPUTE_START_NS.fetch_add(tc.elapsed().as_nanos() as u64, Ordering::Relaxed);
+                        }
+                    }
+
+                    let t_bb = if prof { Some(std::time::Instant::now()) } else { None };
+                    if let Some(start_data) = start_data
+                        && start_data
+                            .get_bounding_box()
+                            .intersects_raw_xz(start_x, start_z, end_x, end_z)
+                    {
+                        references.push((entry.structure, start_data.collector.clone()));
+                        if prof {
+                            if let Some(tbb) = t_bb {
+                                PROF_BBOX_NS.fetch_add(tbb.elapsed().as_nanos() as u64, Ordering::Relaxed);
+                            }
+                        }
+                        break;
+                    }
+                    if prof {
+                        if let Some(tbb) = t_bb {
+                            PROF_BBOX_NS.fetch_add(tbb.elapsed().as_nanos() as u64, Ordering::Relaxed);
+                        }
+                    }
+                }
+            }
+
+            if prof {
+                if let Some(ts) = set_start {
+                    PROF_SET_TIMES_NS[set_index].fetch_add(ts.elapsed().as_nanos() as u64, Ordering::Relaxed);
                 }
             }
         }
@@ -1550,6 +1920,12 @@ impl ProtoChunk {
             self.structure_starts
                 .entry(key)
                 .or_insert_with(|| StructureInstance::Reference(pos));
+        }
+
+        if prof {
+            if let Some(tf) = fn_start {
+                PROF_TOTAL_NS.fetch_add(tf.elapsed().as_nanos() as u64, Ordering::Relaxed);
+            }
         }
 
         self.stage = StagedChunkEnum::StructureReferences;

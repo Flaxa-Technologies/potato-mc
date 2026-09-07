@@ -32,7 +32,7 @@ use crate::{
     },
 };
 
-pub(crate) mod height_sampler;
+pub mod height_sampler;
 pub mod piece;
 pub mod placement;
 pub mod shiftable_piece;
@@ -194,6 +194,42 @@ pub fn lazily_generate_structure(
     biome_supplier: &dyn BiomeSupplier,
     multi_noise_sampler: &mut MultiNoiseSampler,
 ) -> Option<StructurePosition> {
+    let Some(biomes) = get_tag_ids(
+        RegistryKey::WorldgenBiome,
+        structure
+            .biomes
+            .strip_prefix('#')
+            .unwrap_or(structure.biomes),
+    ) else {
+        return None;
+    };
+
+    // Fast early check: verify that the chunk where this structure attempts to generate
+    // matches the structure's allowed biomes before doing expensive Jigsaw / template placement.
+    // We scan all 16 quart coordinates (4x4) of the chunk and break immediately on the first match.
+    let base_bx = context.chunk_x * 4;
+    let base_bz = context.chunk_z * 4;
+    let test_y = if *key == StructureKeys::AncientCity {
+        -27
+    } else {
+        context.sea_level
+    };
+    let test_by = biome_coords::from_block(test_y);
+
+    let mut has_allowed_biome = false;
+    'early_check: for dx in 0..4 {
+        for dz in 0..4 {
+            let b = biome_supplier.biome(base_bx + dx, test_by, base_bz + dz, multi_noise_sampler).id as u16;
+            if biomes.contains(&b) {
+                has_allowed_biome = true;
+                break 'early_check;
+            }
+        }
+    }
+    if !has_allowed_biome {
+        return None;
+    }
+
     if *key == StructureKeys::Monument {
         let center_x = crate::generation::positions::chunk_pos::get_center_x(context.chunk_x);
         let center_z = crate::generation::positions::chunk_pos::get_center_z(context.chunk_z);

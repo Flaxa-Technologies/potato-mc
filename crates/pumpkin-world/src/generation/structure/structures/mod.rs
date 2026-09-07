@@ -867,6 +867,7 @@ pub fn create_chunk_random(seed: i64, chunk_x: i32, chunk_z: i32) -> RandomGener
     RandomGenerator::Legacy(LegacyRand::from_seed(structure_seed as u64))
 }
 
+#[derive(Clone)]
 pub enum StructureInstance {
     /// This chunk is the "owner" of the structure.
     Start(StructurePosition),

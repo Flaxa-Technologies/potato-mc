@@ -367,10 +367,30 @@ impl ProtoNoiseRouters {
                     )),
                 ),
                 BaseNoiseFunctionComponent::Noise { data } => {
-                    let sampler = DoublePerlinNoiseBuilder::get_noise_sampler_for_id(
-                        base_random_deriver,
-                        &data.noise_id,
-                    );
+                    let sampler = match data.noise_id.id {
+                        id if id == DoublePerlinNoiseParameters::NETHER_TEMPERATURE.id => {
+                            let mut legacy_rand =
+                                LegacyRand::from_seed(random_config.seed.wrapping_add(0));
+                            DoublePerlinNoiseSampler::from_params(
+                                &mut legacy_rand,
+                                &data.noise_id,
+                                true,
+                            )
+                        }
+                        id if id == DoublePerlinNoiseParameters::NETHER_VEGETATION.id => {
+                            let mut legacy_rand =
+                                LegacyRand::from_seed(random_config.seed.wrapping_add(1));
+                            DoublePerlinNoiseSampler::from_params(
+                                &mut legacy_rand,
+                                &data.noise_id,
+                                true,
+                            )
+                        }
+                        _ => DoublePerlinNoiseBuilder::get_noise_sampler_for_id(
+                            base_random_deriver,
+                            &data.noise_id,
+                        ),
+                    };
                     ProtoNoiseFunctionComponent::Independent(
                         IndependentProtoNoiseFunctionComponent::Noise(Noise::new(sampler, data)),
                     )

@@ -647,6 +647,7 @@ impl ChunkData {
         if old != block_state_id {
             let state = BlockState::from_id(block_state_id);
             self.update_heightmap(relative_x, relative_y, relative_z, state);
+            self.dirty.store(true, std::sync::atomic::Ordering::Relaxed);
         }
         old
     }

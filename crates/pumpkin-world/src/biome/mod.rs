@@ -1,5 +1,4 @@
 use sha2::{Digest, Sha256};
-use std::cell::RefCell;
 
 use pumpkin_data::chunk::{Biome, BiomeTree, NETHER_BIOME_SOURCE, OVERWORLD_BIOME_SOURCE};
 
@@ -16,10 +15,6 @@ pub use pumpkin_data::chunk::{
     Parameter, ParameterPoint, ParameterRange, TargetPoint, quantize_coord, unquantize_coord,
 };
 
-thread_local! {
-    /// A shortcut; check if last used biome is what we should use
-    static LAST_RESULT_NODE: RefCell<Option<&'static BiomeTree>> = const {RefCell::new(None) };
-}
 
 pub trait BiomeSupplier {
     fn biome(&self, x: i32, y: i32, z: i32, noise: &mut MultiNoiseSampler<'_>) -> &'static Biome;
@@ -42,7 +37,7 @@ impl BiomeSupplier for MultiNoiseBiomeSupplier {
     fn biome(&self, x: i32, y: i32, z: i32, noise: &mut MultiNoiseSampler<'_>) -> &'static Biome {
         let point = noise.sample(x, y, z);
         let point_list = point.convert_to_list();
-        LAST_RESULT_NODE.with_borrow_mut(|last_result| self.source.get(&point_list, last_result))
+        self.source.get(&point_list, &mut None)
     }
 }
 

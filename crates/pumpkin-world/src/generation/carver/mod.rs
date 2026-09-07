@@ -66,6 +66,7 @@ pub struct CarvingContext<'a> {
     pub surface_rule: &'a MaterialRule,
     pub surface_height_sampler: SurfaceHeightEstimateSampler<'a>,
     pub carver_aquifer: Option<CarverAquiferSampler<'a>>,
+    pub terrain_cache: Option<&'a crate::generation::proto_chunk::TerrainCache>,
 }
 
 pub struct CarveRun<'a, 'b> {
@@ -93,6 +94,9 @@ impl CarvingContext<'_> {
             self.secondary_noise,
             self.sea_level,
         );
+        if let Some(tc) = self.terrain_cache {
+            context = context.with_terrain_cache(tc);
+        }
         context.init_horizontal(x, z);
         context.biome = chunk.get_terrain_gen_biome(x, y, z);
         context.set_steep_material_condition(steep);
@@ -159,6 +163,7 @@ pub fn carve(chunk: &mut ProtoChunk, generator: &VanillaGenerator) {
         surface_rule: generator.surface_rule,
         surface_height_sampler,
         carver_aquifer,
+        terrain_cache: Some(&generator.terrain_cache),
     };
 
     let mut run = CarveRun {
@@ -387,6 +392,7 @@ fn with_carve_run_options<F>(
         surface_rule: surface_rule.unwrap_or(generator.surface_rule),
         surface_height_sampler,
         carver_aquifer,
+        terrain_cache: Some(&generator.terrain_cache),
     };
     let mut run = CarveRun {
         ctx: &mut context,

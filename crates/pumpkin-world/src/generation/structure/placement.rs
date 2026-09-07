@@ -10,13 +10,19 @@ use pumpkin_util::{
     },
 };
 use std::f64::consts::PI;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 
 use crate::ProtoChunk;
 use dashmap::DashMap;
 use pumpkin_data::structures::StructureKeys;
 
 use super::structures::StructurePosition;
+
+/// Diagnostic counter: how many times a thread found a structure-start slot already
+/// being computed by another thread and had to wait (thundering-herd events prevented).
+pub static JIGSAW_CONCURRENT_MISSES: std::sync::atomic::AtomicU64 =
+    std::sync::atomic::AtomicU64::new(0);
+
 /// A thread-safe global cache for structures that require world-wide placement calculations
 /// rather than localized chunk-based math (e.g., Strongholds using Concentric Rings).
 ///
@@ -25,12 +31,14 @@ use super::structures::StructurePosition;
 pub struct GlobalStructureCache {
     /// A cached list of mathematically predicted (`chunk_x`, `chunk_z`) coordinates.
     stronghold_chunks: OnceLock<Vec<(i32, i32)>>,
-    /// Memoized structure starts, keyed by (structure, start chunk x, start chunk z).
+    /// Single-flight memoized structure starts.
     ///
-    /// A jigsaw structure's placement is fully determined by its start chunk and the
-    /// world seed, so it is computed once here instead of being recomputed for every
-    /// surrounding chunk whose structure references overlap it.
-    structure_starts: OnceLock<DashMap<(StructureKeys, i32, i32), Option<StructurePosition>>>,
+    /// Each entry holds an `Arc<OnceLock<Option<StructurePosition>>>`.
+    /// The first thread to insert a slot runs `compute()` inside `get_or_init`;
+    /// every other thread that arrives before or after completion receives the
+    /// same Arc and blocks on `get_or_init` until the first thread finishes.
+    /// Result: each (key, chunk_x, chunk_z) triplet is expanded at most once.
+    structure_starts: OnceLock<DashMap<(StructureKeys, i32, i32), Arc<OnceLock<Option<StructurePosition>>>>>,
 }
 impl GlobalStructureCache {
     /// Creates a new, empty global structure cache.
@@ -51,9 +59,12 @@ impl GlobalStructureCache {
     /// Returns the memoized structure start for the given structure and start chunk,
     /// computing it via `compute` on the first request and caching the result.
     ///
-    /// Because a structure's placement depends only on its start chunk and the world
-    /// seed, every chunk whose references overlap that structure can reuse the cached
-    /// result instead of re-running the expensive jigsaw expansion.
+    /// **Single-flight guarantee**: concurrent threads requesting the same
+    /// `(key, chunk_x, chunk_z)` triplet all share one `Arc<OnceLock>`.
+    /// Only the first thread runs `compute()`; all others block on `get_or_init`
+    /// until it completes, then clone the cached result.  This eliminates the
+    /// thundering-herd where N workers each independently pay the full Jigsaw
+    /// expansion cost for the same structure chunk.
     pub fn get_or_compute_structure_start(
         &self,
         key: StructureKeys,
@@ -62,12 +73,49 @@ impl GlobalStructureCache {
         compute: impl FnOnce() -> Option<StructurePosition>,
     ) -> Option<StructurePosition> {
         let cache = self.structure_starts.get_or_init(DashMap::new);
-        if let Some(cached) = cache.get(&(key, chunk_x, chunk_z)) {
-            return cached.value().clone();
+        let map_key = (key, chunk_x, chunk_z);
+
+        // Fast path: slot already fully computed (OnceLock already initialised).
+        if let Some(slot) = cache.get(&map_key) {
+            if let Some(result) = slot.get() {
+                return result.clone();
+            }
+            // The slot exists but get_or_init hasn't returned yet on the owning
+            // thread — track this as a prevented concurrent expansion.
+            let slot_arc = slot.clone();
+            drop(slot); // release DashMap shard before blocking
+            JIGSAW_CONCURRENT_MISSES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            return slot_arc.get_or_init(|| compute()).clone();
         }
-        let computed = compute();
-        cache.insert((key, chunk_x, chunk_z), computed.clone());
-        computed
+
+        // Slow path: atomically get-or-insert a fresh Arc<OnceLock> for this key.
+        // entry().or_insert_with holds the shard write-lock only long enough to
+        // store the Arc; concurrent threads racing on the same key all get the
+        // same Arc once the winner releases the shard.
+        let slot_arc = cache
+            .entry(map_key)
+            .or_insert_with(|| Arc::new(OnceLock::new()))
+            .clone();
+
+        // get_or_init ensures exactly one thread executes compute().
+        // Threads that lose the race block here until the winner's result is stored.
+        let t_jigsaw = std::time::Instant::now();
+        let result = slot_arc.get_or_init(|| {
+            let v = compute();
+            if crate::generation::proto_chunk::STRUCT_REF_PROF_ENABLED
+                .load(std::sync::atomic::Ordering::Relaxed)
+            {
+                crate::generation::proto_chunk::PROF_JIGSAW_COUNT
+                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                crate::generation::proto_chunk::PROF_JIGSAW_NS
+                    .fetch_add(
+                        t_jigsaw.elapsed().as_nanos() as u64,
+                        std::sync::atomic::Ordering::Relaxed,
+                    );
+            }
+            v
+        });
+        result.clone()
     }
 
     /// Retrieves the list of chunk coordinates for Concentric Ring structures.

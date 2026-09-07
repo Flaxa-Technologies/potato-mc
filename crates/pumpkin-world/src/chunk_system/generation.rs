@@ -405,4 +405,309 @@ mod tests {
             cage_chunk.get_block_state(&pumpkin_util::math::vector3::Vector3::new(1183, 68, -1330));
         assert_eq!(state.to_block_id(), pumpkin_data::Block::GRASS_BLOCK.id);
     }
+
+    #[test]
+    fn batched_generation_matches_single_chunk_generation() {
+        use crate::chunk_system::stage_cache::{generate_single_chunk_batched, StageCache};
+
+        let seed = Seed(12345);
+        let block_registry = Arc::new(BlockRegistry);
+
+        // Expanded well beyond 5 coordinates to 25 coordinates per dimension (75 total chunks)
+        // covering origin, adjacent clusters, negative coordinates, chunk-border boundaries, and distant offsets.
+        let test_coords = [
+            (0, 0), (1, 0), (0, 1), (1, 1), (-1, -1),
+            (2, 2), (-2, 2), (2, -2), (-2, -2), (3, -1),
+            (-3, 1), (4, 4), (-5, -5), (7, -3), (-8, 6),
+            (10, -10), (-16, 16), (31, 31), (-32, -32), (0, 15),
+            (15, 0), (-7, 0), (0, -7), (12, -8), (-15, -15),
+        ];
+
+        for dimension in [Dimension::OVERWORLD, Dimension::THE_NETHER, Dimension::THE_END] {
+            let world_gen_single =
+                get_world_gen(seed, dimension.clone(), false, Vec::new(), String::new());
+            let world_gen_batched =
+                get_world_gen(seed, dimension.clone(), false, Vec::new(), String::new());
+            let stage_cache = StageCache::new();
+
+            for &(cx, cz) in &test_coords {
+                let single = generate_single_chunk(
+                    &world_gen_single,
+                    block_registry.as_ref(),
+                    cx,
+                    cz,
+                    StagedChunkEnum::Full,
+                );
+                let batched = generate_single_chunk_batched(
+                    &world_gen_batched,
+                    block_registry.as_ref(),
+                    cx,
+                    cz,
+                    StagedChunkEnum::Full,
+                    &stage_cache,
+                );
+
+                let super::Chunk::Level(s) = single else {
+                    panic!("expected Level chunk for single at ({cx}, {cz})");
+                };
+                let super::Chunk::Level(b) = batched else {
+                    panic!("expected Level chunk for batched at ({cx}, {cz})");
+                };
+
+                assert_eq!(s.x, b.x);
+                assert_eq!(s.z, b.z);
+                if s.section.dump_blocks() != b.section.dump_blocks() {
+                    let sb = s.section.dump_blocks();
+                    let bb = b.section.dump_blocks();
+                    let mut diff_count = 0;
+                    let mut diff_samples = Vec::new();
+                    for i in 0..sb.len() {
+                        if sb[i] != bb[i] {
+                            diff_count += 1;
+                            if diff_samples.len() < 5 {
+                                let sec = i / 4096;
+                                let in_sec = i % 4096;
+                                let y = sec * 16 + (in_sec / 256);
+                                let rem = in_sec % 256;
+                                let z = rem / 16;
+                                let x = rem % 16;
+                                let name0 = pumpkin_data::Block::from_state_id(sb[i]).name;
+                                let name1 = pumpkin_data::Block::from_state_id(bb[i]).name;
+                                diff_samples.push(format!("({x},{y},{z}) idx {i}: single={name0}({:?}) vs batched={name1}({:?})", sb[i], bb[i]));
+                            }
+                        }
+                    }
+                    println!(
+                        "BATCHED PARITY MISMATCH at ({cx}, {cz}) in {:?}: {} blocks differ. Samples: {:?}",
+                        dimension, diff_count, diff_samples
+                    );
+                }
+                assert_eq!(
+                    s.section.dump_blocks().len(),
+                    b.section.dump_blocks().len()
+                );
+                assert_eq!(
+                    s.section.dump_blocks() == b.section.dump_blocks(),
+                    true,
+                    "blocks mismatch in {:?} at ({cx}, {cz})",
+                    dimension
+                );
+                assert_eq!(
+                    s.section.dump_biomes(),
+                    b.section.dump_biomes(),
+                    "biomes mismatch in {:?} at ({cx}, {cz})",
+                    dimension
+                );
+            }
+        }
+    }
+
+    /// Tests for Steel's Trap 1: thread-local state, thread-assignment order, or thread scheduling
+    /// leaking or affecting chunk generation output.
+    ///
+    /// Verifies that:
+    /// 1. A single-threaded sequential pool (1 thread)
+    /// 2. A 4-threaded concurrent pool (forward dispatch order)
+    /// 3. A 12-threaded concurrent pool (reversed dispatch order)
+    /// 4. A concurrent batched pool using shared StageCache (12 threads)
+    ///
+    /// all produce 100% bit-for-bit identical block states and biome dumps for every chunk.
+    #[test]
+    fn test_steels_trap_thread_invariance() {
+        use crate::chunk_system::stage_cache::{generate_single_chunk_batched, StageCache};
+        use std::collections::HashMap;
+
+        let seed = Seed(42);
+        let block_registry = Arc::new(BlockRegistry);
+
+        for dimension in [Dimension::OVERWORLD, Dimension::THE_NETHER] {
+            // Test a 4x4 chunk cluster (16 chunks) where 3x3 neighbor pyramids heavily overlap
+            let mut coords = Vec::new();
+            for cx in 0..4 {
+                for cz in 0..4 {
+                    coords.push((cx, cz));
+                }
+            }
+
+            // 1. Reference Run: Single thread (num_threads: 1)
+            let world_gen_1 = Arc::new(get_world_gen(
+                seed,
+                dimension.clone(),
+                false,
+                Vec::new(),
+                String::new(),
+            ));
+            let pool_1 = rayon::ThreadPoolBuilder::new()
+                .num_threads(1)
+                .build()
+                .expect("Failed to build 1-thread pool");
+
+            let ref_chunks: Arc<std::sync::Mutex<HashMap<(i32, i32), (Vec<BlockStateId>, Vec<u8>)>>> =
+                Arc::new(std::sync::Mutex::new(HashMap::new()));
+
+            pool_1.install(|| {
+                for &(cx, cz) in &coords {
+                    let chunk = generate_single_chunk(
+                        world_gen_1.as_ref(),
+                        block_registry.as_ref(),
+                        cx,
+                        cz,
+                        StagedChunkEnum::Full,
+                    );
+                    let super::Chunk::Level(lvl) = chunk else {
+                        panic!("expected Level chunk for Full stage");
+                    };
+                    ref_chunks.lock().unwrap().insert(
+                        (cx, cz),
+                        (lvl.section.dump_blocks(), lvl.section.dump_biomes()),
+                    );
+                }
+            });
+
+            let reference = ref_chunks.lock().unwrap().clone();
+            assert_eq!(reference.len(), 16);
+
+            // 2. Test Run: 4 threads, forward dispatch
+            let world_gen_4 = Arc::new(get_world_gen(
+                seed,
+                dimension.clone(),
+                false,
+                Vec::new(),
+                String::new(),
+            ));
+            let pool_4 = rayon::ThreadPoolBuilder::new()
+                .num_threads(4)
+                .build()
+                .expect("Failed to build 4-thread pool");
+
+            pool_4.scope(|s| {
+                for &(cx, cz) in &coords {
+                    let wg = world_gen_4.clone();
+                    let br = block_registry.clone();
+                    let expected = reference.get(&(cx, cz)).unwrap().clone();
+                    let dim = dimension.clone();
+
+                    s.spawn(move |_| {
+                        let chunk = generate_single_chunk(
+                            wg.as_ref(),
+                            br.as_ref(),
+                            cx,
+                            cz,
+                            StagedChunkEnum::Full,
+                        );
+                        let super::Chunk::Level(lvl) = chunk else {
+                            panic!("expected Level chunk for Full stage");
+                        };
+                        assert_eq!(
+                            lvl.section.dump_blocks(),
+                            expected.0,
+                            "Steel's Trap 1: 4-thread block mismatch at ({cx}, {cz}) in {:?}",
+                            dim
+                        );
+                        assert_eq!(
+                            lvl.section.dump_biomes(),
+                            expected.1,
+                            "Steel's Trap 1: 4-thread biome mismatch at ({cx}, {cz}) in {:?}",
+                            dim
+                        );
+                    });
+                }
+            });
+
+            // 3. Test Run: 12 threads, reversed dispatch order
+            let world_gen_12 = Arc::new(get_world_gen(
+                seed,
+                dimension.clone(),
+                false,
+                Vec::new(),
+                String::new(),
+            ));
+            let pool_12 = rayon::ThreadPoolBuilder::new()
+                .num_threads(12)
+                .build()
+                .expect("Failed to build 12-thread pool");
+
+            let mut reversed_coords = coords.clone();
+            reversed_coords.reverse();
+
+            pool_12.scope(|s| {
+                for &(cx, cz) in &reversed_coords {
+                    let wg = world_gen_12.clone();
+                    let br = block_registry.clone();
+                    let expected = reference.get(&(cx, cz)).unwrap().clone();
+                    let dim = dimension.clone();
+
+                    s.spawn(move |_| {
+                        let chunk = generate_single_chunk(
+                            wg.as_ref(),
+                            br.as_ref(),
+                            cx,
+                            cz,
+                            StagedChunkEnum::Full,
+                        );
+                        let super::Chunk::Level(lvl) = chunk else {
+                            panic!("expected Level chunk");
+                        };
+                        assert_eq!(
+                            lvl.section.dump_blocks(),
+                            expected.0,
+                            "Steel's Trap 1: 12-thread reversed block mismatch at ({cx}, {cz}) in {:?}",
+                            dim
+                        );
+                        assert_eq!(
+                            lvl.section.dump_biomes(),
+                            expected.1,
+                            "Steel's Trap 1: 12-thread reversed biome mismatch at ({cx}, {cz}) in {:?}",
+                            dim
+                        );
+                    });
+                }
+            });
+
+            // 4. Test Run: Concurrent Batched StageCache (multi-threaded with cached intermediate stages)
+            let world_gen_batched = Arc::new(get_world_gen(
+                seed,
+                dimension.clone(),
+                false,
+                Vec::new(),
+                String::new(),
+            ));
+            let stage_cache = Arc::new(StageCache::new());
+            pool_12.scope(|s| {
+                for &(cx, cz) in &coords {
+                    let wg = world_gen_batched.clone();
+                    let br = block_registry.clone();
+                    let sc = stage_cache.clone();
+                    let expected = reference.get(&(cx, cz)).unwrap().clone();
+                    let dim = dimension.clone();
+
+                    s.spawn(move |_| {
+                        let chunk = generate_single_chunk_batched(
+                            wg.as_ref(),
+                            br.as_ref(),
+                            cx,
+                            cz,
+                            StagedChunkEnum::Full,
+                            &sc,
+                        );
+                        let super::Chunk::Level(lvl) = chunk else {
+                            panic!("expected Level chunk");
+                        };
+                        assert_eq!(
+                            lvl.section.dump_blocks(),
+                            expected.0,
+                            "Steel's Trap 1: Batched StageCache block mismatch at ({cx}, {cz}) in {:?}",
+                            dim
+                        );
+                        assert_eq!(
+                            lvl.section.dump_biomes(),
+                            expected.1,
+                            "Steel's Trap 1: Batched StageCache biome mismatch at ({cx}, {cz}) in {:?}",
+                            dim
+                        );
+                    });
+                }
+            });
+        }
+    }
 }

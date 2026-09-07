@@ -2,7 +2,6 @@ use decorator::TreeDecorator;
 use foliage::FoliagePlacer;
 use pumpkin_data::BlockState;
 use pumpkin_data::block_properties::{BlockProperties, OakLeavesLikeProperties};
-use pumpkin_data::tag::Taggable;
 use pumpkin_data::{BlockId, tag};
 use pumpkin_util::{math::position::BlockPos, random::RandomGenerator};
 use root::RootPlacer;
@@ -117,68 +116,62 @@ impl TreeFeature {
             }
         }
 
-        let mut to_check: [std::collections::HashSet<BlockPos>; 7] = Default::default();
+        let mut queue = std::collections::VecDeque::new();
         for pos in logs {
-            to_check[0].insert(*pos);
+            if let Some(idx) = get_index(pos.0.x, pos.0.y, pos.0.z) {
+                if !visited[idx] {
+                    visited[idx] = true;
+                    queue.push_back((*pos, 0u8));
+                }
+            }
         }
 
-        let mut smallest_distance = 0;
-
-        while smallest_distance < 7 {
-            while smallest_distance < 7 && !to_check[smallest_distance].is_empty() {
-                let Some(pos) = to_check[smallest_distance].iter().next().copied() else {
-                    break;
-                };
-                to_check[smallest_distance].remove(&pos);
-
-                let Some(idx) = get_index(pos.0.x, pos.0.y, pos.0.z) else {
-                    continue;
-                };
-
-                if smallest_distance != 0 {
-                    let (block, state) = chunk.get_block_and_state(&pos);
-                    if OakLeavesLikeProperties::handles_block_id(block.id) {
-                        let mut props = OakLeavesLikeProperties::from_state_id(state.id);
-                        props.distance = smallest_distance as u8;
-                        let new_state = &block.states[props.to_index() as usize];
-                        chunk.set_block_state(&pos.0, new_state);
-                    }
+        while let Some((pos, dist)) = queue.pop_front() {
+            if dist != 0 {
+                let (block, state) = chunk.get_block_and_state(&pos);
+                if OakLeavesLikeProperties::handles_block_id(block.id) {
+                    let mut props = OakLeavesLikeProperties::from_state_id(state.id);
+                    props.distance = dist;
+                    let new_state = &block.states[props.to_index() as usize];
+                    chunk.set_block_state(&pos.0, new_state);
                 }
+            }
 
-                visited[idx] = true;
-
+            if dist < 6 {
                 for direction in pumpkin_data::BlockDirection::all() {
                     let offset = direction.to_offset();
                     let neighbor_pos = pos.offset(offset);
                     if let Some(n_idx) =
                         get_index(neighbor_pos.0.x, neighbor_pos.0.y, neighbor_pos.0.z)
-                        && !visited[n_idx]
                     {
-                        let (n_block, n_state) = chunk.get_block_and_state(&neighbor_pos);
-                        let distance =
-                            if n_block.has_tag(&tag::Block::MINECRAFT_PREVENTS_NEARBY_LEAF_DECAY) {
-                                Some(0)
-                            } else if OakLeavesLikeProperties::handles_block_id(n_block.id) {
-                                Some(
-                                    OakLeavesLikeProperties::from_state_id(n_state.id).distance
-                                        as usize,
-                                )
-                            } else {
-                                None
-                            };
-
-                        if let Some(dist) = distance {
-                            let new_distance = dist.min(smallest_distance + 1);
-                            if new_distance < 7 {
-                                to_check[new_distance].insert(neighbor_pos);
-                                smallest_distance = smallest_distance.min(new_distance);
+                        if !visited[n_idx] {
+                            let (n_block, _n_state) = chunk.get_block_and_state(&neighbor_pos);
+                            if OakLeavesLikeProperties::handles_block_id(n_block.id) {
+                                visited[n_idx] = true;
+                                queue.push_back((neighbor_pos, dist + 1));
                             }
                         }
                     }
                 }
             }
+        }
 
-            smallest_distance += 1;
+        // Clamp any foliage placed by this tree feature that wasn't reached by the BFS to distance 6,
+        // matching Vanilla tree generation and preventing newly generated chunks from immediately dropping saplings.
+        for pos in foliage {
+            if let Some(idx) = get_index(pos.0.x, pos.0.y, pos.0.z) {
+                if !visited[idx] {
+                    let (block, state) = chunk.get_block_and_state(pos);
+                    if OakLeavesLikeProperties::handles_block_id(block.id) {
+                        let mut props = OakLeavesLikeProperties::from_state_id(state.id);
+                        if props.distance >= 7 {
+                            props.distance = 6;
+                            let new_state = &block.states[props.to_index() as usize];
+                            chunk.set_block_state(&pos.0, new_state);
+                        }
+                    }
+                }
+            }
         }
     }
 

@@ -52,6 +52,7 @@ pub struct MaterialRuleContext<'a> {
     pub stone_depth_above: i32,
     pub terrain_builder: &'a SurfaceTerrainBuilder,
     pub sea_level: i32,
+    pub terrain_cache: Option<&'a crate::generation::proto_chunk::TerrainCache>,
     steep_material_condition: Option<bool>,
 }
 
@@ -89,8 +90,18 @@ impl<'a> MaterialRuleContext<'a> {
             stone_depth_below: 0,
             stone_depth_above: 0,
             sea_level,
+            terrain_cache: None,
             steep_material_condition: None,
         }
+    }
+
+    #[must_use]
+    pub fn with_terrain_cache(
+        mut self,
+        terrain_cache: &'a crate::generation::proto_chunk::TerrainCache,
+    ) -> Self {
+        self.terrain_cache = Some(terrain_cache);
+        self
     }
 
     fn sample_run_depth(&self) -> i32 {
@@ -305,13 +316,17 @@ pub fn test_noise_threshold(
     condition: &NoiseThresholdMaterialCondition,
     context: &mut MaterialRuleContext,
 ) -> bool {
-    // TODO: we want to cache these
-    let sampler = DoublePerlinNoiseBuilder::get_noise_sampler_for_id(
-        context.random_deriver,
-        &condition.noise,
-    );
-    let value =
-        f64::from(sampler.sample(context.block_pos_x as f64, 0.0, context.block_pos_z as f64));
+    let value = if let Some(terrain_cache) = context.terrain_cache {
+        let sampler =
+            terrain_cache.get_noise_sampler(&condition.noise, context.random_deriver);
+        f64::from(sampler.sample(context.block_pos_x as f64, 0.0, context.block_pos_z as f64))
+    } else {
+        let sampler = DoublePerlinNoiseBuilder::get_noise_sampler_for_id(
+            context.random_deriver,
+            &condition.noise,
+        );
+        f64::from(sampler.sample(context.block_pos_x as f64, 0.0, context.block_pos_z as f64))
+    };
     value >= condition.min_threshold && value <= condition.max_threshold
 }
 

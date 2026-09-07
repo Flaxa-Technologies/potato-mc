@@ -16,19 +16,24 @@ fn take_best(
     min_capacity: usize,
     max_capacity: usize,
 ) -> Option<Box<[f32]>> {
+    if let Some(last) = pool.last() {
+        if last.len() == min_capacity {
+            return pool.pop();
+        }
+    }
     let mut best_index = None;
     let mut best_capacity = max_capacity + 1;
     for i in (0..pool.len()).rev() {
         let capacity = pool[i].len();
         if capacity == min_capacity {
-            return Some(pool.remove(i));
+            return Some(pool.swap_remove(i));
         }
         if capacity > min_capacity && capacity < best_capacity {
             best_index = Some(i);
             best_capacity = capacity;
         }
     }
-    best_index.map(|i| pool.remove(i))
+    best_index.map(|i| pool.swap_remove(i))
 }
 
 pub struct DensityBuffer {

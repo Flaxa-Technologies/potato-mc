@@ -134,7 +134,10 @@ impl StructurePieceBase for BridgePlatformPiece {
         // Blaze spawner (placed once)
         if !self.has_blaze_spawner {
             let spawner_pos = p.offset_pos(3, 5, 5);
-            if bb.contains_pos(&spawner_pos) {
+            if (spawner_pos.x >> 4) == chunk.x
+                && (spawner_pos.z >> 4) == chunk.z
+                && bb.contains_pos(&spawner_pos)
+            {
                 self.has_blaze_spawner = true;
                 chunk.set_block_state(
                     spawner_pos.x,

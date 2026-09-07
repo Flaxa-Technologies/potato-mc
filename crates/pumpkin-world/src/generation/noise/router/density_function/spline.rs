@@ -155,7 +155,7 @@ impl Spline {
         })
     }
 
-    fn sample_with(&self, location_of: &mut dyn FnMut(usize) -> f32) -> f32 {
+    pub(crate) fn sample_with(&self, location_of: &mut dyn FnMut(usize) -> f32) -> f32 {
         let location = location_of(self.input_index);
 
         let n = self.points.len();

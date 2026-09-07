@@ -137,6 +137,7 @@ pub struct VanillaGenerator {
     pub global_structure_cache: crate::generation::structure::placement::GlobalStructureCache,
     pub structure_calculator: StructurePlacementCalculator,
     pub structure_allowed_biomes: FxHashMap<usize, Vec<u16>>,
+    pub dimension_structure_sets: Box<[usize]>,
 }
 
 impl VanillaGenerator {
@@ -188,6 +189,27 @@ impl GeneratorInit for VanillaGenerator {
             );
         }
 
+        let dim_biomes: &[u16] = if dimension == Dimension::THE_NETHER {
+            pumpkin_data::tag::WorldgenBiome::MINECRAFT_IS_NETHER.1
+        } else if dimension == Dimension::THE_END {
+            pumpkin_data::tag::WorldgenBiome::MINECRAFT_IS_END.1
+        } else {
+            pumpkin_data::tag::WorldgenBiome::MINECRAFT_IS_OVERWORLD.1
+        };
+
+        let dimension_structure_sets: Box<[usize]> = StructureSet::ALL
+            .iter()
+            .enumerate()
+            .filter_map(|(i, _)| {
+                let allowed = &structure_allowed_biomes[&i];
+                if allowed.iter().any(|b| dim_biomes.contains(b)) {
+                    Some(i)
+                } else {
+                    None
+                }
+            })
+            .collect();
+
         Self {
             random_config,
             base_router,
@@ -201,6 +223,7 @@ impl GeneratorInit for VanillaGenerator {
                 crate::generation::structure::placement::GlobalStructureCache::new(),
             structure_calculator: StructurePlacementCalculator::new(seed.0 as i64),
             structure_allowed_biomes,
+            dimension_structure_sets,
         }
     }
 }

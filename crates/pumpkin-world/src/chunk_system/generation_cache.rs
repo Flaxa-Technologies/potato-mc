@@ -579,6 +579,7 @@ impl Cache {
             Chunk::Proto(chunk) if chunk.stage >= stage => return,
             Chunk::Proto(_) => {}
         }
+        let stage_start = std::time::Instant::now();
         match stage {
             StagedChunkEnum::Empty => panic!("empty stage"),
             StagedChunkEnum::StructureStart => match generator {
@@ -702,6 +703,7 @@ impl Cache {
                 debug_assert_eq!(chunk.stage, StagedChunkEnum::Spawn);
                 chunk.stage = StagedChunkEnum::Full;
                 self.chunks[mid].upgrade_to_level_chunk(generator.dimension(), lighting_config);
+                let _duration = stage_start.elapsed();
             }
             StagedChunkEnum::None => {}
         }

@@ -203,7 +203,55 @@ impl ChunkNoiseRouter<'_> {
     sample_function!(lava_noise, lava_noise_volume);
     sample_function!(erosion, erosion_volume);
     sample_function!(depth, depth_volume);
-    sample_function!(final_density, final_density_volume);
+    #[inline]
+    pub fn final_density(&mut self, pos: &Vector3<i32>) -> f32 {
+        ChunkNoiseFunctionComponent::sample_from_stack(
+            &mut self.component_stack[..=self.final_density],
+            pos,
+        )
+    }
+
+    #[inline]
+    pub fn final_density_volume(&mut self, buffer: &mut [f32], volume: &DensityVolume) {
+        if self.final_density == 12 && self.component_stack.len() == 14 {
+            if let ChunkNoiseFunctionComponent::Independent(
+                super::proto_noise_router::IndependentProtoNoiseFunctionComponent::InterpolatedNoise(sampler),
+            ) = &self.component_stack[4] {
+                if let ChunkNoiseFunctionComponent::Chunk(
+                    super::chunk_density_function::ChunkSpecificNoiseFunctionComponent::Beardifier(beardifier),
+                ) = &self.component_stack[11] {
+                    super::aot_noise_router::evaluate_nether_final_density_volume(
+                        sampler,
+                        beardifier,
+                        buffer,
+                        volume,
+                    );
+                    return;
+                }
+            }
+        }
+
+        if self.final_density == 195 && self.component_stack.len() == 222 {
+            if let ChunkNoiseFunctionComponent::Chunk(
+                super::chunk_density_function::ChunkSpecificNoiseFunctionComponent::Beardifier(beardifier),
+            ) = &self.component_stack[194] {
+                super::aot_noise_router::evaluate_overworld_final_density_volume(
+                    &self.component_stack,
+                    beardifier,
+                    buffer,
+                    volume,
+                );
+                return;
+            }
+        }
+
+        ChunkNoiseFunctionComponent::sample_volume_from_stack(
+            &mut self.component_stack[..=self.final_density],
+            buffer,
+            volume,
+        );
+    }
+
     sample_function!(vein_toggle, vein_toggle_volume);
     sample_function!(vein_ridged, vein_ridged_volume);
     sample_function!(vein_gap, vein_gap_volume);

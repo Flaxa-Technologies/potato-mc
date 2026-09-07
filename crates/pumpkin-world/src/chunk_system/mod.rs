@@ -26,6 +26,7 @@ pub mod dag;
 pub mod generation;
 pub mod generation_cache;
 pub mod schedule;
+pub mod stage_cache;
 pub mod worker_logic;
 
 #[cfg(test)]
@@ -40,3 +41,4 @@ pub use dag::DAG;
 pub use generation::generate_single_chunk;
 pub use generation_cache::Cache;
 pub use schedule::GenerationSchedule;
+pub use stage_cache::{generate_batch_chunks, generate_single_chunk_batched, StageCache};

@@ -133,7 +133,7 @@ impl GenerationSchedule {
         ));
 
         let cpus = thread::available_parallelism().map_or(1, std::num::NonZero::get);
-        let gen_threads = (cpus / 2).clamp(2, 16);
+        let gen_threads = cpus.saturating_sub(1).clamp(4, 32);
         let generation_pool = Arc::new(
             rayon::ThreadPoolBuilder::new()
                 .num_threads(gen_threads)
@@ -141,7 +141,7 @@ impl GenerationSchedule {
                 .build()
                 .expect("Failed to build Chunk Generation ThreadPool"),
         );
-        let max_in_flight = (gen_threads * 2) as u16;
+        let max_in_flight = (gen_threads * 4) as u16;
 
         let level_sched = level;
         let lighting_config = level_sched.lighting_config;

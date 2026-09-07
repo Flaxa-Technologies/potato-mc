@@ -25,8 +25,8 @@ const BLENDED_MAIN_FIRST_OCTAVE: i32 = -7;
 const SMEARED_RANGE_BASE: f64 = 2.0;
 
 pub struct Noise {
-    sampler: DoublePerlinNoiseSampler,
-    data: &'static NoiseData,
+    pub(crate) sampler: DoublePerlinNoiseSampler,
+    pub(crate) data: &'static NoiseData,
 }
 
 impl Noise {
@@ -64,7 +64,7 @@ impl StaticIndependentChunkNoiseFunctionComponentImpl for Noise {
 }
 
 pub struct ShiftA {
-    sampler: DoublePerlinNoiseSampler,
+    pub(crate) sampler: DoublePerlinNoiseSampler,
 }
 
 impl ShiftA {
@@ -105,7 +105,7 @@ impl StaticIndependentChunkNoiseFunctionComponentImpl for ShiftA {
 }
 
 pub struct ShiftB {
-    sampler: DoublePerlinNoiseSampler,
+    pub(crate) sampler: DoublePerlinNoiseSampler,
 }
 
 impl ShiftB {
@@ -170,8 +170,8 @@ pub struct ShiftedNoise {
     pub(crate) input_x_index: usize,
     pub(crate) input_y_index: usize,
     pub(crate) input_z_index: usize,
-    sampler: DoublePerlinNoiseSampler,
-    data: &'static ShiftedNoiseData,
+    pub(crate) sampler: DoublePerlinNoiseSampler,
+    pub(crate) data: &'static ShiftedNoiseData,
 }
 
 impl ShiftedNoise {

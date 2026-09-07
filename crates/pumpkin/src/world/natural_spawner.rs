@@ -402,8 +402,15 @@ impl SpawnState {
 
     #[inline]
     pub fn can_spawn_for_category_global(&self, category: &'static MobCategory) -> bool {
-        self.mob_category_counts.0[category.id].load(Relaxed)
-            < category.max * self.spawnable_chunk_count / MAGIC_NUMBER
+        if category.max <= 0 {
+            return false;
+        }
+        let max_count = if self.spawnable_chunk_count > 0 {
+            (category.max * self.spawnable_chunk_count / MAGIC_NUMBER).max(1)
+        } else {
+            0
+        };
+        self.mob_category_counts.0[category.id].load(Relaxed) < max_count
     }
 
     pub fn can_spawn_for_category_local(
@@ -515,7 +522,7 @@ pub fn spawn_for_chunk(
     let mut entities = Vec::new();
     for category in spawn_list {
         if spawn_state.can_spawn_for_category_local(world, category, chunk_pos) {
-            let random_pos = get_random_pos_within(world.min_y, &chunk_pos, chunk);
+            let random_pos = get_random_pos_within(world, &chunk_pos, chunk);
             if random_pos.0.y > world.min_y {
                 entities.extend(spawn_category_for_position(
                     category,
@@ -532,7 +539,7 @@ pub fn spawn_for_chunk(
 }
 
 pub fn get_random_pos_within(
-    min_y: i32,
+    world: &World,
     chunk_pos: &Vector2<i32>,
     chunk: &Arc<ChunkData>,
 ) -> BlockPos {
@@ -546,8 +553,59 @@ pub fn get_random_pos_within(
         .unwrap_or_else(std::sync::PoisonError::into_inner)
         .get(ChunkHeightmapType::WorldSurface, x, z, chunk.section.min_y)
         + 1;
-    let y = rng.next_inbetween_i32(min_y, temp_y);
-    BlockPos::new(x, y, z)
+    let min_y = world.min_y;
+
+    if world.dimension.has_ceiling {
+        // Vanilla NaturalSpawner.getTopNonCollidingPos ceiling downward scan:
+        // Start from random Y between min_y and temp_y inside the Nether cavern.
+        let start_y = rng.next_inbetween_i32(min_y.max(10), temp_y);
+        let mut y = start_y;
+
+        // Step down through solid ceiling/ledge rock if starting inside it
+        while y > min_y {
+            let check_pos = BlockPos::new(x, y, z);
+            if world.get_block_state(&check_pos).is_air() {
+                break;
+            }
+            y -= 1;
+        }
+
+        // Step down through open air cavern until hitting the walkable ground
+        while y > min_y {
+            let check_pos = BlockPos::new(x, y - 1, z);
+            let below_state = world.get_block_state(&check_pos);
+            if !below_state.is_air() {
+                // Ground surface is at y - 1, spawn position is y
+                return BlockPos::new(x, y, z);
+            }
+            y -= 1;
+        }
+
+        BlockPos::new(x, y, z)
+    } else {
+        // Overworld: 50% surface spawn, 50% subterranean cave scan
+        let pick_surface = rng.next_bounded_i32(2) == 0;
+        if pick_surface {
+            BlockPos::new(x, temp_y, z)
+        } else {
+            let start_y = rng.next_inbetween_i32(min_y, temp_y);
+            let mut y = start_y;
+            let mut found_y = temp_y;
+            while y < temp_y {
+                let check_pos = BlockPos::new(x, y, z);
+                let state = world.get_block_state(&check_pos);
+                if !state.is_solid_block() && !state.is_full_cube() {
+                    let below = world.get_block_state(&check_pos.down());
+                    if below.is_solid_block() || below.is_liquid() {
+                        found_y = y;
+                        break;
+                    }
+                }
+                y += 1;
+            }
+            BlockPos::new(x, found_y, z)
+        }
+    }
 }
 
 pub fn spawn_mobs_for_chunk_generation(
@@ -606,12 +664,12 @@ pub fn spawn_mobs_for_chunk_generation(
                     let spawn_pos_f64 = Vector3::new(fx, f64::from(pos.0.y), fz);
                     let check_pos = BlockPos::new(fx.floor() as i32, pos.0.y, fz.floor() as i32);
 
-                    if world.is_space_empty(entity_type.get_spawn_bounding_box(
-                        fx,
-                        f64::from(pos.0.y),
-                        fz,
-                    )) && check_spawn_rules(entity_type, world, &check_pos, false)
-                    {
+                    let below_pos = check_pos.down().0;
+                    let below_state = GenerationCache::get_block_state(cache, &below_pos).to_state();
+                    let valid_block = Block::from_state_id(below_state.id)
+                        .has_tag(&pumpkin_data::tag::Block::MINECRAFT_ANIMALS_SPAWNABLE_ON);
+
+                    if valid_block {
                         let entity = from_type(entity_type, spawn_pos_f64, world, Uuid::new_v4());
                         entity
                             .get_entity()
@@ -889,6 +947,53 @@ pub fn is_right_distance_to_player_and_spawn_point(
                 .contains_block(pos.0.x, pos.0.z))
 }
 
+pub static BLAZE_SPAWNER: Spawner = Spawner {
+    r#type: "minecraft:blaze",
+    min_count: 2,
+    max_count: 3,
+};
+pub static ZOMBIFIED_PIGLIN_SPAWNER: Spawner = Spawner {
+    r#type: "minecraft:zombified_piglin",
+    min_count: 4,
+    max_count: 4,
+};
+pub static WITHER_SKELETON_SPAWNER: Spawner = Spawner {
+    r#type: "minecraft:wither_skeleton",
+    min_count: 5,
+    max_count: 5,
+};
+pub static SKELETON_SPAWNER: Spawner = Spawner {
+    r#type: "minecraft:skeleton",
+    min_count: 5,
+    max_count: 5,
+};
+pub static MAGMA_CUBE_SPAWNER: Spawner = Spawner {
+    r#type: "minecraft:magma_cube",
+    min_count: 4,
+    max_count: 4,
+};
+
+/// Nether Fortress enemies matching Vanilla NetherFortressStructure.FORTRESS_ENEMIES:
+/// Blaze (weight 10), Zombified Piglin (weight 5), Wither Skeleton (weight 8), Skeleton (weight 2), Magma Cube (weight 3)
+pub static FORTRESS_ENEMIES: &[(&'static Spawner, u32)] = &[
+    (&BLAZE_SPAWNER, 10),
+    (&ZOMBIFIED_PIGLIN_SPAWNER, 5),
+    (&WITHER_SKELETON_SPAWNER, 8),
+    (&SKELETON_SPAWNER, 2),
+    (&MAGMA_CUBE_SPAWNER, 3),
+];
+
+#[must_use]
+pub fn is_in_nether_fortress_bounds(world: &World, category: &MobCategory, pos: &BlockPos) -> bool {
+    if category != &MobCategory::MONSTER || world.dimension != Dimension::THE_NETHER {
+        return false;
+    }
+    let below_block = world.get_block(&pos.down());
+    below_block == &Block::NETHER_BRICKS
+        || below_block == &Block::RED_NETHER_BRICKS
+        || below_block == &Block::NETHER_BRICK_FENCE
+}
+
 #[must_use]
 pub fn can_spawn_mob_at(
     world: &World,
@@ -896,6 +1001,17 @@ pub fn can_spawn_mob_at(
     spawner_type: &'static str,
     pos: &BlockPos,
 ) -> bool {
+    let target = spawner_type
+        .strip_prefix("minecraft:")
+        .unwrap_or(spawner_type);
+
+    if is_in_nether_fortress_bounds(world, category, pos) {
+        return matches!(
+            target,
+            "blaze" | "zombified_piglin" | "wither_skeleton" | "skeleton" | "magma_cube"
+        );
+    }
+
     let biome = world.level.get_rough_biome(pos);
     let spawners = match category.id {
         id if id == MobCategory::MONSTER.id => biome.spawners.monster,
@@ -910,9 +1026,6 @@ pub fn can_spawn_mob_at(
         id if id == MobCategory::MISC.id => biome.spawners.misc,
         _ => biome.spawners.misc,
     };
-    let target = spawner_type
-        .strip_prefix("minecraft:")
-        .unwrap_or(spawner_type);
     spawners.iter().any(|s| {
         let name = s.r#type.strip_prefix("minecraft:").unwrap_or(s.r#type);
         name == target
@@ -925,6 +1038,23 @@ pub fn get_random_spawn_mob_at(
     category: &'static MobCategory,
     block_pos: &BlockPos,
 ) -> Option<&'static Spawner> {
+    if is_in_nether_fortress_bounds(world, category, block_pos) {
+        let total_weight: u32 = FORTRESS_ENEMIES.iter().map(|(_, w)| *w).sum();
+        let mut roll = rng().random_range(0..total_weight);
+        for (spawner, weight) in FORTRESS_ENEMIES {
+            if roll < *weight {
+                tracing::debug!(
+                    "[NETHER-SPAWN] Spawning fortress mob {} on nether bricks at {:?}",
+                    spawner.r#type,
+                    block_pos
+                );
+                return Some(spawner);
+            }
+            roll -= *weight;
+        }
+        return Some(&BLAZE_SPAWNER);
+    }
+
     let biome = world.level.get_rough_biome(block_pos);
     if category == &MobCategory::WATER_AMBIENT
         && biome.has_tag(&MINECRAFT_REDUCE_WATER_AMBIENT_SPAWNS)
@@ -932,7 +1062,7 @@ pub fn get_random_spawn_mob_at(
     {
         None
     } else {
-        match category.id {
+        let spawner = match category.id {
             id if id == MobCategory::MONSTER.id => biome.spawners.monster,
             id if id == MobCategory::CREATURE.id => biome.spawners.creature,
             id if id == MobCategory::AMBIENT.id => biome.spawners.ambient,
@@ -945,7 +1075,19 @@ pub fn get_random_spawn_mob_at(
             id if id == MobCategory::MISC.id => biome.spawners.misc,
             _ => biome.spawners.misc,
         }
-        .choose(&mut rng())
+        .choose(&mut rng());
+
+        if let Some(s) = spawner {
+            if world.dimension == Dimension::THE_NETHER {
+                tracing::debug!(
+                    "[NETHER-SPAWN] Selected mob {} in Nether biome {:?} at {:?}",
+                    s.r#type,
+                    biome.id,
+                    block_pos
+                );
+            }
+        }
+        spawner
     }
 }
 

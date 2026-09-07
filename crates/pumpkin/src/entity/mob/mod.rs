@@ -20,7 +20,6 @@ use pumpkin_protocol::java::client::play::{CHeadRot, CUpdateEntityRot};
 use pumpkin_util::Difficulty;
 use pumpkin_util::math::boundingbox::BoundingBox;
 use pumpkin_util::math::position::BlockPos;
-use pumpkin_util::math::vector2::Vector2;
 use pumpkin_util::math::vector3::Vector3;
 use pumpkin_util::random::xoroshiro128::Xoroshiro;
 use pumpkin_util::random::{RandomGenerator, get_seed};
@@ -373,11 +372,13 @@ impl MobEntity {
             return false;
         }
 
-        let current_brightness = if is_thundering {
-            (sky_light - 10).max(block_light)
+        let sky_darken = if is_thundering {
+            10
         } else {
-            sky_light.max(block_light)
+            world.get_sky_darken()
         };
+        let effective_sky = (sky_light as i32 - sky_darken).max(0) as u8;
+        let current_brightness = effective_sky.max(block_light);
 
         // TODO
         let mut random = RandomGenerator::Xoroshiro(Xoroshiro::from_seed(get_seed()));
@@ -473,6 +474,9 @@ impl MobEntity {
             self.living_entity
                 .last_attack_time
                 .store(self.living_entity.entity.age.load(Relaxed), Relaxed);
+            if let Some(mob) = caller.get_mob() {
+                mob.on_attack(target);
+            }
         }
     }
 
@@ -550,8 +554,12 @@ impl MobEntity {
         }
 
         let pos = entity.pos.load();
-        let top_y = world.get_top_block(Vector2::new(pos.x as i32, pos.z as i32));
-        if (entity.get_eye_y() as i32) < top_y {
+        let rounded_pos = BlockPos::new(
+            pos.x.floor() as i32,
+            entity.get_eye_y().floor() as i32,
+            pos.z.floor() as i32,
+        );
+        if !world.can_see_sky(&rounded_pos) {
             return false;
         }
 
@@ -742,8 +750,36 @@ pub trait Mob: EntityBase + Send + Sync {
 
     fn on_eating_grass(&self) {}
 
+    /// Override to return a custom loot table key for this mob's death drops.
+    /// Return `None` to use the default entity resource name key.
+    fn get_entity_loot_key(&self) -> Option<String> {
+        None
+    }
+
     fn modify_incoming_damage(&self, amount: f32, _damage_type: DamageType) -> f32 {
         amount
+    }
+
+    fn can_attack(&self, target: &dyn EntityBase) -> bool {
+        if let Some(tamable) = self.as_tamable() {
+            if tamable.is_tame() {
+                if let Some(player) = target.get_player() {
+                    if tamable.is_owned_by(&player.gameprofile.id) {
+                        return false;
+                    }
+                }
+                if let Some(target_mob) = target.get_mob()
+                    && let Some(target_tamable) = target_mob.as_tamable()
+                    && target_tamable.is_tame()
+                    && let (Some(my_owner), Some(target_owner)) =
+                        (tamable.get_owner(), target_tamable.get_owner())
+                    && my_owner == target_owner
+                {
+                    return false;
+                }
+            }
+        }
+        true
     }
 
     fn can_attack_with_owner(&self, _target: &dyn EntityBase, _owner: &dyn EntityBase) -> bool {
@@ -1101,6 +1137,11 @@ impl<T: Mob + Send + 'static> EntityBase for T {
     #[allow(clippy::too_many_lines)]
     fn tick(&self, caller: &dyn EntityBase, server: &Server) {
         let mob_entity = self.get_mob_entity();
+        if !mob_entity.living_entity.is_alive() {
+            mob_entity.living_entity.tick(caller, server);
+            self.post_tick();
+            return;
+        }
         mob_entity.living_entity.entity.tick_leash();
         mob_entity.tick_sun_burn();
 
@@ -1125,6 +1166,13 @@ impl<T: Mob + Send + 'static> EntityBase for T {
         }
 
         mob_entity.check_despawn(self);
+
+        if mob_entity.living_entity.dead.load(Relaxed)
+            || mob_entity.living_entity.health.load() <= 0.0
+        {
+            mob_entity.living_entity.tick(caller, server);
+            return;
+        }
 
         self.mob_tick(caller);
 
@@ -1177,7 +1225,19 @@ impl<T: Mob + Send + 'static> EntityBase for T {
             std::mem::take(&mut *guard)
         };
 
-        navigator.tick(&mob_entity.living_entity);
+        if self.is_sitting() {
+            navigator.stop();
+            mob_entity
+                .living_entity
+                .movement_input
+                .store(pumpkin_util::math::vector3::Vector3::new(0.0, 0.0, 0.0));
+            mob_entity
+                .living_entity
+                .jumping
+                .store(false, std::sync::atomic::Ordering::Relaxed);
+        } else {
+            navigator.tick(&mob_entity.living_entity);
+        }
 
         {
             *mob_entity
@@ -1202,6 +1262,17 @@ impl<T: Mob + Send + 'static> EntityBase for T {
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
             move_control.tick(self);
         };
+
+        if self.is_sitting() {
+            mob_entity
+                .living_entity
+                .movement_input
+                .store(pumpkin_util::math::vector3::Vector3::new(0.0, 0.0, 0.0));
+            mob_entity
+                .living_entity
+                .jumping
+                .store(false, std::sync::atomic::Ordering::Relaxed);
+        }
 
         mob_entity.living_entity.tick(caller, server);
         self.post_tick();
@@ -1241,11 +1312,11 @@ impl<T: Mob + Send + 'static> EntityBase for T {
     }
 
     fn is_collidable(&self, _entity: Option<Box<dyn EntityBase>>) -> bool {
-        true
+        self.get_mob_entity().living_entity.is_alive()
     }
 
     fn can_hit(&self) -> bool {
-        true
+        self.get_mob_entity().living_entity.is_alive()
     }
 
     fn damage_with_context(

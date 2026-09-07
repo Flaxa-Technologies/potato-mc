@@ -122,7 +122,7 @@ impl MobCategory {
         id: 5,
         max: 5,
         is_friendly: true,
-        is_persistent: true,
+        is_persistent: false,
         despawn_distance: 128,
     };
     pub const WATER_AMBIENT: MobCategory = MobCategory {
@@ -4768,7 +4768,7 @@ impl EntityType {
             (Attributes::WAYPOINT_TRANSMIT_RANGE, 0f64),
         ],
         experience_reward: 1u32,
-        hurt_sound: None,
+        hurt_sound: Some(Sound::EntitySheepHurt),
         attackable: Some(true),
         mob: true,
         saveable: true,

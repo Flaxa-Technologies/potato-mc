@@ -99,7 +99,7 @@ pub fn update_position(player: &Arc<Player>) {
         )
     });
 
-    let new_sim_level = (!is_spectator).then(|| {
+    let new_sim_level = Some({
         let sim_dist = world.server.upgrade().map_or(10, |s| {
             s.advanced_config.networking.java.simulation_distance.get()
         });

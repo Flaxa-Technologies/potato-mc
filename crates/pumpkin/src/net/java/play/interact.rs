@@ -142,12 +142,11 @@ impl JavaClient {
 
                 'after: {
                     if event.action == ActionType::Attack {
-                        error!(
-                            "Player id {} interacted with entity id {}, which was not found.",
+                        debug!(
+                            "Player id {} interacted with entity id {}, which was not found (target likely despawned or died).",
                             player.entity_id(),
                             event.entity_id
                         );
-                        self.try_kick(&TextComponent::translate_cross(translation::java::MULTIPLAYER_DISCONNECT_INVALID_ENTITY_ATTACKED, translation::java::MULTIPLAYER_DISCONNECT_INVALID_ENTITY_ATTACKED, []));
                     }
                 }
             }}

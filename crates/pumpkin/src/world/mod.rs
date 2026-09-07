@@ -423,9 +423,6 @@ impl World {
         let mut current_players = FxHashSet::default();
 
         for player in players.iter() {
-            if player.is_spectator() {
-                continue;
-            }
             let id = player.gameprofile.id;
             current_players.insert(id);
             tracker.update_player(

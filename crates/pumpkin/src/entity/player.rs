@@ -4787,6 +4787,10 @@ impl Player {
             },
         );
 
+        let world = self.world();
+        world.entity_tracker.update_player_position(self, &world);
+        world.update_active_chunks();
+
         true
     }
 

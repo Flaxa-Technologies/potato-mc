@@ -170,6 +170,18 @@ pub fn get_carver_seed(world_seed: u64, chunk_x: i32, chunk_z: i32) -> u64 {
         ^ world_seed
 }
 
+/// Generates a large feature seed matching vanilla `WorldgenRandom.setLargeFeatureSeed`.
+#[inline]
+#[must_use]
+pub fn get_large_feature_seed(world_seed: u64, chunk_x: i32, chunk_z: i32) -> u64 {
+    let mut random = LegacyRand::from_seed(world_seed);
+    let x_mul = random.next_i64();
+    let z_mul = random.next_i64();
+    ((chunk_x as i64).wrapping_mul(x_mul)
+        ^ (chunk_z as i64).wrapping_mul(z_mul)
+        ^ (world_seed as i64)) as u64
+}
+
 #[expect(clippy::return_self_not_must_use)]
 pub trait RandomImpl {
     fn split(&mut self) -> Self;

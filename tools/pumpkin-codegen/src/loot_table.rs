@@ -240,6 +240,7 @@ struct EntryFunctionStruct {
     formula: Option<String>,
     #[serde(default)]
     parameters: Option<BonusParameterStruct>,
+    #[serde(default)]
     count: Option<CountStruct>,
 }
 

@@ -64,6 +64,22 @@ impl LegacyRand {
     const fn next(&mut self, bits: u64) -> i32 {
         (self.next_random() >> (48 - bits)) as i32
     }
+
+    pub fn set_seed(&mut self, seed: u64) {
+        self.seed = (seed ^ 0x0005_DEEC_E66D) & 0xFFFF_FFFF_FFFF;
+        self.internal_next_gaussian = None;
+    }
+
+    /// Matches vanilla's `WorldgenRandom.setLargeFeatureSeed`.
+    pub fn set_large_feature_seed(&mut self, seed: u64, chunk_x: i32, chunk_z: i32) {
+        self.set_seed(seed);
+        let x_mul = self.next_i64();
+        let z_mul = self.next_i64();
+        let result = ((chunk_x as i64).wrapping_mul(x_mul)
+            ^ (chunk_z as i64).wrapping_mul(z_mul)
+            ^ (seed as i64)) as u64;
+        self.set_seed(result);
+    }
 }
 
 impl GaussianGenerator for LegacyRand {

@@ -1025,7 +1025,7 @@ impl DensityFunctionRepr {
             Self::Constant { value } => {
                 let val = value.0;
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let _ = (pos, ctx);
                         #val
@@ -1038,7 +1038,7 @@ impl DensityFunctionRepr {
                 let from_val = data.from_value.0;
                 let to_val = data.to_value.0;
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let _ = ctx;
                         let y = pos.y as f32;
@@ -1085,7 +1085,7 @@ impl DensityFunctionRepr {
                     },
                 };
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let _ = ctx;
                         let coord = #coord;
@@ -1104,7 +1104,7 @@ impl DensityFunctionRepr {
                     DistanceMetric::Chebyshev => quote! { dx.abs().max(dy.abs()).max(dz.abs()) },
                 };
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let _ = ctx;
                         let dx = (pos.x - #px) as f32;
@@ -1126,7 +1126,7 @@ impl DensityFunctionRepr {
                 let f_fn = syn::Ident::new(&format!("{}_{}", fn_prefix, f_idx), Span::call_site());
                 let s_fn = syn::Ident::new(&format!("{}_{}", fn_prefix, s_idx), Span::call_site());
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let a = #a_fn(pos, ctx);
                         let f = #f_fn(pos, ctx);
@@ -1161,7 +1161,7 @@ impl DensityFunctionRepr {
                     }
                 };
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let v = #in_fn(pos, ctx);
                         let m = #mul_fn(pos, ctx);
@@ -1189,7 +1189,7 @@ impl DensityFunctionRepr {
                     }
                 };
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let slice_pos = #slice_pos;
                         #child_fn(&slice_pos, ctx)
@@ -1206,7 +1206,7 @@ impl DensityFunctionRepr {
                     LinearOperation::Mul => quote! { #child_fn(pos, ctx) * #arg },
                 };
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         #body
                     }
@@ -1240,7 +1240,7 @@ impl DensityFunctionRepr {
                     }
                 };
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         #body
                     }
@@ -1253,7 +1253,7 @@ impl DensityFunctionRepr {
                 let min_v = data.min_value.0;
                 let max_v = data.max_value.0;
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         #child_fn(pos, ctx).clamp(#min_v, #max_v)
                     }
@@ -1288,7 +1288,7 @@ impl DensityFunctionRepr {
                     }
                 };
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         #body
                     }
@@ -1315,7 +1315,7 @@ impl DensityFunctionRepr {
                 let min_inc = data.min_inclusive.0;
                 let max_exc = data.max_exclusive.0;
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let val = #input_fn(pos, ctx);
                         if val >= #min_inc && val < #max_exc {
@@ -1331,7 +1331,7 @@ impl DensityFunctionRepr {
                 let xz_scale = data.xz_scale.0;
                 let y_scale = data.y_scale.0;
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_noise(DoublePerlinNoiseParameters::#noise_id, f64::from(pos.x) * #xz_scale, f64::from(pos.y) * #y_scale, f64::from(pos.z) * #xz_scale)
                     }
@@ -1340,7 +1340,7 @@ impl DensityFunctionRepr {
             Self::ShiftA { noise_id } => {
                 let noise_id = quote::format_ident!("{}", noise_id.to_shouty_snake_case());
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_shift_a(DoublePerlinNoiseParameters::#noise_id, pos)
                     }
@@ -1349,7 +1349,7 @@ impl DensityFunctionRepr {
             Self::ShiftB { noise_id } => {
                 let noise_id = quote::format_ident!("{}", noise_id.to_shouty_snake_case());
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_shift_b(DoublePerlinNoiseParameters::#noise_id, pos)
                     }
@@ -1374,7 +1374,7 @@ impl DensityFunctionRepr {
                 let xz_scale = data.xz_scale.0;
                 let y_scale = data.y_scale.0;
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let sx = #sx_fn(pos, ctx);
                         let sy = #sy_fn(pos, ctx);
@@ -1385,7 +1385,7 @@ impl DensityFunctionRepr {
             }
             Self::BlendAlpha => {
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_blend_alpha(pos)
                     }
@@ -1393,7 +1393,7 @@ impl DensityFunctionRepr {
             }
             Self::BlendOffset => {
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_blend_offset(pos)
                     }
@@ -1404,7 +1404,7 @@ impl DensityFunctionRepr {
                 let child_fn =
                     syn::Ident::new(&format!("{}_{}", fn_prefix, child_idx), Span::call_site());
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let val = #child_fn(pos, ctx);
                         ctx.sample_blend_density(val, pos)
@@ -1413,7 +1413,7 @@ impl DensityFunctionRepr {
             }
             Self::Beardifier => {
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_beardifier(pos)
                     }
@@ -1421,7 +1421,7 @@ impl DensityFunctionRepr {
             }
             Self::EndIslands => {
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_end_islands(pos)
                     }
@@ -1434,7 +1434,7 @@ impl DensityFunctionRepr {
                 let wrapper_repr = wrapper.into_token_stream();
                 let comp_idx = index;
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_wrapper(#comp_idx, #wrapper_repr, pos, &#child_fn)
                     }
@@ -1464,7 +1464,7 @@ impl DensityFunctionRepr {
                     &[]
                 };
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         let input_val = #input_fn(pos, ctx);
                         let thresholds = &[#(#threshold_values),*];
@@ -1484,7 +1484,7 @@ impl DensityFunctionRepr {
             }
             Self::InterpolatedNoiseSampler { .. } => {
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_interpolated_noise(pos)
                     }
@@ -1503,7 +1503,7 @@ impl DensityFunctionRepr {
                     let loc_fn =
                         syn::Ident::new(&format!("{}_{}", fn_prefix, loc_idx), Span::call_site());
                     quote! {
-                        #[inline(always)]
+                        #[inline]
                         pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                             let location_val = #loc_fn(pos, ctx);
                             ctx.sample_spline(#index, location_val, pos)
@@ -1515,7 +1515,7 @@ impl DensityFunctionRepr {
                         _ => 0.0,
                     };
                     quote! {
-                        #[inline(always)]
+                        #[inline]
                         pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                             let _ = (pos, ctx);
                             #val
@@ -1535,7 +1535,7 @@ impl DensityFunctionRepr {
                 let lower = data.lower_bound;
                 let cell_h = data.cell_height;
                 quote! {
-                    #[inline(always)]
+                    #[inline]
                     pub fn #fn_name<C: NoiseEvaluationContext>(pos: &pumpkin_util::math::vector3::Vector3<i32>, ctx: &mut C) -> f32 {
                         ctx.sample_find_top_surface(&#d_fn, &#u_fn, #lower, #cell_h, pos)
                     }

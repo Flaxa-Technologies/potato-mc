@@ -53,10 +53,25 @@ impl ClientPacket for CDamageEvent {
     fn write_packet_data(
         &self,
         mut write: impl std::io::Write,
-        _version: &JavaMinecraftVersion,
+        version: &JavaMinecraftVersion,
     ) -> Result<(), crate::ser::WritingError> {
         write.write_var_int(&self.entity_id)?;
-        write.write_var_int(&self.source_type_id)?;
+        let mapped_source_type_id = if *version <= JavaMinecraftVersion::V_26_1 {
+            // In 26.1 and earlier, the dynamic damage_type registry only had 50 entries (0..=49).
+            // `sulfur_cube_hot` (added at 42 in 26.2) does not exist in 26.1, so all entries after 42
+            // were shifted up by 1 in 26.2.
+            if self.source_type_id.0 == 42 {
+                VarInt(31) // on_fire fallback
+            } else if self.source_type_id.0 > 42 {
+                let shifted = self.source_type_id.0 - 1;
+                VarInt(shifted.min(49))
+            } else {
+                VarInt(self.source_type_id.0.min(49))
+            }
+        } else {
+            self.source_type_id
+        };
+        write.write_var_int(&mapped_source_type_id)?;
         write.write_var_int(&self.source_cause_id)?;
         write.write_var_int(&self.source_direct_id)?;
         if let Some(pos) = &self.source_position {
@@ -68,5 +83,72 @@ impl ClientPacket for CDamageEvent {
             write.write_bool(false)?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::java::packet_encoder::serialize_packet;
+
+    #[test]
+    fn test_damage_event_serialization() {
+        let packet = CDamageEvent::new(
+            VarInt(5),
+            VarInt(34),
+            Some(VarInt(10)),
+            Some(VarInt(10)),
+            None,
+        );
+        let bytes = serialize_packet(&packet, &JavaMinecraftVersion::V_26_2).expect("serialize");
+        // Packet ID 25 (0x19) in 26.2
+        assert_eq!(bytes[0], 0x19);
+        // Entity ID 5
+        assert_eq!(bytes[1], 5);
+        // Source type ID 34
+        assert_eq!(bytes[2], 34);
+        // Source cause ID 11 (10 + 1)
+        assert_eq!(bytes[3], 11);
+        // Source direct ID 11 (10 + 1)
+        assert_eq!(bytes[4], 11);
+        // Has position: false
+        assert_eq!(bytes[5], 0);
+    }
+
+    #[test]
+    fn test_damage_event_remap_v26_1() {
+        // Test that wither_skull (id 50 in 26.2) remaps to 49 in 26.1
+        let packet = CDamageEvent::new(
+            VarInt(5),
+            VarInt(50),
+            None,
+            None,
+            None,
+        );
+        let bytes = serialize_packet(&packet, &JavaMinecraftVersion::V_26_1).expect("serialize");
+        assert_eq!(bytes[1], 5); // entity_id
+        assert_eq!(bytes[2], 49); // remapped to 49 for 26.1!
+    }
+
+    #[test]
+    fn test_damage_event_without_causes_with_pos() {
+        let packet = CDamageEvent::new(
+            VarInt(7),
+            VarInt(9),
+            None,
+            None,
+            Some(Vector3::new(10.0, 20.0, 30.0)),
+        );
+        let bytes = serialize_packet(&packet, &JavaMinecraftVersion::V_26_2).expect("serialize");
+        assert_eq!(bytes[0], 0x19);
+        assert_eq!(bytes[1], 7);
+        assert_eq!(bytes[2], 9);
+        // Cause ID 0
+        assert_eq!(bytes[3], 0);
+        // Direct ID 0
+        assert_eq!(bytes[4], 0);
+        // Has position: true
+        assert_eq!(bytes[5], 1);
+        assert_eq!(bytes.len(), 1 + 1 + 1 + 1 + 1 + 1 + 24);
     }
 }

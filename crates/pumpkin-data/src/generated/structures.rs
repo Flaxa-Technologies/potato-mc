@@ -161,6 +161,42 @@ impl StructureKeys {
             "minecraft:village_taiga",
         ]
     }
+    #[must_use]
+    pub fn structure_set(&self) -> &'static StructureSet {
+        match self {
+            Self::AncientCity => &StructureSet::ANCIENT_CITIES,
+            Self::BastionRemnant => &StructureSet::NETHER_COMPLEXES,
+            Self::BuriedTreasure => &StructureSet::BURIED_TREASURES,
+            Self::DesertPyramid => &StructureSet::DESERT_PYRAMIDS,
+            Self::EndCity => &StructureSet::END_CITIES,
+            Self::Fortress => &StructureSet::NETHER_COMPLEXES,
+            Self::Igloo => &StructureSet::IGLOOS,
+            Self::JunglePyramid => &StructureSet::JUNGLE_TEMPLES,
+            Self::Mansion => &StructureSet::WOODLAND_MANSIONS,
+            Self::Mineshaft | Self::MineshaftMesa => &StructureSet::MINESHAFTS,
+            Self::Monument => &StructureSet::OCEAN_MONUMENTS,
+            Self::NetherFossil => &StructureSet::NETHER_FOSSILS,
+            Self::OceanRuinCold | Self::OceanRuinWarm => &StructureSet::OCEAN_RUINS,
+            Self::PillagerOutpost => &StructureSet::PILLAGER_OUTPOSTS,
+            Self::RuinedPortal
+            | Self::RuinedPortalDesert
+            | Self::RuinedPortalJungle
+            | Self::RuinedPortalMountain
+            | Self::RuinedPortalNether
+            | Self::RuinedPortalOcean
+            | Self::RuinedPortalSwamp => &StructureSet::RUINED_PORTALS,
+            Self::Shipwreck | Self::ShipwreckBeached => &StructureSet::SHIPWRECKS,
+            Self::Stronghold => &StructureSet::STRONGHOLDS,
+            Self::SwampHut => &StructureSet::SWAMP_HUTS,
+            Self::TrailRuins => &StructureSet::TRAIL_RUINS,
+            Self::TrialChambers => &StructureSet::TRIAL_CHAMBERS,
+            Self::VillageDesert
+            | Self::VillagePlains
+            | Self::VillageSavanna
+            | Self::VillageSnowy
+            | Self::VillageTaiga => &StructureSet::VILLAGES,
+        }
+    }
 }
 pub struct StructureSet {
     pub placement: StructurePlacement,
@@ -1975,5 +2011,20 @@ impl StructureSet {
             "woodland_mansions" => Some(&Self::WOODLAND_MANSIONS),
             _ => None,
         }
+    }
+    #[must_use]
+    pub fn find_for_name(name: &str) -> Option<(&'static Self, Vec<StructureKeys>)> {
+        let clean_name = name.strip_prefix("minecraft:").unwrap_or(name);
+        if let Some(set) = Self::get(clean_name) {
+            return Some((set, set.structures.iter().map(|e| e.structure).collect()));
+        }
+        if let Some(key) = StructureKeys::from_name(clean_name) {
+            return Some((key.structure_set(), vec![key]));
+        }
+        let plural = format!("{clean_name}s");
+        if let Some(set) = Self::get(&plural) {
+            return Some((set, set.structures.iter().map(|e| e.structure).collect()));
+        }
+        None
     }
 }

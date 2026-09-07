@@ -2864,7 +2864,7 @@ impl Enchantment {
     }
     pub fn are_compatible(&self, other: &'static Enchantment) -> bool {
         if self == other {
-            return false;
+            return true;
         }
         if let Some(tag) = self.exclusive_set
             && tag.1.contains(&(other.id as u16))

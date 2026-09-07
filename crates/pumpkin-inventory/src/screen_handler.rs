@@ -939,6 +939,79 @@ pub trait ScreenHandler: Send + Sync {
                 let stack = slot.get_stack();
                 *cursor_stack = stack.copy_with_count(stack.get_max_stack_size());
             }
+        } else if action_type == SlotActionType::Swap
+            && ((0..9).contains(&button) || button == 40)
+            && slot_index >= 0
+        {
+            let behaviour = self.get_behaviour_mut();
+            if let Some(target_slot) = behaviour.slots.get(slot_index as usize).cloned() {
+                let player_inv = player.get_inventory();
+                let is_offhand = button == 40;
+                let hotbar_index = button as usize;
+
+                let source = if is_offhand {
+                    player_inv.off_hand_item()
+                } else {
+                    let inv = player_inv
+                        .main_inventory
+                        .read()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
+                    inv[hotbar_index].clone()
+                };
+
+                let mut target_stack = target_slot.get_cloned_stack();
+
+                let set_source = |new_stack: ItemStack| {
+                    if is_offhand {
+                        player_inv.set_stack_in_hand(pumpkin_util::Hand::Left, new_stack);
+                    } else {
+                        let mut inv = player_inv
+                            .main_inventory
+                            .write()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner);
+                        inv[hotbar_index] = new_stack;
+                    }
+                };
+
+                if !source.is_empty() || !target_stack.is_empty() {
+                    if source.is_empty() {
+                        if target_slot.can_take_items(player) {
+                            set_source(target_stack.clone());
+                            target_slot.set_stack(ItemStack::EMPTY.clone());
+                            target_slot.on_take_item(player, &target_stack);
+                        }
+                    } else if target_stack.is_empty() {
+                        if target_slot.can_insert(&source) {
+                            let max_stack_size = target_slot.get_max_item_count_for_stack(&source);
+                            if source.item_count > max_stack_size {
+                                let mut placed_stack = source.clone();
+                                let remaining = placed_stack.split(max_stack_size);
+                                target_slot.set_stack(placed_stack);
+                                set_source(remaining);
+                            } else {
+                                set_source(ItemStack::EMPTY.clone());
+                                target_slot.set_stack(source);
+                            }
+                        }
+                    } else if target_slot.can_take_items(player) && target_slot.can_insert(&source) {
+                        let max_stack_size = target_slot.get_max_item_count_for_stack(&source);
+                        if source.item_count > max_stack_size {
+                            let mut placed_stack = source.clone();
+                            let remaining = placed_stack.split(max_stack_size);
+                            target_slot.set_stack(placed_stack);
+                            target_slot.on_take_item(player, &target_stack);
+                            if !player_inv.insert_stack_anywhere(&mut target_stack) {
+                                player.drop_item(target_stack, true);
+                            }
+                            set_source(remaining);
+                        } else {
+                            set_source(target_stack.clone());
+                            target_slot.set_stack(source);
+                            target_slot.on_take_item(player, &target_stack);
+                        }
+                    }
+                }
+            }
         } else if (action_type == SlotActionType::Pickup
             || action_type == SlotActionType::QuickMove)
             && (button == 0 || button == 1)

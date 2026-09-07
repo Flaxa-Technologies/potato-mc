@@ -2,7 +2,6 @@ use std::io::{Cursor, Write};
 
 use pumpkin_data::{
     block_state_remap::remap_block_state_for_version,
-    item_id_remap::remap_item_id_for_version,
     meta_data_type::MetaDataType,
     packet::clientbound::play::SET_ENTITY_DATA,
     tracked_data::{TrackedData, TrackedId},
@@ -158,31 +157,6 @@ impl<T> Metadata<T> {
                 writer.write_var_int(&remapped_state)?;
             } else {
                 writer.write_i32(remapped_state.0)?;
-            }
-            return Ok(());
-        }
-
-        if self.r#type == MetaDataType::ITEM_STACK {
-            let mut serialized_value = Vec::new();
-            self.value.write_metadata(&mut serialized_value, version)?;
-
-            let mut cursor = Cursor::new(serialized_value);
-            let item_count = VarInt::decode(&mut cursor).map_err(|e| {
-                WritingError::Message(format!("Failed to decodeitem stack count: {e}"))
-            })?;
-
-            if item_count.0 <= 0 {
-                writer.write_var_int(&item_count)?;
-            } else {
-                let item_id = VarInt::decode(&mut cursor)
-                    .map_err(|e| WritingError::Message(format!("Failed to decode item id: {e}")))?;
-                let remapped_id = u16::try_from(item_id.0)
-                    .map_or(0, |id| remap_item_id_for_version(id, *version));
-                writer.write_var_int(&item_count)?;
-                writer.write_var_int(&VarInt(i32::from(remapped_id)))?;
-                let remainder_start = cursor.position() as usize;
-                let inner = cursor.into_inner();
-                writer.write_slice(&inner[remainder_start..])?;
             }
             return Ok(());
         }
@@ -346,6 +320,27 @@ impl MetadataSerializer for VarInt {
         _version: &JavaMinecraftVersion,
     ) -> Result<(), WritingError> {
         writer.write_var_int(self)
+    }
+}
+
+impl MetadataSerializer for pumpkin_data::BlockStateId {
+    fn write_metadata(
+        &self,
+        writer: &mut impl std::io::Write,
+        _version: &JavaMinecraftVersion,
+    ) -> Result<(), WritingError> {
+        writer.write_var_int(&VarInt(i32::from(self.as_u16())))
+    }
+}
+
+impl MetadataSerializer for Option<pumpkin_data::BlockStateId> {
+    fn write_metadata(
+        &self,
+        writer: &mut impl std::io::Write,
+        _version: &JavaMinecraftVersion,
+    ) -> Result<(), WritingError> {
+        let val = self.map_or(0, |id| i32::from(id.as_u16()));
+        writer.write_var_int(&VarInt(val))
     }
 }
 
@@ -614,5 +609,58 @@ mod tests {
         pos.write_metadata(&mut buf_legacy, &JavaMinecraftVersion::V_1_8)
             .unwrap();
         assert_eq!(buf_legacy.len(), 12); // 3 * i32 (12 bytes)
+    }
+
+    #[test]
+    fn item_stack_metadata_remaps_only_once_for_1_21_4() {
+        use pumpkin_data::item::Item;
+        use pumpkin_data::item_id_remap::remap_item_id_for_version;
+        use pumpkin_data::item_stack::ItemStack;
+        use crate::codec::item_stack_seralizer::ItemStackSerializer;
+
+        let stack = ItemStack::new(1, &Item::WHEAT_SEEDS);
+        let metadata = Metadata::new(
+            pumpkin_data::tracked_data::item::ITEM,
+            ItemStackSerializer::from(stack),
+        );
+        let mut bytes = Vec::new();
+        let version = JavaMinecraftVersion::V_1_21_4;
+        metadata.write(&mut bytes, &version).unwrap();
+
+        assert_eq!(bytes[0], pumpkin_data::tracked_data::item::ITEM.get(&version));
+        assert_eq!(bytes[1], MetaDataType::ITEM_STACK.id(version) as u8);
+
+        // In 1.21.4 (1.20.5+ item format):
+        // bytes[2..] starts with item_count (VarInt), then item_id (VarInt)
+        let mut cursor = Cursor::new(&bytes[2..]);
+        let item_count = VarInt::decode(&mut cursor).unwrap();
+        let item_id = VarInt::decode(&mut cursor).unwrap();
+
+        assert_eq!(item_count, VarInt(1));
+        let expected_remapped_id = remap_item_id_for_version(Item::WHEAT_SEEDS.id, version);
+        assert_eq!(item_id, VarInt(expected_remapped_id as i32));
+    }
+
+    #[test]
+    fn block_state_id_metadata_remaps_for_1_21_4() {
+        use pumpkin_data::Block;
+        use pumpkin_data::block_state_remap::remap_block_state_for_version;
+
+        let state_id = Block::TNT.default_state.id;
+        let metadata = Metadata::new(
+            pumpkin_data::tracked_data::tnt::DATA_BLOCK_STATE_ID,
+            state_id,
+        );
+        let mut bytes = Vec::new();
+        let version = JavaMinecraftVersion::V_1_21_4;
+        metadata.write(&mut bytes, &version).unwrap();
+
+        assert_eq!(bytes[0], pumpkin_data::tracked_data::tnt::DATA_BLOCK_STATE_ID.get(&version));
+        assert_eq!(bytes[1], MetaDataType::BLOCK_STATE.id(version) as u8);
+
+        let mut cursor = Cursor::new(&bytes[2..]);
+        let decoded_state = VarInt::decode(&mut cursor).unwrap();
+        let expected_remapped = remap_block_state_for_version(state_id.as_u16(), version);
+        assert_eq!(decoded_state, VarInt(expected_remapped as i32));
     }
 }

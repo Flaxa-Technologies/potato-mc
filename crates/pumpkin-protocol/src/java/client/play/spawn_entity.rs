@@ -140,7 +140,7 @@ impl CSpawnEntity {
             entity_uuid,
             r#type,
             position,
-            pitch: (pitch * ROTATION_FACTOR).floor() as u8,
+            pitch: (pitch.rem_euclid(360.0) * ROTATION_FACTOR).floor() as u8,
             yaw: (yaw.rem_euclid(360.0) * ROTATION_FACTOR).floor() as u8,
             head_yaw: (head_yaw.rem_euclid(360.0) * ROTATION_FACTOR).floor() as u8,
             data,

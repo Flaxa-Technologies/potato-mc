@@ -1572,7 +1572,7 @@ pub mod serverbound {
             v1_21_7: 7i32,
             v1_21_9: 7i32,
             v1_21_11: 7i32,
-            v26_1: 8i32,
+            v26_1: 7i32,
             v26_2: 7i32,
         };
         pub const CHAT_COMMAND_SIGNED: super::super::PacketId = super::super::PacketId {
@@ -1625,7 +1625,7 @@ pub mod serverbound {
             v1_21_7: -1i32,
             v1_21_9: -1i32,
             v1_21_11: -1i32,
-            v26_1: -1i32,
+            v26_1: 8i32,
             v26_2: 8i32,
         };
         pub const CHAT_PREVIEW: super::super::PacketId = super::super::PacketId {

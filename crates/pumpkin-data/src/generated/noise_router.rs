@@ -62,7 +62,7 @@ pub trait NoiseEvaluationContext {
 }
 pub mod overworld_compiled {
     use super::*;
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_0<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -72,7 +72,7 @@ pub mod overworld_compiled {
         let rel = coord.clamp(-64i32, -40i32) - -64i32;
         0f32 + rel as f32 * 0.041666668f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_1<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -80,7 +80,7 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         0.1171875f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_2<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -90,7 +90,7 @@ pub mod overworld_compiled {
         let rel = coord.clamp(240i32, 256i32) - 240i32;
         1f32 + rel as f32 * -0.0625f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_3<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -98,7 +98,7 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         -0.078125f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_4<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -108,28 +108,28 @@ pub mod overworld_compiled {
         let rel = coord.clamp(-64i32, 320i32) - -64i32;
         1.5f32 + rel as f32 * -0.0078125f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_5<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_blend_alpha(pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_6<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_blend_offset(pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_7<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_shift_a(DoublePerlinNoiseParameters::OFFSET, pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_8<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -137,14 +137,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_7(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_9<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(9usize, WrapperType::Cache, pos, &eval_overworld_8)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_10<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -152,14 +152,14 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         0f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_11<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_shift_b(DoublePerlinNoiseParameters::OFFSET, pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_12<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -167,14 +167,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_11(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_13<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(13usize, WrapperType::Cache, pos, &eval_overworld_12)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_14<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -191,7 +191,7 @@ pub mod overworld_compiled {
             0f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_15<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -199,14 +199,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_14(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_16<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(16usize, WrapperType::Cache, pos, &eval_overworld_15)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_17<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -223,7 +223,7 @@ pub mod overworld_compiled {
             0f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_18<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -231,14 +231,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_17(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_19<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(19usize, WrapperType::Cache, pos, &eval_overworld_18)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_20<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -255,7 +255,7 @@ pub mod overworld_compiled {
             0f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_21<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -263,49 +263,49 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_20(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_22<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(22usize, WrapperType::Cache, pos, &eval_overworld_21)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_23<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_22(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_24<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_23(pos, ctx) + -0.6666667f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_25<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_24(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_26<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_25(pos, ctx) + -0.33333334f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_27<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_26(pos, ctx) * -3f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_28<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -313,14 +313,14 @@ pub mod overworld_compiled {
         let location_val = eval_overworld_16(pos, ctx);
         ctx.sample_spline(28usize, location_val, pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_29<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_28(pos, ctx) + -0.50375f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_30<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -330,7 +330,7 @@ pub mod overworld_compiled {
         let s = eval_overworld_29(pos, ctx);
         f + a * (s - f)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_31<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -338,14 +338,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_30(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_32<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(32usize, WrapperType::Cache, pos, &eval_overworld_31)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_33<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -353,14 +353,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_32(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_34<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_4(pos, ctx) + eval_overworld_33(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_35<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -368,7 +368,7 @@ pub mod overworld_compiled {
         let location_val = eval_overworld_16(pos, ctx);
         ctx.sample_spline(35usize, location_val, pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_36<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -378,7 +378,7 @@ pub mod overworld_compiled {
         let s = eval_overworld_35(pos, ctx);
         f + a * (s - f)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_37<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -386,14 +386,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_36(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_38<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(38usize, WrapperType::Cache, pos, &eval_overworld_37)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_39<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -405,7 +405,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1500f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_40<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -413,14 +413,14 @@ pub mod overworld_compiled {
         let v = eval_overworld_39(pos, ctx);
         if v > 0.0 { v } else { v * 0.5 }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_41<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_38(pos, ctx) * eval_overworld_40(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_42<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -428,14 +428,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_41(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_43<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(43usize, WrapperType::Cache, pos, &eval_overworld_42)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_44<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -443,14 +443,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_43(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_45<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_34(pos, ctx) + eval_overworld_44(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_46<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -458,7 +458,7 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         10f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_47<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -466,7 +466,7 @@ pub mod overworld_compiled {
         let location_val = eval_overworld_16(pos, ctx);
         ctx.sample_spline(47usize, location_val, pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_48<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -476,7 +476,7 @@ pub mod overworld_compiled {
         let s = eval_overworld_47(pos, ctx);
         f + a * (s - f)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_49<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -484,14 +484,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_48(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_50<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(50usize, WrapperType::Cache, pos, &eval_overworld_49)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_51<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -499,14 +499,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_50(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_52<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_45(pos, ctx) * eval_overworld_51(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_53<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -514,35 +514,35 @@ pub mod overworld_compiled {
         let v = eval_overworld_52(pos, ctx);
         if v > 0.0 { v } else { v * 0.25 }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_54<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_53(pos, ctx) * 4f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_55<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_interpolated_noise(pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_56<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_54(pos, ctx) + eval_overworld_55(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_57<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(57usize, WrapperType::Cache, pos, &eval_overworld_56)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_58<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -554,14 +554,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 0.75f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_59<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_58(pos, ctx) + 0.37f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_60<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -571,14 +571,14 @@ pub mod overworld_compiled {
         let rel = coord.clamp(-10i32, 30i32) - -10i32;
         0.3f32 + rel as f32 * -0.0075000003f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_61<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_59(pos, ctx) + eval_overworld_60(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_62<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -590,21 +590,21 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_63<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_62(pos, ctx) * -0.05f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_64<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_63(pos, ctx) + -0.05f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_65<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -616,35 +616,35 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_66<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_65(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_67<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_66(pos, ctx) + -0.4f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_68<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_64(pos, ctx) * eval_overworld_67(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_69<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(69usize, WrapperType::Cache, pos, &eval_overworld_68)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_70<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -656,14 +656,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 2f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_71<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(71usize, WrapperType::Cache, pos, &eval_overworld_70)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_72<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -675,14 +675,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1.3333333333333333f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_73<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_72(pos, ctx) * 0.75f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_74<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -694,14 +694,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_75<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_74(pos, ctx) * 1f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_76<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -713,14 +713,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 0.6666666666666666f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_77<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_76(pos, ctx) * 1.5f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_78<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -732,14 +732,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 0.5f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_79<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_78(pos, ctx) * 2f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_80<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -760,14 +760,14 @@ pub mod overworld_compiled {
             _ => eval_overworld_79(pos, ctx),
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_81<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_80(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_82<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -779,14 +779,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1.3333333333333333f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_83<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_82(pos, ctx) * 0.75f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_84<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -798,14 +798,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_85<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_84(pos, ctx) * 1f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_86<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -817,14 +817,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 0.6666666666666666f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_87<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_86(pos, ctx) * 1.5f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_88<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -836,14 +836,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 0.5f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_89<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_88(pos, ctx) * 2f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_90<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -864,21 +864,21 @@ pub mod overworld_compiled {
             _ => eval_overworld_89(pos, ctx),
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_91<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_90(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_92<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_81(pos, ctx).max(eval_overworld_91(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_93<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -890,70 +890,70 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_94<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_93(pos, ctx) * -0.011500001f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_95<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_94(pos, ctx) + -0.0765f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_96<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_92(pos, ctx) + eval_overworld_95(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_97<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_96(pos, ctx).clamp(-1f32, 1f32)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_98<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_69(pos, ctx) + eval_overworld_97(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_99<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_61(pos, ctx).min(eval_overworld_98(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_100<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(100usize, WrapperType::Cache, pos, &eval_overworld_99)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_101<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_100(pos, ctx) * 5f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_102<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_57(pos, ctx).min(eval_overworld_101(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_103<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -965,7 +965,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_104<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -973,14 +973,14 @@ pub mod overworld_compiled {
         let v = eval_overworld_103(pos, ctx);
         v * v
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_105<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_104(pos, ctx) * 4f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_106<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -992,63 +992,63 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_107<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_106(pos, ctx) + 0.27f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_108<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_107(pos, ctx).clamp(-1f32, 1f32)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_109<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_57(pos, ctx) * -0.64f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_110<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_109(pos, ctx) + 1.5f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_111<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_110(pos, ctx).clamp(0f32, 0.5f32)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_112<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_108(pos, ctx) + eval_overworld_111(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_113<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_105(pos, ctx) + eval_overworld_112(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_114<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_113(pos, ctx).min(eval_overworld_100(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_115<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1060,7 +1060,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 2f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_116<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1072,14 +1072,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 2f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_117<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_116(pos, ctx) * 0.5f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_118<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1091,14 +1091,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1.3333333333333333f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_119<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_118(pos, ctx) * 0.75f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_120<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1110,14 +1110,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_121<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_120(pos, ctx) * 1f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_122<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1129,14 +1129,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 0.5f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_123<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_122(pos, ctx) * 2f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_124<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1148,14 +1148,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 0.3333333333333333f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_125<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_124(pos, ctx) * 3f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_126<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1177,14 +1177,14 @@ pub mod overworld_compiled {
             _ => eval_overworld_125(pos, ctx),
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_127<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_126(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_128<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1196,42 +1196,42 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 2f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_129<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_128(pos, ctx) * -0.34999996f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_130<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_129(pos, ctx) + -0.95f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_131<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(131usize, WrapperType::Cache, pos, &eval_overworld_130)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_132<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_131(pos, ctx) * 0.083f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_133<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_127(pos, ctx) + eval_overworld_132(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_134<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1243,14 +1243,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_135<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_134(pos, ctx) * 8f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_136<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1258,14 +1258,14 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_135(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_137<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(137usize, WrapperType::Cache, pos, &eval_overworld_136)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_138<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1273,7 +1273,7 @@ pub mod overworld_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_overworld_137(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_139<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1283,28 +1283,28 @@ pub mod overworld_compiled {
         let rel = coord.clamp(-64i32, 320i32) - -64i32;
         8f32 + rel as f32 * -0.125f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_140<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_138(pos, ctx) + eval_overworld_139(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_141<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_140(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_142<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_141(pos, ctx) + eval_overworld_131(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_143<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1312,35 +1312,35 @@ pub mod overworld_compiled {
         let v = eval_overworld_142(pos, ctx);
         v * v * v
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_144<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_133(pos, ctx).max(eval_overworld_143(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_145<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_144(pos, ctx).clamp(-1f32, 1f32)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_146<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_145(pos, ctx) + eval_overworld_69(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_147<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_114(pos, ctx).min(eval_overworld_146(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_148<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1352,14 +1352,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 25f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_149<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_148(pos, ctx) * 2f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_150<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1371,28 +1371,28 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_151<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_150(pos, ctx) * -1f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_152<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_151(pos, ctx) + -1f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_153<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_149(pos, ctx) + eval_overworld_152(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_154<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1404,21 +1404,21 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_155<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_154(pos, ctx) * 0.55f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_156<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_155(pos, ctx) + 0.55f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_157<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1426,21 +1426,21 @@ pub mod overworld_compiled {
         let v = eval_overworld_156(pos, ctx);
         v * v * v
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_158<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_153(pos, ctx) * eval_overworld_157(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_159<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(159usize, WrapperType::Cache, pos, &eval_overworld_158)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_160<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1448,7 +1448,7 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         -1000000f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_161<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1460,14 +1460,14 @@ pub mod overworld_compiled {
             eval_overworld_159(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_162<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_147(pos, ctx).max(eval_overworld_161(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_163<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1479,7 +1479,7 @@ pub mod overworld_compiled {
             eval_overworld_162(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_164<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1489,7 +1489,7 @@ pub mod overworld_compiled {
         let s = eval_overworld_163(pos, ctx);
         f + a * (s - f)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_165<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1499,7 +1499,7 @@ pub mod overworld_compiled {
         let s = eval_overworld_164(pos, ctx);
         f + a * (s - f)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_166<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1507,14 +1507,14 @@ pub mod overworld_compiled {
         let val = eval_overworld_165(pos, ctx);
         ctx.sample_blend_density(val, pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_167<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_166(pos, ctx) * 0.64f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_168<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1529,7 +1529,7 @@ pub mod overworld_compiled {
             &eval_overworld_167,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_169<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1537,7 +1537,7 @@ pub mod overworld_compiled {
         let c = eval_overworld_168(pos, ctx).clamp(-1.0, 1.0);
         c / 2.0 - c * c * c / 24.0
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_170<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1547,7 +1547,7 @@ pub mod overworld_compiled {
         let rel = coord.clamp(-4064i32, 4062i32) - -4064i32;
         -4064f32 + rel as f32 * 1f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_171<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1559,7 +1559,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_172<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1567,7 +1567,7 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         -1f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_173<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1579,7 +1579,7 @@ pub mod overworld_compiled {
             eval_overworld_172(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_174<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1594,7 +1594,7 @@ pub mod overworld_compiled {
             &eval_overworld_173,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_175<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1602,7 +1602,7 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         64f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_176<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1614,21 +1614,21 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_177<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_176(pos, ctx) * -0.025f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_178<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_177(pos, ctx) + -0.075f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_179<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1640,7 +1640,7 @@ pub mod overworld_compiled {
             eval_overworld_10(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_180<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1655,7 +1655,7 @@ pub mod overworld_compiled {
             &eval_overworld_179,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_181<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1667,7 +1667,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 2.6666666666666665f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_182<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1679,7 +1679,7 @@ pub mod overworld_compiled {
             eval_overworld_10(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_183<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1694,14 +1694,14 @@ pub mod overworld_compiled {
             &eval_overworld_182,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_184<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_183(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_185<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1713,7 +1713,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 2.6666666666666665f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_186<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1725,7 +1725,7 @@ pub mod overworld_compiled {
             eval_overworld_10(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_187<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1740,35 +1740,35 @@ pub mod overworld_compiled {
             &eval_overworld_186,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_188<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_187(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_189<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_184(pos, ctx).max(eval_overworld_188(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_190<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_189(pos, ctx) * 1.5f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_191<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_180(pos, ctx) + eval_overworld_190(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_192<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1780,28 +1780,28 @@ pub mod overworld_compiled {
             eval_overworld_191(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_193<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_169(pos, ctx).min(eval_overworld_192(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_194<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_beardifier(pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_195<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_193(pos, ctx) + eval_overworld_194(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_196<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1813,7 +1813,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_197<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1825,7 +1825,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_198<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1837,7 +1837,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_199<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1849,7 +1849,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_200<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1861,7 +1861,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1.5f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_201<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1873,7 +1873,7 @@ pub mod overworld_compiled {
             eval_overworld_10(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_202<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1888,14 +1888,14 @@ pub mod overworld_compiled {
             &eval_overworld_201,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_203<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(203usize, WrapperType::Cache, pos, &eval_overworld_202)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_204<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1903,7 +1903,7 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         0.08f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_205<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1915,7 +1915,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 4f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_206<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1923,7 +1923,7 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         1f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_207<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1935,7 +1935,7 @@ pub mod overworld_compiled {
             eval_overworld_206(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_208<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1950,14 +1950,14 @@ pub mod overworld_compiled {
             &eval_overworld_207,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_209<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_208(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_210<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1969,7 +1969,7 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 4f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_211<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1981,7 +1981,7 @@ pub mod overworld_compiled {
             eval_overworld_206(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_212<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -1996,28 +1996,28 @@ pub mod overworld_compiled {
             &eval_overworld_211,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_213<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_212(pos, ctx).abs()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_214<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_209(pos, ctx).max(eval_overworld_213(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_215<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_204(pos, ctx) - eval_overworld_214(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_216<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2029,14 +2029,14 @@ pub mod overworld_compiled {
             eval_overworld_215(pos, ctx)
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_217<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(217usize, WrapperType::Cache, pos, &eval_overworld_216)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_218<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2044,7 +2044,7 @@ pub mod overworld_compiled {
         let _ = (pos, ctx);
         -0.3f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_219<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2056,14 +2056,14 @@ pub mod overworld_compiled {
             f64::from(pos.z) * 1f64,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_220<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_overworld_218(pos, ctx) - eval_overworld_219(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_overworld_221<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2074,7 +2074,7 @@ pub mod overworld_compiled {
 }
 pub mod nether_compiled {
     use super::*;
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_0<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2084,7 +2084,7 @@ pub mod nether_compiled {
         let rel = coord.clamp(-8i32, 24i32) - -8i32;
         0f32 + rel as f32 * 0.03125f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_1<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2092,7 +2092,7 @@ pub mod nether_compiled {
         let _ = (pos, ctx);
         2.5f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_2<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2102,7 +2102,7 @@ pub mod nether_compiled {
         let rel = coord.clamp(104i32, 128i32) - 104i32;
         1f32 + rel as f32 * -0.041666668f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_3<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2110,14 +2110,14 @@ pub mod nether_compiled {
         let _ = (pos, ctx);
         0.9375f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_4<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_interpolated_noise(pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_5<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2127,7 +2127,7 @@ pub mod nether_compiled {
         let s = eval_nether_4(pos, ctx);
         f + a * (s - f)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_6<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2137,7 +2137,7 @@ pub mod nether_compiled {
         let s = eval_nether_5(pos, ctx);
         f + a * (s - f)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_7<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2145,14 +2145,14 @@ pub mod nether_compiled {
         let val = eval_nether_6(pos, ctx);
         ctx.sample_blend_density(val, pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_8<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_nether_7(pos, ctx) * 0.64f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_9<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2167,7 +2167,7 @@ pub mod nether_compiled {
             &eval_nether_8,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_10<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2175,21 +2175,21 @@ pub mod nether_compiled {
         let c = eval_nether_9(pos, ctx).clamp(-1.0, 1.0);
         c / 2.0 - c * c * c / 24.0
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_11<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_beardifier(pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_12<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_nether_10(pos, ctx) + eval_nether_11(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_nether_13<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2200,7 +2200,7 @@ pub mod nether_compiled {
 }
 pub mod end_compiled {
     use super::*;
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_0<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2210,7 +2210,7 @@ pub mod end_compiled {
         let rel = coord.clamp(4i32, 32i32) - 4i32;
         0f32 + rel as f32 * 0.035714287f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_1<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2218,7 +2218,7 @@ pub mod end_compiled {
         let _ = (pos, ctx);
         -0.234375f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_2<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2228,7 +2228,7 @@ pub mod end_compiled {
         let rel = coord.clamp(56i32, 312i32) - 56i32;
         1f32 + rel as f32 * -0.00390625f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_3<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2236,7 +2236,7 @@ pub mod end_compiled {
         let _ = (pos, ctx);
         -23.4375f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_4<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2244,7 +2244,7 @@ pub mod end_compiled {
         let _ = (pos, ctx);
         100f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_5<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2255,21 +2255,21 @@ pub mod end_compiled {
         let dz = (pos.z - 0i32) as f32;
         (dx * dx + dy * dy + dz * dz).sqrt()
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_6<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_end_4(pos, ctx) - eval_end_5(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_7<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_end_6(pos, ctx).clamp(-100f32, 80f32)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_8<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2277,21 +2277,21 @@ pub mod end_compiled {
         let _ = (pos, ctx);
         8f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_9<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_end_7(pos, ctx) - eval_end_8(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_10<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_end_9(pos, ctx) * 0.0078125f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_11<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2299,21 +2299,21 @@ pub mod end_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_end_10(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_12<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_end_islands(pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_13<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_end_11(pos, ctx).max(eval_end_12(pos, ctx))
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_14<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2321,14 +2321,14 @@ pub mod end_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_end_13(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_15<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_wrapper(15usize, WrapperType::Cache, pos, &eval_end_14)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_16<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2336,21 +2336,21 @@ pub mod end_compiled {
         let slice_pos = pumpkin_util::math::vector3::Vector3::new(pos.x, 0i32, pos.z);
         eval_end_15(&slice_pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_17<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_interpolated_noise(pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_18<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_end_16(pos, ctx) + eval_end_17(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_19<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2360,7 +2360,7 @@ pub mod end_compiled {
         let s = eval_end_18(pos, ctx);
         f + a * (s - f)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_20<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2370,7 +2370,7 @@ pub mod end_compiled {
         let s = eval_end_19(pos, ctx);
         f + a * (s - f)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_21<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2378,14 +2378,14 @@ pub mod end_compiled {
         let val = eval_end_20(pos, ctx);
         ctx.sample_blend_density(val, pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_22<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_end_21(pos, ctx) * 0.64f32
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_23<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2400,7 +2400,7 @@ pub mod end_compiled {
             &eval_end_22,
         )
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_24<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
@@ -2408,21 +2408,21 @@ pub mod end_compiled {
         let c = eval_end_23(pos, ctx).clamp(-1.0, 1.0);
         c / 2.0 - c * c * c / 24.0
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_25<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         ctx.sample_beardifier(pos)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_26<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,
     ) -> f32 {
         eval_end_24(pos, ctx) + eval_end_25(pos, ctx)
     }
-    #[inline(always)]
+    #[inline]
     pub fn eval_end_27<C: NoiseEvaluationContext>(
         pos: &pumpkin_util::math::vector3::Vector3<i32>,
         ctx: &mut C,

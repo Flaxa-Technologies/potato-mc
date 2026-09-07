@@ -129,6 +129,9 @@ pub mod noise_parameter;
 #[path = "generated/biome.rs"]
 pub mod biome;
 
+#[cfg(feature = "biome")]
+pub mod biome_remap;
+
 #[cfg(feature = "chunk_status")]
 #[rustfmt::skip]
 #[path = "generated/chunk_status.rs"]
@@ -257,6 +260,9 @@ pub mod block_properties;
 #[cfg(feature = "block")]
 #[rustfmt::skip]
 #[path = "generated/block_state_remap.rs"]
+pub mod block_state_remap_generated;
+
+#[cfg(feature = "block")]
 pub mod block_state_remap;
 
 #[cfg(feature = "item_id_remap")]

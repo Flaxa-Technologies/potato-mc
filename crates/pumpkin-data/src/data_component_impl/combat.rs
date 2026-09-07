@@ -75,7 +75,13 @@ impl EnchantmentsImpl {
         for (name, level) in data {
             let enchantment = Enchantment::from_name(name.as_ref())
                 .or_else(|| Enchantment::from_name(&format!("minecraft:{name}")))?;
-            enc.push((enchantment, level.extract_int()?));
+            let level_val = match level {
+                NbtTag::Byte(b) => i32::from(*b),
+                NbtTag::Short(s) => i32::from(*s),
+                NbtTag::Int(i) => *i,
+                _ => level.extract_int()?,
+            };
+            enc.push((enchantment, level_val));
         }
         Some(Self {
             enchantment: Cow::from(enc),
@@ -1079,7 +1085,13 @@ impl StoredEnchantmentsImpl {
         for (name, level) in data {
             let enchantment = Enchantment::from_name(name.as_ref())
                 .or_else(|| Enchantment::from_name(&format!("minecraft:{name}")))?;
-            enc.push((enchantment, level.extract_int()?));
+            let level_val = match level {
+                NbtTag::Byte(b) => i32::from(*b),
+                NbtTag::Short(s) => i32::from(*s),
+                NbtTag::Int(i) => *i,
+                _ => level.extract_int()?,
+            };
+            enc.push((enchantment, level_val));
         }
         Some(Self {
             enchantment: Cow::from(enc),

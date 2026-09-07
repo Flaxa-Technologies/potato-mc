@@ -157,7 +157,47 @@ pub fn write_chunk_data(
                 }
             }
 
-            let biome_network = biome_palette.convert_network();
+            let mut biome_network = biome_palette.convert_network();
+            if version < &CURRENT_MC_VERSION {
+                match &mut biome_network.palette {
+                    NetworkPalette::Single(registry_id) => {
+                        *registry_id = pumpkin_data::biome_remap::remap_biome_for_version(
+                            *registry_id,
+                            *version,
+                        );
+                    }
+                    NetworkPalette::Indirect(palette) => {
+                        for registry_id in palette.iter_mut() {
+                            *registry_id = pumpkin_data::biome_remap::remap_biome_for_version(
+                                *registry_id,
+                                *version,
+                            );
+                        }
+                    }
+                    NetworkPalette::Direct => {
+                        let bits_per_entry = usize::from(biome_network.bits_per_entry);
+                        if bits_per_entry > 0 {
+                            let values_per_i64 = 64 / bits_per_entry;
+                            let id_mask = (1u64 << bits_per_entry) - 1;
+
+                            for packed_word in &mut biome_network.packed_data {
+                                let mut remapped_word = 0u64;
+                                let packed_word_u64 = *packed_word as u64;
+                                for index in 0..values_per_i64 {
+                                    let shift = index * bits_per_entry;
+                                    let biome_id = ((packed_word_u64 >> shift) & id_mask) as u8;
+                                    let remapped_id = pumpkin_data::biome_remap::remap_biome_for_version(
+                                        biome_id,
+                                        *version,
+                                    );
+                                    remapped_word |= u64::from(remapped_id) << shift;
+                                }
+                                *packed_word = remapped_word as i64;
+                            }
+                        }
+                    }
+                }
+            }
             blocks_and_biomes_buf.write_u8(biome_network.bits_per_entry)?;
 
             match biome_network.palette {

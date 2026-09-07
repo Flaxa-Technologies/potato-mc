@@ -10,7 +10,8 @@ extern crate pumpkin_macros;
 use crate::crash::CrashReport;
 use crate::data::VanillaData;
 use crate::logging::{
-    ConsoleWriter, GzipRollingLogger, PumpkinCommandCompleter, ReadlineLogWrapper,
+    ConsoleWriter, GzipRollingLogger, PotatoConsoleFormatter, PumpkinCommandCompleter,
+    ReadlineLogWrapper,
 };
 use crate::net::bedrock::{
     BedrockClient,
@@ -145,47 +146,24 @@ pub fn init_logger(advanced_config: &AdvancedConfiguration) {
             (ConsoleWriter::new(None), None)
         };
 
-        let fmt_layer = fmt::layer()
-            .with_writer(std::sync::Mutex::new(logger))
-            .with_ansi(advanced_config.logging.color)
-            .with_ansi_sanitization(false)
-            .with_target(advanced_config.logging.target)
-            .with_thread_names(advanced_config.logging.threads)
-            .with_thread_ids(advanced_config.logging.thread_ids);
+        let console_formatter = PotatoConsoleFormatter {
+            color: advanced_config.logging.color,
+            timestamp: advanced_config.logging.timestamp,
+        };
 
-        if advanced_config.logging.timestamp {
-            let local_offset =
-                time::UtcOffset::current_local_offset().unwrap_or(time::UtcOffset::UTC);
-            let format_str: &'static str = Box::leak(
-                advanced_config
-                    .logging
-                    .timestamp_format
-                    .clone()
-                    .into_boxed_str(),
-            );
-            let timer_format = time::format_description::parse(format_str).unwrap_or_else(|_| {
-                time::macros::format_description!("[hour]:[minute]:[second]").to_vec()
-            });
-            let fmt_layer =
-                fmt_layer.with_timer(fmt::time::OffsetTime::new(local_offset, timer_format));
-            let registry = tracing_subscriber::registry()
-                .with(env_filter)
-                .with(fmt_layer);
-            if let Some(file_logger) = file_logger {
-                registry.with(file_logger).init();
-            } else {
-                registry.init();
-            }
+        let fmt_layer = fmt::layer()
+            .event_format(console_formatter)
+            .with_writer(std::sync::Mutex::new(logger))
+            .with_ansi_sanitization(false);
+
+        let registry = tracing_subscriber::registry()
+            .with(env_filter)
+            .with(fmt_layer);
+
+        if let Some(file_logger) = file_logger {
+            registry.with(file_logger).init();
         } else {
-            let fmt_layer = fmt_layer.without_time();
-            let registry = tracing_subscriber::registry()
-                .with(env_filter)
-                .with(fmt_layer);
-            if let Some(file_logger) = file_logger {
-                registry.with(file_logger).init();
-            } else {
-                registry.init();
-            }
+            registry.init();
         }
 
         let logging_config = LoggingConfig {

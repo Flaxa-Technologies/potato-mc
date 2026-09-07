@@ -17,6 +17,10 @@ use time::{Duration, OffsetDateTime};
 use tracing::Subscriber;
 use tracing_subscriber::Layer;
 use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::fmt::FmtContext;
+use tracing_subscriber::fmt::FormatEvent;
+use tracing_subscriber::fmt::format::Writer;
+use tracing_subscriber::registry::LookupSpan;
 
 use crate::command::CommandSender;
 use crate::command::string_reader::StringReader;
@@ -357,6 +361,105 @@ impl tracing::field::Visit for StringVisitor {
             if self.0.starts_with('"') && self.0.ends_with('"') {
                 self.0 = self.0[1..self.0.len() - 1].to_string();
             }
+        }
+    }
+
+    fn record_str(&mut self, field: &tracing::field::Field, value: &str) {
+        if field.name() == "message" {
+            self.0 = value.to_string();
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct PotatoConsoleFormatter {
+    pub color: bool,
+    pub timestamp: bool,
+}
+
+impl<S, N> FormatEvent<S, N> for PotatoConsoleFormatter
+where
+    S: Subscriber + for<'a> LookupSpan<'a>,
+    N: for<'a> tracing_subscriber::fmt::FormatFields<'a> + 'static,
+{
+    fn format_event(
+        &self,
+        _ctx: &FmtContext<'_, S, N>,
+        mut writer: Writer<'_>,
+        event: &tracing::Event<'_>,
+    ) -> std::fmt::Result {
+        // 1. Timestamp: HH:mm:ss
+        if self.timestamp {
+            let now = OffsetDateTime::now_utc();
+            let local_now = time::UtcOffset::current_local_offset()
+                .map_or(now, |offset| now.to_offset(offset));
+            write!(
+                writer,
+                "{:02}:{:02}:{:02} ",
+                local_now.hour(),
+                local_now.minute(),
+                local_now.second()
+            )?;
+        }
+
+        // 2. Level: [INFO ], [WARN ], [ERROR], [DEBUG], [TRACE] with ANSI colors
+        let metadata = event.metadata();
+        let level = metadata.level();
+        let (level_str, color_code) = match *level {
+            tracing::Level::ERROR => ("[ERROR]", "\x1b[91m"), // bright red
+            tracing::Level::WARN => ("[WARN ]", "\x1b[33m"),  // yellow
+            tracing::Level::INFO => ("[INFO ]", "\x1b[36m"),  // cyan
+            tracing::Level::DEBUG => ("[DEBUG]", "\x1b[90m"), // dim / gray
+            tracing::Level::TRACE => ("[TRACE]", "\x1b[35m"), // magenta
+        };
+
+        if self.color {
+            write!(writer, "{color_code}{level_str}\x1b[0m ")?;
+        } else {
+            write!(writer, "{level_str} ")?;
+        }
+
+        // 3. Message & Subsystem source extraction
+        let mut visitor = StringVisitor::default();
+        event.record(&mut visitor);
+        let mut msg = visitor.0;
+
+        let target = metadata.target();
+        let source_tag = if msg.starts_with("[Spawn]")
+            || target.contains("spawning")
+            || target.contains("natural_spawner")
+        {
+            if let Some(stripped) = msg.strip_prefix("[Spawn] ") {
+                msg = stripped.to_string();
+            } else if let Some(stripped) = msg.strip_prefix("[Spawn]") {
+                msg = stripped.to_string();
+            }
+            "Spawn"
+        } else if msg.starts_with("[Boot]") || target.ends_with("::main") || target == "pumpkin" {
+            if let Some(stripped) = msg.strip_prefix("[Boot] ") {
+                msg = stripped.to_string();
+            } else if let Some(stripped) = msg.strip_prefix("[Boot]") {
+                msg = stripped.to_string();
+            }
+            "Boot "
+        } else if target.contains("world") || target.contains("chunk") {
+            "World"
+        } else if target.contains("net") || target.contains("protocol") {
+            "Net  "
+        } else if target.contains("plugin") {
+            "Plg  "
+        } else if target.contains("command") {
+            "Cmd  "
+        } else if target.contains("auth") {
+            "Auth "
+        } else {
+            "Srvr "
+        };
+
+        if self.color {
+            writeln!(writer, "\x1b[1;37m[{source_tag}]\x1b[0m {msg}")
+        } else {
+            writeln!(writer, "[{source_tag}] {msg}")
         }
     }
 }

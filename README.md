@@ -1,19 +1,19 @@
 <div align="center">
+  <img src="https://github.com/Flaxa-Technologies/potato-api/raw/main/LOGO.png" alt="PotatoMC Logo" width="220"/>
+  <h1>PotatoMC</h1>
+  <p><strong>Next-Generation, Ultra-High-Performance Minecraft Server Engine</strong></p>
 
-# 🥔 PotatoMC
-
-**Next-Generation, Ultra-High-Performance Minecraft Server Engine**
-
-[![Release](https://img.shields.io/github/v/release/Flaxa-Technologies/potato-mc?style=for-the-badge&color=e5a823)](https://github.com/Flaxa-Technologies/potato-mc/releases)
-[![Website](https://img.shields.io/badge/Website-potatomc.flaxa.in-blue?style=for-the-badge)](https://potatomc.flaxa.in/)
-[![Discord](https://img.shields.io/badge/Discord-Join%20Flaxa%20Studios-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/UUaNzfZyc6)
-[![License](https://img.shields.io/badge/License-GPL--3.0-green?style=for-the-badge)](LICENSE)
-
+  <p>
+    <a href="https://github.com/Flaxa-Technologies/potato-mc/releases"><img src="https://img.shields.io/github/v/release/Flaxa-Technologies/potato-mc?style=for-the-badge&amp;color=e5a823" alt="Release"/></a>
+    <a href="https://potatomc.flaxa.in/"><img src="https://img.shields.io/badge/Website-potatomc.flaxa.in-blue?style=for-the-badge" alt="Website"/></a>
+    <a href="https://discord.com/invite/UUaNzfZyc6"><img src="https://img.shields.io/badge/Discord-Join%20Flaxa%20Studios-5865F2?style=for-the-badge&amp;logo=discord&amp;logoColor=white" alt="Discord"/></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-green?style=for-the-badge" alt="License"/></a>
+  </p>
 </div>
 
 ---
 
-## 🌟 Overview
+## Overview
 
 **PotatoMC** is an ultra-fast, modern Minecraft server implementation built from the ground up in **Rust**. Engineered specifically to eliminate the garbage collection pauses, single-thread bottlenecks, and memory bloat inherent in legacy JVM servers, PotatoMC delivers unprecedented concurrency, rock-solid 20.0 TPS, and microsecond tick latencies.
 
@@ -21,17 +21,17 @@ Whether hosting massive survival networks, minigames, or custom game modes, Pota
 
 ---
 
-## ⚡ Core Highlights
+## Core Highlights
 
-- 🚀 **Blazing Native Performance**: Written entirely in Rust with zero garbage collection overhead and minimal idle memory usage (~30MB vs 1GB+ on Java).
-- 🧩 **Native Rust Plugin Architecture (potato-api)**: Write plugins directly in native Rust (.dll / .so). Experience zero-cost FFI abstractions, direct memory safety, and synchronous execution without JVM overhead.
-- 🌐 **Cross-Play Networking**: Native dual-stack support for both Minecraft Java Edition and Minecraft Bedrock Edition clients.
-- 🗺️ **Concurrent Chunk Pipeline**: Asynchronous world generation, radial distance streaming, and lock-free entity processing across all available CPU cores.
-- 🛡️ **Memory Safety**: Guaranteed compile-time concurrency and memory safety, eliminating memory leaks and data races at the architectural level.
+- **Blazing Native Performance**: Written entirely in Rust with zero garbage collection overhead and minimal idle memory usage (~30MB vs 1GB+ on Java).
+- **Native Rust Plugin Architecture (`potato-api`)**: Write plugins directly in native Rust (`.dll` / `.so`). Experience zero-cost FFI abstractions, direct memory safety, and synchronous execution without JVM overhead.
+- **Cross-Play Networking**: Native dual-stack support for both Minecraft Java Edition and Minecraft Bedrock Edition clients.
+- **Concurrent Chunk Pipeline**: Asynchronous world generation, radial distance streaming, and lock-free entity processing across all available CPU cores.
+- **Memory Safety**: Guaranteed compile-time concurrency and memory safety, eliminating memory leaks and data races at the architectural level.
 
 ---
 
-## 📥 Direct Downloads & Quick Start
+## Direct Downloads & Quick Start
 
 ### 1. Download Standalone Executables
 Grab the official pre-compiled binaries from [GitHub Releases](https://github.com/Flaxa-Technologies/potato-mc/releases/latest):
@@ -44,28 +44,28 @@ Grab the official pre-compiled binaries from [GitHub Releases](https://github.co
 ### 2. Run the Server
 
 #### On Windows:
-``powershell
+```powershell
 # Place pumpkin-windows-x86_64.exe in your server folder and run:
 .\pumpkin-windows-x86_64.exe
-``
+```
 
 #### On Linux:
-``bash
+```bash
 # Download and grant execution permissions:
 curl -LO https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-linux-x86_64
 chmod +x pumpkin-linux-x86_64
 ./pumpkin-linux-x86_64
-``
+```
 
 The server will automatically generate world data and configuration files on first launch.
 
 ---
 
-## 🔌 Plugin Development with Potato API
+## Plugin Development with Potato API
 
-PotatoMC features a groundbreaking native plugin engine powered by [potato-api](https://github.com/Flaxa-Technologies/potato-api). Plugins compile to shared native libraries (cdylib) and communicate with the server at native machine speed.
+PotatoMC features a groundbreaking native plugin engine powered by [`potato-api`](https://github.com/Flaxa-Technologies/potato-api). Plugins compile to shared native libraries (`cdylib`) and communicate with the server at native machine speed.
 
-`ust
+```rust
 use potato_api::prelude::*;
 
 #[derive(Default)]
@@ -84,28 +84,28 @@ impl Plugin for MyPlugin {
 }
 
 declare_plugin!(MyPlugin);
-`
+```
 
-Plugins placed in the plugins/ directory are loaded dynamically on server startup.
+Plugins placed in the `plugins/` directory are loaded dynamically on server startup.
 
 ---
 
-## 🤝 Community & Working With Us
+## Community & Working With Us
 
 PotatoMC is built by **Flaxa Studios** and an open community of engineers, server creators, and Rust enthusiasts.
 
 We are actively seeking:
 - **Core Developers & Contributors**: Help us implement new Minecraft mechanics, network protocol improvements, and optimizations.
-- **Plugin Developers**: Build plugins, games, and tools on top of potato-api.
+- **Plugin Developers**: Build plugins, games, and tools on top of `potato-api`.
 - **Server Testers**: Stress-test high player counts, world generation, and report edge cases.
 
 ### Get In Touch:
-- 🌐 **Official Website**: [https://potatomc.flaxa.in/](https://potatomc.flaxa.in/)
-- 💬 **Flaxa Studios Discord**: [Join Our Discord](https://discord.com/invite/UUaNzfZyc6) — chat directly with the core team, get developer roles, and participate in technical design discussions.
-- 🐛 **Issue Tracker**: Report bugs or suggest features right here on [GitHub Issues](https://github.com/Flaxa-Technologies/potato-mc/issues).
+- **Official Website**: [https://potatomc.flaxa.in/](https://potatomc.flaxa.in/)
+- **Flaxa Studios Discord**: [Join Our Discord](https://discord.com/invite/UUaNzfZyc6) — chat directly with the core team, get developer roles, and participate in technical design discussions.
+- **Issue Tracker**: Report bugs or suggest features right here on [GitHub Issues](https://github.com/Flaxa-Technologies/potato-mc/issues).
 
 ---
 
 <div align="center">
-  <sub>Built with ❤️ by <a href="https://potatomc.flaxa.in/">Flaxa Studios</a>.</sub>
+  <sub>Built with care by <a href="https://potatomc.flaxa.in/">Flaxa Studios</a>.</sub>
 </div>

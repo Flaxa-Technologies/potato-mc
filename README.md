@@ -31,38 +31,33 @@ Whether hosting massive survival networks, minigames, or custom game modes, Pota
 
 ---
 
-## 📥 Quick Start & Installation
+## 📥 Direct Downloads & Quick Start
 
-### 1. Download the Latest Release
-Grab the latest pre-compiled binaries from our [GitHub Releases](https://github.com/Flaxa-Technologies/potato-mc/releases/tag/beta.1.0):
+### 1. Download Standalone Executables
+Grab the official pre-compiled binaries from [GitHub Releases](https://github.com/Flaxa-Technologies/potato-mc/releases/latest):
 
-- **Windows (x86_64)**: Download potatomc-beta.1.0-windows-x86_64.zip
-- **Linux (x86_64 MUSL)**: Download potatomc-beta.1.0-linux-x86_64.zip
+| Operating System | Download Link | Architecture |
+|---|---|---|
+| **Windows** | [**pumpkin-windows-x86_64.exe**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-windows-x86_64.exe) | 64-bit |
+| **Linux** | [**pumpkin-linux-x86_64**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-linux-x86_64) | 64-bit MUSL (Static) |
 
 ### 2. Run the Server
 
 #### On Windows:
 ``powershell
-# Extract the archive
-Expand-Archive potatomc-beta.1.0-windows-x86_64.zip -DestinationPath PotatoMC
-cd PotatoMC
-
-# Start the server
-.\pumpkin.exe
+# Place pumpkin-windows-x86_64.exe in your server folder and run:
+.\pumpkin-windows-x86_64.exe
 ``
 
 #### On Linux:
 ``bash
-# Extract the archive
-unzip potatomc-beta.1.0-linux-x86_64.zip -d PotatoMC
-cd PotatoMC
-
-# Grant execution permissions and run
-chmod +x pumpkin
-./pumpkin
+# Download and grant execution permissions:
+curl -LO https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-linux-x86_64
+chmod +x pumpkin-linux-x86_64
+./pumpkin-linux-x86_64
 ``
 
-The server will automatically generate world data and start listening for incoming connections.
+The server will automatically generate world data and configuration files on first launch.
 
 ---
 

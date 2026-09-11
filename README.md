@@ -33,23 +33,31 @@ Whether hosting massive survival networks, minigames, or custom game modes, Pota
 
 ## Direct Downloads & Quick Start
 
-### 1. Download Standalone Executables
-Grab the official pre-compiled binaries from [GitHub Releases](https://github.com/Flaxa-Technologies/potato-mc/releases/latest):
+### 1. Download Standalone Executables or Server JAR
+Grab the official pre-compiled assets from [GitHub Releases](https://github.com/Flaxa-Technologies/potato-mc/releases/latest):
 
-| Operating System | Download Link | Architecture |
+| Platform / Host | Download Link | Description |
 |---|---|---|
-| **Windows** | [**pumpkin-windows-x86_64.exe**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-windows-x86_64.exe) | 64-bit |
-| **Linux** | [**pumpkin-linux-x86_64**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-linux-x86_64) | 64-bit MUSL (Static) |
+| **Pterodactyl & Game Panels** | [**server.jar**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/server.jar) | Universal Bootstrap JAR for Pterodactyl, Multicraft, and existing game hosts |
+| **Windows** | [**pumpkin-windows-x86_64.exe**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-windows-x86_64.exe) | 64-bit Standalone Windows Binary |
+| **Linux** | [**pumpkin-linux-x86_64**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-linux-x86_64) | 64-bit MUSL Static Linux Binary |
 
 ### 2. Run the Server
 
-#### On Windows:
+#### Pterodactyl & Existing Hosts (Recommended):
+Place `server.jar` in your server root directory and run with your host's standard startup command:
+```bash
+java -Xms1G -Xmx4G -jar server.jar
+```
+The bootstrap JAR will automatically detect your OS/architecture, download the matching native PotatoMC binary, and pipe console I/O seamlessly!
+
+#### On Standalone Windows:
 ```powershell
 # Place pumpkin-windows-x86_64.exe in your server folder and run:
 .\pumpkin-windows-x86_64.exe
 ```
 
-#### On Linux:
+#### On Standalone Linux:
 ```bash
 # Download and grant execution permissions:
 curl -LO https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-linux-x86_64

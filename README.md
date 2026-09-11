@@ -101,7 +101,7 @@ We are actively seeking:
 
 ### Get In Touch:
 - **Official Website**: [https://potatomc.flaxa.in/](https://potatomc.flaxa.in/)
-- **Flaxa Studios Discord**: [Join Our Discord](https://discord.com/invite/UUaNzfZyc6) — chat directly with the core team, get developer roles, and participate in technical design discussions.
+- **Flaxa Studios Discord**: [Join Our Discord](https://discord.com/invite/UUaNzfZyc6) - chat directly with the core team, get developer roles, and participate in technical design discussions.
 - **Issue Tracker**: Report bugs or suggest features right here on [GitHub Issues](https://github.com/Flaxa-Technologies/potato-mc/issues).
 
 ---

@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use pumpkin_data::fluid::{Fluid, FluidState};
-use pumpkin_data::tag::{self};
+use pumpkin_data::tag::{self, Taggable};
 use pumpkin_data::{Block, BlockDirection, BlockState, BlockStateId};
 use pumpkin_util::math::{position::BlockPos, vector3::Vector3};
 
@@ -331,7 +331,11 @@ impl WouldSurviveBlockPredicate {
         let state = self.state.get_state();
 
         let pos = self.offset.get(pos);
-        block_registry.can_place_at(block, state, chunk, &pos)
+        if !block_registry.can_place_at(block, state, chunk, &pos) {
+            return false;
+        }
+
+        Self::check_vegetation_survival(block, chunk, &pos)
     }
 
     pub fn test_world(
@@ -343,7 +347,133 @@ impl WouldSurviveBlockPredicate {
         let block = self.state.get_block();
         let state = self.state.get_state();
         let pos = self.offset.get(pos);
-        block_registry.is_none_or(|registry| registry.can_place_at(block, state, world, &pos))
+        if !block_registry.is_none_or(|registry| registry.can_place_at(block, state, world, &pos)) {
+            return false;
+        }
+
+        Self::check_vegetation_survival(block, world, &pos)
+    }
+
+    pub fn check_vegetation_survival(
+        block: &Block,
+        accessor: &dyn BlockAccessor,
+        pos: &BlockPos,
+    ) -> bool {
+        if block.has_tag(&tag::Block::MINECRAFT_FLOWERS)
+            || block.name == "short_grass"
+            || block.name == "fern"
+            || block.name == "tall_grass"
+            || block.name == "large_fern"
+            || block.name == "sunflower"
+            || block.name == "lilac"
+            || block.name == "rose_bush"
+            || block.name == "peony"
+            || block.name == "pitcher_plant"
+            || block.has_tag(&tag::Block::MINECRAFT_SAPLINGS)
+            || block.name == "azalea"
+            || block.name == "flowering_azalea"
+            || block.name == "mangrove_propagule"
+            || block.name == "firefly_bush"
+            || block.name == "sweet_berry_bush"
+            || block.name == "bush"
+        {
+            let below = accessor.get_block(&pos.down());
+            let below_valid = below.has_tag(&tag::Block::MINECRAFT_SUPPORTS_VEGETATION)
+                || below.has_tag(&tag::Block::MINECRAFT_DIRT)
+                || below.name == "farmland";
+            if !below_valid {
+                return false;
+            }
+            let current = accessor.get_block(pos);
+            if !current.is_air() && !current.default_state.replaceable() {
+                return false;
+            }
+            if matches!(
+                block.name,
+                "tall_grass" | "large_fern" | "sunflower" | "lilac" | "rose_bush" | "peony" | "pitcher_plant"
+            ) {
+                let above = accessor.get_block(&pos.up());
+                if !above.is_air() && !above.default_state.replaceable() {
+                    return false;
+                }
+            }
+        } else if block.name == "dead_bush" {
+            let below = accessor.get_block(&pos.down());
+            let below_valid = below.name == "sand"
+                || below.name == "red_sand"
+                || below.has_tag(&tag::Block::MINECRAFT_TERRACOTTA)
+                || below.has_tag(&tag::Block::MINECRAFT_DIRT);
+            if !below_valid {
+                return false;
+            }
+            let current = accessor.get_block(pos);
+            if !current.is_air() && !current.default_state.replaceable() {
+                return false;
+            }
+        } else if block.name == "cactus" {
+            let below = accessor.get_block(&pos.down());
+            if below.name != "sand" && below.name != "red_sand" && below.name != "cactus" {
+                return false;
+            }
+            let current = accessor.get_block(pos);
+            if !current.is_air() && !current.default_state.replaceable() {
+                return false;
+            }
+        } else if block.name == "sugar_cane" {
+            let below = accessor.get_block(&pos.down());
+            if !below.has_tag(&tag::Block::MINECRAFT_DIRT)
+                && below.name != "sand"
+                && below.name != "red_sand"
+            {
+                return false;
+            }
+            let current = accessor.get_block(pos);
+            if !current.is_air() && !current.default_state.replaceable() {
+                return false;
+            }
+        } else if block.name == "bamboo" {
+            let below = accessor.get_block(&pos.down());
+            let below_valid = below.has_tag(&tag::Block::MINECRAFT_SUPPORTS_VEGETATION)
+                || below.has_tag(&tag::Block::MINECRAFT_DIRT)
+                || below.name == "sand"
+                || below.name == "gravel"
+                || below.name == "bamboo";
+            if !below_valid {
+                return false;
+            }
+            let current = accessor.get_block(pos);
+            if !current.is_air() && !current.default_state.replaceable() {
+                return false;
+            }
+        } else if block.name == "moss_carpet" {
+            let below = accessor.get_block(&pos.down());
+            if below.is_air() || below.has_tag(&tag::Block::MINECRAFT_LEAVES) {
+                return false;
+            }
+            let current = accessor.get_block(pos);
+            if !current.is_air() && !current.default_state.replaceable() {
+                return false;
+            }
+        } else if block.name == "hanging_roots" {
+            let above = accessor.get_block(&pos.up());
+            if above.is_air() {
+                return false;
+            }
+            let current = accessor.get_block(pos);
+            if !current.is_air() && !current.default_state.replaceable() {
+                return false;
+            }
+        } else if block.name == "cave_vines" || block.name == "cave_vines_plant" {
+            let above = accessor.get_block(&pos.up());
+            if above.is_air() {
+                return false;
+            }
+            let current = accessor.get_block(pos);
+            if !current.is_air() && !current.default_state.replaceable() {
+                return false;
+            }
+        }
+        true
     }
 }
 

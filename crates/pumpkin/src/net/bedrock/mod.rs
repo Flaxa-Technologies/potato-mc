@@ -331,6 +331,14 @@ impl BedrockClient {
             return;
         }
 
+        if let Ok(mut sender) = player.chunk_sender.lock() {
+            for chunk in &valid_chunks {
+                sender.mark_chunk_as_sent(pumpkin_util::math::vector2::Vector2::new(
+                    chunk.x, chunk.z,
+                ));
+            }
+        }
+
         let bedrock_dimension =
             if player.world().dimension == pumpkin_data::dimension::Dimension::THE_NETHER {
                 1

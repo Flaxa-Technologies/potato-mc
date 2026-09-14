@@ -135,3 +135,70 @@ fn test_overworld_aot_density_differential_parity() {
     }
 }
 
+#[test]
+fn test_overworld_aot_vein_density_differential_parity() {
+    use pumpkin_world::generation::noise::router::aot_noise_router::evaluate_overworld_veins_volume;
+
+    for seed in [0u64, 42, 1789322517659391064] {
+        let random_config = GlobalRandomConfig::new(seed, false);
+        let proto_routers = ProtoNoiseRouters::generate(&OVERWORLD_BASE_NOISE_ROUTER, &random_config);
+        let builder_options = ChunkNoiseFunctionBuilderOptions::new(Vec::new(), Vec::new(), None);
+
+        let mut router = ChunkNoiseRouter::generate(&proto_routers.noise, &builder_options);
+
+        for (chunk_x, chunk_z) in [(0, 0), (-23, -26), (5, -3)] {
+            let volume = DensityVolume::with_block_step(16, 384, 16, chunk_x * 16, -64, chunk_z * 16);
+
+            let mut legacy_toggle = vec![0.0f32; volume.size_x * volume.size_y * volume.size_z];
+            let mut legacy_ridged = vec![0.0f32; volume.size_x * volume.size_y * volume.size_z];
+            let mut aot_toggle = vec![0.0f32; volume.size_x * volume.size_y * volume.size_z];
+            let mut aot_ridged = vec![0.0f32; volume.size_x * volume.size_y * volume.size_z];
+
+            // 1. Run legacy AST evaluation
+            ChunkNoiseFunctionComponent::sample_volume_from_stack(
+                &mut router.component_stack_mut()[..=203],
+                &mut legacy_toggle,
+                &volume,
+            );
+            ChunkNoiseFunctionComponent::sample_volume_from_stack(
+                &mut router.component_stack_mut()[..=217],
+                &mut legacy_ridged,
+                &volume,
+            );
+
+            // 2. Run AOT veins evaluation
+            let ok = evaluate_overworld_veins_volume(
+                router.component_stack_mut(),
+                &mut aot_toggle,
+                &mut aot_ridged,
+                &volume,
+            );
+            assert!(ok);
+
+            // 3. Verify exact parity across all 98,304 voxels for both toggle and ridged
+            assert_eq!(legacy_toggle.len(), aot_toggle.len());
+            assert_eq!(legacy_ridged.len(), aot_ridged.len());
+
+            for i in 0..legacy_toggle.len() {
+                let diff_t = (legacy_toggle[i] - aot_toggle[i]).abs();
+                assert!(
+                    diff_t < 1e-4,
+                    "Vein toggle discrepancy at voxel {} (seed {}, chunk ({}, {})): legacy={}, aot={}, diff={}",
+                    i, seed, chunk_x, chunk_z, legacy_toggle[i], aot_toggle[i], diff_t
+                );
+
+                let diff_r = (legacy_ridged[i] - aot_ridged[i]).abs();
+                assert!(
+                    diff_r < 1e-4,
+                    "Vein ridged discrepancy at voxel {} (seed {}, chunk ({}, {})): legacy={}, aot={}, diff={}",
+                    i, seed, chunk_x, chunk_z, legacy_ridged[i], aot_ridged[i], diff_r
+                );
+            }
+            println!(
+                "Overworld Veins Seed {} chunk ({}, {}): verified {} voxels bit-exact parity!",
+                seed, chunk_x, chunk_z, legacy_toggle.len()
+            );
+        }
+    }
+}
+

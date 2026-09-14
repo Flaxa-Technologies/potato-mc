@@ -1,4 +1,4 @@
-use pumpkin_data::{Block, BlockState, block_properties::BrownMushroomBlockLikeProperties};
+use pumpkin_data::{Block, BlockState, block_properties::BrownMushroomBlockLikeProperties, tag::Taggable};
 use pumpkin_util::{
     math::position::BlockPos,
     random::{RandomGenerator, RandomImpl},
@@ -29,6 +29,14 @@ impl HugeBrownMushroomFeature {
         random: &mut RandomGenerator,
         pos: BlockPos,
     ) -> bool {
+        let ground_state = GenerationCache::get_block_state(chunk, &pos.down().0);
+        let ground_block = Block::from_id(ground_state.to_block_id());
+        if !ground_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_DIRT)
+            && ground_block.id != Block::MYCELIUM.id
+        {
+            return false;
+        }
+
         let tree_height = mushroom_tree_height(random);
 
         let radius = Self::FOLIAGE_RADIUS;

@@ -82,7 +82,9 @@ impl BowAttackGoal {
         let world = entity.world.load();
         let world_full = entity.world.load_full();
 
-        let arrow_entity = Entity::new(world.clone(), entity.pos.load(), &EntityType::ARROW);
+        let mut spawn_pos = entity.get_eye_pos();
+        spawn_pos.y -= 0.1;
+        let arrow_entity = Entity::new(world.clone(), spawn_pos, &EntityType::ARROW);
         let projectile = if entity.entity_type == &EntityType::BOGGED {
             use pumpkin_data::data_component::DataComponent;
             use pumpkin_data::data_component_impl::{DataComponentImpl, PotionContentsImpl};
@@ -146,14 +148,14 @@ impl BowAttackGoal {
             arrow.set_flame(true);
         }
 
-        let mob_pos = entity.pos.load();
+        let shooter_eye = entity.get_eye_pos();
         let target_entity = target.get_entity();
         let target_pos = target_entity.pos.load();
+        let target_height = f64::from(target_entity.entity_dimension.load().height);
 
-        let dx = target_pos.x - mob_pos.x;
-        let dy = (target_pos.y + f64::from(target_entity.entity_dimension.load().height) / 3.0)
-            - arrow.entity.pos.load().y;
-        let dz = target_pos.z - mob_pos.z;
+        let dx = target_pos.x - shooter_eye.x;
+        let dy = (target_pos.y + target_height * (1.0 / 3.0)) - shooter_eye.y;
+        let dz = target_pos.z - shooter_eye.z;
         let horizontal_distance = dx.hypot(dz);
 
         // Vanilla scales the spread with the world difficulty: 14 - difficulty * 4.
@@ -167,7 +169,7 @@ impl BowAttackGoal {
             divergence,
         );
 
-        world.play_sound(Sound::EntityArrowShoot, SoundCategory::Hostile, &mob_pos);
+        world.play_sound(Sound::EntityArrowShoot, SoundCategory::Hostile, &shooter_eye);
 
         let arrow: Arc<dyn EntityBase> = Arc::new(arrow);
         let entity_id = entity.entity_id;
@@ -218,7 +220,8 @@ impl Goal for BowAttackGoal {
             && Self::is_holding_bow(mob)
     }
 
-    fn start(&mut self, _mob: &dyn Mob) {
+    fn start(&mut self, mob: &dyn Mob) {
+        mob.get_mob_entity().set_attacking(true);
         self.cooldown = -1;
         self.draw_ticks = 0;
         self.drawing = false;
@@ -227,10 +230,16 @@ impl Goal for BowAttackGoal {
     }
 
     fn stop(&mut self, mob: &dyn Mob) {
+        mob.get_mob_entity().set_attacking(false);
         self.stop_drawing(mob);
         self.cooldown = -1;
         self.see_time = 0;
         self.strafing_time = -1;
+        if let Some(living) = mob.get_living_entity() {
+            living
+                .movement_input
+                .store(pumpkin_util::math::vector3::Vector3::default());
+        }
         mob.get_mob_entity()
             .navigator
             .lock()
@@ -241,6 +250,11 @@ impl Goal for BowAttackGoal {
     fn tick(&mut self, mob: &dyn Mob) {
         let target = mob.get_mob_entity().get_target().clone();
         let Some(target) = target else {
+            if let Some(living) = mob.get_living_entity() {
+                living
+                    .movement_input
+                    .store(pumpkin_util::math::vector3::Vector3::default());
+            }
             return;
         };
 
@@ -321,12 +335,14 @@ impl Goal for BowAttackGoal {
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner)
                 .look_at_entity_with_range(&target, 30.0, 30.0);
+            mob.get_mob_entity().look_at(target.as_ref(), 30.0, 30.0);
         } else {
             mob.get_mob_entity()
                 .look_control
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner)
                 .look_at_entity_with_range(&target, 30.0, 30.0);
+            mob.get_mob_entity().look_at(target.as_ref(), 30.0, 30.0);
         }
 
         if self.drawing {
@@ -350,7 +366,7 @@ impl Goal for BowAttackGoal {
                 let stack = Self::main_hand_item(mob);
                 mob.get_mob_entity()
                     .living_entity
-                    .set_active_hand(Hand::Right, stack, i32::MAX);
+                    .set_active_hand(Hand::Right, stack, 72000);
                 self.drawing = true;
                 self.draw_ticks = 0;
             }

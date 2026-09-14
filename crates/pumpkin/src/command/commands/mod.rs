@@ -50,7 +50,6 @@ mod particle;
 mod place;
 mod playsound;
 mod plugin;
-mod plugins;
 mod pumpkin;
 mod raid;
 mod random;
@@ -189,7 +188,6 @@ pub fn default_dispatcher(
     deop::register(&mut dispatcher, registry);
     kick::register(&mut dispatcher, registry);
     plugin::register(&mut dispatcher, registry);
-    plugins::register(&mut dispatcher, registry);
     ban::register(&mut dispatcher, registry);
     banip::register(&mut dispatcher, registry);
     pardon::register(&mut dispatcher, registry);

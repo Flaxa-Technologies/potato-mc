@@ -712,6 +712,10 @@ impl PathNavigation {
             }
             path_nodes.reverse();
 
+            if path_nodes.len() <= 1 && !reached {
+                return None;
+            }
+
             let path_target = target.node.pos;
             return Some(Path::new(path_nodes, path_target, reached));
         }
@@ -1074,7 +1078,8 @@ impl PathNavigation {
 
             let on_ground = entity.entity.on_ground.load(Ordering::Relaxed);
 
-            if let Some(next_block) = path.get_next_node_pos() {
+            let mut reached_any_node = false;
+            while let Some(next_block) = path.get_next_node_pos() {
                 let target_pos = Vector3::new(
                     f64::from(next_block.0.x) + 0.5,
                     f64::from(next_block.0.y),
@@ -1095,15 +1100,6 @@ impl PathNavigation {
                     0.75 - self.mob_width * 0.5
                 };
 
-                if !on_ground
-                    && horizontal_dist < f64::from(self.max_distance_to_waypoint)
-                    && dy < -0.5
-                {
-                    path.advance();
-                    self.current_goal = Some(goal);
-                    return;
-                }
-
                 let close_enough = horizontal_dist < f64::from(self.max_distance_to_waypoint)
                     && dy.abs() < NODE_REACH_Y;
 
@@ -1113,23 +1109,32 @@ impl PathNavigation {
                         && n.path_type != PathType::WalkableDoor
                 }) && Self::should_target_next_node_in_direction(mob_pos, path);
 
-                if close_enough || corner_cut {
+                if (!on_ground
+                    && horizontal_dist < f64::from(self.max_distance_to_waypoint)
+                    && dy < -0.5)
+                    || close_enough
+                    || corner_cut
+                {
                     path.advance();
-                    self.current_goal = Some(goal);
-                    return;
+                    reached_any_node = true;
+                    if path.is_done() {
+                        self.finish_navigation(entity);
+                        return;
+                    }
+                    continue;
                 }
 
-                let desired_yaw = wrap_degrees((dz.atan2(dx) as f32).to_degrees() - 90.0);
-                let current_yaw = entity.entity.yaw.load();
-                let yaw_diff = wrap_degrees(desired_yaw - current_yaw);
-                let target_yaw =
-                    current_yaw + yaw_diff.clamp(-MAX_YAW_TURN_PER_TICK, MAX_YAW_TURN_PER_TICK);
-                entity.entity.yaw.store(target_yaw);
-                entity.entity.head_yaw.store(target_yaw);
-                entity.entity.body_yaw.store(target_yaw);
+                if horizontal_dist_sq > 0.0025 {
+                    let desired_yaw = wrap_degrees((dz.atan2(dx) as f32).to_degrees() - 90.0);
+                    let current_yaw = entity.entity.yaw.load();
+                    let yaw_diff = wrap_degrees(desired_yaw - current_yaw);
+                    let target_yaw =
+                        current_yaw + yaw_diff.clamp(-MAX_YAW_TURN_PER_TICK, MAX_YAW_TURN_PER_TICK);
+                    entity.entity.yaw.store(target_yaw);
+                }
 
-                let mob_speed =
-                    goal.speed * entity.get_attribute_value(&Attributes::MOVEMENT_SPEED);
+                let movement_speed = entity.get_attribute_value(&Attributes::MOVEMENT_SPEED);
+                let mob_speed = (goal.speed * movement_speed).clamp(-1.0, 1.0);
 
                 entity
                     .movement_input
@@ -1138,14 +1143,17 @@ impl PathNavigation {
                 let step_height = entity.get_attribute_value(&Attributes::STEP_HEIGHT);
                 let jump_distance = 1.0f64.max(f64::from(self.mob_width));
 
-                if (dy > step_height || f64::from(next_block.0.y) > current_pos.y)
+                if dy > step_height
                     && horizontal_dist_sq < jump_distance * jump_distance
                 {
                     entity.jumping.store(true, Ordering::SeqCst);
                 } else {
                     entity.jumping.store(false, Ordering::SeqCst);
                 }
-            } else {
+                break;
+            }
+
+            if path.is_done() && !reached_any_node {
                 self.finish_navigation(entity);
                 return;
             }
@@ -1523,19 +1531,7 @@ impl PathNavigationTrait for FlyingPathNavigation {
                     f64::from(next_block.0.z) + 0.5,
                 );
                 let current_pos = entity.entity.pos.load();
-                let dx = target_pos.x - current_pos.x;
                 let dy = target_pos.y - current_pos.y;
-                let dz = target_pos.z - current_pos.z;
-                let sd = dx.hypot(dz);
-
-                let desired_yaw = wrap_degrees((dz.atan2(dx) as f32).to_degrees() - 90.0);
-                let desired_pitch = wrap_degrees(-(dy.atan2(sd) as f32).to_degrees());
-
-                entity.entity.yaw.store(desired_yaw);
-                entity.entity.head_yaw.store(desired_yaw);
-                entity.entity.body_yaw.store(desired_yaw);
-                entity.entity.pitch.store(desired_pitch);
-
                 let flying_speed = entity.get_attribute_value(&Attributes::FLYING_SPEED);
                 let base_speed = if flying_speed > 0.0 {
                     flying_speed
@@ -2094,12 +2090,14 @@ impl PathNavigationTrait for WallClimberNavigation {
                 self.inner.inner.finish_navigation(entity);
             } else {
                 let desired_yaw = wrap_degrees((dz.atan2(dx) as f32).to_degrees() - 90.0);
-                entity.entity.yaw.store(desired_yaw);
-                entity.entity.head_yaw.store(desired_yaw);
-                entity.entity.body_yaw.store(desired_yaw);
+                let current_yaw = entity.entity.yaw.load();
+                let yaw_diff = wrap_degrees(desired_yaw - current_yaw);
+                let target_yaw =
+                    current_yaw + yaw_diff.clamp(-MAX_YAW_TURN_PER_TICK, MAX_YAW_TURN_PER_TICK);
+                entity.entity.yaw.store(target_yaw);
 
-                let speed = self.inner.inner.speed_modifier
-                    * entity.get_attribute_value(&Attributes::MOVEMENT_SPEED);
+                let movement_speed = entity.get_attribute_value(&Attributes::MOVEMENT_SPEED);
+                let speed = (self.inner.inner.speed_modifier * movement_speed).clamp(-1.0, 1.0);
                 entity.movement_input.store(Vector3::new(0.0, 0.0, speed));
                 if dy > 0.0 {
                     entity.jumping.store(true, Ordering::SeqCst);

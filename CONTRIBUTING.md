@@ -1,3 +1,5 @@
+# IGNORE THIS FILE
+
 # Contributing to Pumpkin
 
 We appreciate your interest in contributing to Pumpkin! This document outlines the guidelines for submitting bug reports, feature suggestions, and code changes.

@@ -13,6 +13,14 @@ impl BedrockClient {
         if !player.has_client_loaded() {
             return;
         }
+        if player
+            .awaiting_teleport
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .is_some()
+        {
+            return;
+        }
         if player.living_entity.dead.load(Ordering::Relaxed)
             || player.living_entity.health.load() <= 0.0
         {

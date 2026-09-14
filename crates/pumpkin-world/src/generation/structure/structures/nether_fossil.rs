@@ -194,7 +194,7 @@ impl NetherFossilPiece {
 
             let local_pos =
                 StructureTemplate::transform_block_pos(block.pos, mirror, rotation, pivot);
-            let world_pos = self.template_position + local_pos;
+            let mut world_pos = self.template_position + local_pos;
 
             if !chunk_box.contains_pos(&world_pos) {
                 continue;
@@ -208,7 +208,7 @@ impl NetherFossilPiece {
                 };
                 processed_state = processor.process_with_context(
                     chunk,
-                    world_pos,
+                    &mut world_pos,
                     current_state,
                     &mut block_entity_nbt,
                     &mut context,

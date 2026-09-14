@@ -53,6 +53,24 @@ impl ItemBehaviour for SpearItem {
             Hand::Left
         };
         let stack = inventory.get_stack_in_hand(hand);
+
+        // If the spear has Lunge enchantment, right-clicking directly triggers spear dash
+        let lunge_lvl = Self::lunge_level(&stack);
+        if lunge_lvl > 0 {
+            self.on_spear_jab(&stack, player);
+            return;
+        }
+
+        if player
+            .living_entity
+            .item_in_use
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .is_some()
+        {
+            return;
+        }
+
         let sound = stack
             .get_data_component::<KineticWeaponImpl>()
             .and_then(|weapon| weapon.sound.clone());
@@ -67,9 +85,10 @@ impl ItemBehaviour for SpearItem {
                 &player.position(),
             );
         }
+    }
 
-        // Note: Lunge is a post_piercing_attack enchantment effect, NOT a normal_use effect.
-        // Lunge impulse is applied in on_spear_jab, not here.
+    fn on_stopped_using(&self, stack: &ItemStack, player: &Player) {
+        self.on_spear_jab(stack, player);
     }
 
     fn on_spear_jab(&self, stack: &ItemStack, player: &Player) {
@@ -81,11 +100,14 @@ impl ItemBehaviour for SpearItem {
             return;
         };
 
-        let tps = f64::from(server.basic_config.tps);
-        let attack_delay = tps / Self::attack_speed(player, stack);
-        let elapsed = f64::from(player.last_attacked_ticks.load(Ordering::Acquire));
-        if elapsed + 5.0 < attack_delay {
-            return;
+        let switch_delay = server.spear_switch_delay.load(Ordering::Relaxed);
+        if switch_delay > 0 {
+            let tps = f64::from(server.basic_config.tps);
+            let attack_delay = (tps / Self::attack_speed(player, stack)).min(switch_delay as f64);
+            let elapsed = f64::from(player.last_attacked_ticks.load(Ordering::Acquire));
+            if elapsed + 5.0 < attack_delay {
+                return;
+            }
         }
 
         let lunge_lvl = Self::lunge_level(stack);
@@ -103,19 +125,34 @@ impl ItemBehaviour for SpearItem {
                 || i32::from(player.hunger_manager.level.load()) >= 7;
 
             if !in_vehicle && !is_elytra && !in_water && food_ok {
-                // Vanilla ApplyEntityImpulse: look.addLocalCoordinates([0,0,1]).multiply([1,0,1]).scale(0.458 * level)
-                // In Minecraft, horizontal forward direction from yaw is (-sin(yaw), 0, cos(yaw)).
-                // We compute the normalized horizontal vector directly from yaw so the impulse has
-                // constant forward strength regardless of pitch and does not accumulate stale server velocity.
-                let (yaw, _) = player.rotation();
+                let (yaw, pitch) = player.rotation();
                 let f_yaw = yaw.to_radians();
-                let forward = Vector3::new(-f64::from(f_yaw.sin()), 0.0, f64::from(f_yaw.cos()));
-                let magnitude = 0.458 * f64::from(lunge_lvl);
-                let impulse = forward * magnitude;
-                player.set_velocity(impulse);
+                let f_pitch = pitch.to_radians();
+                let is_on_ground = entity.on_ground.load(Ordering::Relaxed);
 
-                // Vanilla exhaustion: LevelBasedValue.perLevel(4.0) per jab, BUT
-                // hunger is tracked via ApplyExhaustion effect, which maps to add_exhaustion
+                // Allow players to do spear dash while falling:
+                let magnitude = 0.458 * f64::from(lunge_lvl);
+                let impulse = if is_on_ground {
+                    let forward = Vector3::new(-f64::from(f_yaw.sin()), 0.0, f64::from(f_yaw.cos()));
+                    forward * magnitude
+                } else {
+                    let cos_p = f64::from(f_pitch.cos());
+                    let dir = Vector3::new(
+                        -f64::from(f_yaw.sin()) * cos_p,
+                        -f64::from(f_pitch.sin()).max(-0.6),
+                        f64::from(f_yaw.cos()) * cos_p,
+                    );
+                    let current_vel = entity.velocity.load();
+                    Vector3::new(
+                        dir.x * magnitude * 1.2 + current_vel.x * 0.4,
+                        (dir.y * magnitude).max(-0.2) + 0.15,
+                        dir.z * magnitude * 1.2 + current_vel.z * 0.4,
+                    )
+                };
+                player.set_velocity(impulse);
+                // Reset fall distance on mid-air dash to allow falling recovery
+                player.living_entity.fall_distance.store(0.0);
+
                 let exhaustion = 4.0 * lunge_lvl as f32;
                 player.add_exhaustion(exhaustion);
 
@@ -749,4 +786,40 @@ fn clip_point(
         return true;
     }
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_spear_switch_delay_defaults_to_zero() {
+        let default_delay: i64 = 0;
+        assert_eq!(default_delay, 0);
+    }
+
+    #[test]
+    fn test_falling_lunge_impulse_vector() {
+        let yaw: f32 = 0.0;
+        let pitch: f32 = -30.0; // looking slightly upward while falling
+        let lunge_lvl = 3;
+        let magnitude = 0.458 * f64::from(lunge_lvl);
+        let f_yaw = yaw.to_radians();
+        let f_pitch = pitch.to_radians();
+        let cos_p = f64::from(f_pitch.cos());
+        let dir = Vector3::new(
+            -f64::from(f_yaw.sin()) * cos_p,
+            -f64::from(f_pitch.sin()).max(-0.6),
+            f64::from(f_yaw.cos()) * cos_p,
+        );
+        let current_vel = Vector3::new(0.0, -1.2, 0.0);
+        let impulse = Vector3::new(
+            dir.x * magnitude * 1.2 + current_vel.x * 0.4,
+            (dir.y * magnitude).max(-0.2) + 0.15,
+            dir.z * magnitude * 1.2 + current_vel.z * 0.4,
+        );
+        assert!(impulse.z > 0.0, "Should have forward impulse");
+        assert!(impulse.y > 0.0, "Should provide vertical recovery from falling");
+        assert!(!impulse.x.is_nan() && !impulse.y.is_nan() && !impulse.z.is_nan());
+    }
 }

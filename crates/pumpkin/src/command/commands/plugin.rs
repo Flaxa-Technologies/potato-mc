@@ -213,27 +213,35 @@ pub fn register(dispatcher: &mut CommandDispatcher, registry: &PermissionRegistr
     registry.register_permission_or_panic(Permission::new(
         PERMISSION,
         DESCRIPTION,
+        PermissionDefault::Allow,
+    ));
+    registry.register_permission_or_panic(Permission::new(
+        "pumpkin:command.plugin.manage",
+        "Manage plugins (load, unload, hotreload)",
         PermissionDefault::Op(PermissionLvl::Three),
     ));
 
-    dispatcher.register(
-        command("plugin", DESCRIPTION)
-            .requires(PERMISSION)
-            .then(literal("list").executes(ListExecutor))
-            .then(
-                literal("load").then(
-                    argument("plugin", StringArgumentType::SingleWord).executes(LoadExecutor),
-                ),
-            )
-            .then(
-                literal("unload").then(
-                    argument("plugin", StringArgumentType::SingleWord).executes(UnloadExecutor),
-                ),
-            )
-            .then(
-                literal("hotreload")
-                    .then(literal("enable").executes(HotReloadExecutor(true)))
-                    .then(literal("disable").executes(HotReloadExecutor(false))),
-            ),
-    );
+    let cmd_node = command("plugin", DESCRIPTION)
+        .requires(PERMISSION)
+        .executes(ListExecutor)
+        .then(literal("list").executes(ListExecutor))
+        .then(
+            literal("load")
+                .requires("pumpkin:command.plugin.manage")
+                .then(argument("plugin", StringArgumentType::SingleWord).executes(LoadExecutor)),
+        )
+        .then(
+            literal("unload")
+                .requires("pumpkin:command.plugin.manage")
+                .then(argument("plugin", StringArgumentType::SingleWord).executes(UnloadExecutor)),
+        )
+        .then(
+            literal("hotreload")
+                .requires("pumpkin:command.plugin.manage")
+                .then(literal("enable").executes(HotReloadExecutor(true)))
+                .then(literal("disable").executes(HotReloadExecutor(false))),
+        );
+
+    let aliases = ["plugins", "pl"];
+    dispatcher.register_with_aliases(cmd_node, &aliases);
 }

@@ -54,6 +54,7 @@ struct SignPlacement {
     facing: Option<String>,
     rotation: Option<u8>,
     attached: bool,
+    waterlogged: bool,
 }
 
 impl SignBlock {
@@ -61,12 +62,13 @@ impl SignBlock {
     fn is_valid_support(world: &World, pos: &BlockPos, direction: BlockDirection) -> bool {
         let (block, state) = world.get_block_and_state(pos);
         let is_permissive = block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_LEAVES)
-            || block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_SIGNS);
+            || block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_SIGNS)
+            || block == &pumpkin_data::Block::DIRT_PATH;
 
         match direction {
             BlockDirection::Up => state.is_side_solid(BlockDirection::Down) || is_permissive,
             BlockDirection::Down => state.is_center_solid(BlockDirection::Up) || is_permissive,
-            _ => state.is_side_solid(direction.opposite()) || is_permissive,
+            _ => state.is_side_solid(direction) || is_permissive,
         }
     }
 
@@ -81,14 +83,14 @@ impl SignBlock {
         for direction in BlockDirection::horizontal() {
             let pos = position.offset(direction.to_offset());
             if Self::is_valid_support(world, &pos, direction.opposite().to_block_direction()) {
-                side_direction = Some(direction);
+                side_direction = Some(direction.to_block_direction());
                 break;
             }
         }
 
         SupportInfo {
             above_is_valid,
-            side_direction: side_direction.map(|d| d.to_block_direction()),
+            side_direction,
         }
     }
 
@@ -169,6 +171,7 @@ impl SignBlock {
             facing,
             rotation,
             attached,
+            waterlogged: args.replacing.water_source(),
         })
     }
 
@@ -188,12 +191,14 @@ impl SignBlock {
     }
 
     /// Selects the appropriate standing sign variant.
-    fn select_standing_variant(args: &OnPlaceArgs, support: &SupportInfo) -> BlockId {
-        if args.direction.is_horizontal() && support.side_direction.is_some() {
-            get_sign_variant(args.block, false) // Wall sign
-        } else {
-            args.block.id // Standing sign
+    fn select_standing_variant(args: &OnPlaceArgs, _support: &SupportInfo) -> BlockId {
+        if args.direction.is_horizontal() {
+            let wall_pos = args.position.offset(args.direction.to_offset());
+            if Self::is_valid_support(args.world, &wall_pos, args.direction.opposite()) {
+                return get_sign_variant(args.block, false); // Wall sign
+            }
         }
+        args.block.id // Standing sign
     }
 
     /// Calculates orientation for wall-hanging signs.
@@ -291,6 +296,10 @@ impl SignBlock {
             prop.1 = if placement.attached { "true" } else { "false" };
         }
 
+        if let Some(prop) = props.iter_mut().find(|(k, _)| *k == "waterlogged") {
+            prop.1 = if placement.waterlogged { "true" } else { "false" };
+        }
+
         block.from_properties(&props).to_state_id(block)
     }
 }
@@ -335,6 +344,37 @@ impl BlockBehaviour for SignBlock {
 
     fn can_place_at(&self, args: CanPlaceAtArgs<'_>) -> bool {
         let is_hanging = args.block.name.contains("hanging");
+        if !is_hanging {
+            let below_pos = args.position.down();
+            let (below_block, below_state) = args.block_accessor.get_block_and_state(&below_pos);
+            let below_solid = below_state.is_side_solid(BlockDirection::Up)
+                || below_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_LEAVES)
+                || below_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_SIGNS)
+                || below_block == &pumpkin_data::Block::DIRT_PATH;
+
+            if below_solid {
+                return true;
+            }
+
+            let clicked_face = args
+                .use_item_on
+                .and_then(|u| pumpkin_data::BlockDirection::try_from(u.face.0).ok())
+                .unwrap_or(pumpkin_data::BlockDirection::Up);
+
+            if clicked_face.is_horizontal() {
+                let wall_pos = args.position.offset(clicked_face.opposite().to_offset());
+                let (wall_block, wall_state) = args.block_accessor.get_block_and_state(&wall_pos);
+                let wall_solid = wall_state.is_side_solid(clicked_face)
+                    || wall_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_LEAVES)
+                    || wall_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_SIGNS);
+                if wall_solid {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         let clicked_face = args
             .use_item_on
             .and_then(|u| pumpkin_data::BlockDirection::try_from(u.face.0).ok())
@@ -367,12 +407,12 @@ impl BlockBehaviour for SignBlock {
 
         match clicked_face {
             BlockDirection::Up => {
-                !is_hanging && (state.is_center_solid(BlockDirection::Up) || is_permissive)
+                !is_hanging && (state.is_side_solid(BlockDirection::Up) || is_permissive)
             }
             BlockDirection::Down => {
                 is_hanging && (state.is_side_solid(BlockDirection::Down) || is_permissive)
             }
-            _ => state.is_side_solid(clicked_face.opposite()) || is_permissive,
+            _ => state.is_side_solid(clicked_face) || is_permissive,
         }
     }
 
@@ -415,10 +455,10 @@ impl BlockBehaviour for SignBlock {
 
             let is_valid = match dir {
                 BlockDirection::Up => {
-                    support_state.is_center_solid(BlockDirection::Down) || is_leaf || is_sign
+                    support_state.is_side_solid(BlockDirection::Down) || is_leaf || is_sign
                 }
                 BlockDirection::Down => {
-                    support_state.is_center_solid(BlockDirection::Up) || is_leaf || is_sign
+                    support_state.is_side_solid(BlockDirection::Up) || is_leaf || is_sign
                 }
                 _ => support_state.is_side_solid(dir.opposite()) || is_leaf || is_sign,
             };

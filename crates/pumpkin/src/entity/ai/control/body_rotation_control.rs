@@ -31,17 +31,24 @@ impl BodyRotationControl {
             Self::rotate_head_if_necessary(mob);
             self.last_stable_y_head_rot = entity.head_yaw.load();
             self.head_stable_time = 0;
-        } else if (entity.head_yaw.load() - self.last_stable_y_head_rot).abs() > 15.0 {
-            self.head_stable_time = 0;
-            self.last_stable_y_head_rot = entity.head_yaw.load();
-            Self::rotate_body_if_necessary(mob);
         } else {
-            self.head_stable_time += 1;
-            if self.head_stable_time > 10 {
-                self.rotate_head_towards_front(mob);
+            if pumpkin_util::math::degrees_difference_abs(
+                entity.head_yaw.load(),
+                self.last_stable_y_head_rot,
+            ) > 15.0
+            {
+                self.head_stable_time = 0;
+                self.last_stable_y_head_rot = entity.head_yaw.load();
+                Self::rotate_body_if_necessary(mob);
+            } else {
+                self.head_stable_time += 1;
+                if self.head_stable_time > 10 {
+                    self.rotate_head_towards_front(mob);
+                }
             }
         }
     }
+
 
     fn rotate_body_if_necessary(mob: &dyn Mob) {
         let entity = &mob.get_mob_entity().living_entity.entity;
@@ -77,8 +84,11 @@ impl BodyRotationControl {
 
     fn is_moving(mob: &dyn Mob) -> bool {
         let entity = &mob.get_mob_entity().living_entity.entity;
-        let vel = entity.velocity.load();
-        vel.x * vel.x + vel.z * vel.z > 2.500_000_3e-7
+        let pos = entity.pos.load();
+        let last_pos = entity.last_pos.load();
+        let xd = pos.x - last_pos.x;
+        let zd = pos.z - last_pos.z;
+        xd * xd + zd * zd > 2.500_000_3e-7
     }
 }
 

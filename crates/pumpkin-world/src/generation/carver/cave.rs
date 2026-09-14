@@ -26,7 +26,11 @@ impl Carver for CaveCarver {
 
         let max_distance = (4 * 2 - 1) << 4;
 
-        let cave_count = cave_config.count.get(random);
+        let is_nether = run.ctx.carver_aquifer.is_none() && min_y == 0;
+        let cave_bound = if is_nether { 10 } else { 15 };
+        let b1 = random.next_bounded_i32(cave_bound) + 1;
+        let b2 = random.next_bounded_i32(b1) + 1;
+        let cave_count = random.next_bounded_i32(b2);
 
         for _ in 0..cave_count {
             let x = (carver_chunk_pos.x << 4) + random.next_bounded_i32(16);
@@ -60,13 +64,17 @@ impl Carver for CaveCarver {
             for _ in 0..tunnels {
                 let horizontal_rotation = random.next_f32() * PI * 2.0;
                 let vertical_rotation = (random.next_f32() - 0.5) / 4.0;
-                let mut thickness = cave_config.thickness.get(random);
-                if cave_config.weird_thickness_bias && random.next_bounded_i32(10) == 0 {
-                    thickness *= random.next_f32() * random.next_f32() * 3.0 + 1.0;
-                }
+                let thickness = if is_nether {
+                    (random.next_f32() * 2.0 + random.next_f32()) * 2.0
+                } else {
+                    let mut t = random.next_f32() * 2.0 + random.next_f32();
+                    if random.next_bounded_i32(10) == 0 {
+                        t *= random.next_f32() * random.next_f32() * 3.0 + 1.0;
+                    }
+                    t
+                };
                 let distance = max_distance - random.next_bounded_i32(max_distance / 4);
-                let start_vertical_radius_multiplier =
-                    cave_config.start_vertical_radius_multiplier.get(random) as f64;
+                let y_scale = if is_nether { 5.0 } else { 1.0 };
 
                 Self::create_tunnel(
                     config,
@@ -82,7 +90,7 @@ impl Carver for CaveCarver {
                     vertical_rotation,
                     0,
                     distance,
-                    start_vertical_radius_multiplier,
+                    y_scale,
                     floor_level,
                     legacy_random_source,
                 );
@@ -258,31 +266,25 @@ impl CaveCarver {
         vertical_radius: f64,
         floor_level: f64,
     ) {
-        let chunk_min_x = run.chunk.x << 4;
-        let chunk_min_z = run.chunk.z << 4;
+        let center_x = (run.chunk.x << 4) as f64 + 8.0;
+        let center_z = (run.chunk.z << 4) as f64 + 8.0;
+        let max_delta = 16.0 + horizontal_radius * 2.0;
 
-        if !Self::in_chunk_range(
-            chunk_min_x,
-            chunk_min_z,
-            x,
-            z,
-            horizontal_radius,
-            horizontal_radius,
-        ) {
+        if (x - center_x).abs() > max_delta || (z - center_z).abs() > max_delta {
             return;
         }
 
-        let min_y = 1.max((y - vertical_radius).floor() as i32 - 1);
-        let max_y = (run.chunk.generation_height() as i32 - 1)
-            .min((y + vertical_radius).floor() as i32 + 1);
+        let chunk_min_x = run.chunk.x << 4;
+        let chunk_min_z = run.chunk.z << 4;
 
         let x_index_min = ((x - horizontal_radius).floor() as i32 - chunk_min_x - 1).max(0);
         let x_index_max = ((x + horizontal_radius).floor() as i32 - chunk_min_x).min(15);
 
-        let is_overworld = run.ctx.carver_aquifer.is_some();
-        let protected_blocks_on_top = i32::from(!is_overworld);
-        let max_y = max_y.min(
-            (run.chunk.generation_bottom_y() as i32 + run.chunk.generation_height() as i32)
+        let min_y = ((y - vertical_radius).floor() as i32 - 1)
+            .max(run.chunk.generation_bottom_y() as i32 + 1);
+        let protected_blocks_on_top = 7;
+        let max_y = ((y + vertical_radius).floor() as i32 + 1).min(
+            run.chunk.generation_bottom_y() as i32 + run.chunk.generation_height() as i32
                 - 1
                 - protected_blocks_on_top,
         );
@@ -348,12 +350,24 @@ impl CaveCarver {
             *has_grass = true;
         }
 
+        let is_overworld = run.ctx.carver_aquifer.is_some();
+        let replaceable = if is_overworld {
+            block
+                .id
+                .has_tag(pumpkin_data::tag::Block::MINECRAFT_OVERWORLD_CARVER_REPLACEABLES)
+        } else {
+            block
+                .id
+                .has_tag(pumpkin_data::tag::Block::MINECRAFT_NETHER_CARVER_REPLACEABLES)
+        };
+        if !replaceable {
+            return false;
+        }
+
         let Some((state, should_schedule_fluid_update)) = overworld_carve_state(run, x, y, z)
         else {
             return false;
         };
-
-        let overworld = run.ctx.carver_aquifer.is_some();
 
         place_carved_block(
             run,
@@ -361,25 +375,12 @@ impl CaveCarver {
             state,
             should_schedule_fluid_update,
             *has_grass,
-            overworld,
+            is_overworld,
         );
 
         true
     }
 
-    fn in_chunk_range(
-        chunk_min_x: i32,
-        chunk_min_z: i32,
-        x: f64,
-        z: f64,
-        horizontal_radius_x: f64,
-        horizontal_radius_z: f64,
-    ) -> bool {
-        x >= (chunk_min_x as f64 - 16.0 - horizontal_radius_x * 2.0)
-            && z >= (chunk_min_z as f64 - 16.0 - horizontal_radius_z * 2.0)
-            && x <= (chunk_min_x as f64 + 16.0 + 16.0 + horizontal_radius_x * 2.0)
-            && z <= (chunk_min_z as f64 + 16.0 + 16.0 + horizontal_radius_z * 2.0)
-    }
 }
 
 pub fn get_height(p: &HeightProvider, random: &mut RandomGenerator, min_y: i8, height: u16) -> i32 {

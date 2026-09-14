@@ -44,6 +44,7 @@ impl ItemMetadata for FilledBucketItem {
             Item::TROPICAL_FISH_BUCKET.id,
             Item::PUFFERFISH_BUCKET.id,
             Item::TADPOLE_BUCKET.id,
+            Item::SULFUR_CUBE_BUCKET.id,
         ]
         .into()
     }
@@ -83,6 +84,8 @@ const fn get_mob_for_bucket(item: &Item) -> Option<(&'static EntityType, Sound)>
         Some((&EntityType::PUFFERFISH, Sound::ItemBucketEmptyFish))
     } else if item.id == Item::TADPOLE_BUCKET.id {
         Some((&EntityType::TADPOLE, Sound::ItemBucketEmptyTadpole))
+    } else if item.id == Item::SULFUR_CUBE_BUCKET.id {
+        Some((&EntityType::SULFUR_CUBE, Sound::ItemBucketEmptySulfurCube))
     } else {
         None
     }
@@ -339,6 +342,14 @@ impl ItemBehaviour for EmptyBucketItem {
     fn use_on_entity(&self, _item: &mut ItemStack, player: &Player, entity: Arc<dyn EntityBase>) {
         let ent = entity.get_entity();
         let entity_type = ent.entity_type;
+        if entity_type == &EntityType::SULFUR_CUBE {
+            let world = ent.world.load();
+            world.play_sound(Sound::ItemBucketFillSulfurCube, SoundCategory::Neutral, &ent.pos.load());
+            give_player_bucket_item(player, &Item::SULFUR_CUBE_BUCKET);
+            ent.remove();
+            return;
+        }
+
         if (entity_type == &EntityType::COW
             || entity_type == &EntityType::MOOSHROOM
             || entity_type == &EntityType::GOAT)

@@ -170,18 +170,21 @@ impl ExplosionDamageCalculator for SimpleExplosionDamageCalculator {
 
     fn should_block_explode(
         &self,
-        _explosion: &Explosion,
+        explosion: &Explosion,
         _world: &World,
         _pos: &BlockPos,
         block: &Block,
         _power: f32,
     ) -> bool {
-        if !self.damages_blocks {
-            return false;
-        }
         if let Some(immune_tag) = self.immune_blocks
             && block.has_tag(immune_tag)
         {
+            return false;
+        }
+        if explosion.block_interaction == BlockInteraction::TriggerBlock {
+            return true;
+        }
+        if !self.damages_blocks {
             return false;
         }
         true
@@ -459,11 +462,24 @@ impl Explosion {
             let should_damage = calc.should_damage_entity(self, entity_base.as_ref());
             let knockback_multiplier = calc.get_knockback_multiplier(entity_base.as_ref()) as f64;
 
-            let exposure = if !should_damage && knockback_multiplier == 0.0 {
+            let mut exposure = if !should_damage && knockback_multiplier == 0.0 {
                 0.0
             } else {
                 Self::calculate_exposure(&self.pos, entity, world) as f64
             };
+
+            if self.is_wind_charge && exposure == 0.0 && distance <= 1.0 {
+                let check_pos = entity.get_eye_pos();
+                if world
+                    .raycast(check_pos, self.pos, |pos, world_ref| {
+                        let state = world_ref.get_block_state(pos);
+                        !state.is_air() && !state.collision_shapes.is_empty()
+                    })
+                    .is_none()
+                {
+                    exposure = 1.0;
+                }
+            }
 
             if exposure == 0.0 {
                 continue;
@@ -566,7 +582,7 @@ impl Explosion {
                 let mut m = 0.0;
                 while m <= 1.0001 {
                     let n = bbox.min.x + dx * k;
-                    let o = bbox.min.y + dy * l;
+                    let o = (bbox.min.y + dy * l).max(bbox.min.y + 0.01);
                     let p = bbox.min.z + dz * m;
 
                     let vec3d = Vector3::new(n + offset_x, o, p + offset_z);

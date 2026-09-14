@@ -687,7 +687,7 @@ impl ItemStack {
         if let Some(data) = self.get_data_component_mut::<EnchantmentsImpl>() {
             for (enc, old_level) in data.enchantment.to_mut() {
                 if *enc == enchantment {
-                    *old_level = max(*old_level, level);
+                    *old_level = level;
                     return;
                 }
             }
@@ -1519,4 +1519,22 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn test_diamond_axe_unbreaking_and_sharpness() {
+        use crate::enchantment::Enchantment;
+        use crate::item::Item;
+        assert!(Enchantment::UNBREAKING.can_enchant(&Item::DIAMOND_AXE));
+        assert!(Enchantment::SHARPNESS.can_enchant(&Item::DIAMOND_AXE));
+        assert!(Enchantment::SHARPNESS.are_compatible(&Enchantment::UNBREAKING));
+        assert!(Enchantment::UNBREAKING.are_compatible(&Enchantment::SHARPNESS));
+
+        let mut stack = ItemStack::new(1, &Item::DIAMOND_AXE);
+        stack.enchant(&Enchantment::UNBREAKING, 1);
+        let data = stack.get_data_component::<crate::data_component_impl::EnchantmentsImpl>().unwrap();
+        for (existing, _) in data.enchantment.iter() {
+            assert!(existing.id == Enchantment::SHARPNESS.id || Enchantment::SHARPNESS.are_compatible(existing));
+        }
+    }
 }
+

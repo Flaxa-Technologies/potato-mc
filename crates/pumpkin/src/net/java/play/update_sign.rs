@@ -49,15 +49,20 @@ impl JavaClient {
 
         let text = sign_entity.get_text(sign_data.is_front_text);
 
-        *text
-            .messages
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner) = [
+        let new_messages: [Box<str>; 4] = [
             sign_data.line_1.into(),
             sign_data.line_2.into(),
             sign_data.line_3.into(),
             sign_data.line_4.into(),
         ];
+        *text
+            .messages
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = new_messages.clone();
+        *text
+            .filtered_messages
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = new_messages;
         *sign_entity
             .currently_editing_player()
             .lock()

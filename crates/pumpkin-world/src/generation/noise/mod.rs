@@ -110,6 +110,19 @@ impl ChainedBlockStateSampler {
         }
         None
     }
+
+    #[inline]
+    pub fn get_skip_sampling_above_y(
+        &mut self,
+        height_estimator: &mut SurfaceHeightEstimateSampler,
+    ) -> Option<i32> {
+        for sampler in &mut self.samplers {
+            if let BlockStateSampler::Aquifer(aquifer) = sampler {
+                return aquifer.get_skip_sampling_above_y(height_estimator);
+            }
+        }
+        None
+    }
 }
 
 pub struct ChunkNoiseGenerator<'a> {
@@ -191,9 +204,8 @@ impl<'a> ChunkNoiseGenerator<'a> {
         self.router.final_density_volume(&mut density, &self.volume);
         let veins = self.ore_veins.then(|| {
             let mut toggle = DensityBuffer::acquire(&self.volume);
-            self.router.vein_toggle_volume(&mut toggle, &self.volume);
             let mut ridged = DensityBuffer::acquire(&self.volume);
-            self.router.vein_ridged_volume(&mut ridged, &self.volume);
+            self.router.veins_volume(&mut toggle, &mut ridged, &self.volume);
             [toggle, ridged]
         });
         ChunkDensities { density, veins }
@@ -215,6 +227,14 @@ impl<'a> ChunkNoiseGenerator<'a> {
             veins,
             height_estimator,
         )
+    }
+
+    #[inline]
+    pub fn get_skip_sampling_above_y(
+        &mut self,
+        height_estimator: &mut SurfaceHeightEstimateSampler,
+    ) -> Option<i32> {
+        self.state_sampler.get_skip_sampling_above_y(height_estimator)
     }
 
     #[inline]

@@ -25,13 +25,12 @@ use super::{
     GlobalRandomConfig, biome_coords,
     blender::{Blender, BlenderImpl},
     feature::placed_features::PLACED_FEATURES,
-    feature_order::select_features,
+    feature_order::for_each_selected_feature,
     noise::router::{
         multi_noise_sampler::MultiNoiseSampler, proto_noise_router::DoublePerlinNoiseBuilder,
         surface_height_sampler::SurfaceHeightEstimateSampler,
     },
     positions::chunk_pos::{start_block_x, start_block_z},
-    section_coords,
     surface::{MaterialRuleContext, estimate_surface_height, terrain::SurfaceTerrainBuilder},
 };
 use crate::biome::{BiomeSupplier, MultiNoiseBiomeSupplier, end::TheEndBiomeSupplier};
@@ -85,7 +84,10 @@ pub trait GenerationCache: HeightLimitView + BlockAccessor {
     fn top_motion_blocking_block_no_leaves_height_exclusive(&self, x: i32, z: i32) -> i32;
     fn get_top_y(&self, heightmap: &HeightMap, x: i32, z: i32) -> i32;
     fn top_block_height_exclusive(&self, x: i32, z: i32) -> i32;
+    fn top_block_wg_height_exclusive(&self, x: i32, z: i32) -> i32;
     fn ocean_floor_height_exclusive(&self, x: i32, z: i32) -> i32;
+    fn ocean_floor_wg_height_exclusive(&self, x: i32, z: i32) -> i32;
+    fn get_world_seed(&self) -> u64;
     fn is_air(&self, local_pos: &Vector3<i32>) -> bool;
     fn get_biome_for_terrain_gen(&self, x: i32, y: i32, z: i32) -> &'static Biome;
     fn get_blending_data(
@@ -133,26 +135,37 @@ impl FluidLevelSamplerImpl for StandardChunkFluidLevelSampler {
 pub struct ProtoChunk {
     pub x: i32,
     pub z: i32,
+    pub world_seed: u64,
     pub default_block: &'static BlockState,
     biome_mixer_seed: i64,
     pub(crate) flat_block_map: Box<[BlockStateId]>,
     pub flat_biome_map: Box<[u8]>,
+    pub biome_mask: [u64; 4],
     pub flat_surface_height_map: [i16; CHUNK_AREA],
     pub flat_ocean_floor_height_map: [i16; CHUNK_AREA],
     pub flat_motion_blocking_height_map: [i16; CHUNK_AREA],
     pub flat_motion_blocking_no_leaves_height_map: [i16; CHUNK_AREA],
-    pub(crate) structure_starts: FxHashMap<StructureKeys, StructureInstance>,
+    pub structure_starts: FxHashMap<StructureKeys, StructureInstance>,
+    pub emissive_sections: u32,
 
     height: u16,
     bottom_y: i8,
     generation_height: u16,
     generation_bottom_y: i8,
+    /// Precomputed `height * CHUNK_DIM`: the stride between consecutive x-columns
+    /// in `flat_block_map`. Cached once at construction so `local_pos_to_block_index`
+    /// (called from every `get_block_state`/`set_block_state`) doesn't redo this
+    /// multiplication on every single block access.
+    column_stride: usize,
+    /// Precomputed `height >> 2` (chunk height in biome-quart units), cached for the
+    /// same reason as `column_stride` but for `local_biome_pos_to_biome_index`.
+    biome_height: usize,
     pub stage: StagedChunkEnum,
     pub light: ChunkLight,
     pub carving_mask: crate::generation::carver::mask::CarvingMask,
     pub blending_data: Option<crate::generation::blender::blending_data::BlendingData>,
     pub pending_block_entities: Vec<NbtCompound>,
-    pending_structure_entities: Vec<NbtCompound>,
+    pub pending_structure_entities: Vec<NbtCompound>,
     pub fluid_ticks: Vec<ScheduledTick<&'static Fluid>>,
 }
 
@@ -306,47 +319,67 @@ impl ProtoChunk {
         };
 
         let default_heightmap = [i16::MIN; CHUNK_AREA];
-        Self {
-            x,
-            z,
-            default_block,
-            biome_mixer_seed,
-            flat_block_map: vec![BlockStateId::AIR; CHUNK_AREA * height as usize]
+        let world_seed = generator.seed();
+            let default_biome_id = Biome::PLAINS.id;
+            let mut initial_mask = [0u64; 4];
+            initial_mask[(default_biome_id >> 6) as usize] |= 1u64 << (default_biome_id & 63);
+            let column_stride = height as usize * CHUNK_DIM as usize;
+            let biome_height = height as usize >> 2;
+            Self {
+                x,
+                z,
+                world_seed,
+                default_block,
+                biome_mixer_seed,
+                flat_block_map: vec![BlockStateId::AIR; CHUNK_AREA * height as usize]
+                    .into_boxed_slice(),
+                flat_biome_map: vec![
+                    default_biome_id;
+                    biome_coords::from_block(CHUNK_DIM as i32) as usize
+                        * biome_coords::from_block(CHUNK_DIM as i32) as usize
+                        * biome_coords::from_block(height as i32) as usize
+                ]
                 .into_boxed_slice(),
-            flat_biome_map: vec![
-                Biome::PLAINS.id;
-                biome_coords::from_block(CHUNK_DIM as i32) as usize
-                    * biome_coords::from_block(CHUNK_DIM as i32) as usize
-                    * biome_coords::from_block(height as i32) as usize
-            ]
-            .into_boxed_slice(),
-            flat_surface_height_map: default_heightmap,
-            flat_ocean_floor_height_map: default_heightmap,
-            flat_motion_blocking_height_map: default_heightmap,
-            flat_motion_blocking_no_leaves_height_map: default_heightmap,
-            structure_starts: FxHashMap::default(),
-            height,
-            bottom_y,
-            generation_height,
-            generation_bottom_y,
-            stage: StagedChunkEnum::Empty,
-            light: ChunkLight {
-                sky_light: (0..section_count)
-                    .map(|_| LightContainer::new_empty(0))
-                    .collect(),
-                block_light: (0..section_count)
-                    .map(|_| LightContainer::new_empty(0))
-                    .collect(),
-            },
-            carving_mask: crate::generation::carver::mask::CarvingMask::new(
-                height as i32,
-                bottom_y as i32,
-            ),
-            blending_data: None,
-            pending_block_entities: Vec::new(),
-            pending_structure_entities: Vec::new(),
-            fluid_ticks: Vec::new(),
+                biome_mask: initial_mask,
+                flat_surface_height_map: default_heightmap,
+                flat_ocean_floor_height_map: default_heightmap,
+                flat_motion_blocking_height_map: default_heightmap,
+                flat_motion_blocking_no_leaves_height_map: default_heightmap,
+                structure_starts: FxHashMap::default(),
+                emissive_sections: 0,
+                height,
+                bottom_y,
+                generation_height,
+                generation_bottom_y,
+                column_stride,
+                biome_height,
+                stage: StagedChunkEnum::Empty,
+                light: ChunkLight {
+                    sky_light: (0..section_count)
+                        .map(|_| LightContainer::new_empty(0))
+                        .collect(),
+                    block_light: (0..section_count)
+                        .map(|_| LightContainer::new_empty(0))
+                        .collect(),
+                },
+                carving_mask: crate::generation::carver::mask::CarvingMask::new(
+                    height as i32,
+                    bottom_y as i32,
+                ),
+                blending_data: None,
+                pending_block_entities: Vec::new(),
+                pending_structure_entities: Vec::new(),
+                fluid_ticks: Vec::new(),
+            }
         }
+
+    #[inline]
+    pub fn update_biome_mask(&mut self) {
+        let mut mask = [0u64; 4];
+        for &id in &self.flat_biome_map[..] {
+            mask[(id >> 6) as usize] |= 1u64 << (id & 63);
+        }
+        self.biome_mask = mask;
     }
 
     /// Create a fresh `ProtoChunk` at `(x, z)` inheriting all dimension/seed
@@ -364,6 +397,7 @@ impl ProtoChunk {
         Self {
             x,
             z,
+            world_seed: template.world_seed,
             default_block: template.default_block,
             biome_mixer_seed: template.biome_mixer_seed,
             flat_block_map: vec![
@@ -372,15 +406,19 @@ impl ProtoChunk {
             ]
             .into_boxed_slice(),
             flat_biome_map: template.flat_biome_map.clone(),
+            biome_mask: template.biome_mask,
             flat_surface_height_map: default_heightmap,
             flat_ocean_floor_height_map: default_heightmap,
             flat_motion_blocking_height_map: default_heightmap,
             flat_motion_blocking_no_leaves_height_map: default_heightmap,
             structure_starts: rustc_hash::FxHashMap::default(),
+            emissive_sections: template.emissive_sections,
             height,
             bottom_y,
             generation_height: template.generation_height,
             generation_bottom_y: template.generation_bottom_y,
+            column_stride: template.column_stride,
+            biome_height: template.biome_height,
             stage: StagedChunkEnum::Biomes,
             light: ChunkLight {
                 sky_light: (0..section_count)
@@ -410,6 +448,12 @@ impl ProtoChunk {
         self.structure_starts.clone_from(&src.structure_starts);
     }
 
+    #[inline]
+    #[must_use]
+    pub fn structure_starts(&self) -> &FxHashMap<StructureKeys, StructureInstance> {
+        &self.structure_starts
+    }
+
     #[must_use]
     pub fn from_chunk_data(
         chunk_data: &ChunkData,
@@ -425,6 +469,7 @@ impl ProtoChunk {
         proto_chunk
             .blending_data
             .clone_from(&chunk_data.blending_data);
+        proto_chunk.emissive_sections = 0;
 
         let section_data = &chunk_data.section;
         let heightmap_data = chunk_data
@@ -479,6 +524,7 @@ impl ProtoChunk {
         }
         drop(block_sections_guard);
         drop(biome_sections_guard);
+        proto_chunk.update_biome_mask();
 
         for z in 0..16 {
             for x in 0..16 {
@@ -561,7 +607,7 @@ impl ProtoChunk {
         self.pending_structure_entities.push(nbt);
     }
 
-    fn take_pending_structure_entities(&mut self) -> Vec<NbtCompound> {
+    pub(crate) fn take_pending_structure_entities(&mut self) -> Vec<NbtCompound> {
         std::mem::take(&mut self.pending_structure_entities)
     }
 
@@ -617,9 +663,19 @@ impl ProtoChunk {
     }
 
     #[must_use]
+    pub const fn top_block_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
+        self.top_block_height_exclusive(x, z)
+    }
+
+    #[must_use]
     pub const fn ocean_floor_height_exclusive(&self, x: i32, z: i32) -> i32 {
         let index = Self::local_position_to_height_map_index(x & 15, z & 15);
         self.flat_ocean_floor_height_map[index] as i32 + 1
+    }
+
+    #[must_use]
+    pub const fn ocean_floor_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
+        self.ocean_floor_height_exclusive(x, z)
     }
 
     #[must_use]
@@ -638,41 +694,42 @@ impl ProtoChunk {
         self.flat_motion_blocking_no_leaves_height_map[index] as i32 + 1
     }
 
-    #[inline]
+    #[inline(always)]
     const fn local_position_to_height_map_index(x: i32, z: i32) -> usize {
         x as usize * CHUNK_DIM as usize + z as usize
     }
 
-    #[inline]
+    #[inline(always)]
     const fn local_pos_to_block_index(&self, x: i32, y: i32, z: i32) -> usize {
-        self.height() as usize * CHUNK_DIM as usize * x as usize
-            + CHUNK_DIM as usize * y as usize
-            + z as usize
+        // Uses the precomputed `column_stride` (== height * CHUNK_DIM) instead of
+        // recomputing that multiplication on every single block access - this is
+        // the single hottest indexing function in chunk gen (every get/set of a
+        // block state goes through it).
+        self.column_stride * x as usize + CHUNK_DIM as usize * y as usize + z as usize
     }
 
-    #[inline]
+    #[inline(always)]
     #[must_use]
     pub const fn local_biome_pos_to_biome_index(&self, x: i32, y: i32, z: i32) -> usize {
-        let biome_height = self.height() as usize >> 2;
-        biome_height * biome_coords::from_block(CHUNK_DIM as i32) as usize * x as usize
+        self.biome_height * biome_coords::from_block(CHUNK_DIM as i32) as usize * x as usize
             + biome_coords::from_block(CHUNK_DIM as i32) as usize * y as usize
             + z as usize
     }
 
-    #[inline]
+    #[inline(always)]
     #[must_use]
     pub fn is_air(&self, local_pos: &Vector3<i32>) -> bool {
         is_air(self.get_block_state(local_pos))
     }
 
-    #[inline]
+    #[inline(always)]
     #[must_use]
     pub fn get_block_state_raw(&self, x: i32, y: i32, z: i32) -> BlockStateId {
         let index = self.local_pos_to_block_index(x, y, z);
         self.flat_block_map[index]
     }
 
-    #[inline]
+    #[inline(always)]
     #[must_use]
     pub fn get_block_state(&self, local_pos: &Vector3<i32>) -> BlockStateId {
         let local_y = local_pos.y - self.bottom_y() as i32;
@@ -682,6 +739,7 @@ impl ProtoChunk {
         self.get_block_state_raw(local_pos.x & 15, local_y, local_pos.z & 15)
     }
 
+    #[inline]
     pub fn set_block_state(&mut self, x: i32, y: i32, z: i32, block_state: &BlockState) {
         let local_x = x & 15;
         let local_y = y - self.bottom_y() as i32;
@@ -691,6 +749,10 @@ impl ProtoChunk {
             return;
         }
         if !block_state.is_air() {
+            if block_state.luminance > 0 {
+                let sec = (local_y >> 4) as u32;
+                self.emissive_sections |= 1 << sec;
+            }
             let index = Self::local_position_to_height_map_index(local_x, local_z);
             let y = y as i16;
             self.maybe_update_surface_height_map(index, y);
@@ -720,7 +782,7 @@ impl ProtoChunk {
         Biome::from_id(self.get_biome_id(x, y, z)).unwrap_or(&Biome::PLAINS)
     }
 
-    #[inline]
+    #[inline(always)]
     #[must_use]
     pub fn get_biome_id(&self, x: i32, y: i32, z: i32) -> u8 {
         let index = self.local_biome_pos_to_biome_index(
@@ -953,22 +1015,113 @@ impl ProtoChunk {
             ActiveSupplier::Nether(s) | ActiveSupplier::Overworld(s) => s,
         };
         let blender = Blender::empty();
-        let biome_supplier = blender.get_biome_supplier(base_supplier);
+        let blender_supplier;
+        let biome_supplier: &dyn BiomeSupplier = if self.blending_data.is_some() {
+            blender_supplier = blender.get_biome_supplier(base_supplier);
+            &blender_supplier
+        } else {
+            base_supplier
+        };
         let min_y = self.bottom_y();
-        let bottom_section = section_coords::block_to_section(min_y as i32);
-        let top_section = section_coords::block_to_section(min_y as i32 + self.height() as i32 - 1);
 
         let start_block_x = start_block_x(self.x);
         let start_block_z = start_block_z(self.z);
 
-        let start_biome_x = biome_coords::from_block(start_block_x);
-        let start_biome_z = biome_coords::from_block(start_block_z);
+        let total_biome_y = biome_coords::from_block(self.height() as i32) as usize;
+        let biomes_per_section = biome_coords::from_block(CHUNK_DIM as i32) as usize;
+
+        if *dimension == Dimension::THE_END {
+            let start_biome_x = biome_coords::from_block(start_block_x);
+            let start_biome_z = biome_coords::from_block(start_block_z);
+            let min_biome_y = biome_coords::from_block(min_y as i32);
+            for x in 0..biomes_per_section as i32 {
+                for z in 0..biomes_per_section as i32 {
+                    for by in 0..total_biome_y as i32 {
+                        let biome = biome_supplier.biome(
+                            start_biome_x + x,
+                            min_biome_y + by,
+                            start_biome_z + z,
+                            multi_noise_sampler,
+                        );
+                        let index = self.local_biome_pos_to_biome_index(x, by, z);
+                        self.flat_biome_map[index] = biome.id;
+                    }
+                }
+            }
+            self.update_biome_mask();
+            return;
+        }
 
         let biome_step = biome_coords::to_block(1);
-        multi_noise_sampler.fill_volume(DensityVolume::new(
-            biome_coords::from_block(CHUNK_DIM as i32) as usize,
-            biome_coords::from_block(self.height() as i32) as usize,
-            biome_coords::from_block(CHUNK_DIM as i32) as usize,
+
+        if *dimension == Dimension::OVERWORLD && self.blending_data.is_none() {
+            let col_volume = DensityVolume::new(
+                biomes_per_section,
+                1,
+                biomes_per_section,
+                start_block_x,
+                0,
+                start_block_z,
+                biome_step,
+                biome_step,
+                biome_step,
+            );
+            let depth_volume = DensityVolume::new(
+                1,
+                total_biome_y,
+                1,
+                start_block_x,
+                min_y as i32,
+                start_block_z,
+                biome_step,
+                biome_step,
+                biome_step,
+            );
+            let (col_buffers, depth_buf) =
+                multi_noise_sampler.fill_overworld_column_cached(&col_volume, &depth_volume);
+
+            let b_temp = &col_buffers[0];
+            let b_humid = &col_buffers[1];
+            let b_cont = &col_buffers[2];
+            let b_erosion = &col_buffers[3];
+            let b_ridges = &col_buffers[4];
+
+            for z in 0..biomes_per_section {
+                for x in 0..biomes_per_section {
+                    let col_idx_2d = x + z * biomes_per_section;
+                    let t_long = crate::biome::multi_noise::to_long(b_temp[col_idx_2d]);
+                    let h_long = crate::biome::multi_noise::to_long(b_humid[col_idx_2d]);
+                    let c_long = crate::biome::multi_noise::to_long(b_cont[col_idx_2d]);
+                    let e_long = crate::biome::multi_noise::to_long(b_erosion[col_idx_2d]);
+                    let r_long = crate::biome::multi_noise::to_long(b_ridges[col_idx_2d]);
+
+                    let mut last_depth = i64::MAX;
+                    let mut last_biome = &pumpkin_data::chunk::Biome::PLAINS;
+
+                    for by in 0..total_biome_y {
+                        let d_long = crate::biome::multi_noise::to_long(depth_buf[by]);
+                        let biome = if d_long == last_depth {
+                            last_biome
+                        } else {
+                            let point_list = [t_long, h_long, c_long, e_long, d_long, r_long, 0];
+                            let b = biome_supplier.biome_from_point(point_list, multi_noise_sampler);
+                            last_depth = d_long;
+                            last_biome = b;
+                            b
+                        };
+                        let index = self.local_biome_pos_to_biome_index(x as i32, by as i32, z as i32);
+                        self.flat_biome_map[index] = biome.id;
+                    }
+                }
+            }
+            self.update_biome_mask();
+            return;
+        }
+
+        let buffers = multi_noise_sampler.fill_volume(DensityVolume::new(
+            biomes_per_section,
+            total_biome_y,
+            biomes_per_section,
             start_block_x,
             min_y as i32,
             start_block_z,
@@ -977,31 +1130,45 @@ impl ProtoChunk {
             biome_step,
         ));
 
-        for i in bottom_section..=top_section {
-            let start_block_y = section_coords::section_to_block(i);
-            let start_biome_y = biome_coords::from_block(start_block_y);
+        let b0 = &buffers[0];
+        let b1 = &buffers[1];
+        let b2 = &buffers[2];
+        let b3 = &buffers[3];
+        let b4 = &buffers[4];
+        let b5 = &buffers[5];
 
-            let biomes_per_section = biome_coords::from_block(CHUNK_DIM as i32);
+        for z in 0..biomes_per_section {
             for x in 0..biomes_per_section {
-                for y in 0..biomes_per_section {
-                    for z in 0..biomes_per_section {
-                        let biome = biome_supplier.biome(
-                            start_biome_x + x,
-                            start_biome_y + y,
-                            start_biome_z + z,
-                            multi_noise_sampler,
-                        );
-                        let index = self.local_biome_pos_to_biome_index(
-                            x,
-                            start_biome_y + y - biome_coords::from_block(min_y as i32),
-                            z,
-                        );
+                let mut last_point_list = [i64::MAX; 7];
+                let mut last_biome = &pumpkin_data::chunk::Biome::PLAINS;
 
-                        self.flat_biome_map[index] = biome.id;
-                    }
+                let col_idx = (x + z * biomes_per_section) * total_biome_y;
+
+                for by in 0..total_biome_y {
+                    let idx = col_idx + by;
+                    let point_list = [
+                        crate::biome::multi_noise::to_long(b0[idx]),
+                        crate::biome::multi_noise::to_long(b1[idx]),
+                        crate::biome::multi_noise::to_long(b2[idx]),
+                        crate::biome::multi_noise::to_long(b3[idx]),
+                        crate::biome::multi_noise::to_long(b4[idx]),
+                        crate::biome::multi_noise::to_long(b5[idx]),
+                        0,
+                    ];
+                    let biome = if point_list == last_point_list {
+                        last_biome
+                    } else {
+                        let b = biome_supplier.biome_from_point(point_list, multi_noise_sampler);
+                        last_point_list = point_list;
+                        last_biome = b;
+                        b
+                    };
+                    let index = self.local_biome_pos_to_biome_index(x as i32, by as i32, z as i32);
+                    self.flat_biome_map[index] = biome.id;
                 }
             }
         }
+        self.update_biome_mask();
     }
 
     pub fn populate_noise(
@@ -1017,14 +1184,20 @@ impl ProtoChunk {
         let bottom_y = self.bottom_y() as i32;
 
         let default_state_id = generator.default_block.id;
+        let default_luminance = generator.default_block.luminance;
         let air_state_id = Block::AIR.default_state.id;
+
+        let sky_skip_y = noise_sampler
+            .get_skip_sampling_above_y(surface_height_estimate_sampler)
+            .map(|skip_y| (skip_y + 1).max(generator.settings.sea_level));
 
         for z in 0..volume.size_z {
             let block_z = volume.block_z(z);
             for x in 0..volume.size_x {
                 let block_x = volume.block_x(x);
                 let hm_index = Self::local_position_to_height_map_index(x as i32, z as i32);
-                let col_base = chunk_height * CHUNK_DIM as usize * x + z;
+                let col_base = self.column_stride * x + z;
+                let col_density_offset = (x + z * volume.size_x) * volume.size_y;
                 let mut surface_found = false;
                 let mut ocean_floor_found = false;
                 let mut motion_blocking_found = false;
@@ -1034,20 +1207,53 @@ impl ProtoChunk {
                 let mut block_idx = col_base + CHUNK_DIM as usize * (volume.size_y.saturating_sub(1));
                 for y in (0..volume.size_y).rev() {
                     let block_y = volume.block_y(y);
-                    let index = volume.index_unchecked(x, y, z);
-                    let block_state = noise_sampler
-                        .sample_block_state(
-                            ore_random_deriver,
-                            &Vector3::new(block_x, block_y, block_z),
-                            densities.density[index],
-                            densities.vein_sample(index).as_ref(),
-                            surface_height_estimate_sampler,
-                        )
-                        .unwrap_or(generator.default_block);
+                    let index = col_density_offset + y;
+                    let density = densities.density[index];
+                    let vein = if block_y >= crate::generation::noise::ore_sampler::vein_type::MIN_Y
+                        && block_y <= crate::generation::noise::ore_sampler::vein_type::MAX_Y
+                    {
+                        densities.vein_sample(index)
+                    } else {
+                        None
+                    };
+
+                    if all_hm_found && density > 0.0 && vein.is_none() {
+                        let local_y = block_y - bottom_y;
+                        if local_y >= 0 && (local_y as usize) < chunk_height {
+                            self.flat_block_map[block_idx] = default_state_id;
+                            if default_luminance > 0 {
+                                let sec = (local_y >> 4) as u32;
+                                self.emissive_sections |= 1 << sec;
+                            }
+                        }
+                        if block_idx >= CHUNK_DIM as usize {
+                            block_idx -= CHUNK_DIM as usize;
+                        }
+                        continue;
+                    }
+                    let block_state = if density > 0.0 && vein.is_none() {
+                        generator.default_block
+                    } else if density <= 0.0 && sky_skip_y.is_some_and(|sy| block_y >= sy) {
+                        Block::AIR.default_state
+                    } else {
+                        noise_sampler
+                            .sample_block_state(
+                                ore_random_deriver,
+                                &Vector3::new(block_x, block_y, block_z),
+                                density,
+                                vein.as_ref(),
+                                surface_height_estimate_sampler,
+                            )
+                            .unwrap_or(generator.default_block)
+                    };
 
                     let local_y = block_y - bottom_y;
                     if local_y >= 0 && (local_y as usize) < chunk_height {
                         self.flat_block_map[block_idx] = block_state.id;
+                        if block_state.luminance > 0 {
+                            let sec = (local_y >> 4) as u32;
+                            self.emissive_sections |= 1 << sec;
+                        }
 
                         if block_state.id != air_state_id {
                             let y_i16 = block_y as i16;
@@ -1204,14 +1410,30 @@ impl ProtoChunk {
         )
         .with_terrain_cache(terrain_cache);
 
-        let chunk_height = self.height() as usize;
         let min_y_i32 = min_y as i32;
+        let is_overworld = generator.dimension == Dimension::OVERWORLD;
+        let has_sulfur_caves = surface_biomes.contains_biome(Biome::SULFUR_CAVES.id);
+
+        let (bedrock_spl, deepslate_spl) = if is_overworld && !has_sulfur_caves {
+            let b_spl = random
+                .from_lo_and_hi(13544455532117611141u64, 14185350335435586452u64)
+                .next_splitter();
+            let d_spl = random
+                .from_lo_and_hi(10411719568726253007u64, 14964796469053385315u64)
+                .next_splitter();
+            (Some(b_spl), Some(d_spl))
+        } else {
+            (None, None)
+        };
+        let bedrock_state_id = Block::BEDROCK.default_state.id;
+        let deepslate_state_id = Block::DEEPSLATE.default_state.id;
+        let default_state_id = self.default_block.id;
 
         for local_x in 0..16 {
             for local_z in 0..16 {
                 let x = start_x + local_x;
                 let z = start_z + local_z;
-                let col_block_idx = chunk_height * CHUNK_DIM as usize * local_x as usize + local_z as usize;
+                let col_block_idx = self.column_stride * local_x as usize + local_z as usize;
 
                 let mut top_block = self.top_block_height_exclusive(local_x, local_z);
 
@@ -1236,74 +1458,198 @@ impl ProtoChunk {
 
                 context.init_horizontal(x, z);
 
-                let mut stone_depth_above = 0;
-                let mut min = i32::MAX;
-                let mut fluid_height = i32::MIN;
-                for y in (min_y_i32..top_block).rev() {
-                    let local_y = y - min_y_i32;
-                    let state = BlockState::from_id(
-                        self.flat_block_map[col_block_idx + CHUNK_DIM as usize * local_y as usize],
-                    );
-                    if state.is_air() {
-                        stone_depth_above = 0;
-                        fluid_height = i32::MIN;
-                        continue;
-                    }
-                    if state.is_liquid() {
-                        if fluid_height == i32::MIN {
-                            fluid_height = y + 1;
+                let surface_estimate = if is_overworld {
+                    estimate_surface_height(&mut context, surface_height_estimate_sampler)
+                } else {
+                    i32::MIN
+                };
+
+                if let (Some(b_spl), Some(d_spl)) = (&bedrock_spl, &deepslate_spl) {
+                    let split_y = surface_estimate.min(8);
+                    let mut stone_depth_above = 0;
+                    let mut min = i32::MAX;
+                    let mut fluid_height = i32::MIN;
+
+                    for y in (split_y.max(min_y_i32)..top_block).rev() {
+                        let local_y = y - min_y_i32;
+                        let block_idx = col_block_idx + CHUNK_DIM as usize * local_y as usize;
+                        let state = BlockState::from_id(self.flat_block_map[block_idx]);
+                        if state.is_air() {
+                            stone_depth_above = 0;
+                            fluid_height = i32::MIN;
+                            continue;
                         }
-                        continue;
-                    }
-                    if min >= y {
-                        let shift = min_y << 4;
-                        min = shift as i32;
-
-                        for search_y in ((min_y_i32 - 1)..y).rev() {
-                            if search_y < min_y_i32 {
-                                min = search_y + 1;
-                                break;
+                        if state.is_liquid() {
+                            if fluid_height == i32::MIN {
+                                fluid_height = y + 1;
                             }
+                            continue;
+                        }
+                        if (8..surface_estimate).contains(&y) && state.id == default_state_id {
+                            stone_depth_above += 1;
+                            continue;
+                        }
+                        if min >= y {
+                            let shift = min_y << 4;
+                            min = shift as i32;
 
-                            let local_search_y = search_y - min_y_i32;
-                            let block_id = BlockId::from_state_id(
-                                self.flat_block_map
-                                    [col_block_idx + CHUNK_DIM as usize * local_search_y as usize],
+                            for search_y in ((min_y_i32 - 1)..y).rev() {
+                                if search_y < min_y_i32 {
+                                    min = search_y + 1;
+                                    break;
+                                }
+
+                                let local_search_y = search_y - min_y_i32;
+                                let block_id = BlockId::from_state_id(
+                                    self.flat_block_map
+                                        [col_block_idx + CHUNK_DIM as usize * local_search_y as usize],
+                                );
+
+                                if !(block_id != AIR_BLOCK
+                                    && block_id != WATER_BLOCK
+                                    && block_id != LAVA_BLOCK)
+                                {
+                                    min = search_y + 1;
+                                    break;
+                                }
+                            }
+                        }
+
+                        stone_depth_above += 1;
+                        let stone_depth_below = y - min + 1;
+                        context.init_vertical(stone_depth_above, stone_depth_below, y, fluid_height);
+
+                        if state.id == default_state_id {
+                            let Some(biome_id) = self.get_terrain_gen_biome_id_from_neighborhood(
+                                surface_biomes,
+                                context.block_pos_x,
+                                context.block_pos_y,
+                                context.block_pos_z,
+                            ) else {
+                                panic!("surface biome neighborhood must cover fuzzy biome lookup");
+                            };
+                            context.biome = Biome::from_id(biome_id).unwrap_or(&Biome::PLAINS);
+                            let new_state = try_apply_material_rule(
+                                generator.surface_rule,
+                                self,
+                                &mut context,
+                                surface_height_estimate_sampler,
                             );
 
-                            if !(block_id != AIR_BLOCK
-                                && block_id != WATER_BLOCK
-                                && block_id != LAVA_BLOCK)
-                            {
-                                min = search_y + 1;
-                                break;
+                            if let Some(state) = new_state {
+                                self.set_block_state(x, y, z, state);
                             }
                         }
                     }
 
-                    stone_depth_above += 1;
-                    let stone_depth_below = y - min + 1;
-                    context.init_vertical(stone_depth_above, stone_depth_below, y, fluid_height);
-
-                    if state.id == self.default_block.id {
-                        let Some(biome_id) = self.get_terrain_gen_biome_id_from_neighborhood(
-                            surface_biomes,
-                            context.block_pos_x,
-                            context.block_pos_y,
-                            context.block_pos_z,
-                        ) else {
-                            panic!("surface biome neighborhood must cover fuzzy biome lookup");
-                        };
-                        context.biome = Biome::from_id(biome_id).unwrap_or(&Biome::PLAINS);
-                        let new_state = try_apply_material_rule(
-                            generator.surface_rule,
-                            self,
-                            &mut context,
-                            surface_height_estimate_sampler,
+                    let bedrock_bottom = min_y_i32;
+                    let bedrock_top = min_y_i32 + 5;
+                    let phase2_top = split_y.min(top_block);
+                    for y in (min_y_i32..phase2_top).rev() {
+                        let local_y = y - min_y_i32;
+                        let block_idx = col_block_idx + CHUNK_DIM as usize * local_y as usize;
+                        let state_id = self.flat_block_map[block_idx];
+                        if state_id == default_state_id {
+                            if y > 0 {
+                                let mut rand = d_spl.split_pos(x, y, z);
+                                let mapped = pumpkin_util::math::map(y as f32, 0.0, 8.0, 1.0, 0.0);
+                                if rand.next_f32() < mapped {
+                                    self.flat_block_map[block_idx] = deepslate_state_id;
+                                }
+                            } else if y >= bedrock_top {
+                                self.flat_block_map[block_idx] = deepslate_state_id;
+                            } else if y <= bedrock_bottom {
+                                self.flat_block_map[block_idx] = bedrock_state_id;
+                            } else {
+                                let mut rand = b_spl.split_pos(x, y, z);
+                                let mapped = pumpkin_util::math::map(
+                                    y as f32,
+                                    bedrock_bottom as f32,
+                                    bedrock_top as f32,
+                                    1.0,
+                                    0.0,
+                                );
+                                if rand.next_f32() < mapped {
+                                    self.flat_block_map[block_idx] = bedrock_state_id;
+                                } else {
+                                    self.flat_block_map[block_idx] = deepslate_state_id;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    let mut stone_depth_above = 0;
+                    let mut min = i32::MAX;
+                    let mut fluid_height = i32::MIN;
+                    for y in (min_y_i32..top_block).rev() {
+                        let local_y = y - min_y_i32;
+                        let state = BlockState::from_id(
+                            self.flat_block_map[col_block_idx + CHUNK_DIM as usize * local_y as usize],
                         );
+                        if state.is_air() {
+                            stone_depth_above = 0;
+                            fluid_height = i32::MIN;
+                            continue;
+                        }
+                        if state.is_liquid() {
+                            if fluid_height == i32::MIN {
+                                fluid_height = y + 1;
+                            }
+                            continue;
+                        }
+                        if min >= y {
+                            let shift = min_y << 4;
+                            min = shift as i32;
 
-                        if let Some(state) = new_state {
-                            self.set_block_state(x, y, z, state);
+                            for search_y in ((min_y_i32 - 1)..y).rev() {
+                                if search_y < min_y_i32 {
+                                    min = search_y + 1;
+                                    break;
+                                }
+
+                                let local_search_y = search_y - min_y_i32;
+                                let block_id = BlockId::from_state_id(
+                                    self.flat_block_map
+                                        [col_block_idx + CHUNK_DIM as usize * local_search_y as usize],
+                                );
+
+                                if !(block_id != AIR_BLOCK
+                                    && block_id != WATER_BLOCK
+                                    && block_id != LAVA_BLOCK)
+                                {
+                                    min = search_y + 1;
+                                    break;
+                                }
+                            }
+                        }
+
+                        stone_depth_above += 1;
+                        let stone_depth_below = y - min + 1;
+                        context.init_vertical(stone_depth_above, stone_depth_below, y, fluid_height);
+
+                        if state.id == self.default_block.id {
+                            if is_overworld && !has_sulfur_caves && (8..surface_estimate).contains(&y) {
+                                continue;
+                            }
+                            let Some(biome_id) = self.get_terrain_gen_biome_id_from_neighborhood(
+                                surface_biomes,
+                                context.block_pos_x,
+                                context.block_pos_y,
+                                context.block_pos_z,
+                            ) else {
+                                panic!("surface biome neighborhood must cover fuzzy biome lookup");
+                            };
+                            context.biome = Biome::from_id(biome_id).unwrap_or(&Biome::PLAINS);
+                            let new_state = try_apply_material_rule(
+                                generator.surface_rule,
+                                self,
+                                &mut context,
+                                surface_height_estimate_sampler,
+                            );
+
+                            if let Some(state) = new_state {
+                                self.set_block_state(x, y, z, state);
+                            }
                         }
                     }
                 }
@@ -1344,16 +1690,26 @@ impl ProtoChunk {
 
         // Vanilla gathers every biome stored in the 3x3 chunk neighborhood before selecting the
         // globally ordered feature set.
-        let mut possible_biomes = Vec::new();
+        // Bitmask aggregation: 36 64-bit OR operations replace scanning 13,824 elements across 9 chunks.
+        let mut combined_mask = [0u64; 4];
         for chunk_x in center_x - 1..=center_x + 1 {
             for chunk_z in center_z - 1..=center_z + 1 {
                 if let Some(chunk) = cache.get_chunk(chunk_x, chunk_z) {
-                    for &biome_id in &chunk.flat_biome_map {
-                        if !possible_biomes.contains(&biome_id) {
-                            possible_biomes.push(biome_id);
-                        }
-                    }
+                    combined_mask[0] |= chunk.biome_mask[0];
+                    combined_mask[1] |= chunk.biome_mask[1];
+                    combined_mask[2] |= chunk.biome_mask[2];
+                    combined_mask[3] |= chunk.biome_mask[3];
                 }
+            }
+        }
+
+        let mut possible_biomes = Vec::with_capacity(32);
+        for (i, mut mask) in combined_mask.into_iter().enumerate() {
+            while mask != 0 {
+                let bit = mask.trailing_zeros();
+                let biome_id = ((i as u8) << 6) | (bit as u8);
+                possible_biomes.push(biome_id);
+                mask &= mask - 1;
             }
         }
 
@@ -1364,63 +1720,27 @@ impl ProtoChunk {
         let population_seed =
             WorldgenRandom::get_population_seed(random_config.seed, start_block_x, start_block_z);
 
-        for step in 0..11 {
-            Self::generate_structure_step(
-                cache,
-                block_registry,
-                step,
-                population_seed,
-                random_config.seed as i64,
-            );
-
-            for (global_index, feature_enum) in select_features(&possible_biomes, step) {
-                if let Some(feature) = PLACED_FEATURES.get(&feature_enum) {
-                    let decorator_seed =
-                        get_decorator_seed(population_seed, global_index as u64, step as u64);
-                    let mut random =
-                        RandomGenerator::Worldgen(WorldgenRandom::from_seed(decorator_seed));
-
-                    feature.generate(
-                        cache,
-                        block_registry,
-                        generation_min_y,
-                        generation_height,
-                        feature_enum,
-                        &mut random,
-                        origin_pos,
-                    );
-                }
-            }
-        }
-
-        cache.get_center_chunk_mut().stage = StagedChunkEnum::Features;
-    }
-
-    fn generate_structure_step<T: GenerationCache>(
-        cache: &mut T,
-        block_registry: &dyn WorldPortalExt,
-        step: usize,
-        population_seed: u64,
-        world_seed: i64,
-    ) {
-        let mut tasks = Vec::new();
+        let mut tasks_by_step: [Vec<_>; 11] = Default::default();
         {
             let center_chunk = cache.get_center_chunk();
             let center_x = center_chunk.x;
             let center_z = center_chunk.z;
+            let start_x = chunk_pos::start_block_x(center_x);
+            let start_z = chunk_pos::start_block_z(center_z);
+            let end_x = start_x + 15;
+            let end_z = start_z + 15;
 
             for (id, instance) in &center_chunk.structure_starts {
                 let s = Structure::get(id);
-                if s.step.ordinal() != step {
-                    continue;
-                }
-
-                match instance {
-                    StructureInstance::Start(pos) => tasks.push(pos.collector.clone()),
-                    StructureInstance::Reference(collector) => {
-                        let collector_arc = collector.clone();
-                        if !tasks.iter().any(|t| Arc::ptr_eq(t, &collector_arc)) {
-                            tasks.push(collector_arc);
+                let step = s.step.ordinal();
+                if step < 11 {
+                    match instance {
+                        StructureInstance::Start(pos) => tasks_by_step[step].push(pos.collector.clone()),
+                        StructureInstance::Reference(collector) => {
+                            let collector_arc = collector.clone();
+                            if !tasks_by_step[step].iter().any(|t| Arc::ptr_eq(t, &collector_arc)) {
+                                tasks_by_step[step].push(collector_arc);
+                            }
                         }
                     }
                 }
@@ -1439,31 +1759,25 @@ impl ProtoChunk {
                     if let Some(neighbor) = cache.try_get_proto_chunk(neighbor_x, neighbor_z) {
                         for (id, instance) in &neighbor.structure_starts {
                             let s = Structure::get(id);
-                            if s.step.ordinal() != step {
-                                continue;
-                            }
-
-                            match instance {
-                                StructureInstance::Start(pos) => {
-                                    let start_x = chunk_pos::start_block_x(center_x);
-                                    let start_z = chunk_pos::start_block_z(center_z);
-                                    let end_x = start_x + 15;
-                                    let end_z = start_z + 15;
-
-                                    if pos
-                                        .get_bounding_box()
-                                        .intersects_raw_xz(start_x, start_z, end_x, end_z)
-                                    {
-                                        let collector_arc = pos.collector.clone();
-                                        if !tasks.iter().any(|t| Arc::ptr_eq(t, &collector_arc)) {
-                                            tasks.push(collector_arc);
+                            let step = s.step.ordinal();
+                            if step < 11 {
+                                match instance {
+                                    StructureInstance::Start(pos) => {
+                                        if pos
+                                            .get_bounding_box()
+                                            .intersects_raw_xz(start_x, start_z, end_x, end_z)
+                                        {
+                                            let collector_arc = pos.collector.clone();
+                                            if !tasks_by_step[step].iter().any(|t| Arc::ptr_eq(t, &collector_arc)) {
+                                                tasks_by_step[step].push(collector_arc);
+                                            }
                                         }
                                     }
-                                }
-                                StructureInstance::Reference(collector) => {
-                                    let collector_arc = collector.clone();
-                                    if !tasks.iter().any(|t| Arc::ptr_eq(t, &collector_arc)) {
-                                        tasks.push(collector_arc);
+                                    StructureInstance::Reference(collector) => {
+                                        let collector_arc = collector.clone();
+                                        if !tasks_by_step[step].iter().any(|t| Arc::ptr_eq(t, &collector_arc)) {
+                                            tasks_by_step[step].push(collector_arc);
+                                        }
                                     }
                                 }
                             }
@@ -1473,24 +1787,56 @@ impl ProtoChunk {
             }
         }
 
-        tasks.sort_by_key(|collector_arc| {
-            let bbox = collector_arc
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner)
-                .get_bounding_box();
-            (bbox.min.x, bbox.min.y, bbox.min.z, bbox.max.x, bbox.max.z)
-        });
+        let world_seed = random_config.seed as i64;
+        for step in 0..11 {
+            let tasks = std::mem::take(&mut tasks_by_step[step]);
+            if !tasks.is_empty() {
+                let mut keyed_tasks: Vec<_> = tasks
+                    .into_iter()
+                    .map(|collector_arc| {
+                        let bbox = collector_arc
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner)
+                            .get_bounding_box();
+                        let key = (bbox.min.x, bbox.min.y, bbox.min.z, bbox.max.x, bbox.max.z);
+                        (key, collector_arc)
+                    })
+                    .collect();
+                keyed_tasks.sort_by_key(|(key, _)| *key);
 
-        let decorator_seed = get_decorator_seed(population_seed, 0, step as u64);
-        let mut random = RandomGenerator::Worldgen(WorldgenRandom::from_seed(decorator_seed));
+                let decorator_seed = get_decorator_seed(population_seed, 0, step as u64);
+                let mut random = RandomGenerator::Worldgen(WorldgenRandom::from_seed(decorator_seed));
 
-        let chunk = cache.get_center_chunk_mut();
-        for collector_arc in tasks {
-            let mut collector = collector_arc
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner);
-            collector.generate_in_chunk(chunk, block_registry, &mut random, world_seed);
+                let chunk = cache.get_center_chunk_mut();
+                for (_, collector_arc) in keyed_tasks {
+                    let mut collector = collector_arc
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
+                    collector.generate_in_chunk(chunk, block_registry, &mut random, world_seed);
+                }
+            }
+
+            for_each_selected_feature(&possible_biomes, step, |global_index, feature_enum| {
+                if let Some(feature) = PLACED_FEATURES.get(&feature_enum) {
+                    let decorator_seed =
+                        get_decorator_seed(population_seed, global_index as u64, step as u64);
+                    let mut random =
+                        RandomGenerator::Worldgen(WorldgenRandom::from_seed(decorator_seed));
+
+                    feature.generate(
+                        cache,
+                        block_registry,
+                        generation_min_y,
+                        generation_height,
+                        feature_enum,
+                        &mut random,
+                        origin_pos,
+                    );
+                }
+            });
         }
+
+        cache.get_center_chunk_mut().stage = StagedChunkEnum::Features;
     }
 
     #[must_use]
@@ -1520,8 +1866,7 @@ impl ProtoChunk {
 
         let seed = random_config.seed;
 
-        let mut height_sampler =
-            crate::generation::structure::height_sampler::NoiseHeightSampler::new(generator);
+        let mut height_sampler = None;
 
         for &i in &generator.dimension_structure_sets {
             let set = &StructureSet::ALL[i];
@@ -1539,6 +1884,10 @@ impl ProtoChunk {
                 continue;
             }
 
+            let sampler = height_sampler.get_or_insert_with(|| {
+                crate::generation::structure::height_sampler::NoiseHeightSampler::new(generator)
+            });
+
             if set.structures.len() == 1 {
                 if let Some(entry) = set.structures.first() {
                     self.try_set_structure_start(
@@ -1546,7 +1895,7 @@ impl ProtoChunk {
                         settings.sea_level,
                         entry,
                         generator,
-                        &mut height_sampler,
+                        sampler,
                     );
                 }
                 continue;
@@ -1577,7 +1926,7 @@ impl ProtoChunk {
                     settings.sea_level,
                     selected_entry,
                     generator,
-                    &mut height_sampler,
+                    sampler,
                 ) {
                     break;
                 }
@@ -1742,7 +2091,11 @@ impl ProtoChunk {
         for &set_index in &generator.dimension_structure_sets {
             let set = &StructureSet::ALL[set_index];
             let set_start = if prof { Some(std::time::Instant::now()) } else { None };
-            let mut candidate_chunks = Vec::new();
+            // RandomSpread always yields exactly 9 candidates (a 3x3 region scan) and
+            // ConcentricRings only a handful; reserving capacity up front avoids the
+            // 2-3 reallocations `Vec::new()` would otherwise trigger while filling
+            // this, for every structure set (~20), on every single chunk generated.
+            let mut candidate_chunks = Vec::with_capacity(9);
 
             let t_cand = if prof { Some(std::time::Instant::now()) } else { None };
             match &set.placement.placement_type {
@@ -1765,17 +2118,21 @@ impl ProtoChunk {
                     }
                 }
                 StructurePlacementType::ConcentricRings(rings) => {
-                    let allowed_biomes = Self::get_allowed_biomes(set);
-                    let strongholds = global_cache.get_or_calculate_strongholds(
-                        seed,
-                        rings,
-                        self,
-                        &allowed_biomes,
-                    );
+                    let min_dist_chunks = (rings.distance * 4 - (rings.distance * 5 / 4) - 8).max(0);
                     let max_radius = Self::structure_set_max_chunk_radius(set_index);
-                    for &(cx, cz) in strongholds {
-                        if (cx - self.x).abs() <= max_radius && (cz - self.z).abs() <= max_radius {
-                            candidate_chunks.push((cx, cz));
+                    let safe_dist = (min_dist_chunks - max_radius).max(0);
+                    if self.x.saturating_mul(self.x) + self.z.saturating_mul(self.z) >= safe_dist * safe_dist {
+                        let allowed_biomes = Self::get_allowed_biomes(set);
+                        let strongholds = global_cache.get_or_calculate_strongholds(
+                            seed,
+                            rings,
+                            self,
+                            &allowed_biomes,
+                        );
+                        for &(cx, cz) in strongholds {
+                            if (cx - self.x).abs() <= max_radius && (cz - self.z).abs() <= max_radius {
+                                candidate_chunks.push((cx, cz));
+                            }
                         }
                     }
                 }
@@ -1949,18 +2306,22 @@ impl ProtoChunk {
 }
 
 impl BlockAccessor for ProtoChunk {
+    #[inline]
     fn get_block(&self, position: &BlockPos) -> &'static Block {
         self.get_block_state(&position.0).to_block()
     }
 
+    #[inline]
     fn get_block_state(&self, position: &BlockPos) -> &'static BlockState {
         self.get_block_state(&position.0).to_state()
     }
 
+    #[inline]
     fn get_block_state_id(&self, position: &BlockPos) -> BlockStateId {
         self.get_block_state(&position.0)
     }
 
+    #[inline]
     fn get_block_and_state(&self, position: &BlockPos) -> (&'static Block, &'static BlockState) {
         let id = self.get_block_state(&position.0);
         BlockState::from_id_with_block(id)
@@ -1968,14 +2329,17 @@ impl BlockAccessor for ProtoChunk {
 }
 
 impl BlockPlacer for ProtoChunk {
+    #[inline]
     fn get_block_state(&self, pos: &Vector3<i32>) -> BlockStateId {
         self.get_block_state(pos)
     }
 
+    #[inline]
     fn set_block_state(&mut self, pos: &Vector3<i32>, state: &BlockState) {
         Self::set_block_state(self, pos.x, pos.y, pos.z, state);
     }
 
+    #[inline]
     fn add_block_entity(&mut self, nbt: NbtCompound) {
         self.add_block_entity(nbt);
     }
@@ -1997,6 +2361,7 @@ impl GenerationCache for ProtoChunk {
     fn try_get_proto_chunk(&self, cx: i32, cz: i32) -> Option<&ProtoChunk> {
         self.get_chunk(cx, cz)
     }
+    #[inline]
     fn get_block_state(&self, pos: &Vector3<i32>) -> BlockStateId {
         Self::get_block_state(self, pos)
     }
@@ -2015,30 +2380,49 @@ impl GenerationCache for ProtoChunk {
             },
         )
     }
+    #[inline]
     fn set_block_state(&mut self, pos: &Vector3<i32>, block_state: &BlockState) {
         Self::set_block_state(self, pos.x, pos.y, pos.z, block_state);
     }
     fn add_block_entity(&mut self, _pos: &Vector3<i32>, nbt: NbtCompound) {
         self.add_block_entity(nbt);
     }
+    #[inline]
     fn top_motion_blocking_block_height_exclusive(&self, x: i32, z: i32) -> i32 {
         Self::top_motion_blocking_block_height_exclusive(self, x, z)
     }
+    #[inline]
     fn top_motion_blocking_block_no_leaves_height_exclusive(&self, x: i32, z: i32) -> i32 {
         Self::top_motion_blocking_block_no_leaves_height_exclusive(self, x, z)
     }
+    #[inline]
     fn get_top_y(&self, heightmap: &HeightMap, x: i32, z: i32) -> i32 {
         Self::get_top_y(self, heightmap, x, z)
     }
+    #[inline]
     fn top_block_height_exclusive(&self, x: i32, z: i32) -> i32 {
         Self::top_block_height_exclusive(self, x, z)
     }
+    #[inline]
+    fn top_block_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
+        Self::top_block_wg_height_exclusive(self, x, z)
+    }
+    #[inline]
     fn ocean_floor_height_exclusive(&self, x: i32, z: i32) -> i32 {
         Self::ocean_floor_height_exclusive(self, x, z)
     }
+    #[inline]
+    fn ocean_floor_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
+        Self::ocean_floor_wg_height_exclusive(self, x, z)
+    }
+    fn get_world_seed(&self) -> u64 {
+        self.world_seed
+    }
+    #[inline]
     fn is_air(&self, local_pos: &Vector3<i32>) -> bool {
         self.is_air(local_pos)
     }
+    #[inline]
     fn get_biome_for_terrain_gen(&self, x: i32, y: i32, z: i32) -> &'static Biome {
         Self::get_biome(self, x, y, z)
     }

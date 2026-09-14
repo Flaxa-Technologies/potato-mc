@@ -295,9 +295,15 @@ impl TrackedEntity {
         let be_packet = CRemoveActor::new(VarLong(i64::from(self.entity_id)));
 
         let players = world.players.load();
-        let recipients = players
-            .iter()
-            .filter(|p| self.seen_by.contains(&p.gameprofile.id));
+        let entity_chunk = self.entity.get_entity().chunk_pos.load();
+        let recipients = players.iter().filter(|p| {
+            if self.seen_by.contains(&p.gameprofile.id) {
+                return true;
+            }
+            let center = p.get_entity().chunk_pos.load();
+            let view_distance = get_view_distance(p).get() as i32;
+            is_within_view_distance(entity_chunk, center, view_distance)
+        });
 
         let mut java_recipients = Vec::new();
         let mut bedrock_recipients = Vec::new();

@@ -272,6 +272,10 @@ pub struct World {
     pub custom_block_entity_data: DashMap<BlockPos, NbtCompound>,
     /// Entity tracker responsible for tracking entity visibility and sending delta/status packets to watchers.
     pub entity_tracker: entity_tracker::EntityTracker,
+    /// Per-world mutex that serializes concurrent `entities.rcu()` calls.
+    /// Using a per-world mutex (vs. the old global static) prevents worlds from
+    /// blocking each other's entity removals — a key chunk-load throughput fix.
+    entity_modify_mutex: std::sync::Mutex<()>,
 }
 
 #[derive(Clone, Copy)]
@@ -398,10 +402,11 @@ impl World {
             custom_data: std::sync::Mutex::new(custom_data),
             custom_block_entity_data: DashMap::new(),
             entity_tracker: entity_tracker::EntityTracker::new(),
+            entity_modify_mutex: std::sync::Mutex::new(()),
         }
     }
 
-    pub fn update_active_chunks(&self) {
+    pub fn update_active_chunks(self: &Arc<Self>) {
         let sim_dist = self.server.upgrade().map_or(10, |s| {
             s.advanced_config.networking.java.simulation_distance.get()
         }) as i32;
@@ -449,6 +454,8 @@ impl World {
         for pos in newly_active {
             if self.level.is_chunk_loaded(&pos) && tracker.loaded_active_chunks.insert(pos) {
                 self.migrate_pending_block_entities(pos);
+                self.migrate_pending_structure_entities(pos);
+                self.scan_chunk_for_villager_poi(pos);
             }
         }
         for change in self.level.loaded_chunk_changes() {
@@ -459,6 +466,8 @@ impl World {
                         && tracker.loaded_active_chunks.insert(pos)
                     {
                         self.migrate_pending_block_entities(pos);
+                        self.migrate_pending_structure_entities(pos);
+                        self.scan_chunk_for_villager_poi(pos);
                     }
                 }
                 pumpkin_world::level::LoadedChunkChange::Unloaded(pos) => {
@@ -475,6 +484,8 @@ impl World {
         for pos in pending_migrations {
             if active_chunks.contains(&pos) && self.level.is_chunk_loaded(&pos) {
                 self.migrate_pending_block_entities(pos);
+                self.migrate_pending_structure_entities(pos);
+                self.scan_chunk_for_villager_poi(pos);
             }
         }
         let spawnable_chunks = tracker.loaded_active_chunks.len() as i32;
@@ -3471,6 +3482,146 @@ impl World {
         }
     }
 
+    pub fn migrate_pending_structure_entities(self: &Arc<Self>, chunk_pos: Vector2<i32>) {
+        let entities: Vec<pumpkin_nbt::compound::NbtCompound> = self
+            .level
+            .read_chunk_sync(&chunk_pos, |chunk| {
+                chunk
+                    .pending_structure_entities
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                    .drain(..)
+                    .collect()
+            })
+            .unwrap_or_default();
+        if !entities.is_empty() {
+            self.spawn_structure_entities(entities);
+        }
+    }
+
+    pub fn spawn_structure_entities(self: &Arc<Self>, entities: Vec<pumpkin_nbt::compound::NbtCompound>) {
+        for nbt in entities {
+            let Some(id) = nbt.get_string("id") else {
+                continue;
+            };
+            let Some(entity_type) =
+                EntityType::from_name(id.strip_prefix("minecraft:").unwrap_or(id))
+            else {
+                warn!("Unknown structure entity type: {id}");
+                continue;
+            };
+            let entity = crate::entity::r#type::from_type(
+                entity_type,
+                Vector3::new(0.0, 0.0, 0.0),
+                self,
+                Uuid::new_v4(),
+            );
+            entity.read_nbt_non_mut(&nbt);
+            if let Some(mob) = entity.get_mob() {
+                mob.mob_read_nbt(&nbt);
+                mob.get_mob_entity()
+                    .persistence_required
+                    .store(true, std::sync::atomic::Ordering::Relaxed);
+            }
+            self.spawn_entity(entity);
+        }
+    }
+
+    pub fn scan_chunk_for_villager_poi(&self, chunk_pos: Vector2<i32>) {
+        {
+            let poi = self
+                .villager_poi
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if poi.is_chunk_scanned(&chunk_pos) {
+                return;
+            }
+        }
+
+        let (job_sites, bed_sites): (Vec<(BlockPos, &'static Block)>, Vec<BlockPos>) = self
+            .level
+            .read_chunk_sync(&chunk_pos, |chunk| {
+                let mut job_sites = Vec::new();
+                let mut bed_sites = Vec::new();
+                let min_y = chunk.section.min_y;
+                let block_sections = chunk
+                    .section
+                    .block_sections
+                    .read()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+
+                for (sec_idx, section) in block_sections.iter().enumerate() {
+                    let has_poi = section.any_palette(|state_id| {
+                        let block = Block::from_state_id(state_id);
+                        villager_poi::is_job_site_block(block) || villager_poi::is_bed_block(block)
+                    });
+
+                    if !has_poi {
+                        continue;
+                    }
+
+                    let sec_y = min_y + (sec_idx as i32) * 16;
+                    let chunk_world_x = chunk_pos.x << 4;
+                    let chunk_world_z = chunk_pos.y << 4;
+
+                    for y in 0..16 {
+                        for z in 0..16 {
+                            for x in 0..16 {
+                                let state_id = section.get(x, y, z);
+                                let block = Block::from_state_id(state_id);
+                                if villager_poi::is_job_site_block(block) {
+                                    let pos = BlockPos::new(
+                                        chunk_world_x + x as i32,
+                                        sec_y + y as i32,
+                                        chunk_world_z + z as i32,
+                                    );
+                                    job_sites.push((pos, block));
+                                } else if villager_poi::is_bed_block(block) {
+                                    let pos = BlockPos::new(
+                                        chunk_world_x + x as i32,
+                                        sec_y + y as i32,
+                                        chunk_world_z + z as i32,
+                                    );
+                                    bed_sites.push(pos);
+                                }
+                            }
+                        }
+                    }
+                }
+                (job_sites, bed_sites)
+            })
+            .unwrap_or_default();
+
+        {
+            let mut poi = self
+                .villager_poi
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            poi.mark_chunk_scanned(chunk_pos);
+            for (pos, block) in &job_sites {
+                poi.update_block(*pos, block);
+            }
+            for pos in &bed_sites {
+                poi.update_bed(*pos, true);
+            }
+        }
+
+        if !job_sites.is_empty() || !bed_sites.is_empty() {
+            let mut portal_poi = self
+                .portal_poi
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            for (pos, block) in &job_sites {
+                if let Some(poi_type) = villager_poi::poi_type_for_block(block) {
+                    portal_poi.add_with_free_tickets(*pos, poi_type, 1);
+                }
+            }
+            for pos in &bed_sites {
+                portal_poi.add_with_free_tickets(*pos, "minecraft:home", 1);
+            }
+        }
+    }
+
     pub fn update_block_entity(&self, block_entity: &Arc<dyn BlockEntity>) {
         let block_pos = block_entity.get_position();
         let chunk_pos = block_pos.chunk_position();
@@ -4308,26 +4459,7 @@ impl WorldPortalExt for WorldPortal {
     }
 
     fn spawn_structure_entities(&self, entities: Vec<NbtCompound>) {
-        for nbt in entities {
-            let Some(id) = nbt.get_string("id") else {
-                continue;
-            };
-            let Some(entity_type) =
-                EntityType::from_name(id.strip_prefix("minecraft:").unwrap_or(id))
-            else {
-                warn!("Unknown structure entity type: {id}");
-                continue;
-            };
-            let entity = from_type(
-                entity_type,
-                Vector3::new(0.0, 0.0, 0.0),
-                &self.0,
-                Uuid::new_v4(),
-            );
-            entity.get_entity().read_nbt_non_mut(&nbt);
-            entity.read_nbt_non_mut(&nbt);
-            self.0.spawn_entity(entity);
-        }
+        self.0.spawn_structure_entities(entities);
     }
 }
 

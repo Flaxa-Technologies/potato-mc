@@ -22,6 +22,75 @@ pub struct VegetationPatchFeature {
     pub extra_edge_column_chance: f32,
 }
 
+pub struct JavaBlockPosSet {
+    capacity: usize,
+    threshold: usize,
+    size: usize,
+    table: Vec<Vec<(u32, BlockPos)>>,
+}
+
+impl JavaBlockPosSet {
+    pub fn new() -> Self {
+        Self {
+            capacity: 16,
+            threshold: 12,
+            size: 0,
+            table: vec![Vec::new(); 16],
+        }
+    }
+
+    fn hash(pos: &BlockPos) -> u32 {
+        let x = pos.0.x;
+        let y = pos.0.y;
+        let z = pos.0.z;
+        let h = (y.wrapping_add(z.wrapping_mul(31))).wrapping_mul(31).wrapping_add(x) as u32;
+        h ^ (h >> 16)
+    }
+
+    pub fn insert(&mut self, pos: BlockPos) {
+        let h = Self::hash(&pos);
+        let idx = (self.capacity - 1) & (h as usize);
+        for (_, p) in &self.table[idx] {
+            if *p == pos {
+                return;
+            }
+        }
+        self.size += 1;
+        if self.size > self.threshold {
+            self.resize();
+            let new_idx = (self.capacity - 1) & (h as usize);
+            self.table[new_idx].push((h, pos));
+        } else {
+            self.table[idx].push((h, pos));
+        }
+    }
+
+    fn resize(&mut self) {
+        let new_cap = self.capacity * 2;
+        let new_threshold = (new_cap * 3) / 4;
+        let mut new_table = vec![Vec::new(); new_cap];
+        for bucket in self.table.drain(..) {
+            for (h, pos) in bucket {
+                let idx = (new_cap - 1) & (h as usize);
+                new_table[idx].push((h, pos));
+            }
+        }
+        self.capacity = new_cap;
+        self.threshold = new_threshold;
+        self.table = new_table;
+    }
+
+    pub fn into_vec(self) -> Vec<BlockPos> {
+        let mut out = Vec::with_capacity(self.size);
+        for bucket in self.table {
+            for (_, pos) in bucket {
+                out.push(pos);
+            }
+        }
+        out
+    }
+}
+
 impl VegetationPatchFeature {
     /// Returns the block direction that points "into" the surface (down for floor, up for ceiling).
     pub(crate) const fn surface_direction(&self) -> pumpkin_data::BlockDirection {
@@ -75,7 +144,7 @@ impl VegetationPatchFeature {
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub(crate) fn place_ground_patch<T: GenerationCache>(
+    pub fn place_ground_patch<T: GenerationCache>(
         &self,
         chunk: &mut T,
         block_registry: &dyn WorldPortalExt,
@@ -85,7 +154,7 @@ impl VegetationPatchFeature {
         x_radius: i32,
         z_radius: i32,
     ) -> Vec<BlockPos> {
-        let mut surface = Vec::new();
+        let mut surface = JavaBlockPosSet::new();
 
         // Determine "inwards" and "outwards" directions based on the surface
         let inwards = self.surface_direction();
@@ -153,13 +222,13 @@ impl VegetationPatchFeature {
                         ground_pos,
                         depth,
                     ) {
-                        surface.push(ground_pos);
+                        surface.insert(ground_pos);
                     }
                 }
             }
         }
 
-        surface
+        surface.into_vec()
     }
 
     fn place_ground<T: GenerationCache>(

@@ -10,6 +10,7 @@ use pumpkin_data::BlockDirection;
 use pumpkin_data::entity::EntityType;
 use pumpkin_data::item::Item;
 use pumpkin_data::item_stack::ItemStack;
+use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_util::math::position::BlockPos;
 use pumpkin_util::math::vector3::Vector3;
 
@@ -50,13 +51,21 @@ impl ItemBehaviour for FireworkRocketItem {
     fn normal_use(&self, _item: &Item, player: &Player) {
         if player.get_entity().is_fall_flying() {
             let world = player.world();
+            let pos = player.get_entity().pos.load();
             let entity = Entity::new(
                 world.clone(),
-                player.get_entity().pos.load(),
+                pos,
                 &EntityType::FIREWORK_ROCKET,
             );
             let entity = FireworkRocketEntity::new_shot(entity, player.get_entity());
             world.spawn_entity(Arc::new(entity));
+            world.play_sound_fine(
+                Sound::EntityFireworkRocketLaunch,
+                SoundCategory::Ambient,
+                &pos,
+                3.0,
+                1.0,
+            );
 
             let mut held = player.inventory().held_item();
             let mut is_main = true;

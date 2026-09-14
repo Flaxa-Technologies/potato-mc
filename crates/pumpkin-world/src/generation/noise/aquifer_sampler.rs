@@ -730,6 +730,20 @@ impl WorldAquiferSampler {
 
         (Some(block_state.default_state), should_schedule)
     }
+
+    pub fn get_skip_sampling_above_y(
+        &mut self,
+        height_estimator: &mut SurfaceHeightEstimateSampler,
+    ) -> i32 {
+        Self::skip_sampling_above_y(
+            &mut self.skip_sampling_above_y,
+            self.surface_level_sample_min_x,
+            self.surface_level_sample_min_z,
+            self.surface_level_sample_max_x,
+            self.surface_level_sample_max_z,
+            height_estimator,
+        )
+    }
 }
 
 impl AquiferSamplerImpl for WorldAquiferSampler {
@@ -802,6 +816,20 @@ impl AquiferSamplerImpl for AquiferSampler {
         match self {
             Self::SeaLevel(s) => s.apply(router, pos, density, height_estimator),
             Self::Aquifer(a) => a.apply(router, pos, density, height_estimator),
+        }
+    }
+}
+
+impl AquiferSampler {
+    #[inline]
+    #[must_use]
+    pub fn get_skip_sampling_above_y(
+        &mut self,
+        height_estimator: &mut SurfaceHeightEstimateSampler,
+    ) -> Option<i32> {
+        match self {
+            Self::Aquifer(a) => Some(a.get_skip_sampling_above_y(height_estimator)),
+            Self::SeaLevel(_) => None,
         }
     }
 }

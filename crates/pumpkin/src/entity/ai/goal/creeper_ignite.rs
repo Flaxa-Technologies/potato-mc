@@ -45,6 +45,32 @@ impl Goal for CreeperIgniteGoal {
         false
     }
 
+    fn should_continue(&self, mob: &dyn Mob) -> bool {
+        let creeper = mob.get_mob_entity();
+        let target_lock = creeper
+            .target
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+
+        if self.creeper.fuse_speed.load(Ordering::Relaxed) > 0 {
+            return true;
+        }
+
+        if let Some(target) = target_lock.as_ref() {
+            if !target.get_entity().is_alive() {
+                return false;
+            }
+            let dist_sq = mob
+                .get_entity()
+                .pos
+                .load()
+                .squared_distance_to_vec(&target.get_entity().pos.load());
+            return dist_sq < 49.0;
+        }
+
+        false
+    }
+
     fn start(&mut self, mob: &dyn Mob) {
         let mut navigator = mob
             .get_mob_entity()

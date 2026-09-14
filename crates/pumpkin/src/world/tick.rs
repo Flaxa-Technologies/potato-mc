@@ -148,7 +148,6 @@ impl World {
 
         let mut block_entities: Vec<Arc<dyn crate::block::entities::BlockEntity>> = Vec::new();
         for chunk_pos in active_chunks.iter() {
-            self.migrate_pending_block_entities(*chunk_pos);
             if let Some(chunk_block_entities) = self.block_entities.get(chunk_pos) {
                 block_entities.extend(chunk_block_entities.values().cloned());
             }
@@ -551,7 +550,6 @@ impl World {
                         let base_entity = entity.get_entity();
                         base_entity.velocity.store(Vector3::default());
 
-                        player.client.enqueue_spawn_packet(&entity);
                         player.try_restore_vehicle(&entity);
                         entities_to_add.push(entity);
                     }
@@ -562,13 +560,20 @@ impl World {
                             new_entities.extend(entities_to_add.iter().cloned());
                             new_entities
                         });
+                        for entity in &entities_to_add {
+                            world.entity_tracker.add_entity(entity, &world);
+                        }
                     }
                 } else {
                     for entity in world.entities.load().iter() {
                         let base_entity = entity.get_entity();
                         if base_entity.chunk_pos.load() == position {
-                            player.client.enqueue_spawn_packet(entity);
                             player.try_restore_vehicle(entity);
+                            if let Some(tracked) = world.entity_tracker.get_tracked_entity(base_entity.entity_id) {
+                                if tracked.seen_by.insert(player.gameprofile.id) {
+                                    tracked.add_pairing(&player);
+                                }
+                            }
                         }
                     }
                 }

@@ -445,8 +445,28 @@ impl World {
         self.spawn_state.load().add_entity(self, entity.as_ref());
 
         self.entities.rcu(|current_entities| {
-            let mut new_entities = (**current_entities).clone();
+            let mut new_entities = Vec::with_capacity(current_entities.len() + 1);
+            new_entities.extend_from_slice(current_entities);
             new_entities.push(entity.clone());
+            new_entities
+        });
+    }
+
+    pub fn spawn_entities_non_save(&self, entities: &[Arc<dyn EntityBase>]) {
+        if entities.is_empty() {
+            return;
+        }
+        for entity in entities {
+            let _base_entity = entity.get_entity();
+            entity.init_data_tracker();
+            self.entity_tracker.add_entity(entity, self);
+            self.spawn_state.load().add_entity(self, entity.as_ref());
+        }
+
+        self.entities.rcu(|current_entities| {
+            let mut new_entities = Vec::with_capacity(current_entities.len() + entities.len());
+            new_entities.extend_from_slice(current_entities);
+            new_entities.extend(entities.iter().cloned());
             new_entities
         });
     }
@@ -527,6 +547,18 @@ impl World {
 
         self.spawn_state.load().remove_entity(self, entity);
         self.entity_tracker.remove_entity(entity, self);
+
+        let entity_ids = [base_entity.entity_id.into()];
+        let je_packet = pumpkin_protocol::java::client::play::CRemoveEntities::new(&entity_ids);
+        let be_packet = pumpkin_protocol::bedrock::client::CRemoveActor::new(
+            pumpkin_protocol::codec::var_long::VarLong(i64::from(base_entity.entity_id)),
+        );
+        self.broadcast_to_chunk_editioned(base_entity.chunk_pos.load(), &je_packet, &be_packet);
+
+        let _guard = self
+            .entity_modify_mutex
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         self.entities.rcu(|current_entities| {
             let mut new_entities = (**current_entities).clone();
             new_entities.retain(|e| e.get_entity().entity_uuid != base_entity.entity_uuid);

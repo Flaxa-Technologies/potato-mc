@@ -113,6 +113,45 @@ impl CommandExecutor for SetBoolExecutor {
     }
 }
 
+struct QuerySpearSwitchDelayExecutor;
+
+impl CommandExecutor for QuerySpearSwitchDelayExecutor {
+    fn execute(&self, context: &CommandContext) -> CommandExecutorResult {
+        let key = TextComponent::text("spear_switch_delay");
+        let delay = context.server().spear_switch_delay.load(std::sync::atomic::Ordering::Relaxed);
+        let value = TextComponent::text(delay.to_string());
+        context.source.send_feedback(
+            TextComponent::translate_cross(
+                "commands.gamerule.query",
+                "commands.gamerule.query",
+                [key, value],
+            ),
+            false,
+        );
+        Ok(delay as i32)
+    }
+}
+
+struct SetSpearSwitchDelayExecutor;
+
+impl CommandExecutor for SetSpearSwitchDelayExecutor {
+    fn execute(&self, context: &CommandContext) -> CommandExecutorResult {
+        let key = TextComponent::text("spear_switch_delay");
+        let arg_value = IntegerArgumentType::get(context, "value")? as i64;
+        context.server().spear_switch_delay.store(arg_value, std::sync::atomic::Ordering::Relaxed);
+        let value_component = TextComponent::text(arg_value.to_string());
+        context.source.send_feedback(
+            TextComponent::translate_cross(
+                "commands.gamerule.set",
+                "commands.gamerule.set",
+                [key, value_component],
+            ),
+            true,
+        );
+        Ok(arg_value as i32)
+    }
+}
+
 pub fn register(dispatcher: &mut CommandDispatcher, registry: &PermissionRegistry) {
     registry.register_permission_or_panic(Permission::new(
         PERMISSION,
@@ -135,6 +174,31 @@ pub fn register(dispatcher: &mut CommandDispatcher, registry: &PermissionRegistr
         };
         cmd = cmd.then(branch);
     }
+
+    // Register /gamerule spearSwitchDelay, /gamerule spear_switch_delay
+    for alias in ["spearSwitchDelay", "spear_switch_delay"] {
+        cmd = cmd.then(
+            literal(alias)
+                .executes(QuerySpearSwitchDelayExecutor)
+                .then(argument("value", IntegerArgumentType::any()).executes(SetSpearSwitchDelayExecutor)),
+        );
+    }
+
+    // Register /gamerule spear switch delay <value> and /gamerule spear switch_delay <value>
+    let spear_node = literal("spear")
+        .then(
+            literal("switch").then(
+                literal("delay")
+                    .executes(QuerySpearSwitchDelayExecutor)
+                    .then(argument("value", IntegerArgumentType::any()).executes(SetSpearSwitchDelayExecutor)),
+            ),
+        )
+        .then(
+            literal("switch_delay")
+                .executes(QuerySpearSwitchDelayExecutor)
+                .then(argument("value", IntegerArgumentType::any()).executes(SetSpearSwitchDelayExecutor)),
+        );
+    cmd = cmd.then(spear_node);
 
     dispatcher.register(cmd);
 }

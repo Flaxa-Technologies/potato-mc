@@ -137,3 +137,6 @@ pub mod structure_block;
 pub mod trial_spawner;
 pub mod turtle_egg;
 pub mod vault;
+
+pub mod potent_sulfur;
+pub mod sulfur_spike;

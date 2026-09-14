@@ -62,10 +62,15 @@ impl MoveControlTrait for FlyingMoveControl {
 
             let speed = if entity.on_ground.load(Ordering::Relaxed) {
                 let movement_speed = living_entity.get_attribute_value(&Attributes::MOVEMENT_SPEED);
-                (self.speed_modifier * movement_speed) as f32
+                (self.speed_modifier * movement_speed.max(0.1)) as f32
             } else {
                 let flying_speed = living_entity.get_attribute_value(&Attributes::FLYING_SPEED);
-                (self.speed_modifier * flying_speed) as f32
+                let base = if flying_speed > 0.0 {
+                    flying_speed
+                } else {
+                    living_entity.get_attribute_value(&Attributes::MOVEMENT_SPEED).max(0.1)
+                };
+                (self.speed_modifier * base) as f32
             };
 
             let sd = xd.hypot(zd);

@@ -37,7 +37,7 @@ pub struct WindChargeEntity {
 pub static WIND_CHARGE_EXPLOSION_DAMAGE_CALCULATOR: LazyLock<Arc<SimpleExplosionDamageCalculator>> =
     LazyLock::new(|| {
         Arc::new(SimpleExplosionDamageCalculator::new(
-            true,
+            false,
             false,
             Some(1.22),
             Some(&tag::Block::MINECRAFT_BLOCKS_WIND_CHARGE_EXPLOSIONS),
@@ -48,7 +48,7 @@ pub static BREEZE_WIND_CHARGE_EXPLOSION_DAMAGE_CALCULATOR: LazyLock<
     Arc<SimpleExplosionDamageCalculator>,
 > = LazyLock::new(|| {
     Arc::new(SimpleExplosionDamageCalculator::new(
-        true,
+        false,
         false,
         None,
         Some(&tag::Block::MINECRAFT_BLOCKS_WIND_CHARGE_EXPLOSIONS),

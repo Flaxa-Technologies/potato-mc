@@ -7,7 +7,7 @@ use crate::generation::proto_chunk::GenerationCache;
 use crate::world::WorldPortalExt;
 use pumpkin_data::BlockDirection;
 
-use super::vegetation_patch::VegetationPatchFeature;
+use super::vegetation_patch::{JavaBlockPosSet, VegetationPatchFeature};
 
 pub struct WaterloggedVegetationPatchFeature {
     pub base: VegetationPatchFeature,
@@ -80,10 +80,13 @@ impl WaterloggedVegetationPatchFeature {
         );
 
         // Filter the surface to only include unexposed positions, turning them into water
-        let water_surface: Vec<BlockPos> = surface
-            .into_iter()
-            .filter(|&pos| !is_exposed(chunk, pos))
-            .collect();
+        let mut water_surface_set = JavaBlockPosSet::new();
+        for pos in surface {
+            if !is_exposed(chunk, pos) {
+                water_surface_set.insert(pos);
+            }
+        }
+        let water_surface = water_surface_set.into_vec();
 
         for pos in &water_surface {
             chunk.set_block_state(&pos.0, pumpkin_data::Block::WATER.default_state);
@@ -103,6 +106,11 @@ impl WaterloggedVegetationPatchFeature {
         random: &mut RandomGenerator,
         placement_pos: BlockPos,
     ) -> bool {
+        // Vanilla: super.placeVegetation(level, config, generator, random, placementPos.below())
+        // Vegetation is placed one block below the water surface pos, then we
+        // waterlog the block at placement_pos (the water block) if the placed
+        // block has WATERLOGGED property.
+        let below_pos = placement_pos.down();
         if self.base.vegetation_feature.generate(
             chunk,
             block_registry,
@@ -110,8 +118,9 @@ impl WaterloggedVegetationPatchFeature {
             height,
             feature_name,
             random,
-            placement_pos,
+            below_pos,
         ) {
+            // Vanilla reads getBlockState(placementPos) — the water block — and waterloggs it
             let placed_raw = GenerationCache::get_block_state(chunk, &placement_pos.0);
             let placed_waterlogged = placed_raw.to_block().set_waterlogged(placed_raw, true);
             if let Some(new_state) = placed_waterlogged {

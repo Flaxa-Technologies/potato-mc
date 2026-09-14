@@ -251,6 +251,8 @@ pub fn lazily_generate_structure(
         }
     }
 
+    let chunk_x = context.chunk_x;
+    let chunk_z = context.chunk_z;
     let structure_pos = generate_structure_position(key, structure, context);
 
     if let Some(pos) = structure_pos {
@@ -269,6 +271,27 @@ pub fn lazily_generate_structure(
                 .unwrap_or(structure.biomes),
         ) && biomes.contains(&(biome.id as u16))
         {
+            let (piece_count, bbox) = if let Ok(mut guard) = pos.collector.lock() {
+                (guard.pieces.len(), guard.get_bounding_box())
+            } else {
+                (0, pumpkin_util::math::block_box::BlockBox::new(0, 0, 0, 0, 0, 0))
+            };
+            tracing::info!(
+                "[StructureGen] Generated structure {:?} at [{}, {}, {}] in chunk ({}, {}) with {} pieces (bbox: [{}, {}, {}] to [{}, {}, {}])",
+                key,
+                pos.start_pos.0.x,
+                pos.start_pos.0.y,
+                pos.start_pos.0.z,
+                chunk_x,
+                chunk_z,
+                piece_count,
+                bbox.min.x,
+                bbox.min.y,
+                bbox.min.z,
+                bbox.max.x,
+                bbox.max.y,
+                bbox.max.z,
+            );
             return Some(pos);
         }
     }

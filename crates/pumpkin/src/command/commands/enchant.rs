@@ -60,7 +60,7 @@ fn enchant_target(
 
     if let Some(data) = item.get_data_component::<EnchantmentsImpl>() {
         for (existing, _) in data.enchantment.iter() {
-            if *existing != enchantment && !enchantment.are_compatible(existing) {
+            if existing.id != enchantment.id && !enchantment.are_compatible(existing) {
                 return Err(ERROR_FAILED_INCOMPATIBLE.create_without_context(item.item.translated_name()));
             }
         }

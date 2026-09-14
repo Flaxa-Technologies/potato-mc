@@ -25,12 +25,12 @@ pub struct MultiNoiseSampler<'a> {
     // AKA: Weirdness
     ridges: usize,
     component_stack: Box<[ChunkNoiseFunctionComponent<'a>]>,
-    volume: Option<DensityVolume>,
-    buffers: Option<[DensityBuffer; 6]>,
+    pub biome_cache: [([i64; 7], Option<&'static pumpkin_data::chunk::Biome>); 512],
 }
 
 impl<'a> MultiNoiseSampler<'a> {
-    pub fn fill_volume(&mut self, volume: DensityVolume) {
+    #[must_use]
+    pub fn fill_volume(&mut self, volume: DensityVolume) -> [DensityBuffer; 6] {
         let indices = [
             self.temperature,
             self.humidity,
@@ -39,7 +39,7 @@ impl<'a> MultiNoiseSampler<'a> {
             self.depth,
             self.ridges,
         ];
-        let buffers = indices.map(|index| {
+        indices.map(|index| {
             let mut buffer = DensityBuffer::acquire(&volume);
             ChunkNoiseFunctionComponent::sample_volume_from_stack(
                 &mut self.component_stack[..=index],
@@ -47,28 +47,44 @@ impl<'a> MultiNoiseSampler<'a> {
                 &volume,
             );
             buffer
+        })
+    }
+
+    #[must_use]
+    pub fn fill_overworld_column_cached(
+        &mut self,
+        col_volume: &DensityVolume,
+        depth_volume: &DensityVolume,
+    ) -> ([DensityBuffer; 5], DensityBuffer) {
+        let indices = [
+            self.temperature,
+            self.humidity,
+            self.continentalness,
+            self.erosion,
+            self.ridges,
+        ];
+        let col_buffers = indices.map(|index| {
+            let mut buffer = DensityBuffer::acquire(col_volume);
+            ChunkNoiseFunctionComponent::sample_volume_from_stack(
+                &mut self.component_stack[..=index],
+                &mut buffer,
+                col_volume,
+            );
+            buffer
         });
-        self.volume = Some(volume);
-        self.buffers = Some(buffers);
+        let mut depth_buffer = DensityBuffer::acquire(depth_volume);
+        ChunkNoiseFunctionComponent::sample_volume_from_stack(
+            &mut self.component_stack[..=self.depth],
+            &mut depth_buffer,
+            depth_volume,
+        );
+        (col_buffers, depth_buffer)
     }
 
     pub fn sample(&mut self, biome_x: i32, biome_y: i32, biome_z: i32) -> NoiseValuePoint {
         let block_x = biome_coords::to_block(biome_x);
         let block_y = biome_coords::to_block(biome_y);
         let block_z = biome_coords::to_block(biome_z);
-
-        if let (Some(volume), Some(buffers)) = (&self.volume, &self.buffers)
-            && let Some(index) = volume.index_of_block(block_x, block_y, block_z)
-        {
-            return NoiseValuePoint {
-                temperature: to_long(buffers[0][index]),
-                humidity: to_long(buffers[1][index]),
-                continentalness: to_long(buffers[2][index]),
-                erosion: to_long(buffers[3][index]),
-                depth: to_long(buffers[4][index]),
-                weirdness: to_long(buffers[5][index]),
-            };
-        }
 
         let pos = Vector3::new(block_x, block_y, block_z);
 
@@ -177,8 +193,7 @@ impl<'a> MultiNoiseSampler<'a> {
             erosion: base.erosion,
             ridges: base.ridges,
             component_stack: component_stack.into_boxed_slice(),
-            volume: None,
-            buffers: None,
+            biome_cache: [([0i64; 7], None); 512],
         }
     }
 }

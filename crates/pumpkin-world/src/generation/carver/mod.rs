@@ -67,6 +67,7 @@ pub struct CarvingContext<'a> {
     pub surface_height_sampler: SurfaceHeightEstimateSampler<'a>,
     pub carver_aquifer: Option<CarverAquiferSampler<'a>>,
     pub terrain_cache: Option<&'a crate::generation::proto_chunk::TerrainCache>,
+    pub material_rule_context: MaterialRuleContext<'a>,
 }
 
 pub struct CarveRun<'a, 'b> {
@@ -75,7 +76,48 @@ pub struct CarveRun<'a, 'b> {
     pub ids: CarverBlockIds,
 }
 
-impl CarvingContext<'_> {
+impl<'a> CarvingContext<'a> {
+    pub fn new(
+        min_y: i8,
+        height: u16,
+        random_config: &'a GlobalRandomConfig,
+        surface_noise: &'a DoublePerlinNoiseSampler,
+        secondary_noise: &'a DoublePerlinNoiseSampler,
+        terrain_builder: &'a SurfaceTerrainBuilder,
+        sea_level: i32,
+        surface_rule: &'a MaterialRule,
+        surface_height_sampler: SurfaceHeightEstimateSampler<'a>,
+        carver_aquifer: Option<CarverAquiferSampler<'a>>,
+        terrain_cache: Option<&'a crate::generation::proto_chunk::TerrainCache>,
+    ) -> Self {
+        let mut material_rule_context = MaterialRuleContext::new(
+            min_y,
+            height,
+            &random_config.base_random_deriver,
+            terrain_builder,
+            surface_noise,
+            secondary_noise,
+            sea_level,
+        );
+        if let Some(tc) = terrain_cache {
+            material_rule_context = material_rule_context.with_terrain_cache(tc);
+        }
+        Self {
+            min_y,
+            height,
+            random_config,
+            surface_noise,
+            secondary_noise,
+            terrain_builder,
+            sea_level,
+            surface_rule,
+            surface_height_sampler,
+            carver_aquifer,
+            terrain_cache,
+            material_rule_context,
+        }
+    }
+
     pub fn top_material(
         &mut self,
         chunk: &mut ProtoChunk,
@@ -85,27 +127,16 @@ impl CarvingContext<'_> {
         under_fluid: bool,
         steep: bool,
     ) -> Option<&'static BlockState> {
-        let mut context = MaterialRuleContext::new(
-            self.min_y,
-            self.height,
-            &self.random_config.base_random_deriver,
-            self.terrain_builder,
-            self.surface_noise,
-            self.secondary_noise,
-            self.sea_level,
-        );
-        if let Some(tc) = self.terrain_cache {
-            context = context.with_terrain_cache(tc);
-        }
-        context.init_horizontal(x, z);
-        context.biome = chunk.get_terrain_gen_biome(x, y, z);
-        context.set_steep_material_condition(steep);
-        context.init_vertical(1, 1, y, if under_fluid { y + 1 } else { i32::MIN });
+        self.material_rule_context.init_horizontal(x, z);
+        self.material_rule_context.biome = chunk.get_terrain_gen_biome(x, y, z);
+        self.material_rule_context.set_steep_material_condition(steep);
+        self.material_rule_context
+            .init_vertical(1, 1, y, if under_fluid { y + 1 } else { i32::MIN });
 
         try_apply_material_rule(
             self.surface_rule,
             chunk,
-            &mut context,
+            &mut self.material_rule_context,
             &mut self.surface_height_sampler,
         )
     }
@@ -152,19 +183,19 @@ pub fn carve(chunk: &mut ProtoChunk, generator: &VanillaGenerator) {
         )
     });
 
-    let mut context = CarvingContext {
-        min_y: generator.dimension.min_y as i8,
-        height: generator.dimension.logical_height as u16,
-        random_config: &generator.random_config,
-        surface_noise: &generator.terrain_cache.surface_noise,
-        secondary_noise: &generator.terrain_cache.secondary_noise,
-        terrain_builder: &generator.terrain_cache.terrain_builder,
-        sea_level: generator.settings.sea_level,
-        surface_rule: generator.surface_rule,
+    let mut context = CarvingContext::new(
+        generator.dimension.min_y as i8,
+        generator.dimension.logical_height as u16,
+        &generator.random_config,
+        &generator.terrain_cache.surface_noise,
+        &generator.terrain_cache.secondary_noise,
+        &generator.terrain_cache.terrain_builder,
+        generator.settings.sea_level,
+        generator.surface_rule,
         surface_height_sampler,
         carver_aquifer,
-        terrain_cache: Some(&generator.terrain_cache),
-    };
+        Some(&generator.terrain_cache),
+    );
 
     let mut run = CarveRun {
         ctx: &mut context,
@@ -293,6 +324,10 @@ fn overworld_carve_state(
     y: i32,
     z: i32,
 ) -> Option<(&'static BlockState, bool)> {
+    let lava_level = run.chunk.generation_bottom_y() as i32 + 8;
+    if y <= lava_level {
+        return Some((run.ids.lava, false));
+    }
     if let Some(aquifer) = run.ctx.carver_aquifer.as_mut() {
         let result = aquifer.compute(&Vector3::new(x, y, z), 0.0);
         result
@@ -381,19 +416,19 @@ fn with_carve_run_options<F>(
             generator.settings,
         )
     });
-    let mut context = CarvingContext {
-        min_y: generator.dimension.min_y as i8,
-        height: generator.dimension.logical_height as u16,
-        random_config: &generator.random_config,
-        surface_noise: &generator.terrain_cache.surface_noise,
-        secondary_noise: &generator.terrain_cache.secondary_noise,
-        terrain_builder: &generator.terrain_cache.terrain_builder,
-        sea_level: generator.settings.sea_level,
-        surface_rule: surface_rule.unwrap_or(generator.surface_rule),
+    let mut context = CarvingContext::new(
+        generator.dimension.min_y as i8,
+        generator.dimension.logical_height as u16,
+        &generator.random_config,
+        &generator.terrain_cache.surface_noise,
+        &generator.terrain_cache.secondary_noise,
+        &generator.terrain_cache.terrain_builder,
+        generator.settings.sea_level,
+        surface_rule.unwrap_or(generator.surface_rule),
         surface_height_sampler,
         carver_aquifer,
-        terrain_cache: Some(&generator.terrain_cache),
-    };
+        Some(&generator.terrain_cache),
+    );
     let mut run = CarveRun {
         ctx: &mut context,
         chunk: &mut chunk,

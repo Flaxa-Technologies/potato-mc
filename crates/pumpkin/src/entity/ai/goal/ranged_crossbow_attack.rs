@@ -85,7 +85,9 @@ impl RangedCrossbowAttackGoal {
             .ok()
             .map(|eq| eq.get(&EquipmentSlot::MAIN_HAND));
 
-        let arrow_entity = Entity::new(world.clone(), mob_pos, &EntityType::ARROW);
+        let mut spawn_pos = entity.get_eye_pos();
+        spawn_pos.y -= 0.1;
+        let arrow_entity = Entity::new(world.clone(), spawn_pos, &EntityType::ARROW);
         let projectile = ItemStack::new(1, &Item::ARROW);
         let arrow = if let Some(ref weapon) = weapon_opt {
             ArrowEntity::new_shot_with_weapon(
@@ -99,6 +101,9 @@ impl RangedCrossbowAttackGoal {
             ArrowEntity::new_shot(arrow_entity, entity, &projectile, ArrowPickup::Allowed)
         };
 
+        let difficulty = world.level_info.load().difficulty as i32;
+        arrow.set_base_damage_from_mob(Self::ARROW_SPEED, difficulty);
+
         if let Some(ref item) = weapon_opt {
             arrow.set_pierce_level(
                 crate::enchantment::EnchantmentHelper::process_projectile_piercing(item, 0),
@@ -110,12 +115,11 @@ impl RangedCrossbowAttackGoal {
         }
 
         let dx = target_pos.x - mob_pos.x;
-        let dy = (target_pos.y + f64::from(target_entity.entity_dimension.load().height) / 3.0)
-            - arrow.entity.pos.load().y;
         let dz = target_pos.z - mob_pos.z;
         let horizontal_distance = dx.hypot(dz);
+        let dy = (target_pos.y + f64::from(target_entity.entity_dimension.load().height) / 3.0)
+            - spawn_pos.y;
 
-        let difficulty = world.level_info.load().difficulty as i32;
         let divergence = f64::from(14 - difficulty * 4);
 
         arrow.set_velocity(

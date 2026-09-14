@@ -1,8 +1,10 @@
 use std::any::Any;
+use std::borrow::Cow;
 use std::sync::Arc;
 
 use pumpkin_data::Enchantment;
-use pumpkin_data::data_component_impl::EnchantableImpl;
+use pumpkin_data::data_component::DataComponent;
+use pumpkin_data::data_component_impl::{EnchantableImpl, StoredEnchantmentsImpl};
 use pumpkin_data::item::Item;
 use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::screen::WindowType;
@@ -115,7 +117,7 @@ impl EnchantingTableScreenHandler {
 
                 for i in 0..3 {
                     let level = self.calculate_level_requirement(&mut random, i);
-                    self.level_requirements[i] = level;
+                    self.level_requirements[i] = if level < (i as i32 + 1) { 0 } else { level };
                 }
 
                 for i in 0..3 {
@@ -161,13 +163,13 @@ impl EnchantingTableScreenHandler {
     }
 
     fn calculate_level_requirement(&self, random: &mut LegacyRand, slot: usize) -> i32 {
-        let b = self.bookshelf_count;
+        let b = self.bookshelf_count.min(15);
         let level = random.next_bounded_i32(8) + 1 + (b >> 1) + random.next_bounded_i32(b + 1);
 
         match slot {
             0 => (level / 3).max(1),
-            1 => (level * 2 / 3 + 7).max(1),
-            2 => level.max(b * 2).max(1),
+            1 => level * 2 / 3 + 1,
+            2 => level.max(b * 2),
             _ => 0,
         }
     }
@@ -233,10 +235,10 @@ impl EnchantingTableScreenHandler {
 
             // Add more?
             let mut current_level = enchant_level;
-            while random.next_bounded_i32(50) <= (current_level + 1) / 2 {
+            while random.next_bounded_i32(50) <= current_level {
                 available.retain(|(e, _)| {
                     for (se, _) in &result {
-                        if !e.are_compatible(se) {
+                        if *e == *se || !e.are_compatible(se) {
                             return false;
                         }
                     }
@@ -333,7 +335,7 @@ impl ScreenHandler for EnchantingTableScreenHandler {
         }
 
         let level_req = self.level_requirements[id as usize];
-        if player.experience_level() < level_req && !player.is_creative() {
+        if level_req <= 0 || (player.experience_level() < level_req && !player.is_creative()) {
             return false;
         }
 
@@ -374,8 +376,23 @@ impl ScreenHandler for EnchantingTableScreenHandler {
             self.inventory.set_stack(1, lapis_stack);
         }
 
-        for (enchant, level) in enchantments {
-            item_stack.add_enchantment(enchant, level as u16);
+        if item_stack.item == &Item::BOOK {
+            if enchantments.len() > 1 {
+                let remove_idx = random.next_bounded_i32(enchantments.len() as i32) as usize;
+                enchantments.remove(remove_idx);
+            }
+            let stored = StoredEnchantmentsImpl {
+                enchantment: Cow::Owned(enchantments),
+            };
+            item_stack = ItemStack::new_with_component(
+                1,
+                &Item::ENCHANTED_BOOK,
+                vec![(DataComponent::StoredEnchantments, Some(Box::new(stored)))],
+            );
+        } else {
+            for (enchant, level) in enchantments {
+                item_stack.add_enchantment(enchant, level as u16);
+            }
         }
         self.inventory.set_stack(0, item_stack);
 
@@ -385,6 +402,7 @@ impl ScreenHandler for EnchantingTableScreenHandler {
 
         self.update_enchantments(player);
         self.send_content_updates();
+        player.play_enchantment_sound();
 
         player.increment_stat(
             StatisticCategory::Custom,

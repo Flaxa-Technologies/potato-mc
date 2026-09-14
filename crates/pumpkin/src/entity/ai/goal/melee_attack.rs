@@ -11,6 +11,7 @@ const MAX_ATTACK_TIME: i64 = 20;
 pub struct MeleeAttackGoal {
     goal_control: Controls,
     speed: f64,
+    #[expect(dead_code)]
     pause_when_mob_idle: bool,
     //path: Path, TODO: add path when Navigation is implemented
     #[expect(dead_code)]
@@ -43,33 +44,65 @@ impl MeleeAttackGoal {
     pub fn get_max_cooldown(&self) -> i32 {
         self.get_tick_count(20)
     }
+
+    fn is_holding_ranged_weapon(mob: &dyn Mob) -> bool {
+        mob.get_mob_entity()
+            .living_entity
+            .entity_equipment
+            .try_lock()
+            .is_ok_and(|eq| {
+                let item_id = eq
+                    .get(&pumpkin_data::data_component_impl::EquipmentSlot::MAIN_HAND)
+                    .item
+                    .id;
+                item_id == pumpkin_data::item::Item::BOW.id
+                    || item_id == pumpkin_data::item::Item::CROSSBOW.id
+            })
+    }
 }
 
 impl Goal for MeleeAttackGoal {
     fn can_start(&mut self, mob: &dyn Mob) -> bool {
-        let time = mob.get_entity().world.load().get_world_age();
+        if Self::is_holding_ranged_weapon(mob) {
+            return false;
+        }
+        let target = mob.get_mob_entity().get_target();
+        let Some(target) = target.as_ref() else {
+            return false;
+        };
 
+        if !target.get_entity().is_alive() {
+            return false;
+        }
+
+        if mob.is_sitting() || !mob.can_attack(target.as_ref()) {
+            return false;
+        }
+
+        let is_valid_target = !target
+            .get_player()
+            .is_some_and(|p| p.is_spectator() || p.is_creative());
+        if !is_valid_target {
+            return false;
+        }
+
+        if mob.get_mob_entity().is_in_attack_range(target.as_ref()) {
+            return true;
+        }
+
+        let time = mob.get_entity().world.load().get_world_age();
         if time - self.last_update_time < MAX_ATTACK_TIME {
             return false;
         }
         self.last_update_time = time;
 
-        let target = mob.get_mob_entity().get_target();
-
-        let Some(target) = target.as_ref() else {
-            return false;
-        };
-        if !target.get_entity().is_alive() {
-            return false;
-        }
-        if mob.is_sitting() || !mob.can_attack(target.as_ref()) {
-            return false;
-        }
-        // TODO: add path when is implemented Navigation
-        true //TODO: modify that because if a path to the target not exists then call mob.is_in_attack_range(target)
+        true
     }
 
     fn should_continue(&self, mob: &dyn Mob) -> bool {
+        if Self::is_holding_ranged_weapon(mob) {
+            return false;
+        }
         let target = mob.get_mob_entity().get_target().clone();
 
         let Some(target) = target else {
@@ -90,24 +123,19 @@ impl Goal for MeleeAttackGoal {
             return false;
         }
 
-        if mob.get_mob_entity().is_in_attack_range(target.as_ref()) {
-            return true;
-        }
-
-        if !self.pause_when_mob_idle {
-            let is_idle = mob
-                .get_mob_entity()
-                .navigator
-                .try_lock()
-                .is_ok_and(|navigator| navigator.is_idle());
-            return !is_idle;
-        }
-
         let in_range = mob
             .get_mob_entity()
             .is_in_position_target_range_pos(&target.get_entity().block_pos.load());
 
-        in_range
+        if !in_range {
+            return false;
+        }
+
+        if mob.get_mob_entity().is_in_attack_range(target.as_ref()) {
+            return true;
+        }
+
+        true
     }
 
     fn start(&mut self, mob: &dyn Mob) {
@@ -168,11 +196,21 @@ impl Goal for MeleeAttackGoal {
 
         self.update_countdown_ticks = (self.update_countdown_ticks - 1).max(0);
 
+        let in_attack_range = mob.get_mob_entity().is_in_attack_range(target.as_ref());
+        let nav_idle = mob
+            .get_mob_entity()
+            .navigator
+            .try_lock()
+            .is_ok_and(|nav| nav.is_idle());
+
         let current_target_pos = target.get_entity().pos.load();
-        let should_update_nav = self.update_countdown_ticks <= 0
-            && (self.last_target_position.is_none_or(|last_pos| {
-                current_target_pos.squared_distance_to_vec(&last_pos) >= 1.0
-            }) || mob.get_random().random_range(0..20) == 0);
+        let should_update_nav = !in_attack_range
+            && self.update_countdown_ticks <= 0
+            && (nav_idle
+                || self.last_target_position.is_none_or(|last_pos| {
+                    current_target_pos.squared_distance_to_vec(&last_pos) >= 1.0
+                })
+                || mob.get_random().random_range(0..20) == 0);
 
         if should_update_nav {
             let mob_pos = mob.get_entity().pos.load();
@@ -199,7 +237,7 @@ impl Goal for MeleeAttackGoal {
         self.cooldown = (self.cooldown - 1).max(0);
 
         // TODO: Add visibility check (canSee) - requires world raycast
-        if self.cooldown <= 0 && mob.get_mob_entity().is_in_attack_range(target.as_ref()) {
+        if self.cooldown <= 0 && in_attack_range {
             self.cooldown = self.get_max_cooldown();
             mob.get_mob_entity().living_entity.swing_hand();
             mob.get_mob_entity()

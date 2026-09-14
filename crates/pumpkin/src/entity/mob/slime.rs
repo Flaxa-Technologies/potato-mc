@@ -31,7 +31,7 @@ pub struct SlimeEntity {
     pub target_squish: AtomicCell<f32>,
     pub o_squish: AtomicCell<f32>,
     speed_modifier: AtomicCell<f64>,
-    has_split: AtomicBool,
+    pub has_split: AtomicBool,
 }
 
 impl SlimeEntity {
@@ -101,6 +101,10 @@ impl SlimeEntity {
 
     pub fn is_magma_cube(&self) -> bool {
         self.entity.living_entity.entity.entity_type == &EntityType::MAGMA_CUBE
+    }
+
+    pub fn is_sulfur_cube(&self) -> bool {
+        self.entity.living_entity.entity.entity_type == &EntityType::SULFUR_CUBE
     }
 
     pub fn set_size(&self, size: i32, update_health: bool) {
@@ -331,6 +335,10 @@ impl Mob for SlimeEntity {
     }
 
     fn post_tick(&self) {
+        if self.is_sulfur_cube() {
+            return;
+        }
+
         if (self.entity.living_entity.death_time.load(Ordering::Relaxed) >= 20
             || self.entity.living_entity.entity.removed.load(Ordering::Relaxed))
             && self.get_size() > 1
@@ -428,6 +436,8 @@ impl MoveControlTrait for SlimeMoveControl {
 
         let speed_modifier = slime.speed_modifier.load();
         let mut movement_input = Vector3::new(0.0, 0.0, 0.0);
+        let movement_speed = living_entity.get_attribute_value(&Attributes::MOVEMENT_SPEED);
+        let effective_forward = speed_modifier * movement_speed;
 
         let on_ground = entity.on_ground.load(Ordering::Relaxed);
 
@@ -457,7 +467,7 @@ impl MoveControlTrait for SlimeMoveControl {
                         let vel = entity.velocity.load();
                         entity.velocity.store(Vector3::new(vel.x, vel.y + boost, vel.z));
                     }
-                    movement_input.z = speed_modifier;
+                    movement_input.z = effective_forward;
                 } else {
                     slime.jump_delay.store(current_delay - 1, Ordering::Relaxed);
                     living_entity.jumping.store(false, Ordering::SeqCst);
@@ -468,7 +478,7 @@ impl MoveControlTrait for SlimeMoveControl {
         } else {
             // In air: move forward but don't "jump" again
             if speed_modifier > 0.0 {
-                movement_input.z = speed_modifier;
+                movement_input.z = effective_forward;
             }
             living_entity.jumping.store(false, Ordering::SeqCst);
         }

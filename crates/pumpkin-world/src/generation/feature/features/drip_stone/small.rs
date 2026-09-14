@@ -19,6 +19,9 @@ impl SmallDripstoneFeature {
         random: &mut RandomGenerator,
         pos: BlockPos,
     ) -> bool {
+        if !super::is_empty_or_water(chunk, pos) {
+            return false;
+        }
         if let Some(dir) = Self::get_direction(chunk, pos, random) {
             let root_pos = pos.offset(dir.opposite().to_offset());
             self.gen_dripstone_blocks(chunk, root_pos, random);

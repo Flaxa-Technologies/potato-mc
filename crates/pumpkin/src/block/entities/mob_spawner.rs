@@ -24,6 +24,7 @@ pub struct MobSpawnerBlockEntity {
 
 impl MobSpawnerBlockEntity {
     pub const ID: &'static str = "minecraft:mob_spawner";
+    pub const DEFAULT_ENTITY_TYPE: &'static EntityType = &EntityType::PIG;
     pub const DEFAULT_DELAY: i32 = 20;
     pub const DEFAULT_MAX_SPAWN_DELAY: i32 = 800;
     pub const DEFAULT_MIN_SPAWN_DELAY: i32 = 200;
@@ -34,6 +35,10 @@ impl MobSpawnerBlockEntity {
 
     #[must_use]
     pub const fn new(position: BlockPos, entity_type: Option<&'static EntityType>) -> Self {
+        let entity_type = match entity_type {
+            Some(t) => t,
+            None => Self::DEFAULT_ENTITY_TYPE,
+        };
         Self {
             position,
             delay: AtomicI32::new(Self::DEFAULT_DELAY),
@@ -43,7 +48,7 @@ impl MobSpawnerBlockEntity {
             spawn_range: Self::DEFAULT_SPAWN_RANGE,
             max_nearby_entities: Self::DEFAULT_MAX_NEARBY_ENTITIES,
             required_player_range: Self::DEFAULT_REQUIRED_PLAYER_RANGE,
-            entity_type: AtomicCell::new(entity_type),
+            entity_type: AtomicCell::new(Some(entity_type)),
         }
     }
 
@@ -64,7 +69,14 @@ impl MobSpawnerBlockEntity {
 
             spawn_entry.put_compound("entity", entity_nbt);
 
-            nbt.put_compound("SpawnData", spawn_entry);
+            nbt.put_compound("SpawnData", spawn_entry.clone());
+
+            let mut spawn_potentials = Vec::new();
+            let mut potential_entry = NbtCompound::new();
+            potential_entry.put_compound("data", spawn_entry);
+            potential_entry.put_int("weight", 1);
+            spawn_potentials.push(pumpkin_nbt::tag::NbtTag::Compound(potential_entry));
+            nbt.put_list("SpawnPotentials", spawn_potentials);
         }
     }
 }
@@ -234,7 +246,8 @@ impl BlockEntity for MobSpawnerBlockEntity {
                     })
             })
             .or_else(|| nbt.get_string("EntityId"))
-            .and_then(EntityType::from_name);
+            .and_then(EntityType::from_name)
+            .or(Some(Self::DEFAULT_ENTITY_TYPE));
 
         Self {
             position,
@@ -278,5 +291,133 @@ impl BlockEntity for MobSpawnerBlockEntity {
 
     fn as_any(&self) -> &dyn std::any::Any {
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pumpkin_nbt::tag::NbtTag;
+
+    #[test]
+    fn test_default_spawner_is_pig() {
+        let spawner = MobSpawnerBlockEntity::new(BlockPos::new(0, 64, 0), None);
+        assert_eq!(
+            spawner.entity_type.load(),
+            Some(MobSpawnerBlockEntity::DEFAULT_ENTITY_TYPE)
+        );
+        assert_eq!(spawner.entity_type.load().unwrap().resource_name, "pig");
+
+        let nbt = spawner
+            .chunk_data_nbt()
+            .expect("chunk data NBT must be present");
+        let spawn_data = nbt
+            .get_compound("SpawnData")
+            .expect("SpawnData must be present");
+        let entity = spawn_data
+            .get_compound("entity")
+            .expect("entity tag must be present");
+        assert_eq!(entity.get_string("id"), Some("minecraft:pig"));
+    }
+
+    #[test]
+    fn test_from_nbt_empty_defaults_to_pig() {
+        let empty_nbt = NbtCompound::new();
+        let spawner = MobSpawnerBlockEntity::from_nbt(&empty_nbt, BlockPos::new(0, 64, 0));
+        assert_eq!(
+            spawner.entity_type.load(),
+            Some(MobSpawnerBlockEntity::DEFAULT_ENTITY_TYPE)
+        );
+        assert_eq!(
+            spawner.delay.load(Ordering::Relaxed),
+            MobSpawnerBlockEntity::DEFAULT_DELAY
+        );
+    }
+
+    #[test]
+    fn test_from_nbt_spawn_data_skeleton() {
+        let mut nbt = NbtCompound::new();
+        let mut spawn_data = NbtCompound::new();
+        let mut entity = NbtCompound::new();
+        entity.put_string("id", "minecraft:skeleton".to_string());
+        spawn_data.put_compound("entity", entity);
+        nbt.put_compound("SpawnData", spawn_data);
+
+        let spawner = MobSpawnerBlockEntity::from_nbt(&nbt, BlockPos::new(10, 20, 30));
+        assert_eq!(
+            spawner.entity_type.load().unwrap().resource_name,
+            "skeleton"
+        );
+    }
+
+    #[test]
+    fn test_from_nbt_spawn_potentials() {
+        let mut nbt = NbtCompound::new();
+        let mut potentials = Vec::new();
+        let mut entry = NbtCompound::new();
+        let mut data = NbtCompound::new();
+        let mut entity = NbtCompound::new();
+        entity.put_string("id", "minecraft:blaze".to_string());
+        data.put_compound("entity", entity);
+        entry.put_compound("data", data);
+        potentials.push(NbtTag::Compound(entry));
+        nbt.put_list("SpawnPotentials", potentials);
+
+        let spawner = MobSpawnerBlockEntity::from_nbt(&nbt, BlockPos::new(0, 64, 0));
+        assert_eq!(spawner.entity_type.load().unwrap().resource_name, "blaze");
+    }
+
+    #[test]
+    fn test_from_nbt_unprefixed_mob_id() {
+        let mut nbt = NbtCompound::new();
+        let mut spawn_data = NbtCompound::new();
+        let mut entity = NbtCompound::new();
+        entity.put_string("id", "zombie".to_string());
+        spawn_data.put_compound("entity", entity);
+        nbt.put_compound("SpawnData", spawn_data);
+
+        let spawner = MobSpawnerBlockEntity::from_nbt(&nbt, BlockPos::new(0, 64, 0));
+        assert_eq!(spawner.entity_type.load().unwrap().resource_name, "zombie");
+    }
+
+    #[test]
+    fn test_set_entity_type() {
+        let spawner = MobSpawnerBlockEntity::new(BlockPos::new(0, 64, 0), None);
+        assert_eq!(spawner.entity_type.load().unwrap().resource_name, "pig");
+
+        spawner.set_entity_type(&EntityType::ZOMBIE);
+        assert_eq!(spawner.entity_type.load().unwrap().resource_name, "zombie");
+
+        let nbt = spawner.chunk_data_nbt().unwrap();
+        let spawn_data = nbt.get_compound("SpawnData").unwrap();
+        let entity = spawn_data.get_compound("entity").unwrap();
+        assert_eq!(entity.get_string("id"), Some("minecraft:zombie"));
+    }
+
+    #[test]
+    fn test_write_spawner_nbt_preserves_configuration() {
+        let spawner =
+            MobSpawnerBlockEntity::new(BlockPos::new(0, 64, 0), Some(&EntityType::SPIDER));
+        spawner.delay.store(15, Ordering::Relaxed);
+
+        let mut nbt = NbtCompound::new();
+        spawner.write_spawner_nbt(&mut nbt);
+
+        assert_eq!(nbt.get_short("Delay"), Some(15));
+        assert_eq!(
+            nbt.get_short("MinSpawnDelay"),
+            Some(MobSpawnerBlockEntity::DEFAULT_MIN_SPAWN_DELAY as i16)
+        );
+        assert_eq!(
+            nbt.get_short("MaxSpawnDelay"),
+            Some(MobSpawnerBlockEntity::DEFAULT_MAX_SPAWN_DELAY as i16)
+        );
+
+        let spawn_data = nbt.get_compound("SpawnData").unwrap();
+        let entity = spawn_data.get_compound("entity").unwrap();
+        assert_eq!(entity.get_string("id"), Some("minecraft:spider"));
+
+        let potentials = nbt.get_list("SpawnPotentials").unwrap();
+        assert_eq!(potentials.len(), 1);
     }
 }

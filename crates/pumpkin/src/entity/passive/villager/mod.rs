@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::block::blocks::bed::BedBlock;
 use pumpkin_data::Enchantment;
 use pumpkin_data::attributes::Attributes;
-use pumpkin_data::block_properties::{BedPart, WhiteBedLikeProperties as BedProperties};
+use pumpkin_data::block_properties::{BedPart, WhiteBedLikeProperties as BedProperties, blocks_movement};
 use pumpkin_data::effect::StatusEffect;
 use pumpkin_data::entity::{EntityPose, EntityType};
 use pumpkin_data::item::{Item, JavaToBedrockItemMapping};
@@ -37,11 +37,12 @@ use crate::entity::{
     ai::{
         goal::{
             avoid_entity::AvoidEntityGoal, look_around::RandomLookAroundGoal,
-            look_at_entity::LookAtEntityGoal, open_door::OpenDoorGoal, swim::SwimGoal,
+            look_at_entity::LookAtEntityGoal, open_door::OpenDoorGoal,
+            show_trades_to_player::ShowTradesToPlayerGoal, swim::SwimGoal,
             trade_with_player::TradeWithPlayerGoal, wander_around::WanderAroundGoal,
             work_at_job_site::WorkAtJobSiteGoal,
         },
-        pathfinder::Navigator,
+        pathfinder::NavigatorGoal,
     },
     experience_orb::ExperienceOrbEntity,
     mob::{Mob, MobEntity},
@@ -276,6 +277,7 @@ pub struct VillagerEntity {
     pub job_site: std::sync::Mutex<Option<BlockPos>>,
     pub job_site_pending: AtomicBool,
     pub home_pos: std::sync::Mutex<Option<BlockPos>>,
+    pub last_golem_spawn_time: AtomicI64,
     pub self_weak: std::sync::Mutex<Option<Weak<Self>>>,
 }
 
@@ -316,9 +318,13 @@ impl VillagerEntity {
 
     #[allow(clippy::too_many_lines)]
     pub fn new(entity: Entity) -> Arc<Self> {
+        let biome = entity
+            .world
+            .load()
+            .get_biome(&BlockPos::containing_vec(entity.pos.load()));
         let mob_entity = MobEntity::new(entity);
         let villager_data =
-            VillagerData::new(data::random_villager_type(), VillagerProfession::None, 1);
+            VillagerData::new(data::villager_type_by_biome(biome), VillagerProfession::None, 1);
         let inventory = std::sync::Mutex::new((0..8).map(|_| ItemStack::EMPTY.clone()).collect());
 
         let villager = Self {
@@ -346,6 +352,7 @@ impl VillagerEntity {
             job_site: std::sync::Mutex::new(None),
             job_site_pending: AtomicBool::new(false),
             home_pos: std::sync::Mutex::new(None),
+            last_golem_spawn_time: AtomicI64::new(0),
             self_weak: std::sync::Mutex::new(None),
         };
         let mob_arc = Arc::new(villager);
@@ -357,6 +364,16 @@ impl VillagerEntity {
             let mob_arc: Arc<dyn Mob> = mob_arc.clone();
             Arc::downgrade(&mob_arc)
         };
+
+        {
+            let mut nav = mob_arc
+                .mob_entity
+                .navigator
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            nav.set_can_open_doors(true);
+            nav.set_can_pass_doors(true);
+        }
 
         {
             let mut goal_selector = mob_arc
@@ -416,18 +433,19 @@ impl VillagerEntity {
             );
 
             goal_selector.add_goal(2, Box::new(TradeWithPlayerGoal::new(0.5)));
+            goal_selector.add_goal(2, Box::new(ShowTradesToPlayerGoal::new(Arc::downgrade(&mob_arc))));
             // Basic movement and looking (Vanilla uses 0.5 speed)
             goal_selector.add_goal(3, Box::new(WorkAtJobSiteGoal::new(0.5)));
             goal_selector.add_goal(4, Box::new(WanderAroundGoal::new(0.5)));
             goal_selector.add_goal(
-                5,
+                6,
                 LookAtEntityGoal::with_default(mob_weak.clone(), &EntityType::PLAYER, 8.0),
             );
             goal_selector.add_goal(
-                6,
+                7,
                 LookAtEntityGoal::with_default(mob_weak, &EntityType::VILLAGER, 8.0),
             );
-            goal_selector.add_goal(7, Box::new(RandomLookAroundGoal::default()));
+            goal_selector.add_goal(8, Box::new(RandomLookAroundGoal::default()));
         };
 
         // Send initial metadata
@@ -645,7 +663,27 @@ impl VillagerEntity {
         let mut new_offers = Vec::new();
 
         if let Some(trade_set) = profession.trade_set(level) {
-            let mut rng = StdRng::from_rng(&mut rand::rng());
+            let world = self.mob_entity.living_entity.entity.world.load();
+            let world_seed = world.level_info.load().world_gen_settings.seed;
+            let prof_name = match profession {
+                VillagerProfession::Armorer => "armorer",
+                VillagerProfession::Butcher => "butcher",
+                VillagerProfession::Cartographer => "cartographer",
+                VillagerProfession::Cleric => "cleric",
+                VillagerProfession::Farmer => "farmer",
+                VillagerProfession::Fisherman => "fisherman",
+                VillagerProfession::Fletcher => "fletcher",
+                VillagerProfession::Leatherworker => "leatherworker",
+                VillagerProfession::Librarian => "librarian",
+                VillagerProfession::Mason => "mason",
+                VillagerProfession::Nitwit => "nitwit",
+                VillagerProfession::Shepherd => "shepherd",
+                VillagerProfession::Toolsmith => "toolsmith",
+                VillagerProfession::Weaponsmith => "weaponsmith",
+                VillagerProfession::None => "none",
+            };
+            let mut seq = crate::world::random_sequences::RandomSequence::for_trade_set(prof_name, level, world_seed);
+            let mut rng = StdRng::seed_from_u64(seq.next_u64());
             let mut remaining_trades = trade_set.trades.iter().collect::<Vec<_>>();
             let mut added = 0;
             while added < trade_set.amount && !remaining_trades.is_empty() {
@@ -733,22 +771,28 @@ impl VillagerEntity {
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
             .clear();
-        self.add_trades(profession, level);
+        for lvl in 1..=level {
+            self.add_trades(profession, lvl);
+        }
     }
 
-    fn update_special_prices(&self, player: &Player) {
-        let player_uuid = player.get_entity().entity_uuid;
-        let reputation = self
-            .gossips
+    #[must_use]
+    pub fn get_player_reputation(&self, player_uuid: &uuid::Uuid) -> i32 {
+        self.gossips
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .get(&player_uuid)
+            .get(player_uuid)
             .map_or(0, |gossips| {
                 gossips
                     .iter()
                     .map(|(kind, value)| kind.weight() * value)
                     .sum()
-            });
+            })
+    }
+
+    fn update_special_prices(&self, player: &Player) {
+        let player_uuid = player.get_entity().entity_uuid;
+        let reputation = self.get_player_reputation(&player_uuid);
         let hero_amplifier = player
             .living_entity
             .get_effect(&StatusEffect::HERO_OF_THE_VILLAGE)
@@ -810,6 +854,8 @@ impl VillagerEntity {
     }
 
     fn complete_trade(&self, offer_index: usize, world: &Arc<World>, player_uuid: Uuid) {
+        use rand::RngExt;
+
         let (xp_gain, reward_exp) = {
             let mut offers = self
                 .offers
@@ -827,13 +873,27 @@ impl VillagerEntity {
             .villager_data
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
+        const NEXT_LEVEL_XP_THRESHOLDS: [i32; 5] = [10, 70, 150, 250, i32::MAX];
+        let current_level = villager_data.level.0;
+        let should_level_up = current_level < 5
+            && current_xp >= NEXT_LEVEL_XP_THRESHOLDS[(current_level - 1).max(0) as usize];
+        if should_level_up {
+            self.merchant_update_timer.store(40, Ordering::Relaxed);
+            self.increase_profession_level_on_update
+                .store(true, Ordering::Relaxed);
+        }
         let bedrock_metadata = Self::bedrock_metadata(villager_data, current_xp);
         self.get_entity()
             .set_synced_data(tracked_data::villager::VILLAGER_DATA, villager_data);
         self.get_entity().send_bedrock_actor_data(&bedrock_metadata);
 
         if reward_exp {
-            ExperienceOrbEntity::spawn(world, self.get_entity().pos.load(), xp_gain as u32);
+            let mut pop_xp = rand::rng().random_range(3..=6);
+            if should_level_up {
+                pop_xp += 5;
+            }
+            let orb_pos = self.get_entity().pos.load().add_raw(0.0, 0.5, 0.0);
+            ExperienceOrbEntity::spawn(world, orb_pos, pop_xp);
         }
 
         if let Some(player) = world.get_player_by_uuid(player_uuid) {
@@ -849,56 +909,12 @@ impl VillagerEntity {
                     .or_default();
                 *value = (*value + 2).min(GossipType::Trading.max_value());
             };
-            self.resend_offers_to_player(&player);
-        }
-    }
-
-    fn resend_offers_to_player(&self, player: &Arc<Player>) {
-        let trading_player = *self
-            .trading_player
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-        let Some((player_uuid, sync_id)) = trading_player else {
-            return;
-        };
-        if player.get_entity().entity_uuid != player_uuid {
-            return;
-        }
-        let offers = self
-            .offers
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .clone();
-        let villager_data = *self
-            .villager_data
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-
-        let ok = {
-            let screen = player
-                .current_screen_handler
+            *self
+                .last_traded_player
                 .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner)
-                .clone();
-            let mut screen = screen
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner);
-            if screen.sync_id() != sync_id {
-                false
-            } else if let Some(handler) =
-                screen.as_any_mut().downcast_mut::<MerchantScreenHandler>()
-            {
-                handler.offers.clone_from(&offers);
-                handler.update_result_slot();
-                true
-            } else {
-                false
-            }
-        };
-        if !ok {
-            return;
+                .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(player_uuid);
+            trigger_trade_advancement(&player);
         }
-        self.send_trade_offers(player, sync_id, &offers, villager_data);
     }
 
     fn resend_offers_to_trading_player(&self) {
@@ -929,17 +945,18 @@ impl VillagerEntity {
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner)
                 .clone();
-            let mut screen = screen
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner);
-            if screen.sync_id() != sync_id {
-                false
-            } else if let Some(handler) =
-                screen.as_any_mut().downcast_mut::<MerchantScreenHandler>()
-            {
-                handler.offers.clone_from(&offers);
-                handler.update_result_slot();
-                true
+            if let Ok(mut screen) = screen.try_lock() {
+                if screen.sync_id() != sync_id {
+                    false
+                } else if let Some(handler) =
+                    screen.as_any_mut().downcast_mut::<MerchantScreenHandler>()
+                {
+                    handler.offers.clone_from(&offers);
+                    handler.update_result_slot();
+                    true
+                } else {
+                    false
+                }
             } else {
                 false
             }
@@ -974,6 +991,51 @@ impl VillagerEntity {
         gossips.retain(|_, values| !values.is_empty());
         self.last_gossip_decay_time
             .store(game_time, Ordering::Relaxed);
+    }
+
+    fn share_gossips(&self, game_time: i64, world: &Arc<World>) {
+        if game_time - self.last_gossip_share_time.load(Ordering::Relaxed) < 1200 {
+            return;
+        }
+
+        let my_pos = self.get_entity().pos.load();
+        let aabb = pumpkin_util::math::boundingbox::BoundingBox::new(
+            my_pos.sub_raw(5.0, 3.0, 5.0),
+            my_pos.add_raw(5.0, 3.0, 5.0),
+        );
+        let nearby = world.get_entities_at_box(&aabb);
+        for entity in nearby {
+            if entity.get_entity().entity_id == self.get_entity().entity_id {
+                continue;
+            }
+            if let Some(target) = entity.cast_any().downcast_ref::<VillagerEntity>() {
+                if game_time - target.last_gossip_share_time.load(Ordering::Relaxed) >= 1200 {
+                    let my_gossips = self
+                        .gossips
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
+                    let mut target_gossips = target
+                        .gossips
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
+
+                    for (player_uuid, gossips) in my_gossips.iter() {
+                        let target_player_gossips = target_gossips.entry(*player_uuid).or_default();
+                        for (kind, value) in gossips.iter() {
+                            let shared_val = (*value - kind.daily_decay()).max(0);
+                            if shared_val > 0 {
+                                let cur = target_player_gossips.entry(*kind).or_default();
+                                *cur = (*cur + shared_val).min(kind.max_value());
+                            }
+                        }
+                    }
+
+                    self.last_gossip_share_time.store(game_time, Ordering::Relaxed);
+                    target.last_gossip_share_time.store(game_time, Ordering::Relaxed);
+                    break;
+                }
+            }
+        }
     }
 
     fn notify_trading_player_offers_updated(&self) {
@@ -1138,6 +1200,10 @@ impl VillagerEntity {
                         .unwrap_or_else(std::sync::PoisonError::into_inner)
                         .type_enum();
                     self.set_villager_data(VillagerData::new(r#type, VillagerProfession::None, 1));
+                    self.offers
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner)
+                        .clear();
                 }
             }
         }
@@ -1150,8 +1216,8 @@ impl VillagerEntity {
                 .profession_enum();
             let expected = (profession != VillagerProfession::None).then_some(profession);
             let pos = self.get_entity().block_pos.load();
-            let start = BlockPos::new(pos.0.x - 10, pos.0.y - 4, pos.0.z - 10);
-            let end = BlockPos::new(pos.0.x + 10, pos.0.y + 4, pos.0.z + 10);
+            let start = BlockPos::new(pos.0.x - 24, pos.0.y - 8, pos.0.z - 24);
+            let end = BlockPos::new(pos.0.x + 24, pos.0.y + 8, pos.0.z + 24);
             let mut candidates = Vec::new();
 
             let indexed_sites = world
@@ -1204,16 +1270,8 @@ impl VillagerEntity {
             }
             candidates.sort_by(|left, right| left.0.total_cmp(&right.0));
 
-            let mut navigator = Navigator::default();
             let mut claimed = None;
             for (_, position, block, _) in candidates.into_iter().take(5) {
-                if !navigator.can_reach_within(
-                    &self.mob_entity.living_entity,
-                    position.to_centered_f64(),
-                    1.73,
-                ) {
-                    continue;
-                }
                 if world
                     .villager_poi
                     .lock()
@@ -1231,7 +1289,28 @@ impl VillagerEntity {
                     .job_site
                     .lock()
                     .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(site);
-                self.job_site_pending.store(true, Ordering::Relaxed);
+                self.job_site_pending.store(false, Ordering::Relaxed);
+
+                let (block, _state) = world.get_block_and_state(&site);
+                if let Some(claimed_profession) = profession_for_block(block) {
+                    if profession == VillagerProfession::None {
+                        let r#type = self
+                            .villager_data
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner)
+                            .type_enum();
+                        self.set_villager_data(VillagerData::new(r#type, claimed_profession, 1));
+                        self.generate_trades(claimed_profession, 1);
+                        world.send_entity_status(
+                            self.get_entity(),
+                            pumpkin_data::entity::EntityStatus::VillagerHappy,
+                            Some(ActorEventID::VillagerHappy),
+                        );
+                        if let Some(sound) = claimed_profession.work_sound() {
+                            self.get_entity().play_sound(sound);
+                        }
+                    }
+                }
             }
         }
 
@@ -1265,6 +1344,7 @@ impl VillagerEntity {
                         .unwrap_or_else(std::sync::PoisonError::into_inner)
                         .type_enum();
                     self.set_villager_data(VillagerData::new(r#type, claimed_profession, 1));
+                    self.generate_trades(claimed_profession, 1);
                 }
             }
         }
@@ -1435,6 +1515,74 @@ impl VillagerEntity {
         };
         player.client.try_enqueue_packet_editioned(&java, &bedrock);
     }
+
+    pub fn play_work_sound(&self) {
+        let profession = self
+            .villager_data
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .profession_enum();
+        if let Some(sound) = profession.work_sound() {
+            let entity = &self.mob_entity.living_entity.entity;
+            entity.world.load().play_sound_fine(
+                sound,
+                pumpkin_data::sound::SoundCategory::Neutral,
+                &entity.pos.load(),
+                1.0,
+                1.0,
+            );
+        }
+    }
+
+    #[must_use]
+    pub fn should_restock(&self) -> bool {
+        let world = self.mob_entity.living_entity.entity.world.load();
+        let game_time = world
+            .level_time
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .query_gametime();
+        let last_time = self.last_restock_time.load(Ordering::Relaxed);
+
+        if game_time > last_time + 12000 {
+            self.restocks_today.store(0, Ordering::Relaxed);
+        }
+
+        let restocks = self.restocks_today.load(Ordering::Relaxed);
+        let allowed = restocks == 0 || (restocks < 2 && game_time > last_time + 2400);
+        if !allowed {
+            return false;
+        }
+
+        let offers = self
+            .offers
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        offers.iter().any(|o| o.needs_restock())
+    }
+
+    pub fn restock(&self) {
+        let world = self.mob_entity.living_entity.entity.world.load();
+        let game_time = world
+            .level_time
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .query_gametime();
+
+        let mut offers = self
+            .offers
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        for offer in offers.iter_mut() {
+            offer.update_demand();
+            offer.reset_uses();
+        }
+        drop(offers);
+
+        self.last_restock_time.store(game_time, Ordering::Relaxed);
+        self.restocks_today.fetch_add(1, Ordering::Relaxed);
+        self.notify_trading_player_offers_updated();
+    }
 }
 
 impl ScreenHandlerFactory for VillagerEntity {
@@ -1584,9 +1732,22 @@ impl VillagerEntity {
                     .villager_data
                     .lock()
                     .unwrap_or_else(std::sync::PoisonError::into_inner);
-                data.level.0 += 1;
+                let new_level = (data.level.0 + 1).min(5);
+                data.level = VarInt(new_level);
                 self.set_villager_data(data);
-                self.add_trades(data.profession_enum(), data.level.0);
+                self.add_trades(data.profession_enum(), new_level);
+                let current_xp = self.xp.load(Ordering::Relaxed);
+                let bedrock_metadata = Self::bedrock_metadata(data, current_xp);
+                self.get_entity()
+                    .set_synced_data(tracked_data::villager::VILLAGER_DATA, data);
+                self.get_entity().send_bedrock_actor_data(&bedrock_metadata);
+                world.send_entity_status(
+                    self.get_entity(),
+                    pumpkin_data::entity::EntityStatus::VillagerHappy,
+                    Some(ActorEventID::VillagerHappy),
+                );
+                self.get_entity()
+                    .play_sound(pumpkin_data::sound::Sound::EntityVillagerYes);
             }
             self.mob_entity.living_entity.add_effect(Effect {
                 effect_type: &StatusEffect::REGENERATION,
@@ -1599,6 +1760,31 @@ impl VillagerEntity {
             });
         }
 
+        if self.is_trading.load(Ordering::Relaxed) {
+            if let Some(player) = self.get_trading_player() {
+                let player_pos = player.living_entity.entity.pos.load();
+                let my_pos = self.get_entity().pos.load();
+                self.get_entity().look_at(player.eye_position());
+                self.get_entity().head_yaw.store(self.get_entity().yaw.load());
+                self.get_entity().send_rotation();
+                let head_rot = (self.get_entity().yaw.load() * 256.0 / 360.0).rem_euclid(256.0) as u8;
+                self.get_entity().send_head_rot(head_rot);
+
+                let dist_sq = my_pos.squared_distance_to_vec(&player_pos);
+                let mut nav = self
+                    .get_mob_entity()
+                    .navigator
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+                if dist_sq > 4.0 {
+                    nav.set_progress(NavigatorGoal::new(my_pos, player_pos, 0.5));
+                } else {
+                    nav.stop();
+                }
+            }
+            return;
+        }
+
         let (game_time, day_time, day) = {
             let time = world
                 .level_time
@@ -1608,6 +1794,7 @@ impl VillagerEntity {
         };
         self.decay_gossips(game_time);
         self.work_at_job_site(game_time, day_time, day);
+        self.share_gossips(game_time, &world);
 
         let age = self.get_entity().age.load(Ordering::Relaxed);
         if age % 20 != 0 {
@@ -1633,13 +1820,16 @@ impl VillagerEntity {
                     .home_pos
                     .lock()
                     .unwrap_or_else(std::sync::PoisonError::into_inner) = None;
+                {
+                    let mut poi = world
+                        .villager_poi
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
+                    poi.release_bed(current_home, self.get_entity().entity_uuid);
+                    poi.update_bed(current_home, false);
+                }
                 if is_sleeping {
-                    // Wake up if bed was broken
-                    self.get_entity().set_pose(EntityPose::Standing);
-                    self.get_entity().set_synced_data(
-                        pumpkin_data::tracked_data::villager::SLEEPING_POS_ID,
-                        None::<BlockPos>,
-                    );
+                    self.wake_up_from_bed(&world, Some(current_home));
                 }
             }
         }
@@ -1647,58 +1837,107 @@ impl VillagerEntity {
         // If no bed, search for one
         if self.get_home_pos().is_none() {
             let pos = self.get_entity().block_pos.load();
-            let start = BlockPos::new(pos.0.x - 16, pos.0.y - 4, pos.0.z - 16);
-            let end = BlockPos::new(pos.0.x + 16, pos.0.y + 4, pos.0.z + 16);
-
-            let aabb = BoundingBox::new(
-                Vector3::new(
-                    pos.0.x as f64 - 32.0,
-                    pos.0.y as f64 - 16.0,
-                    pos.0.z as f64 - 32.0,
-                ),
-                Vector3::new(
-                    pos.0.x as f64 + 32.0,
-                    pos.0.y as f64 + 16.0,
-                    pos.0.z as f64 + 32.0,
-                ),
-            );
-            let nearby_entities = world.get_all_at_box(&aabb);
-
-            let mut claimed_homes = Vec::new();
-            for entity in nearby_entities {
-                if entity.get_entity().entity_id != self.get_entity().entity_id
-                    && entity.get_entity().entity_type
-                        == &pumpkin_data::entity::EntityType::VILLAGER
-                    && let Some(home) = entity.get_home_pos()
-                {
-                    claimed_homes.push(home);
-                }
-            }
-
+            let owner = self.poi_owner();
             let mut best_home = None;
-            let mut best_dist = f64::MAX;
 
-            for p in BlockPos::iterate(start, end) {
-                let (block, state) = world.get_block_and_state(&p);
+            // 1. POI fast lookup (up to 48 blocks)
+            let poi_beds = world
+                .villager_poi
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .available_beds(pos, 48);
+
+            for bed_pos in poi_beds {
+                let (block, state) = world.get_block_and_state(&bed_pos);
                 if block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_BEDS) {
                     let bed_props = BedProperties::from_state_id(state.id);
                     let bed_head_pos = if bed_props.part == BedPart::Head {
-                        p
+                        bed_pos
                     } else {
-                        p.offset(bed_props.facing.to_offset())
+                        bed_pos.offset(bed_props.facing.to_offset())
                     };
 
-                    if claimed_homes.contains(&bed_head_pos) {
-                        continue;
-                    }
-
-                    let dist = bed_head_pos
-                        .to_f64()
-                        .squared_distance_to_vec(&self.get_entity().pos.load());
-                    if dist < best_dist {
-                        best_dist = dist;
+                    if let Some(ref o) = owner {
+                        let claimed = world
+                            .villager_poi
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner)
+                            .claim_bed(bed_head_pos, o.clone());
+                        if claimed {
+                            best_home = Some(bed_head_pos);
+                            break;
+                        }
+                    } else {
                         best_home = Some(bed_head_pos);
+                        break;
                     }
+                }
+            }
+
+            // 2. Fallback block scan if POI didn't find an available bed
+            if best_home.is_none() {
+                let start = BlockPos::new(pos.0.x - 24, pos.0.y - 8, pos.0.z - 24);
+                let end = BlockPos::new(pos.0.x + 24, pos.0.y + 8, pos.0.z + 24);
+
+                let aabb = BoundingBox::new(
+                    Vector3::new(
+                        pos.0.x as f64 - 32.0,
+                        pos.0.y as f64 - 16.0,
+                        pos.0.z as f64 - 32.0,
+                    ),
+                    Vector3::new(
+                        pos.0.x as f64 + 32.0,
+                        pos.0.y as f64 + 16.0,
+                        pos.0.z as f64 + 32.0,
+                    ),
+                );
+                let nearby_entities = world.get_all_at_box(&aabb);
+
+                let mut claimed_homes = Vec::new();
+                for entity in nearby_entities {
+                    if entity.get_entity().entity_id != self.get_entity().entity_id
+                        && entity.get_entity().entity_type
+                            == &pumpkin_data::entity::EntityType::VILLAGER
+                        && let Some(home) = entity.get_home_pos()
+                    {
+                        claimed_homes.push(home);
+                    }
+                }
+
+                let mut best_dist = f64::MAX;
+
+                for p in BlockPos::iterate(start, end) {
+                    let (block, state) = world.get_block_and_state(&p);
+                    if block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_BEDS) {
+                        let bed_props = BedProperties::from_state_id(state.id);
+                        let bed_head_pos = if bed_props.part == BedPart::Head {
+                            p
+                        } else {
+                            p.offset(bed_props.facing.to_offset())
+                        };
+
+                        if claimed_homes.contains(&bed_head_pos) {
+                            continue;
+                        }
+
+                        let dist = bed_head_pos
+                            .to_centered_f64()
+                            .squared_distance_to_vec(&self.get_entity().pos.load());
+                        if dist < best_dist {
+                            best_dist = dist;
+                            best_home = Some(bed_head_pos);
+                        }
+                    }
+                }
+
+                if let Some(home) = best_home
+                    && let Some(ref o) = owner
+                {
+                    world
+                        .villager_poi
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner)
+                        .claim_bed(home, o.clone());
                 }
             }
 
@@ -1712,15 +1951,28 @@ impl VillagerEntity {
 
         // Handle Sleeping/Waking up based on time
         let is_sleeping = self.get_entity().pose.load() == EntityPose::Sleeping;
-        if let Some(home_pos) = self.get_home_pos() {
-            let time = world.get_time_of_day();
-            let is_night = (12000..=23000).contains(&time);
+        let is_night = day_time >= 12000;
 
+        // Vanilla check: If sleeping during daytime, or sleeping without a bed nearby, wake up!
+        if is_sleeping {
+            let has_bed = if let Some(home_pos) = self.get_home_pos() {
+                let (block, _) = world.get_block_and_state(&home_pos);
+                block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_BEDS)
+            } else {
+                false
+            };
+
+            if !is_night || !has_bed {
+                self.wake_up_from_bed(&world, self.get_home_pos());
+            }
+        }
+
+        if let Some(home_pos) = self.get_home_pos() {
             if is_night {
                 if !is_sleeping {
                     // Check distance to bed. If close enough, go to sleep
                     let dist = home_pos
-                        .to_f64()
+                        .to_centered_f64()
                         .squared_distance_to_vec(&self.get_entity().pos.load());
                     if dist <= 4.0 {
                         // Within 2 blocks (squared distance 4.0)
@@ -1731,6 +1983,18 @@ impl VillagerEntity {
                                 // Make bed occupied
                                 BedBlock::set_occupied(true, &world, block, &home_pos, state.id);
 
+                                let bed_center = Vector3::new(
+                                    f64::from(home_pos.0.x) + 0.5,
+                                    f64::from(home_pos.0.y) + 0.6875,
+                                    f64::from(home_pos.0.z) + 0.5,
+                                );
+                                self.get_entity().teleport(bed_center, None, None, &world);
+                                self.get_mob_entity()
+                                    .navigator
+                                    .lock()
+                                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                                    .stop();
+
                                 self.get_entity().set_pose(EntityPose::Sleeping);
                                 self.get_entity().set_synced_data(
                                     pumpkin_data::tracked_data::villager::SLEEPING_POS_ID,
@@ -1738,31 +2002,35 @@ impl VillagerEntity {
                                 );
                             }
                         }
+                    } else if age % 20 == 0 {
+                        // Not close enough yet, path towards bed
+                        let target = Vector3::new(
+                            f64::from(home_pos.0.x) + 0.5,
+                            f64::from(home_pos.0.y),
+                            f64::from(home_pos.0.z) + 0.5,
+                        );
+                        let my_pos = self.get_entity().pos.load();
+                        let mut nav = self
+                            .get_mob_entity()
+                            .navigator
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner);
+                        nav.set_progress(NavigatorGoal::new(my_pos, target, 0.5));
+                    }
+                } else {
+                    // Check if bed was destroyed while sleeping
+                    let (block, _) = world.get_block_and_state(&home_pos);
+                    if !block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_BEDS) {
+                        self.wake_up_from_bed(&world, Some(home_pos));
                     }
                 }
             } else if is_sleeping {
                 // It is day, wake up!
-                let (block, state) = world.get_block_and_state(&home_pos);
-                if block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_BEDS) {
-                    let bed_props = BedProperties::from_state_id(state.id);
-                    if bed_props.occupied {
-                        BedBlock::set_occupied(false, &world, block, &home_pos, state.id);
-                    }
-                }
-
-                self.get_entity().set_pose(EntityPose::Standing);
-                self.get_entity().set_synced_data(
-                    pumpkin_data::tracked_data::villager::SLEEPING_POS_ID,
-                    None::<BlockPos>,
-                );
+                self.wake_up_from_bed(&world, Some(home_pos));
             }
         } else if is_sleeping {
-            // Wake up during the day
-            self.get_entity().set_pose(EntityPose::Standing);
-            self.get_entity().set_synced_data(
-                pumpkin_data::tracked_data::villager::SLEEPING_POS_ID,
-                None::<BlockPos>,
-            );
+            // Wake up if home_pos is none
+            self.wake_up_from_bed(&world, None);
         }
 
         // 2. Iron Golem spawning logic (only for adults)
@@ -1773,60 +2041,215 @@ impl VillagerEntity {
             .profession_enum();
         if profession != VillagerProfession::Nitwit && age >= 0 {
             // Checked every 20 ticks, golem spawn check every ~100 ticks
+            let last_spawn = self.last_golem_spawn_time.load(Ordering::Relaxed);
             if age % 100 == 0 && self.get_home().is_some() {
-                // Check if panicked or talked recently to spawn an Iron Golem
                 let has_bed = self.get_home().is_some();
                 let has_worked =
                     game_time - self.last_worked_at_poi.load(Ordering::Relaxed) < 24000;
                 if has_bed && has_worked {
-                    // Check nearby villagers
                     let my_pos = self.get_entity().pos.load();
-                    let bb = BoundingBox::new(
+                    // Check if panicked (sees a hostile monster within 16 blocks)
+                    let panic_bb = BoundingBox::new(
                         my_pos.sub_raw(16.0, 8.0, 16.0),
                         my_pos.add_raw(16.0, 8.0, 16.0),
                     );
-                    let nearby_villagers = world
-                        .get_entities_at_box(&bb)
-                        .iter()
-                        .filter(|e| {
-                            e.get_entity().entity_type
-                                == &pumpkin_data::entity::EntityType::VILLAGER
-                        })
-                        .count();
+                    let panic_entities = world.get_entities_at_box(&panic_bb);
 
-                    if nearby_villagers >= 3 {
-                        // Check if an iron golem is already nearby
-                        let nearby_golems = world
-                            .get_entities_at_box(&bb)
+                    // Vanilla golem detection: if an alive Iron Golem is guarding this villager,
+                    // reset golem timer to now and don't spawn another one.
+                    let has_guarding_golem = panic_entities.iter().any(|e| {
+                        e.get_entity().entity_type
+                            == &pumpkin_data::entity::EntityType::IRON_GOLEM
+                            && e.get_entity().is_alive()
+                    });
+                    if has_guarding_golem {
+                        self.last_golem_spawn_time.store(game_time, Ordering::Relaxed);
+                        return;
+                    }
+
+                    let is_panicked = panic_entities.iter().any(|e| {
+                        let et = &e.get_entity().entity_type;
+                        (!et.category.is_friendly && et.id != pumpkin_data::entity::EntityType::CREEPER.id)
+                            || et.id == pumpkin_data::entity::EntityType::PILLAGER.id
+                            || et.id == pumpkin_data::entity::EntityType::VINDICATOR.id
+                            || et.id == pumpkin_data::entity::EntityType::EVOKER.id
+                            || et.id == pumpkin_data::entity::EntityType::RAVAGER.id
+                            || et.id == pumpkin_data::entity::EntityType::VEX.id
+                    });
+
+                    // Vanilla cooldown: 600 ticks (30s) if panicked, 12,000 ticks (10m) if peaceful gossip
+                    let required_cooldown = if is_panicked { 600 } else { 12000 };
+                    if game_time - last_spawn >= required_cooldown {
+                        // Count nearby villagers in the panic / meeting area (at least 3 villagers needed to spawn)
+                        let nearby_villagers = panic_entities
                             .iter()
                             .filter(|e| {
                                 e.get_entity().entity_type
-                                    == &pumpkin_data::entity::EntityType::IRON_GOLEM
+                                    == &pumpkin_data::entity::EntityType::VILLAGER
                             })
                             .count();
 
-                        if nearby_golems == 0 {
-                            // Attempt to spawn an Iron Golem
-                            let spawn_pos = my_pos.add_raw(0.0, 0.5, 0.0);
-                            let golem_entity = Entity::new(
-                                world.clone(),
-                                spawn_pos,
-                                &pumpkin_data::entity::EntityType::IRON_GOLEM,
+                        if nearby_villagers >= 3 {
+                            // Count existing golems in the full village radius (64x32x64)
+                            let village_bb = BoundingBox::new(
+                                my_pos.sub_raw(64.0, 32.0, 64.0),
+                                my_pos.add_raw(64.0, 32.0, 64.0),
                             );
-                            let golem = crate::entity::passive::iron_golem::IronGolemEntity::new(
-                                golem_entity,
-                            );
-                            world.spawn_entity_non_save(golem as Arc<dyn EntityBase>);
-                            world.send_entity_status(
-                                self.get_entity(),
-                                pumpkin_data::entity::EntityStatus::VillagerHappy,
-                                Some(ActorEventID::VillagerHappy),
-                            );
+                            let village_entities = world.get_entities_at_box(&village_bb);
+                            let nearby_golems = village_entities
+                                .iter()
+                                .filter(|e| {
+                                    e.get_entity().entity_type
+                                        == &pumpkin_data::entity::EntityType::IRON_GOLEM
+                                        && e.get_entity().is_alive()
+                                })
+                                .count();
+
+                            let total_village_villagers = village_entities
+                                .iter()
+                                .filter(|e| {
+                                    e.get_entity().entity_type
+                                        == &pumpkin_data::entity::EntityType::VILLAGER
+                                        && e.get_entity().is_alive()
+                                })
+                                .count();
+
+                            // Vanilla cap: 1 golem per 10 villagers in the village (minimum 1)
+                            let max_golems = (total_village_villagers / 10).max(1);
+
+                            if nearby_golems < max_golems {
+                                // Find a valid ground spawn position around the villager
+                                let mut spawn_pos = None;
+                                for _ in 0..10 {
+                                    let ox = rand::random_range(-6..=6);
+                                    let oz = rand::random_range(-6..=6);
+                                    let oy = rand::random_range(-2..=2);
+
+                                    let cand = BlockPos::new(
+                                        (my_pos.x as i32) + ox,
+                                        (my_pos.y as i32) + oy,
+                                        (my_pos.z as i32) + oz,
+                                    );
+                                    let cand_above = BlockPos::new(cand.0.x, cand.0.y + 1, cand.0.z);
+                                    let cand_above2 = BlockPos::new(cand.0.x, cand.0.y + 2, cand.0.z);
+                                    let cand_below = BlockPos::new(cand.0.x, cand.0.y - 1, cand.0.z);
+
+                                    let below_solid = world.get_block_state(&cand_below).is_solid();
+                                    let at_free = !world.get_block_state(&cand).is_solid();
+                                    let above_free = !world.get_block_state(&cand_above).is_solid()
+                                        && !world.get_block_state(&cand_above2).is_solid();
+
+                                    if below_solid && at_free && above_free {
+                                        spawn_pos = Some(Vector3::new(
+                                            cand.0.x as f64 + 0.5,
+                                            cand.0.y as f64,
+                                            cand.0.z as f64 + 0.5,
+                                        ));
+                                        break;
+                                    }
+                                }
+
+                                let spawn_pos = spawn_pos.unwrap_or_else(|| {
+                                    my_pos.add_raw(0.5, 0.0, 0.5)
+                                });
+
+                                let golem_entity = Entity::new(
+                                    world.clone(),
+                                    spawn_pos,
+                                    &pumpkin_data::entity::EntityType::IRON_GOLEM,
+                                );
+                                let golem = crate::entity::passive::iron_golem::IronGolemEntity::new(
+                                    golem_entity,
+                                );
+                                world.spawn_entity_non_save(golem as Arc<dyn EntityBase>);
+                                world.send_entity_status(
+                                    self.get_entity(),
+                                    pumpkin_data::entity::EntityStatus::VillagerHappy,
+                                    Some(ActorEventID::VillagerHappy),
+                                );
+
+                                // Apply cooldown to self and all villagers in full village radius (64 blocks)
+                                self.last_golem_spawn_time.store(game_time, Ordering::Relaxed);
+                                for ent in &village_entities {
+                                    if let Some(other_villager) = ent.cast_any().downcast_ref::<VillagerEntity>() {
+                                        other_villager.last_golem_spawn_time.store(game_time, Ordering::Relaxed);
+                                    }
+                                }
+                            } else {
+                                // Village is already at golem cap, reset timer to avoid re-evaluating every cycle
+                                self.last_golem_spawn_time.store(game_time, Ordering::Relaxed);
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    fn find_stand_up_position(world: &World, bed_pos: BlockPos) -> Vector3<f64> {
+        let offsets = [
+            (1, 0),
+            (-1, 0),
+            (0, 1),
+            (0, -1),
+            (1, 1),
+            (-1, -1),
+            (1, -1),
+            (-1, 1),
+        ];
+
+        for &(dx, dz) in &offsets {
+            for dy in [0, -1, 1] {
+                let stand_pos = bed_pos.add(dx, dy, dz);
+                let head_pos = stand_pos.add(0, 1, 0);
+                let below_pos = stand_pos.add(0, -1, 0);
+
+                let (stand_block, stand_state) = world.get_block_and_state(&stand_pos);
+                let (head_block, head_state) = world.get_block_and_state(&head_pos);
+                let (below_block, below_state) = world.get_block_and_state(&below_pos);
+
+                let stand_passable = !blocks_movement(stand_state, stand_block.id)
+                    && !stand_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_BEDS);
+                let head_passable = !blocks_movement(head_state, head_block.id);
+                let floor_solid = blocks_movement(below_state, below_block.id);
+
+                if stand_passable && head_passable && floor_solid {
+                    return Vector3::new(
+                        f64::from(stand_pos.0.x) + 0.5,
+                        f64::from(stand_pos.0.y),
+                        f64::from(stand_pos.0.z) + 0.5,
+                    );
+                }
+            }
+        }
+
+        // Fallback: Stand on top of the bed
+        Vector3::new(
+            f64::from(bed_pos.0.x) + 0.5,
+            f64::from(bed_pos.0.y) + 1.0,
+            f64::from(bed_pos.0.z) + 0.5,
+        )
+    }
+
+    pub fn wake_up_from_bed(&self, world: &Arc<World>, bed_pos: Option<BlockPos>) {
+        let pos = bed_pos.or_else(|| self.get_home_pos());
+        if let Some(pos) = pos {
+            let (block, state) = world.get_block_and_state(&pos);
+            if block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_BEDS) {
+                let bed_props = BedProperties::from_state_id(state.id);
+                if bed_props.occupied {
+                    BedBlock::set_occupied(false, world, block, &pos, state.id);
+                }
+            }
+            let stand_pos = Self::find_stand_up_position(world, pos);
+            self.get_entity().teleport(stand_pos, None, None, world);
+        }
+
+        self.get_entity().set_pose(EntityPose::Standing);
+        self.get_entity().set_synced_data(
+            pumpkin_data::tracked_data::villager::SLEEPING_POS_ID,
+            None::<BlockPos>,
+        );
     }
 }
 
@@ -1967,15 +2390,44 @@ impl Mob for VillagerEntity {
                 .villager_data
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
-            if let Some(t) = villager_data_nbt.get_int("Type") {
+            if let Some(t_str) = villager_data_nbt
+                .get_string("type")
+                .or_else(|| villager_data_nbt.get_string("Type"))
+            {
+                let vtype = data::parse_villager_type(t_str);
+                data.r#type = VarInt(vtype as i32);
+            } else if let Some(t) = villager_data_nbt
+                .get_int("Type")
+                .or_else(|| villager_data_nbt.get_int("type"))
+            {
                 data.r#type = VarInt(t);
             }
-            if let Some(p) = villager_data_nbt.get_int("Profession") {
+
+            if let Some(p_str) = villager_data_nbt
+                .get_string("profession")
+                .or_else(|| villager_data_nbt.get_string("Profession"))
+            {
+                let vprof = data::parse_villager_profession(p_str);
+                data.profession = VarInt(vprof as i32);
+            } else if let Some(p) = villager_data_nbt
+                .get_int("Profession")
+                .or_else(|| villager_data_nbt.get_int("profession"))
+            {
                 data.profession = VarInt(p);
             }
-            if let Some(l) = villager_data_nbt.get_int("Level") {
+
+            if let Some(l) = villager_data_nbt
+                .get_int("Level")
+                .or_else(|| villager_data_nbt.get_int("level"))
+            {
                 data.level = VarInt(l);
             }
+            let data_copy = *data;
+            let bedrock_metadata =
+                Self::bedrock_metadata(data_copy, self.xp.load(Ordering::Relaxed));
+            self.get_entity()
+                .set_synced_data(tracked_data::villager::VILLAGER_DATA, data_copy);
+            self.get_entity().send_bedrock_actor_data(&bedrock_metadata);
         }
 
         if let Some(food) = nbt.get_int("FoodLevel") {
@@ -2082,6 +2534,24 @@ impl Mob for VillagerEntity {
             }
         }
 
+        let (prof, level) = {
+            let data = self
+                .villager_data
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            (data.profession_enum(), data.level.0)
+        };
+        if prof != VillagerProfession::None && prof != VillagerProfession::Nitwit {
+            let has_offers = !self
+                .offers
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .is_empty();
+            if !has_offers {
+                self.generate_trades(prof, level.max(1));
+            }
+        }
+
         // Inventory
         if let Some(inventory_list) = nbt.get_list("Inventory") {
             let mut inventory = self
@@ -2135,6 +2605,10 @@ impl Mob for VillagerEntity {
 
     fn get_mob_entity(&self) -> &MobEntity {
         &self.mob_entity
+    }
+
+    fn remove_when_far_away(&self, _distance_sq: f64) -> bool {
+        false
     }
 
     fn mob_bedrock_identifier(&self) -> Option<&'static str> {
@@ -2197,6 +2671,13 @@ impl Mob for VillagerEntity {
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner) = None;
             self.job_site_pending.store(false, Ordering::Relaxed);
+        }
+    }
+
+    fn work_at_job_site(&self) {
+        self.play_work_sound();
+        if self.should_restock() {
+            self.restock();
         }
     }
 
@@ -2270,23 +2751,65 @@ impl Mob for VillagerEntity {
         _damage_type: pumpkin_data::damage::DamageType,
         source: Option<&dyn EntityBase>,
     ) {
-        let Some(source) = source.filter(|source| {
-            source.get_entity().entity_type == &pumpkin_data::entity::EntityType::PLAYER
-        }) else {
+        let Some(source) = source else {
             return;
         };
 
-        let Some(player) = source.cast_any().downcast_ref::<Player>() else {
-            return;
-        };
+        let villager_pos = self.mob_entity.living_entity.entity.pos.load();
+        let world = self.mob_entity.living_entity.entity.world.load();
 
-        if let Ok(mut gossips) = self.gossips.try_lock() {
-            let value = gossips
-                .entry(player.gameprofile.id)
-                .or_default()
-                .entry(GossipType::MinorNegative)
-                .or_default();
-            *value = (*value + 25).min(GossipType::MinorNegative.max_value());
+        if let Some(player) = source.cast_any().downcast_ref::<Player>() {
+            if let Ok(mut gossips) = self.gossips.try_lock() {
+                let value = gossips
+                    .entry(player.gameprofile.id)
+                    .or_default()
+                    .entry(GossipType::MinorNegative)
+                    .or_default();
+                *value = (*value + 25).min(GossipType::MinorNegative.max_value());
+            }
+
+            if !player.is_creative() && !player.is_spectator() {
+                if let Some(player_arc) =
+                    world.get_player_by_id(player.living_entity.entity.entity_id)
+                {
+                    let target_base: Arc<dyn EntityBase> = player_arc;
+                    for entity in world.entities.load().iter() {
+                        if entity.get_entity().entity_type
+                            == &pumpkin_data::entity::EntityType::IRON_GOLEM
+                        {
+                            let golem_pos = entity.get_entity().pos.load();
+                            if (golem_pos - villager_pos).length_squared() <= 64.0 * 64.0 {
+                                if let Some(golem) = entity
+                                    .cast_any()
+                                    .downcast_ref::<crate::entity::passive::iron_golem::IronGolemEntity>()
+                                {
+                                    if !golem.is_player_created() {
+                                        golem.mob_entity.set_target(Some(target_base.clone()));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else if let Some(living) = source.get_living_entity() {
+            if let Some(source_arc) = world.get_entity_by_id(living.entity.entity_id) {
+                for entity in world.entities.load().iter() {
+                    if entity.get_entity().entity_type
+                        == &pumpkin_data::entity::EntityType::IRON_GOLEM
+                    {
+                        let golem_pos = entity.get_entity().pos.load();
+                        if (golem_pos - villager_pos).length_squared() <= 64.0 * 64.0 {
+                            if let Some(golem) = entity
+                                .cast_any()
+                                .downcast_ref::<crate::entity::passive::iron_golem::IronGolemEntity>()
+                            {
+                                golem.mob_entity.set_target(Some(source_arc.clone()));
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

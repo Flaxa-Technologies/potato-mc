@@ -72,12 +72,12 @@ impl BlockBehaviour for BambooBlock {
     fn on_scheduled_tick(&self, args: OnScheduledTickArgs<'_>) {
         if !<Self as PlantBlockBase>::can_place_at(self, args.world.as_ref(), args.position) {
             args.world
-                .break_block(args.position, None, BlockFlags::empty());
+                .break_block(args.position, None, BlockFlags::NOTIFY_ALL);
         } else if args.world.get_block(&args.position.down()) == &Block::BAMBOO_SAPLING {
             args.world.set_block_state(
                 &args.position.down(),
                 Block::BAMBOO.default_state.id,
-                BlockFlags::empty(),
+                BlockFlags::NOTIFY_ALL,
             );
         }
     }
@@ -106,8 +106,16 @@ impl BlockBehaviour for BambooBlock {
     }
 
     fn random_tick(&self, args: RandomTickArgs<'_>) {
-        if rand::rng().random_range(0..=3) == 0 {
-            update_leaves_and_grow(args.world, args.position);
+        // Vanilla: random.nextInt(3) == 0 → 1-in-3 chance (not 1-in-4).
+        if rand::rng().random_range(0..3) == 0 {
+            // Vanilla: level.getRawBrightness(pos.above(), 0) >= 9
+            // Raw brightness = max(blockLight, skyLight) with no sky-darken offset.
+            let above = args.position.up();
+            let sky = args.world.get_sky_light_level(&above);
+            let block = args.world.get_block_light_level(&above).unwrap_or(0);
+            if sky.max(block) >= 9 {
+                update_leaves_and_grow(args.world, args.position);
+            }
         }
     }
 
@@ -134,7 +142,9 @@ fn update_leaves_and_grow(world: &Arc<World>, position: &BlockPos) {
     }
 
     let bamboo_count = count_bamboo_below(world, position);
-    if bamboo_count >= 16 {
+    // Vanilla: height = below + 1; if (height < 16) grow
+    // height < 16  ↔  below < 15  ↔  bamboo_count < 15
+    if bamboo_count >= 15 {
         return;
     }
     let (block_below, state_id_below) = world.get_block_and_state_id(&below_pos);
@@ -171,10 +181,15 @@ fn update_leaves_and_grow(world: &Arc<World>, position: &BlockPos) {
         }
     }
 
-    props.age = u8::from(!(props.age != 1 && block_two_below == &Block::BAMBOO));
+    // Vanilla: age = (state.AGE != 1 && !twoBelowState.is(BAMBOO)) ? 0 : 1
+    // age=1 (thick) when current is already thick OR two below is bamboo.
+    props.age = u8::from(!(props.age != 1 && block_two_below != &Block::BAMBOO));
 
+    // Vanilla: height = below+1; stage = (height < 11 || random >= 0.25) && height != 15 ? 0 : 1
+    // Must use height (includes current block) to match vanilla thresholds.
+    let height = bamboo_count + 1;
     props.stage = u8::from(
-        !((bamboo_count < 11 || rand::rng().random::<f32>() >= 0.25) && bamboo_count != 15),
+        !((height < 11 || rand::rng().random::<f32>() >= 0.25) && height != 15),
     );
 
     world.set_block_state(&above_pos, props.to_state_id(block), BlockFlags::NOTIFY_ALL);

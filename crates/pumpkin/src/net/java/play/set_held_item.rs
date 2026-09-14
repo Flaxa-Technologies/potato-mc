@@ -24,6 +24,24 @@ impl JavaClient {
         let inv = player.inventory();
         inv.set_selected_slot(slot);
         let stack = inv.held_item();
+        if previous_slot != slot {
+            let is_spear = stack
+                .get_data_component::<pumpkin_data::data_component_impl::PiercingWeaponImpl>()
+                .is_some()
+                || stack.item.registry_key.contains("spear");
+            let switch_delay = server
+                .spear_switch_delay
+                .load(std::sync::atomic::Ordering::Relaxed);
+            if is_spear && switch_delay == 0 {
+                player
+                    .last_attacked_ticks
+                    .store(100, std::sync::atomic::Ordering::Relaxed);
+            } else {
+                player
+                    .last_attacked_ticks
+                    .store(0, std::sync::atomic::Ordering::Relaxed);
+            }
+        }
         let equipment = &[(EquipmentSlot::MAIN_HAND, stack)];
         player.living_entity.send_equipment_changes(equipment);
     }

@@ -128,15 +128,27 @@ pub fn get_sky_light(cache: &Cache, pos: BlockPos) -> u8 {
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
             if section_y >= light_engine.sky_light.len() {
-                return 0;
+                return 15;
             }
             light_engine.sky_light[section_y].get(x, y, z)
         }
         Chunk::Proto(c) => {
             if section_y >= c.light.sky_light.len() {
-                return 0;
+                return 15;
             }
-            c.light.sky_light[section_y].get(x, y, z)
+            match &c.light.sky_light[section_y] {
+                crate::chunk::format::LightContainer::Full(data) => {
+                    let index = y * 16 * 16 + z * 16 + x;
+                    (data[index >> 1] >> (4 * (index & 1))) & 0x0F
+                }
+                crate::chunk::format::LightContainer::Empty(val) => {
+                    if *val == 0 && pos.0.y >= c.top_block_height_exclusive(x as i32, z as i32) {
+                        15
+                    } else {
+                        *val
+                    }
+                }
+            }
         }
     }
 }

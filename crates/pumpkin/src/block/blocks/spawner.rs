@@ -17,7 +17,10 @@ impl BlockBehaviour for SpawnerBlock {
 
     fn placed(&self, args: PlacedArgs<'_>) {
         {
-            let spawner_block_entity = MobSpawnerBlockEntity::new(*args.position, None);
+            let spawner_block_entity = MobSpawnerBlockEntity::new(
+                *args.position,
+                Some(MobSpawnerBlockEntity::DEFAULT_ENTITY_TYPE),
+            );
             args.world.add_block_entity(Arc::new(spawner_block_entity));
         }
     }

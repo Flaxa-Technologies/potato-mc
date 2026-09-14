@@ -173,6 +173,12 @@ pub trait EntityBase: Send + Sync + std::any::Any {
         None
     }
 
+    fn hear_noteblock(&self, _pos: pumpkin_util::math::position::BlockPos) {}
+
+    fn hear_jukebox(&self, _pos: pumpkin_util::math::position::BlockPos, _is_playing: bool) {}
+
+    fn open_custom_inventory_screen(&self, _player: &std::sync::Arc<crate::entity::player::Player>) {}
+
     fn as_any(&self) -> &dyn std::any::Any
     where
         Self: Sized,
@@ -500,34 +506,38 @@ pub trait EntityBase: Send + Sync + std::any::Any {
         let mut dx = other_entity.pos.load().x - self_entity.pos.load().x;
         let mut dz = other_entity.pos.load().z - self_entity.pos.load().z;
         let mut d = dx.abs().max(dz.abs());
-        if d >= 0.01 {
-            d = d.sqrt();
-            dx /= d;
-            dz /= d;
-            let mut d2 = 1.0 / d;
-            if d2 > 1.0 {
-                d2 = 1.0;
-            }
-            dx *= d2;
-            dz *= d2;
-            dx *= 0.05;
-            dz *= 0.05;
+        if d < 0.01 {
+            let angle = rand::random::<f64>() * std::f64::consts::TAU;
+            dx = angle.cos() * 0.1;
+            dz = angle.sin() * 0.1;
+            d = 0.1;
+        }
+        d = d.sqrt();
+        dx /= d;
+        dz /= d;
+        let mut d2 = 1.0 / d;
+        if d2 > 1.0 {
+            d2 = 1.0;
+        }
+        dx *= d2;
+        dz *= d2;
+        dx *= 0.05;
+        dz *= 0.05;
 
-            if !self_entity.has_passengers() && self.is_pushable() {
-                let mut vel = self_entity.velocity.load();
-                vel.x -= dx;
-                vel.z -= dz;
-                self_entity.velocity.store(vel);
-                self_entity.send_velocity();
-            }
+        if !self_entity.has_passengers() && self.is_pushable() {
+            let mut vel = self_entity.velocity.load();
+            vel.x -= dx;
+            vel.z -= dz;
+            self_entity.velocity.store(vel);
+            self_entity.send_velocity();
+        }
 
-            if !other_entity.has_passengers() && entity.is_pushable() {
-                let mut vel = other_entity.velocity.load();
-                vel.x += dx;
-                vel.z += dz;
-                other_entity.velocity.store(vel);
-                other_entity.send_velocity();
-            }
+        if !other_entity.has_passengers() && entity.is_pushable() {
+            let mut vel = other_entity.velocity.load();
+            vel.x += dx;
+            vel.z += dz;
+            other_entity.velocity.store(vel);
+            other_entity.send_velocity();
         }
     }
 
@@ -630,19 +640,35 @@ pub trait EntityBase: Send + Sync + std::any::Any {
             }
         } else {
             let other_entities = world.get_entities_at_box(&entity_bb);
-            for other in other_entities {
+            let mut colliding_living_count = 0;
+            for other in &other_entities {
                 if other.get_entity().entity_id != self_entity.entity_id {
+                    if other.is_pushable() && !other.is_passenger() {
+                        colliding_living_count += 1;
+                    }
                     dyn_self.push(other.as_ref());
                     pushed = true;
                 }
             }
 
             let players = world.get_players_at_box(&entity_bb);
-            for player in players {
+            for player in &players {
                 if player.get_entity().entity_id != self_entity.entity_id {
+                    if player.is_pushable() && !player.is_passenger() {
+                        colliding_living_count += 1;
+                    }
                     dyn_self.push(player.as_ref());
                     pushed = true;
                 }
+            }
+
+            // Vanilla maxEntityCramming check (LivingEntity.java:pushEntities)
+            let max_cramming = world.level_info.load().game_rules.max_entity_cramming;
+            if max_cramming > 0
+                && colliding_living_count >= max_cramming as usize
+                && rand::random::<u8>() % 4 == 0
+            {
+                dyn_self.damage(dyn_self, 6.0, DamageType::CRAMMING);
             }
         }
 
@@ -1462,6 +1488,121 @@ impl Entity {
             }
         }
 
+        let x_collision = (movement.x - adjusted_movement.x).abs() > 1.0e-5;
+        let z_collision = (movement.z - adjusted_movement.z).abs() > 1.0e-5;
+        let y_collision = (movement.y - adjusted_movement.y).abs() > 1.0e-5;
+        let on_ground_after_collision = y_collision && movement.y < 0.0;
+        let is_grounded = on_ground_after_collision || self.on_ground.load(Ordering::Relaxed);
+
+        let max_up_step = caller.get_living_entity().map_or(0.0, |l| {
+            l.get_attribute_value(&pumpkin_data::attributes::Attributes::STEP_HEIGHT)
+        });
+
+        if max_up_step > 0.0 && is_grounded && (x_collision || z_collision) {
+            let grounded_box = if on_ground_after_collision {
+                bounding_box.shift(Vector3::new(0.0, adjusted_movement.y, 0.0))
+            } else {
+                bounding_box
+            };
+
+            let step_up_box = grounded_box
+                .stretch(Vector3::new(movement.x, max_up_step, movement.z));
+            let (step_collisions, _) = self
+                .world
+                .load()
+                .get_block_collisions(step_up_box, caller);
+
+            let mut candidate_heights = Vec::new();
+            for inert_box in &step_collisions {
+                let h = inert_box.max.y - grounded_box.min.y;
+                if h > 1.0e-5 && h <= max_up_step + 1.0e-5 {
+                    candidate_heights.push(h.min(max_up_step));
+                }
+            }
+            candidate_heights.push(max_up_step);
+            candidate_heights.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+            candidate_heights.dedup_by(|a, b| (*a - *b).abs() < 1.0e-4);
+
+            let normal_dist_sq = adjusted_movement.x * adjusted_movement.x
+                + adjusted_movement.z * adjusted_movement.z;
+            let mut best_step: Option<Vector3<f64>> = None;
+            let mut best_dist_sq = normal_dist_sq;
+
+            for candidate_h in candidate_heights {
+                let up_movement = Vector3::new(0.0, candidate_h, 0.0);
+                let mut max_time_up = 1.0;
+                for inert_box in &step_collisions {
+                    if let Some(time) = grounded_box.calculate_collision_time(
+                        inert_box,
+                        up_movement,
+                        Axis::Y,
+                        max_time_up,
+                    ) {
+                        max_time_up = time;
+                    }
+                }
+                let actual_up = candidate_h * max_time_up;
+                if actual_up < 1.0e-4 {
+                    continue;
+                }
+
+                let stepped_box = grounded_box.shift(Vector3::new(0.0, actual_up, 0.0));
+                let mut stepped_horiz = Vector3::new(movement.x, 0.0, movement.z);
+                for axis in Axis::horizontal() {
+                    let mut max_time_h = 1.0;
+                    for inert_box in &step_collisions {
+                        if let Some(time) = stepped_box.calculate_collision_time(
+                            inert_box,
+                            stepped_horiz,
+                            axis,
+                            max_time_h,
+                        ) {
+                            max_time_h = time;
+                        }
+                    }
+                    if max_time_h != 1.0 {
+                        let comp = stepped_horiz.get_axis(axis) * max_time_h;
+                        stepped_horiz.set_axis(axis, comp);
+                    }
+                }
+
+                let step_dist_sq =
+                    stepped_horiz.x * stepped_horiz.x + stepped_horiz.z * stepped_horiz.z;
+                if step_dist_sq > best_dist_sq + 1.0e-5 {
+                    let stepped_end_box = stepped_box.shift(stepped_horiz);
+                    let down_movement = Vector3::new(0.0, -actual_up, 0.0);
+                    let mut max_time_down = 1.0;
+                    for inert_box in &step_collisions {
+                        if let Some(time) = stepped_end_box.calculate_collision_time(
+                            inert_box,
+                            down_movement,
+                            Axis::Y,
+                            max_time_down,
+                        ) {
+                            max_time_down = time;
+                        }
+                    }
+                    let actual_down = -actual_up * max_time_down;
+                    let final_step_y = actual_up + actual_down;
+
+                    best_dist_sq = step_dist_sq;
+                    best_step = Some(Vector3::new(
+                        stepped_horiz.x,
+                        adjusted_movement.y + final_step_y,
+                        stepped_horiz.z,
+                    ));
+                }
+            }
+
+            if let Some(stepped) = best_step {
+                adjusted_movement = stepped;
+                let new_x_col = (movement.x - adjusted_movement.x).abs() > 1.0e-5;
+                let new_z_col = (movement.z - adjusted_movement.z).abs() > 1.0e-5;
+                horizontal_collision = new_x_col || new_z_col;
+                self.on_ground.store(true, Ordering::SeqCst);
+            }
+        }
+
         self.horizontal_collision
             .store(horizontal_collision, Ordering::SeqCst);
 
@@ -1681,6 +1822,31 @@ impl Entity {
         let old = self.last_sent_pos.load();
         let new = self.pos.load();
         let chunk_pos = self.chunk_pos.load();
+        let dx = new.x - old.x;
+        let dy = new.y - old.y;
+        let dz = new.z - old.z;
+
+        if dx.abs() >= 8.0 || dy.abs() >= 8.0 || dz.abs() >= 8.0 {
+            self.last_sent_pos.store(new);
+            let yaw_f = self.yaw.load();
+            let pitch_f = self.pitch.load();
+            let yaw_u8 = (yaw_f * 256.0 / 360.0).rem_euclid(256.0) as u8;
+            let pitch_u8 = (pitch_f * 256.0 / 360.0).rem_euclid(256.0) as u8;
+            self.last_sent_yaw.store(yaw_u8, Relaxed);
+            self.last_sent_pitch.store(pitch_u8, Relaxed);
+            self.world.load().broadcast_to_chunk(
+                chunk_pos,
+                &CEntityPositionSync::new(
+                    self.entity_id.into(),
+                    new,
+                    self.velocity.load(),
+                    yaw_f,
+                    pitch_f,
+                    self.on_ground.load(Relaxed),
+                ),
+            );
+            return;
+        }
 
         let converted = Vector3::new(
             new.x.mul_add(4096.0, -(old.x * 4096.0)) as i16,
@@ -1891,6 +2057,26 @@ impl Entity {
         let old = self.last_sent_pos.load();
         let new = self.pos.load();
         let chunk_pos = self.chunk_pos.load();
+
+        let dx = new.x - old.x;
+        let dy = new.y - old.y;
+        let dz = new.z - old.z;
+
+        if dx.abs() >= 8.0 || dy.abs() >= 8.0 || dz.abs() >= 8.0 {
+            self.last_sent_pos.store(new);
+            self.world.load().broadcast_to_chunk(
+                chunk_pos,
+                &CEntityPositionSync::new(
+                    self.entity_id.into(),
+                    new,
+                    self.velocity.load(),
+                    self.yaw.load(),
+                    self.pitch.load(),
+                    self.on_ground.load(Relaxed),
+                ),
+            );
+            return;
+        }
 
         let converted = Vector3::new(
             new.x.mul_add(4096.0, -(old.x * 4096.0)) as i16,
@@ -2755,8 +2941,11 @@ impl Entity {
     pub fn set_rotation(&self, yaw: f32, pitch: f32) {
         // TODO
         self.yaw.store(yaw);
+        self.head_yaw.store(yaw);
+        self.body_yaw.store(yaw);
         self.set_pitch(pitch);
     }
+
 
     pub fn set_pitch(&self, pitch: f32) {
         self.pitch.store(pitch.clamp(-90.0, 90.0) % 360.0);
@@ -4249,7 +4438,9 @@ impl Entity {
             self.last_sent_yaw.store(yaw_byte, Relaxed);
             self.last_sent_pitch.store(pitch_byte, Relaxed);
             self.head_yaw.store(yaw);
+            self.body_yaw.store(yaw);
             self.last_sent_head_yaw.store(yaw_byte, Relaxed);
+
         }
         self.fire_ticks
             .store(i32::from(nbt.get_short("Fire").unwrap_or(0)), Relaxed);

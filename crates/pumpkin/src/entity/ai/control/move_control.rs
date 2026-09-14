@@ -58,12 +58,14 @@ impl MoveControlTrait for MoveControl {
         let mob_entity = mob.get_mob_entity();
         let living_entity = &mob_entity.living_entity;
         let entity = &living_entity.entity;
+        let movement_speed = living_entity.get_attribute_value(&Attributes::MOVEMENT_SPEED);
         if self.operation == Operation::Strafe {
             // TODO: is_walkable check
+            let speed = (self.speed_modifier * movement_speed).clamp(-1.0, 1.0);
             living_entity.movement_input.store(Vector3::new(
-                self.strafe_right as f64,
+                self.strafe_right as f64 * speed,
                 0.0,
-                self.strafe_forwards as f64,
+                self.strafe_forwards as f64 * speed,
             ));
             // Vanilla sets speed here too
             self.operation = Operation::Wait;
@@ -82,13 +84,14 @@ impl MoveControlTrait for MoveControl {
                 return;
             }
 
-            let y_rot_d = (zd.atan2(xd).to_degrees() as f32) - 90.0;
-            entity
-                .yaw
-                .store(self.change_angle(entity.yaw.load(), y_rot_d, 90.0));
+            if xd * xd + zd * zd > 0.0025 {
+                let y_rot_d = (zd.atan2(xd).to_degrees() as f32) - 90.0;
+                entity
+                    .yaw
+                    .store(self.change_angle(entity.yaw.load(), y_rot_d, 90.0));
+            }
 
-            let movement_speed = living_entity.get_attribute_value(&Attributes::MOVEMENT_SPEED);
-            let speed = self.speed_modifier * movement_speed;
+            let speed = (self.speed_modifier * movement_speed).clamp(-1.0, 1.0);
             living_entity
                 .movement_input
                 .store(Vector3::new(0.0, 0.0, speed));
@@ -102,8 +105,7 @@ impl MoveControlTrait for MoveControl {
                 self.operation = Operation::Jumping;
             }
         } else if self.operation == Operation::Jumping {
-            let movement_speed = living_entity.get_attribute_value(&Attributes::MOVEMENT_SPEED);
-            let speed = self.speed_modifier * movement_speed;
+            let speed = (self.speed_modifier * movement_speed).clamp(-1.0, 1.0);
             living_entity
                 .movement_input
                 .store(Vector3::new(0.0, 0.0, speed));
@@ -112,8 +114,6 @@ impl MoveControlTrait for MoveControl {
                 self.operation = Operation::Wait;
             }
         }
-
-        // Navigator owns movement input while this controller waits.
     }
 
     fn set_wanted_position(&mut self, x: f64, y: f64, z: f64, speed_modifier: f64) {

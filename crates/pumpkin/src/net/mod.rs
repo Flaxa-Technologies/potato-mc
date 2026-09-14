@@ -253,6 +253,14 @@ impl ClientPlatform {
         }
     }
 
+    #[must_use]
+    pub fn is_network_congested(&self) -> bool {
+        match self {
+            Self::Java(java) => java.is_network_congested(),
+            Self::Bedrock(_) => false,
+        }
+    }
+
     pub fn try_enqueue_spawn_packet(&self, entity: &Arc<dyn crate::entity::EntityBase>) {
         self.enqueue_spawn_packet(entity);
     }

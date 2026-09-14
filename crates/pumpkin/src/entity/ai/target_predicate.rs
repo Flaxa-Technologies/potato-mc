@@ -135,6 +135,13 @@ impl TargetPredicate {
             return false;
         }
 
+        if let Some(predicate) = &self.predicate {
+            if !predicate(target, world) {
+                return false;
+            }
+        }
+
         true
     }
 }
+

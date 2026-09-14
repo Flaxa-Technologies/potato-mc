@@ -1,0 +1,12 @@
+﻿[package]
+name = "test-plugin"
+version = "0.1.0"
+edition = "2024"
+authors = ["PotatoMC Team"]
+description = "Test plugin demonstrating PotatoMC native Rust plugin API"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+potato-api = { path = "../potato-api" }

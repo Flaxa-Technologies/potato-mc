@@ -44,16 +44,18 @@ impl WitherSkullEntity {
         dangerous: bool,
         direction: Vector3<f64>,
     ) -> Self {
+        let spawn_pos = entity.pos.load();
         let thrown = ThrownItemEntity::new(entity, shooter, GRAVITY);
+        thrown.entity.pos.store(spawn_pos);
+
         let speed = 0.95;
         let vel = direction.normalize().multiply(speed, speed, speed);
         thrown.entity.velocity.store(vel);
 
         let len = vel.horizontal_length();
-        thrown.entity.set_rotation(
-            vel.x.atan2(vel.z) as f32 * 57.295_776,
-            vel.y.atan2(len) as f32 * 57.295_776,
-        );
+        let yaw = (vel.z.atan2(vel.x).to_degrees() as f32) - 90.0;
+        let pitch = -(vel.y.atan2(len).to_degrees() as f32);
+        thrown.entity.set_rotation(yaw, pitch);
 
         Self {
             thrown,
@@ -119,9 +121,27 @@ impl EntityBase for WitherSkullEntity {
         if let ProjectileHit::Entity { ref entity, .. } = hit {
             let difficulty = world.level_info.load().difficulty;
 
-            let _ = entity.damage(entity.as_ref(), 8.0, DamageType::WITHER_SKULL);
+            let owner_opt = self
+                .get_owner_id()
+                .and_then(|id| world.get_entity_by_id(id));
+            let damage_dealer: &dyn EntityBase = match &owner_opt {
+                Some(owner) => owner.as_ref(),
+                None => self,
+            };
 
-            if let Some(living) = entity.get_living_entity() {
+            let was_hurt = entity.damage(damage_dealer, 8.0, DamageType::WITHER_SKULL);
+
+            if was_hurt {
+                if !entity.get_entity().is_alive() {
+                    // Vanilla: If entity was killed by wither skull, heal wither by 5.0 HP
+                    if let Some(owner_id) = self.get_owner_id()
+                        && let Some(owner) = world.get_entity_by_id(owner_id)
+                        && let Some(living_owner) = owner.get_living_entity()
+                    {
+                        living_owner.heal(5.0);
+                    }
+                }
+
                 let duration = match difficulty {
                     Difficulty::Hard => 800,   // 40 seconds
                     Difficulty::Normal => 200, // 10 seconds
@@ -140,7 +160,7 @@ impl EntityBase for WitherSkullEntity {
                     };
                     if let Some(player) = entity.get_player() {
                         player.add_effect(effect);
-                    } else {
+                    } else if let Some(living) = entity.get_living_entity() {
                         living.add_effect(effect);
                     }
                 }

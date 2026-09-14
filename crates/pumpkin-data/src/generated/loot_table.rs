@@ -7801,7 +7801,10 @@ static BLOCKS_FERN_POOL0_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::NoSilkTouchOrShears,
+        condition: LootCondition::AllOf(&[
+            LootCondition::NoSilkTouchOrShears,
+            LootCondition::RandomChance { chance: 0.125 },
+        ]),
         bonus_formula: Some(LootBonusFormula::UniformBonusCount(2i32)),
     },
 ];
@@ -9783,7 +9786,10 @@ static BLOCKS_LARGE_FERN_POOL0_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::NoSilkTouchOrShears,
+        condition: LootCondition::AllOf(&[
+            LootCondition::NoSilkTouchOrShears,
+            LootCondition::RandomChance { chance: 0.125 },
+        ]),
         bonus_formula: None,
     },
 ];
@@ -9801,7 +9807,10 @@ static BLOCKS_LARGE_FERN_POOL1_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::NoSilkTouchOrShears,
+        condition: LootCondition::AllOf(&[
+            LootCondition::NoSilkTouchOrShears,
+            LootCondition::RandomChance { chance: 0.125 },
+        ]),
         bonus_formula: None,
     },
 ];
@@ -17564,7 +17573,10 @@ static BLOCKS_SHORT_GRASS_POOL0_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::NoSilkTouchOrShears,
+        condition: LootCondition::AllOf(&[
+            LootCondition::NoSilkTouchOrShears,
+            LootCondition::RandomChance { chance: 0.125 },
+        ]),
         bonus_formula: Some(LootBonusFormula::UniformBonusCount(2i32)),
     },
 ];
@@ -19478,7 +19490,10 @@ static BLOCKS_TALL_GRASS_POOL0_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::NoSilkTouchOrShears,
+        condition: LootCondition::AllOf(&[
+            LootCondition::NoSilkTouchOrShears,
+            LootCondition::RandomChance { chance: 0.125 },
+        ]),
         bonus_formula: None,
     },
 ];
@@ -19496,7 +19511,10 @@ static BLOCKS_TALL_GRASS_POOL1_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::NoSilkTouchOrShears,
+        condition: LootCondition::AllOf(&[
+            LootCondition::NoSilkTouchOrShears,
+            LootCondition::RandomChance { chance: 0.125 },
+        ]),
         bonus_formula: None,
     },
 ];

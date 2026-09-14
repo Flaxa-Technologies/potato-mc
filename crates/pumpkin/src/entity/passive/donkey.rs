@@ -153,6 +153,10 @@ impl Animal for DonkeyEntity {
 }
 
 impl Mob for DonkeyEntity {
+    /// Vanilla Animal.java:128 / AbstractGolem.java:36 -- passive mobs never despawn naturally.
+    fn remove_when_far_away(&self, _distance_sq: f64) -> bool { false }
+
+
     fn as_ageable(&self) -> Option<&dyn AgeableMob> {
         Some(self)
     }

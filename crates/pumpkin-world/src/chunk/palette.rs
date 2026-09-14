@@ -476,6 +476,14 @@ impl<V: Hash + Eq + Copy + Default, const DIM: usize> PalettedContainer<V, DIM> 
             Self::Heterogeneous(_) => false,
         }
     }
+
+    #[must_use]
+    pub fn any_palette(&self, mut predicate: impl FnMut(V) -> bool) -> bool {
+        match self {
+            Self::Homogeneous(value) => predicate(*value),
+            Self::Heterogeneous(data) => data.palette.iter().copied().any(predicate),
+        }
+    }
 }
 
 impl<'a, V: Hash + Eq + Copy + Default, const DIM: usize> IntoIterator

@@ -246,16 +246,25 @@ fn main() {
         .name("bench-runner".into())
         .stack_size(16 * 1024 * 1024)
         .spawn(|| {
-            println!("Running Worldgen Benchmark...");
-            let num_threads = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(8);
+            let num_threads = std::env::args()
+                .nth(2)
+                .and_then(|s| s.parse::<usize>().ok())
+                .unwrap_or_else(|| std::thread::available_parallelism().map(|n| n.get()).unwrap_or(8));
 
             let grid_size = std::env::args()
                 .nth(1)
                 .and_then(|s| s.parse::<i32>().ok())
-                .unwrap_or(4);
+                .unwrap_or(32);
+
+            println!("=============================================================");
+            println!("  POTATOMC HIGH-PERFORMANCE WORLDGEN BENCHMARK");
+            println!("  Grid: {}x{} ({} chunks) | Rayon Worker Threads: {}", grid_size, grid_size, grid_size * grid_size, num_threads);
+            println!("  Usage: ./worldgen-bench-linux-x86_64 [grid_size] [threads] [--exit]");
+            println!("=============================================================");
 
             profile_stages(Dimension::OVERWORLD, "Overworld");
             profile_stages(Dimension::THE_NETHER, "The Nether");
+            profile_stages(Dimension::THE_END, "The End");
 
             println!(">>> Benchmarking OVERWORLD ({}x{}) - Unbatched Baseline <<<", grid_size, grid_size);
             let (ow_cps_base, ow_avg_base, ow_worst_base, ow_total_base) =
@@ -273,6 +282,14 @@ fn main() {
             let (nether_cps_batch, nether_avg_batch, nether_worst_batch, nether_total_batch) =
                 benchmark_dimension(Dimension::THE_NETHER, "The Nether", grid_size, num_threads, true);
 
+            println!("\n>>> Benchmarking THE END ({}x{}) - Unbatched Baseline <<<", grid_size, grid_size);
+            let (end_cps_base, end_avg_base, end_worst_base, end_total_base) =
+                benchmark_dimension(Dimension::THE_END, "The End", grid_size, num_threads, false);
+
+            println!("\n>>> Benchmarking THE END ({}x{}) - Batched StageCache <<<", grid_size, grid_size);
+            let (end_cps_batch, end_avg_batch, end_worst_batch, end_total_batch) =
+                benchmark_dimension(Dimension::THE_END, "The End", grid_size, num_threads, true);
+
             println!("\n=================== FINAL SUMMARY RESULTS ===================");
             println!("Overworld (Unbatched Baseline): {:.2} c/s | avg: {:.2}ms | worst: {:.2}ms | total: {:.2}s", ow_cps_base, ow_avg_base, ow_worst_base, ow_total_base);
             println!("Overworld (Batched StageCache): {:.2} c/s | avg: {:.2}ms | worst: {:.2}ms | total: {:.2}s", ow_cps_batch, ow_avg_batch, ow_worst_batch, ow_total_batch);
@@ -283,7 +300,21 @@ fn main() {
             println!("Nether (Batched StageCache):    {:.2} c/s | avg: {:.2}ms | worst: {:.2}ms | total: {:.2}s", nether_cps_batch, nether_avg_batch, nether_worst_batch, nether_total_batch);
             let nether_speedup = (nether_cps_batch / nether_cps_base - 1.0) * 100.0;
             println!("Nether Speedup:                 {:+5.1}%", nether_speedup);
+            println!("-------------------------------------------------------------");
+            println!("The End (Unbatched Baseline):   {:.2} c/s | avg: {:.2}ms | worst: {:.2}ms | total: {:.2}s", end_cps_base, end_avg_base, end_worst_base, end_total_base);
+            println!("The End (Batched StageCache):   {:.2} c/s | avg: {:.2}ms | worst: {:.2}ms | total: {:.2}s", end_cps_batch, end_avg_batch, end_worst_batch, end_total_batch);
+            let end_speedup = (end_cps_batch / end_cps_base - 1.0) * 100.0;
+            println!("The End Speedup:                {:+5.1}%", end_speedup);
             println!("=============================================================");
+
+            let should_exit = std::env::args().any(|arg| arg == "--exit");
+            if !should_exit {
+                println!("\n[INFO] Benchmark complete. Process will remain alive so you can inspect results in console.");
+                println!("[INFO] When finished, click 'Stop' in your panel or press Ctrl+C.");
+                loop {
+                    std::thread::sleep(std::time::Duration::from_secs(3600));
+                }
+            }
         })
         .expect("Failed to spawn bench runner thread");
     handle.join().expect("Bench runner thread panicked");

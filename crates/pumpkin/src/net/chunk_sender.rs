@@ -116,6 +116,11 @@ impl ChunkSender {
         self.pending_chunks.insert(pos);
     }
 
+    pub fn mark_chunk_as_sent(&mut self, pos: Vector2<i32>) {
+        self.pending_chunks.remove(&pos);
+        self.sent_chunks.insert(pos);
+    }
+
     pub fn unload_chunk(&mut self, client: &ClientPlatform, pos: Vector2<i32>) {
         self.pending_chunks.remove(&pos);
         if self.sent_chunks.remove(&pos)

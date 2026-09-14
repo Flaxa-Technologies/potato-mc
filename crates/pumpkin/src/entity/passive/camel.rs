@@ -3,12 +3,14 @@ use std::sync::{
     atomic::{AtomicBool, AtomicU8, Ordering},
 };
 
+use pumpkin_data::damage::DamageType;
 use pumpkin_data::entity::EntityType;
 use pumpkin_data::item::Item;
 use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_data::tag::{self, Taggable};
 use pumpkin_nbt::compound::NbtCompound;
+use pumpkin_world::inventory::{Inventory, SimpleInventory};
 
 use crate::entity::{
     Entity, EntityBase,
@@ -18,6 +20,7 @@ use crate::entity::{
         look_around::RandomLookAroundGoal, look_at_entity::LookAtEntityGoal, swim::SwimGoal,
         tempt::TemptGoal, wander_around::WanderAroundGoal,
     },
+    item::ItemEntity,
     mob::{Mob, MobEntity},
     passive::animal::Animal,
     player::Player,
@@ -36,16 +39,26 @@ pub struct CamelEntity {
     pub ageable_data: AgeableData,
     pub flags: AtomicU8,
     pub dashing: AtomicBool,
+    pub saddle_inventory: Arc<SimpleInventory>,
+    pub armor_inventory: Arc<SimpleInventory>,
+    pub mount_inventory: Arc<SimpleInventory>,
 }
 
 impl CamelEntity {
     pub fn new(entity: Entity) -> Arc<Self> {
         let mob_entity = MobEntity::new(entity);
+        let saddle_inventory = Arc::new(SimpleInventory::new(1));
+        let armor_inventory = Arc::new(SimpleInventory::new(1));
+        let mount_inventory = Arc::new(SimpleInventory::new(0));
+
         let camel = Self {
             mob_entity,
             ageable_data: AgeableData::default(),
             flags: AtomicU8::new(0),
             dashing: AtomicBool::new(false),
+            saddle_inventory,
+            armor_inventory,
+            mount_inventory,
         };
         let mob_arc = Arc::new(camel);
         let mob_weak: Weak<dyn Mob> = {
@@ -94,10 +107,19 @@ impl CamelEntity {
 
     #[must_use]
     pub fn is_saddled(&self) -> bool {
-        self.has_flag(FLAG_SADDLE)
+        self.has_flag(FLAG_SADDLE) || !self.saddle_inventory.is_empty()
     }
 
     pub fn set_saddled(&self, val: bool) {
+        if val {
+            if self.saddle_inventory.is_empty() {
+                self.saddle_inventory
+                    .set_stack(0, ItemStack::new(1, &Item::SADDLE));
+            }
+        } else {
+            self.saddle_inventory
+                .set_stack(0, ItemStack::EMPTY.clone());
+        }
         self.set_flag(FLAG_SADDLE, val);
     }
 
@@ -110,6 +132,17 @@ impl CamelEntity {
         self.dashing.store(dashing, Ordering::Relaxed);
         let entity = self.get_entity();
         entity.set_synced_data(pumpkin_data::tracked_data::camel::DASH, dashing);
+    }
+
+    pub fn open_custom_inventory_screen(&self, player: &Arc<Player>) {
+        let entity = self.get_entity();
+        player.open_mount_inventory(
+            entity.entity_id,
+            self.saddle_inventory.clone(),
+            self.armor_inventory.clone(),
+            self.mount_inventory.clone(),
+            0,
+        );
     }
 }
 
@@ -127,12 +160,19 @@ impl Animal for CamelEntity {
 }
 
 impl Mob for CamelEntity {
+    /// Vanilla Animal.java:128 / AbstractGolem.java:36 -- passive mobs never despawn naturally.
+    fn remove_when_far_away(&self, _distance_sq: f64) -> bool { false }
+
     fn as_ageable(&self) -> Option<&dyn AgeableMob> {
         Some(self)
     }
 
     fn as_animal(&self) -> Option<&dyn Animal> {
         Some(self)
+    }
+
+    fn mob_open_custom_inventory_screen(&self, player: &Arc<Player>) {
+        self.open_custom_inventory_screen(player);
     }
 
     fn mob_write_nbt(&self, nbt: &mut NbtCompound) {
@@ -153,6 +193,12 @@ impl Mob for CamelEntity {
 
     fn mob_tick(&self, _caller: &dyn EntityBase) {
         self.ageable_ai_step();
+
+        // Sync saddle flag with saddle inventory
+        let has_saddle = !self.saddle_inventory.is_empty();
+        if has_saddle != self.has_flag(FLAG_SADDLE) {
+            self.set_flag(FLAG_SADDLE, has_saddle);
+        }
     }
 
     fn mob_init_data_tracker(&self) {
@@ -171,6 +217,13 @@ impl Mob for CamelEntity {
     fn mob_interact(&self, player: &Arc<Player>, item_stack: &mut ItemStack) -> bool {
         let item = item_stack.get_item();
 
+        // 1. Shift + right-click opens camel GUI if adult
+        if player.get_entity().is_sneaking() && !self.is_baby() {
+            self.open_custom_inventory_screen(player);
+            return true;
+        }
+
+        // 2. Right click with saddle on unsaddled adult camel equips saddle
         if item == &Item::SADDLE && !self.is_saddled() && !self.is_baby() {
             self.set_saddled(true);
             item_stack.decrement_unless_creative(player.gamemode.load(), 1);
@@ -184,9 +237,20 @@ impl Mob for CamelEntity {
             return true;
         }
 
-        if self.is_saddled() && !self.is_baby() && !self.is_food(item_stack) {
+        // 3. Cactus feeds the camel (heals / love mode)
+        if self.is_food(item_stack) {
+            return self.animal_interact(player, item_stack, Sound::EntityCamelAmbient);
+        }
+
+        // 4. Right click mounts adult camel (up to 2 passengers, saddled or unsaddled)
+        let ent = &self.mob_entity.living_entity.entity;
+        let passenger_count = ent
+            .passengers
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .len();
+        if passenger_count < 2 && !self.is_baby() {
             let world = player.world();
-            let ent = &self.mob_entity.living_entity.entity;
             if let Some(vehicle) = world.get_entity_by_id(ent.entity_id)
                 && let Some(passenger) = world.get_player_by_id(player.entity_id())
             {
@@ -195,6 +259,20 @@ impl Mob for CamelEntity {
             }
         }
 
-        self.animal_interact(player, item_stack, Sound::EntityCamelAmbient)
+        false
+    }
+
+    fn on_damage(&self, _damage_type: DamageType, _source: Option<&dyn EntityBase>) {
+        if self.mob_entity.living_entity.dead.load(Ordering::Relaxed) && self.is_saddled() {
+            let entity = self.get_entity();
+            let world = entity.world.load();
+            let pos = entity.pos.load();
+            let item_entity = Arc::new(ItemEntity::new(
+                Entity::new(world.clone(), pos, &EntityType::ITEM),
+                ItemStack::new(1, &Item::SADDLE),
+            ));
+            world.spawn_entity(item_entity);
+            self.set_saddled(false);
+        }
     }
 }

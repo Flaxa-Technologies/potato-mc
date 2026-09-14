@@ -31,6 +31,13 @@ impl MultifaceGrowthFeature {
             return false;
         }
 
+        if self.place_block == Block::SCULK_VEIN.id
+            && chunk.get_biome_for_terrain_gen(pos.0.x, pos.0.y, pos.0.z)
+                != &pumpkin_data::biome::Biome::DEEP_DARK
+        {
+            return false;
+        }
+
         let shuffled_dirs = self.get_shuffled_directions(random);
         if self.place_growth_if_possible(chunk, pos, random, &shuffled_dirs) {
             return true;
@@ -43,6 +50,12 @@ impl MultifaceGrowthFeature {
 
             for _ in 0..self.search_range {
                 cur_pos = cur_pos.offset(search_direction.to_offset());
+                if self.place_block == Block::SCULK_VEIN.id
+                    && chunk.get_biome_for_terrain_gen(cur_pos.0.x, cur_pos.0.y, cur_pos.0.z)
+                        != &pumpkin_data::biome::Biome::DEEP_DARK
+                {
+                    break;
+                }
                 let block_id = GenerationCache::get_block_state(chunk, &cur_pos.0).to_block_id();
                 if !Self::is_air_or_water(chunk, cur_pos) && block_id != self.place_block {
                     break;

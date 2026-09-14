@@ -30,6 +30,8 @@ use crate::block::blocks::decorated_pot::DecoratedPotBlock;
 use crate::block::blocks::dirt_path::DirtPathBlock;
 use crate::block::blocks::doors::DoorBlock;
 use crate::block::blocks::dripstone::DripstoneBlock;
+use crate::block::blocks::potent_sulfur::PotentSulfurBlock;
+use crate::block::blocks::sulfur_spike::SulfurSpikeBlock;
 use crate::block::blocks::end_gateway::EndGatewayBlock;
 use crate::block::blocks::end_portal::EndPortalBlock;
 use crate::block::blocks::end_portal_frame::EndPortalFrameBlock;
@@ -390,6 +392,8 @@ pub fn default_registry() -> Arc<BlockRegistry> {
     manager.register(SporeBlossomBlock);
     manager.register(ConduitBlock);
     manager.register(DripstoneBlock);
+    manager.register(PotentSulfurBlock);
+    manager.register(SulfurSpikeBlock);
     manager.register(TwistingVinesBlock);
     manager.register(WeepingVinesBlock);
     manager.register(CactusFlowerBlock);
@@ -763,6 +767,26 @@ impl BlockRegistry {
         server.plugin_manager.fire_blocking(server, &mut event);
         if event.cancelled {
             return Ok(None);
+        }
+
+        let (existing_block, existing_state) = world.get_block_and_state(&final_block_pos);
+        if !existing_state.is_air()
+            && existing_block != placed_block
+            && existing_block != &Block::WATER
+        {
+            world.break_block(&final_block_pos, Some(player), BlockFlags::NOTIFY_ALL);
+        }
+
+        let support_pos = final_block_pos.down();
+        let (support_block, _) = world.get_block_and_state(&support_pos);
+        if support_block == &Block::DIRT_PATH
+            && placed_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_ALL_SIGNS)
+        {
+            world.set_block_state(
+                &support_pos,
+                Block::DIRT.default_state.id,
+                BlockFlags::NOTIFY_ALL,
+            );
         }
 
         let _replaced_id =

@@ -649,6 +649,7 @@ pub fn spawn_mobs_for_chunk_generation(
 
     let xo = chunk_x << 4;
     let zo = chunk_z << 4;
+    let mut spawned_entities = Vec::new();
 
     while rand::random::<f32>() < biome.creature_spawn_probability {
         let Some(spawner_data) = creatures.choose(&mut rand::rng()) else {
@@ -674,23 +675,20 @@ pub fn spawn_mobs_for_chunk_generation(
             let mut success = false;
 
             for _ in 0..4 {
-                if success {
-                    break;
-                }
-
                 let pos = get_top_non_colliding_pos(world, cache, entity_type, x, z);
 
                 if entity_type.summonable && is_spawn_position_ok_cache(cache, &pos, entity_type) {
                     let width = f64::from(entity_type.dimension[0]);
-                    let fx =
-                        (f64::from(x)).clamp(f64::from(xo) + width, f64::from(xo) + 16.0 - width);
-                    let fz =
-                        (f64::from(z)).clamp(f64::from(zo) + width, f64::from(zo) + 16.0 - width);
+                    let fx = (f64::from(x) + 0.5)
+                        .clamp(f64::from(xo) + width, f64::from(xo) + 16.0 - width);
+                    let fz = (f64::from(z) + 0.5)
+                        .clamp(f64::from(zo) + width, f64::from(zo) + 16.0 - width);
                     let spawn_pos_f64 = Vector3::new(fx, f64::from(pos.0.y), fz);
                     let check_pos = BlockPos::new(fx.floor() as i32, pos.0.y, fz.floor() as i32);
 
                     let below_pos = check_pos.down().0;
-                    let below_state = GenerationCache::get_block_state(cache, &below_pos).to_state();
+                    let below_state =
+                        GenerationCache::get_block_state(cache, &below_pos).to_state();
                     let valid_block = Block::from_state_id(below_state.id)
                         .has_tag(&pumpkin_data::tag::Block::MINECRAFT_ANIMALS_SPAWNABLE_ON);
 
@@ -699,7 +697,7 @@ pub fn spawn_mobs_for_chunk_generation(
                         entity
                             .get_entity()
                             .set_rotation(rand::random::<f32>() * 360.0, 0.0);
-                        world.spawn_entity_non_save(entity);
+                        spawned_entities.push(entity);
                         success = true;
                     }
                 }
@@ -710,8 +708,16 @@ pub fn spawn_mobs_for_chunk_generation(
                     x = start_x + rand::random_range(0..5) - rand::random_range(0..5);
                     z = start_z + rand::random_range(0..5) - rand::random_range(0..5);
                 }
+
+                if success {
+                    break;
+                }
             }
         }
+    }
+
+    if !spawned_entities.is_empty() {
+        world.spawn_entities_non_save(&spawned_entities);
     }
 }
 
@@ -894,7 +900,9 @@ pub fn spawn_category_for_position(
                     is_thundering,
                 ) && spawn_state.can_spawn(entity_type, &check_pos, world)
                 {
-                    let spawn_pos_f64 = Vector3::new(xx, f64::from(y_start), zz);
+                    let jitter_x = (rng().random::<f64>() - 0.5) * 0.4;
+                    let jitter_z = (rng().random::<f64>() - 0.5) * 0.4;
+                    let spawn_pos_f64 = Vector3::new(xx + jitter_x, f64::from(y_start), zz + jitter_z);
                     let entity = from_type(entity_type, spawn_pos_f64, world, Uuid::new_v4());
                     entity
                         .get_entity()
@@ -1014,6 +1022,24 @@ pub static FORTRESS_ENEMIES: &[(&'static Spawner, u32)] = &[
     (&MAGMA_CUBE_SPAWNER, 3),
 ];
 
+pub static PILLAGER_SPAWNER: Spawner = Spawner {
+    r#type: "minecraft:pillager",
+    min_count: 1,
+    max_count: 1,
+};
+
+pub static WITCH_SPAWNER: Spawner = Spawner {
+    r#type: "minecraft:witch",
+    min_count: 1,
+    max_count: 1,
+};
+
+pub static CAT_SPAWNER: Spawner = Spawner {
+    r#type: "minecraft:cat",
+    min_count: 1,
+    max_count: 1,
+};
+
 #[must_use]
 pub fn is_in_nether_fortress_bounds(world: &World, category: &MobCategory, pos: &BlockPos) -> bool {
     if category != &MobCategory::MONSTER || world.dimension != Dimension::THE_NETHER {
@@ -1023,6 +1049,78 @@ pub fn is_in_nether_fortress_bounds(world: &World, category: &MobCategory, pos: 
     below_block == &Block::NETHER_BRICKS
         || below_block == &Block::RED_NETHER_BRICKS
         || below_block == &Block::NETHER_BRICK_FENCE
+}
+
+#[must_use]
+pub fn is_in_pillager_outpost_bounds(world: &World, category: &MobCategory, pos: &BlockPos) -> bool {
+    if category != &MobCategory::MONSTER || world.dimension != Dimension::OVERWORLD {
+        return false;
+    }
+    // Check precise structure bounds from worldgen
+    if world
+        .level
+        .world_gen
+        .load()
+        .is_in_structure_bounds(pumpkin_data::structures::StructureKeys::PillagerOutpost, pos)
+    {
+        return true;
+    }
+    let below_block = world.get_block(&pos.down());
+    if below_block == &Block::DARK_OAK_PLANKS
+        || below_block == &Block::DARK_OAK_LOG
+        || below_block == &Block::COBBLESTONE
+        || below_block == &Block::MOSSY_COBBLESTONE
+    {
+        for dx in -3..=3 {
+            for dy in -2..=3 {
+                for dz in -3..=3 {
+                    let b = world.get_block(&pos.add(dx, dy, dz));
+                    if b == &Block::DARK_OAK_FENCE
+                        || b == &Block::DARK_OAK_FENCE_GATE
+                        || b == &Block::TARGET
+                        || b == &Block::WHITE_BANNER
+                        || b == &Block::WHITE_WALL_BANNER
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    false
+}
+
+#[must_use]
+pub fn is_in_swamp_hut_bounds(world: &World, category: &MobCategory, pos: &BlockPos) -> bool {
+    if (category != &MobCategory::MONSTER && category != &MobCategory::CREATURE)
+        || world.dimension != Dimension::OVERWORLD
+    {
+        return false;
+    }
+    // Check precise structure bounds from worldgen
+    if world
+        .level
+        .world_gen
+        .load()
+        .is_in_structure_bounds(pumpkin_data::structures::StructureKeys::SwampHut, pos)
+    {
+        return true;
+    }
+    // Block heuristic fallback: spruce planks floor near cauldron or potted mushroom
+    let below = world.get_block(&pos.down());
+    if below == &Block::SPRUCE_PLANKS {
+        for dx in -4..=4 {
+            for dz in -4..=4 {
+                for dy in -1..=2 {
+                    let b = world.get_block(&pos.add(dx, dy, dz));
+                    if b == &Block::CAULDRON || b == &Block::POTTED_RED_MUSHROOM {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    false
 }
 
 #[must_use]
@@ -1046,6 +1144,18 @@ pub fn can_spawn_mob_at(
             target,
             "blaze" | "zombified_piglin" | "wither_skeleton" | "skeleton" | "magma_cube"
         );
+    }
+
+    if is_in_pillager_outpost_bounds(world, category, pos) {
+        return target == "pillager";
+    }
+
+    if is_in_swamp_hut_bounds(world, category, pos) {
+        return match category.id {
+            id if id == MobCategory::MONSTER.id => target == "witch",
+            id if id == MobCategory::CREATURE.id => target == "cat",
+            _ => false,
+        };
     }
 
     let biome = world.level.get_rough_biome(pos);
@@ -1089,6 +1199,30 @@ pub fn get_random_spawn_mob_at(
             roll -= *weight;
         }
         return Some(&BLAZE_SPAWNER);
+    }
+
+    if is_in_pillager_outpost_bounds(world, category, block_pos) {
+        tracing::debug!(
+            "[PILLAGER-SPAWN] Spawning pillager at outpost bounds at {:?}",
+            block_pos
+        );
+        return Some(&PILLAGER_SPAWNER);
+    }
+
+    if is_in_swamp_hut_bounds(world, category, block_pos) {
+        if category == &MobCategory::MONSTER {
+            tracing::debug!(
+                "[SWAMP-HUT-SPAWN] Spawning witch at swamp hut bounds at {:?}",
+                block_pos
+            );
+            return Some(&WITCH_SPAWNER);
+        } else if category == &MobCategory::CREATURE {
+            tracing::debug!(
+                "[SWAMP-HUT-SPAWN] Spawning cat at swamp hut bounds at {:?}",
+                block_pos
+            );
+            return Some(&CAT_SPAWNER);
+        }
     }
 
     let biome = world.level.get_rough_biome(block_pos);
@@ -1317,4 +1451,48 @@ fn is_burning_block(block: &Block) -> bool {
         || block.id == Block::LAVA_CAULDRON.id
         || block.id == Block::CAMPFIRE.id
         || block.id == Block::SOUL_CAMPFIRE.id
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pack_spawn_coordinates_disperse() {
+        // Test that 4 pack iterations starting from (start_x, start_z)
+        // do not all collapse into a zero-radius single coordinate.
+        let xo = 16;
+        let zo = 32;
+        let mut x = xo + 8;
+        let mut z = zo + 8;
+        let start_x = x;
+        let start_z = z;
+
+        let mut spawned_coords = Vec::new();
+        let count = 4;
+
+        for _ in 0..count {
+            for _ in 0..4 {
+                // Record the position this pack member would spawn at
+                spawned_coords.push((x, z));
+                let success = true;
+
+                x += rand::random_range(0..5) - rand::random_range(0..5);
+                z += rand::random_range(0..5) - rand::random_range(0..5);
+                while x < xo || x >= xo + 16 || z < zo || z >= zo + 16 {
+                    x = start_x + rand::random_range(0..5) - rand::random_range(0..5);
+                    z = start_z + rand::random_range(0..5) - rand::random_range(0..5);
+                }
+
+                if success {
+                    break;
+                }
+            }
+        }
+
+        assert_eq!(spawned_coords.len(), 4);
+        // Ensure not all coordinates are identical to start_x, start_z
+        let all_same = spawned_coords.iter().all(|&(cx, cz)| cx == start_x && cz == start_z);
+        assert!(!all_same, "Pack spawns must disperse and not all be at the start coordinate");
+    }
 }

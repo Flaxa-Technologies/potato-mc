@@ -316,16 +316,23 @@ pub fn test_noise_threshold(
     condition: &NoiseThresholdMaterialCondition,
     context: &mut MaterialRuleContext,
 ) -> bool {
+    let y = if condition.noise.id
+        == pumpkin_data::noise_parameter::DoublePerlinNoiseParameters::SULFUR_CAVE_GRADIENT.id
+    {
+        context.block_pos_y as f64
+    } else {
+        0.0
+    };
     let value = if let Some(terrain_cache) = context.terrain_cache {
         let sampler =
             terrain_cache.get_noise_sampler(&condition.noise, context.random_deriver);
-        f64::from(sampler.sample(context.block_pos_x as f64, 0.0, context.block_pos_z as f64))
+        f64::from(sampler.sample(context.block_pos_x as f64, y, context.block_pos_z as f64))
     } else {
         let sampler = DoublePerlinNoiseBuilder::get_noise_sampler_for_id(
             context.random_deriver,
             &condition.noise,
         );
-        f64::from(sampler.sample(context.block_pos_x as f64, 0.0, context.block_pos_z as f64))
+        f64::from(sampler.sample(context.block_pos_x as f64, y, context.block_pos_z as f64))
     };
     value >= condition.min_threshold && value <= condition.max_threshold
 }

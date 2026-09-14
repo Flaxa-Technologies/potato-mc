@@ -27,6 +27,35 @@ type RedstoneWireProperties = RedstoneWireLikeProperties;
 #[pumpkin_block("minecraft:redstone_wire")]
 pub struct RedstoneWireBlock;
 
+impl RedstoneWireBlock {
+    #[must_use]
+    pub fn wire_weak_power(wire: RedstoneWireProperties, direction: BlockDirection) -> u8 {
+        if wire.power == 0 || direction == BlockDirection::Down {
+            return 0;
+        }
+        if direction == BlockDirection::Up {
+            return wire.power;
+        }
+        if let Some(horizontal) = direction.opposite().to_horizontal_facing()
+            && is_side_connected_prop(wire, horizontal)
+        {
+            return wire.power;
+        }
+        0
+    }
+
+    #[must_use]
+    pub const fn wire_strong_power(power: u8, direction: BlockDirection) -> u8 {
+        if power == 0 {
+            return 0;
+        }
+        match direction {
+            BlockDirection::Up => power,
+            _ => 0,
+        }
+    }
+}
+
 impl BlockBehaviour for RedstoneWireBlock {
     fn can_place_at(&self, args: CanPlaceAtArgs<'_>) -> bool {
         can_survive(args.block_accessor, args.position)
@@ -185,34 +214,12 @@ impl BlockBehaviour for RedstoneWireBlock {
 
     fn get_weak_redstone_power(&self, args: GetRedstonePowerArgs<'_>) -> u8 {
         let wire = RedstoneWireProperties::from_state_id(args.state.id);
-        if wire.power == 0 || args.direction == BlockDirection::Down {
-            return 0;
-        }
-        if args.direction == BlockDirection::Up {
-            return wire.power;
-        }
-        if let Some(horizontal) = args.direction.opposite().to_horizontal_facing()
-            && is_side_connected_prop(wire, horizontal)
-        {
-            return wire.power;
-        }
-        0
+        Self::wire_weak_power(wire, args.direction)
     }
 
     fn get_strong_redstone_power(&self, args: GetRedstonePowerArgs<'_>) -> u8 {
         let wire = RedstoneWireProperties::from_state_id(args.state.id);
-        if wire.power == 0 || args.direction == BlockDirection::Down {
-            return 0;
-        }
-        if args.direction == BlockDirection::Up {
-            return wire.power;
-        }
-        if let Some(horizontal) = args.direction.opposite().to_horizontal_facing()
-            && is_side_connected_prop(wire, horizontal)
-        {
-            return wire.power;
-        }
-        0
+        Self::wire_strong_power(wire.power, args.direction)
     }
 
     fn rotate(
@@ -328,6 +335,10 @@ fn get_block_signal(world: &World, pos: &BlockPos) -> u8 {
 }
 
 fn get_incoming_wire_signal(world: &World, pos: &BlockPos) -> u8 {
+    get_incoming_wire_signal_from(world, pos)
+}
+
+pub fn get_incoming_wire_signal_from(world: &dyn BlockAccessor, pos: &BlockPos) -> u8 {
     let mut max_wire_signal = 0;
     let up_pos = pos.up();
     let is_up_conductor = world.get_block_state(&up_pos).is_solid_block();
@@ -674,5 +685,249 @@ impl CardinalWireConnectionExt for WestRedstone {
             Self::Up => WireConnection::Up,
             Self::None => WireConnection::None,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pumpkin_data::block_properties::{
+        EastRedstone, NorthRedstone, RedstoneWireLikeProperties, SouthRedstone, WestRedstone,
+    };
+    use pumpkin_data::{Block, BlockDirection, BlockState};
+    use pumpkin_util::math::position::BlockPos;
+    use pumpkin_world::world::BlockAccessor;
+    use rustc_hash::FxHashMap;
+
+    struct MockBlockWorld {
+        blocks: FxHashMap<BlockPos, (&'static Block, &'static BlockState)>,
+    }
+
+    impl MockBlockWorld {
+        fn new() -> Self {
+            Self {
+                blocks: FxHashMap::default(),
+            }
+        }
+
+        fn set_block(&mut self, pos: BlockPos, block: &'static Block) {
+            self.blocks.insert(pos, (block, block.default_state));
+        }
+
+        fn set_block_state(
+            &mut self,
+            pos: BlockPos,
+            block: &'static Block,
+            state: &'static BlockState,
+        ) {
+            self.blocks.insert(pos, (block, state));
+        }
+    }
+
+    impl BlockAccessor for MockBlockWorld {
+        fn get_block(&self, position: &BlockPos) -> &'static Block {
+            self.blocks
+                .get(position)
+                .map(|(b, _)| *b)
+                .unwrap_or(&Block::AIR)
+        }
+
+        fn get_block_state(&self, position: &BlockPos) -> &'static BlockState {
+            self.blocks
+                .get(position)
+                .map(|(_, s)| *s)
+                .unwrap_or(Block::AIR.default_state)
+        }
+
+        fn get_block_state_id(&self, position: &BlockPos) -> pumpkin_data::BlockStateId {
+            self.get_block_state(position).id
+        }
+
+        fn get_block_and_state(
+            &self,
+            position: &BlockPos,
+        ) -> (&'static Block, &'static BlockState) {
+            self.blocks
+                .get(position)
+                .copied()
+                .unwrap_or((&Block::AIR, Block::AIR.default_state))
+        }
+    }
+
+    #[test]
+    fn test_wire_signal_decay_15_to_0() {
+        let mut world = MockBlockWorld::new();
+
+        // Place wire 0 with power 15
+        let mut wire_props = make_cross(15);
+        let wire_state = BlockState::from_id(wire_props.to_state_id(&Block::REDSTONE_WIRE));
+        world.set_block_state(BlockPos::new(0, 64, 0), &Block::REDSTONE_WIRE, wire_state);
+
+        let mut measured_signals = vec![15u8];
+
+        // Measure wire decay block-by-block across 16 blocks along the X axis
+        for x in 1..=16 {
+            let pos = BlockPos::new(x, 64, 0);
+            let incoming = get_incoming_wire_signal_from(&world, &pos);
+            measured_signals.push(incoming);
+
+            wire_props.power = incoming;
+            let st = BlockState::from_id(wire_props.to_state_id(&Block::REDSTONE_WIRE));
+            world.set_block_state(pos, &Block::REDSTONE_WIRE, st);
+        }
+
+        assert_eq!(measured_signals[0], 15, "Source wire power must be 15");
+        assert_eq!(measured_signals[1], 14, "Step 1 must decay to 14");
+        assert_eq!(measured_signals[2], 13, "Step 2 must decay to 13");
+        assert_eq!(measured_signals[14], 1, "Step 14 must decay to 1");
+        assert_eq!(measured_signals[15], 0, "Step 15 must drop to 0");
+        assert_eq!(measured_signals[16], 0, "Step 16 must remain 0");
+    }
+
+    #[test]
+    fn test_horizontal_strong_power_bug_fixed() {
+        // Redstone wire emits strong power ONLY downwards into the block directly beneath it
+        // when queried from below (args.direction == BlockDirection::Up).
+        // It must NEVER emit strong power horizontally or upwards.
+        let power = 15;
+        assert_eq!(
+            RedstoneWireBlock::wire_strong_power(power, BlockDirection::Up),
+            15,
+            "Wire must strongly power the block beneath it"
+        );
+        assert_eq!(
+            RedstoneWireBlock::wire_strong_power(power, BlockDirection::Down),
+            0,
+            "Wire must not emit strong power upwards"
+        );
+        assert_eq!(
+            RedstoneWireBlock::wire_strong_power(power, BlockDirection::North),
+            0,
+            "Wire must not emit strong power horizontally North"
+        );
+        assert_eq!(
+            RedstoneWireBlock::wire_strong_power(power, BlockDirection::South),
+            0,
+            "Wire must not emit strong power horizontally South"
+        );
+        assert_eq!(
+            RedstoneWireBlock::wire_strong_power(power, BlockDirection::East),
+            0,
+            "Wire must not emit strong power horizontally East"
+        );
+        assert_eq!(
+            RedstoneWireBlock::wire_strong_power(power, BlockDirection::West),
+            0,
+            "Wire must not emit strong power horizontally West"
+        );
+
+        // Power 0 emits 0 everywhere
+        assert_eq!(
+            RedstoneWireBlock::wire_strong_power(0, BlockDirection::Up),
+            0
+        );
+    }
+
+    #[test]
+    fn test_glass_non_conductivity_rules() {
+        // Glass is not a solid block (isRedstoneConductor == false in vanilla)
+        let glass_state = Block::GLASS.default_state;
+        assert!(
+            !glass_state.is_solid_block(),
+            "Glass must NOT be a solid block (does not conduct redstone)"
+        );
+
+        let stone_state = Block::STONE.default_state;
+        assert!(
+            stone_state.is_solid_block(),
+            "Stone must be a solid block (conducts redstone)"
+        );
+    }
+
+    #[test]
+    fn test_stepped_slope_connectivity_glass_vs_solid() {
+        let mut world = MockBlockWorld::new();
+
+        // Step layout:
+        // Lower wire at (0, 64, 0)
+        // Step block at (1, 64, 0) (solid block)
+        // Upper wire at (1, 65, 0) with power 15
+        // Corner block at (0, 65, 0)
+        let lower_wire_pos = BlockPos::new(0, 64, 0);
+        let step_pos = BlockPos::new(1, 64, 0);
+        let upper_wire_pos = BlockPos::new(1, 65, 0);
+        let corner_pos = BlockPos::new(0, 65, 0);
+
+        world.set_block(step_pos, &Block::STONE);
+        let upper_wire = make_cross(15);
+        let upper_wire_state = BlockState::from_id(upper_wire.to_state_id(&Block::REDSTONE_WIRE));
+        world.set_block_state(upper_wire_pos, &Block::REDSTONE_WIRE, upper_wire_state);
+
+        // Scenario 1: Corner is SOLID STONE -> severs connection
+        world.set_block(corner_pos, &Block::STONE);
+        let signal_through_stone = get_incoming_wire_signal_from(&world, &lower_wire_pos);
+        assert_eq!(
+            signal_through_stone, 0,
+            "Solid stone at corner must sever climbing wire connection"
+        );
+
+        // Scenario 2: Corner is TRANSPARENT GLASS -> does NOT sever connection
+        world.set_block(corner_pos, &Block::GLASS);
+        let signal_through_glass = get_incoming_wire_signal_from(&world, &lower_wire_pos);
+        assert_eq!(
+            signal_through_glass, 14,
+            "Glass at corner must NOT sever climbing wire connection (15 - 1 = 14)"
+        );
+
+        // Scenario 3: Corner is AIR -> does NOT sever connection
+        world.set_block(corner_pos, &Block::AIR);
+        let signal_through_air = get_incoming_wire_signal_from(&world, &lower_wire_pos);
+        assert_eq!(
+            signal_through_air, 14,
+            "Air at corner must allow climbing wire connection"
+        );
+    }
+
+    #[test]
+    fn test_wire_can_survive_on_glass_and_stone_not_air() {
+        let mut world = MockBlockWorld::new();
+        let wire_pos = BlockPos::new(0, 64, 0);
+        let below_pos = BlockPos::new(0, 63, 0);
+
+        // On Air -> cannot survive
+        world.set_block(below_pos, &Block::AIR);
+        assert!(!can_survive(&world, &wire_pos), "Wire cannot survive on air");
+
+        // On Stone -> survives
+        world.set_block(below_pos, &Block::STONE);
+        assert!(
+            can_survive(&world, &wire_pos),
+            "Wire must survive on solid stone"
+        );
+
+        // On Glass -> survives in modern vanilla (face sturdy on top)
+        world.set_block(below_pos, &Block::GLASS);
+        assert!(
+            can_survive(&world, &wire_pos),
+            "Wire must survive on glass block"
+        );
+    }
+
+    #[test]
+    fn test_wire_shape_state_helpers() {
+        let dot = RedstoneWireLikeProperties {
+            north: NorthRedstone::None,
+            south: SouthRedstone::None,
+            east: EastRedstone::None,
+            west: WestRedstone::None,
+            power: 0,
+        };
+        assert!(is_dot(dot), "Isolated wire must be a dot");
+        assert!(!is_cross(dot));
+
+        let cross = make_cross(15);
+        assert!(is_cross(cross), "make_cross must produce cross connection");
+        assert!(!is_dot(cross));
+        assert_eq!(cross.power, 15);
     }
 }

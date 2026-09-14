@@ -81,19 +81,27 @@ impl Ticker {
                 break 'ticker;
             }
 
-            let now = Instant::now();
-            if next_tick > now {
-                let sleep_duration = next_tick - now;
-                let cancelled = STOP_INTERRUPT.clone();
-                server.runtime.block_on(async {
-                    tokio::select! {
-                        () = tokio::time::sleep(sleep_duration) => {},
-                        () = cancelled.cancelled() => {},
-                    }
-                });
+            // High-precision tick wait loop:
+            // Prevents early wakeups on Windows where OS timer resolution (15.6ms) can cause
+            // tokio::time::sleep to return early and run unthrottled ticks faster than 20 TPS.
+            while Instant::now() < next_tick {
+                let now = Instant::now();
+                let remaining = next_tick.saturating_duration_since(now);
+                if remaining > Duration::from_millis(2) {
+                    let cancelled = STOP_INTERRUPT.clone();
+                    let sleep_target = remaining - Duration::from_millis(1);
+                    server.runtime.block_on(async {
+                        tokio::select! {
+                            () = tokio::time::sleep(sleep_target) => {},
+                            () = cancelled.cancelled() => {},
+                        }
+                    });
 
-                if STOP_INTERRUPT.is_cancelled() {
-                    break 'ticker;
+                    if STOP_INTERRUPT.is_cancelled() {
+                        break 'ticker;
+                    }
+                } else {
+                    std::hint::spin_loop();
                 }
             }
 

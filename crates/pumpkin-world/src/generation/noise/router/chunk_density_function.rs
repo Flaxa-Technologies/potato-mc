@@ -267,7 +267,7 @@ pub fn trilinear_interpolate_corners(
     }
 }
 
-fn fill_single_cell(
+pub(crate) fn fill_single_cell(
     buffer: &mut [f32],
     volume: &DensityVolume,
     cell_volume: &DensityVolume,

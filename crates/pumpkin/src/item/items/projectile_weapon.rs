@@ -35,12 +35,24 @@ impl ProjectileWeaponItem {
         is_crit: bool,
         is_creative: bool,
     ) -> ArrowEntity {
+        let mut spawn_pos = shooter.pos.load();
+        spawn_pos.y += f64::from(shooter.entity_dimension.load().eye_height) - 0.1;
         let arrow_entity = Entity::new(
             world,
-            shooter.pos.load(),
+            spawn_pos,
             ArrowEntity::entity_type_for_item(projectile.item),
         );
-        let pickup = if is_creative {
+        let has_infinity = weapon
+            .get_data_component::<pumpkin_data::data_component_impl::EnchantmentsImpl>()
+            .is_some_and(|enchantments| {
+                enchantments
+                    .enchantment
+                    .iter()
+                    .any(|(e, _)| **e == pumpkin_data::Enchantment::INFINITY)
+            });
+        let is_infinite_arrow =
+            has_infinity && projectile.item.id == pumpkin_data::item::Item::ARROW.id;
+        let pickup = if is_creative || is_infinite_arrow {
             ArrowPickup::CreativeOnly
         } else {
             ArrowPickup::Allowed

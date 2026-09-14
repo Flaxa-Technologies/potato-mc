@@ -6,7 +6,8 @@ use crate::block::registry::BlockActionResult;
 use crate::block::{
     BlockBehaviour, GetScreenHandlerFactoryArgs, NormalUseArgs, PathComputationType, PlacedArgs,
 };
-use pumpkin_data::{Block, BlockState, BlockStateId, translation};
+use pumpkin_data::tag::Taggable;
+use pumpkin_data::{BlockState, translation};
 use pumpkin_inventory::enchanting::enchanting_screen_handler::EnchantingTableScreenHandler;
 use pumpkin_inventory::player::player_inventory::PlayerInventory;
 use pumpkin_inventory::screen_handler::{
@@ -46,42 +47,13 @@ impl BlockBehaviour for EnchantingTableBlock {
     ) -> Option<Box<dyn ScreenHandlerFactory>> {
         let mut bookshelf_count = 0;
 
-        for off_z in -1..=1 {
-            for off_x in -1..=1 {
-                if (off_z != 0 || off_x != 0)
-                    && args
-                        .world
-                        .get_block_state(&args.position.add(off_x, 0, off_z))
-                        .id
-                        == BlockStateId::AIR
-                    && args
-                        .world
-                        .get_block_state(&args.position.add(off_x, 1, off_z))
-                        .id
-                        == BlockStateId::AIR
-                // Air
-                {
-                    for off_y in 0..=1 {
-                        if Self::is_bookshelf(
-                            args.world,
-                            &args.position.add(off_x * 2, off_y, off_z * 2),
-                        ) {
-                            bookshelf_count += 1;
-                        }
-                        if off_x != 0 && off_z != 0 {
-                            if Self::is_bookshelf(
-                                args.world,
-                                &args.position.add(off_x * 2, off_y, off_z),
-                            ) {
-                                bookshelf_count += 1;
-                            }
-                            if Self::is_bookshelf(
-                                args.world,
-                                &args.position.add(off_x, off_y, off_z * 2),
-                            ) {
-                                bookshelf_count += 1;
-                            }
-                        }
+        for off_x in -2..=2i32 {
+            for off_y in 0..=1i32 {
+                for off_z in -2..=2i32 {
+                    if (off_x.abs() == 2 || off_z.abs() == 2)
+                        && Self::is_valid_bookshelf(args.world, args.position, off_x, off_y, off_z)
+                    {
+                        bookshelf_count += 1;
                     }
                 }
             }
@@ -101,10 +73,24 @@ impl BlockBehaviour for EnchantingTableBlock {
 }
 
 impl EnchantingTableBlock {
-    fn is_bookshelf(world: &Arc<crate::world::World>, pos: &BlockPos) -> bool {
-        let state = world.get_block_state(pos);
-        let block = pumpkin_data::Block::from_state_id(state.id);
-        block == &Block::BOOKSHELF
+    fn is_valid_bookshelf(
+        world: &Arc<crate::world::World>,
+        table_pos: &BlockPos,
+        off_x: i32,
+        off_y: i32,
+        off_z: i32,
+    ) -> bool {
+        let shelf_pos = table_pos.add(off_x, off_y, off_z);
+        let shelf_state = world.get_block_state(&shelf_pos);
+        let shelf_block = pumpkin_data::Block::from_state_id(shelf_state.id);
+        if !shelf_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_ENCHANTMENT_POWER_PROVIDER) {
+            return false;
+        }
+
+        let transmitter_pos = table_pos.add(off_x / 2, off_y, off_z / 2);
+        let transmitter_state = world.get_block_state(&transmitter_pos);
+        let transmitter_block = pumpkin_data::Block::from_state_id(transmitter_state.id);
+        transmitter_block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_ENCHANTMENT_POWER_TRANSMITTER)
     }
 }
 

@@ -5,6 +5,7 @@ use std::sync::{
 
 use pumpkin_data::entity::{EntityStatus, EntityType};
 use pumpkin_data::item::Item;
+
 use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_nbt::compound::NbtCompound;
@@ -13,10 +14,10 @@ use pumpkin_util::GameMode;
 use crate::entity::{
     Entity, EntityBase,
     ai::goal::{
-        active_target::ActiveTargetGoal, look_around::RandomLookAroundGoal,
-        look_at_entity::LookAtEntityGoal, melee_attack::MeleeAttackGoal,
-        move_towards_target::MoveTowardsTargetGoal, offer_flower::OfferFlowerGoal,
-        revenge::RevengeGoal, wander_around::WanderAroundGoal,
+        active_target::ActiveTargetGoal, defend_village::DefendVillageTargetGoal,
+        look_around::RandomLookAroundGoal, look_at_entity::LookAtEntityGoal,
+        melee_attack::MeleeAttackGoal, move_towards_target::MoveTowardsTargetGoal,
+        offer_flower::OfferFlowerGoal, revenge::RevengeGoal, wander_around::WanderAroundGoal,
     },
     mob::{Mob, MobEntity},
     player::Player,
@@ -63,7 +64,7 @@ impl IronGolemEntity {
             if let Some(damage) =
                 attributes.get_mut(&pumpkin_data::attributes::Attributes::ATTACK_DAMAGE.id)
             {
-                damage.base_value = 14.0;
+                damage.base_value = 15.0;
                 damage.dirty.store(true, Ordering::Relaxed);
             }
             if let Some(knockback_res) =
@@ -77,6 +78,18 @@ impl IronGolemEntity {
             {
                 speed.base_value = 0.25;
                 speed.dirty.store(true, Ordering::Relaxed);
+            }
+            if let Some(step_height) =
+                attributes.get_mut(&pumpkin_data::attributes::Attributes::STEP_HEIGHT.id)
+            {
+                step_height.base_value = 1.0;
+                step_height.dirty.store(true, Ordering::Relaxed);
+            }
+            if let Some(follow_range) =
+                attributes.get_mut(&pumpkin_data::attributes::Attributes::FOLLOW_RANGE.id)
+            {
+                follow_range.base_value = 32.0;
+                follow_range.dirty.store(true, Ordering::Relaxed);
             }
         }
         mob_arc.mob_entity.living_entity.health.store(100.0);
@@ -103,10 +116,25 @@ impl IronGolemEntity {
             );
             goal_selector.add_goal(8, Box::new(RandomLookAroundGoal::default()));
 
-            target_selector.add_goal(1, Box::new(RevengeGoal::new(true)));
+            target_selector.add_goal(1, Box::new(DefendVillageTargetGoal::new()));
+            target_selector.add_goal(2, Box::new(RevengeGoal::new(true)));
+            // Vanilla IronGolem.java:78-81: single NearestAttackableTargetGoal<Mob>
+            // matching (instanceof Enemy && !(instanceof Creeper)).
+            // Using four separate goals at the same priority caused target thrashing
+            // (each goal replaces the previous one each tick), making the golem appear frozen.
             target_selector.add_goal(
-                2,
-                ActiveTargetGoal::with_default(&mob_arc.mob_entity, &EntityType::ZOMBIE, true),
+                3,
+                ActiveTargetGoal::with_mob_class(
+                    &mob_arc.mob_entity,
+                    5,    // reciprocal_chance=5, vanilla uses 5 for Mob targets
+                    false, // check_visibility=false (vanilla NearestAttackableTargetGoal arg3)
+                    |target: &crate::entity::living::LivingEntity, _world: &crate::world::World| {
+                        let et = &target.entity.entity_type;
+                        // Must be a monster-category mob (is_friendly == false) and not a Creeper.
+                        !et.category.is_friendly && et.id != EntityType::CREEPER.id
+                    },
+
+                ),
             );
         };
 
@@ -144,6 +172,13 @@ impl IronGolemEntity {
 }
 
 impl Mob for IronGolemEntity {
+    /// Vanilla Animal.java:128 / AbstractGolem.java:36 -- passive mobs never despawn naturally.
+    fn remove_when_far_away(&self, _distance_sq: f64) -> bool { false }
+
+    fn as_iron_golem(&self) -> Option<&IronGolemEntity> {
+        Some(self)
+    }
+
     fn mob_write_nbt(&self, nbt: &mut NbtCompound) {
         nbt.put_bool("PlayerCreated", self.is_player_created());
     }
@@ -203,6 +238,10 @@ impl Mob for IronGolemEntity {
     ) {
         if let Some(attacker) = source {
             if let Some(player) = attacker.get_player() {
+                // If player-created, never attack players (vanilla IronGolem.java:137)
+                if self.is_player_created() {
+                    return;
+                }
                 if !player.is_creative() && !player.is_spectator() {
                     let world = self.mob_entity.living_entity.entity.world.load();
                     if let Some(player_arc) =

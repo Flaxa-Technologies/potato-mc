@@ -12,6 +12,7 @@ use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_data::tracked_data;
 use pumpkin_nbt::compound::NbtCompound;
+use rustc_hash::FxHashMap;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicI32, Ordering};
 use uuid::Uuid;
@@ -23,6 +24,10 @@ pub struct ZombieVillagerEntity {
     pub villager_xp: AtomicI32,
     pub villager_data: std::sync::Mutex<VillagerData>,
     pub villager_data_finalized: AtomicBool,
+    pub offers: std::sync::Mutex<Vec<pumpkin_protocol::java::client::play::MerchantOffer>>,
+    pub gossips: std::sync::Mutex<
+        Option<FxHashMap<Uuid, FxHashMap<crate::entity::passive::villager::GossipType, i32>>>,
+    >,
 }
 
 impl ZombieVillagerEntity {
@@ -39,6 +44,8 @@ impl ZombieVillagerEntity {
                 1,
             )),
             villager_data_finalized: AtomicBool::new(false),
+            offers: std::sync::Mutex::new(Vec::new()),
+            gossips: std::sync::Mutex::new(None),
         };
         Arc::new(zombie)
     }
@@ -57,6 +64,8 @@ impl ZombieVillagerEntity {
                 1,
             )),
             villager_data_finalized: AtomicBool::new(false),
+            offers: std::sync::Mutex::new(Vec::new()),
+            gossips: std::sync::Mutex::new(None),
         };
         Arc::new(zombie)
     }
@@ -184,6 +193,28 @@ impl ZombieVillagerEntity {
             .xp
             .store(self.villager_xp.load(Ordering::Relaxed), Ordering::Relaxed);
 
+        let offers = self
+            .offers
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .clone();
+        *villager
+            .offers
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = offers;
+
+        if let Some(gossips) = self
+            .gossips
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .clone()
+        {
+            *villager
+                .gossips
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner) = gossips;
+        }
+
         if self.is_baby() {
             let v_entity = &villager.mob_entity.living_entity.entity;
             v_entity.age.store(-24000, Ordering::Relaxed);
@@ -193,6 +224,23 @@ impl ZombieVillagerEntity {
         world.spawn_entity_non_save(villager.clone() as Arc<dyn crate::entity::EntityBase>);
 
         if let Some(starter_uuid) = self.conversion_starter.load() {
+            {
+                let mut gossips = villager
+                    .gossips
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+                let player_gossips = gossips.entry(starter_uuid).or_default();
+                let major = player_gossips
+                    .entry(crate::entity::passive::villager::data::GossipType::MajorPositive)
+                    .or_default();
+                *major = (*major + 20)
+                    .min(crate::entity::passive::villager::data::GossipType::MajorPositive.max_value());
+                let minor = player_gossips
+                    .entry(crate::entity::passive::villager::data::GossipType::MinorPositive)
+                    .or_default();
+                *minor = (*minor + 25)
+                    .min(crate::entity::passive::villager::data::GossipType::MinorPositive.max_value());
+            }
             if let Some(player) = world.get_player_by_uuid(starter_uuid) {
                 player.trigger_advancement(AdvancementTrigger::CuredZombieVillager);
             }

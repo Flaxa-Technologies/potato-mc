@@ -50,6 +50,28 @@ impl Default for SignText {
     }
 }
 
+fn serialize_sign_line(line: &str) -> String {
+    if line.is_empty() {
+        String::new()
+    } else if line.starts_with('{') || (line.starts_with('"') && line.ends_with('"')) {
+        line.to_string()
+    } else {
+        line.to_string()
+    }
+}
+
+fn deserialize_sign_line(raw: &str) -> Box<str> {
+    if raw.is_empty() || raw == r#"{"text":""}"# || raw == r#""""# {
+        return Box::from("");
+    }
+    if raw.starts_with('"') && raw.ends_with('"') && raw.len() >= 2 {
+        if let Ok(unquoted) = serde_json::from_str::<String>(raw) {
+            return unquoted.into_boxed_str();
+        }
+    }
+    raw.into()
+}
+
 #[allow(clippy::fallible_impl_from)]
 impl From<SignText> for NbtTag {
     fn from(value: SignText) -> Self {
@@ -66,7 +88,10 @@ impl From<SignText> for NbtTag {
             .unwrap_or_else(std::sync::PoisonError::into_inner);
         nbt.put_list(
             "messages",
-            messages.iter().map(|s| Self::String(s.clone())).collect(),
+            messages
+                .iter()
+                .map(|s| Self::String(serialize_sign_line(s).into()))
+                .collect(),
         );
 
         let filtered_messages = value
@@ -78,7 +103,7 @@ impl From<SignText> for NbtTag {
                 "filtered_messages",
                 filtered_messages
                     .iter()
-                    .map(|s| Self::String(s.clone()))
+                    .map(|s| Self::String(serialize_sign_line(s).into()))
                     .collect(),
             );
         }
@@ -96,7 +121,7 @@ impl From<NbtTag> for SignText {
         let color = nbt.get_string("color").unwrap_or("black");
         let messages: Vec<Box<str>> = nbt.get_list("messages").map_or_else(Vec::new, |list| {
             list.iter()
-                .filter_map(|tag| tag.extract_string().map(Box::from))
+                .filter_map(|tag| tag.extract_string().map(|s| deserialize_sign_line(&s)))
                 .collect()
         });
         let get_message =
@@ -112,7 +137,7 @@ impl From<NbtTag> for SignText {
         let filtered_messages: Option<Vec<Box<str>>> =
             nbt.get_list("filtered_messages").map(|list| {
                 list.iter()
-                    .filter_map(|tag| tag.extract_string().map(Box::from))
+                    .filter_map(|tag| tag.extract_string().map(|s| deserialize_sign_line(&s)))
                     .collect()
             });
 

@@ -84,7 +84,7 @@ impl ItemRegistry {
         cursor_pos: Vector3<f32>,
         block: &Block,
         server: &Server,
-    ) {
+    ) -> bool {
         let cooldown = stack.get_use_cooldown().cloned();
         let cooldown_group = cooldown
             .as_ref()
@@ -92,17 +92,22 @@ impl ItemRegistry {
             .unwrap_or_else(|| stack.item.registry_key.to_string());
 
         if player.is_on_cooldown(&cooldown_group) {
-            return;
+            return false;
         }
 
+        let before = stack.clone();
         let pumpkin_item = self.get_pumpkin_item(stack.item.id);
         if let Some(pumpkin_item) = pumpkin_item {
             pumpkin_item.use_on_block(stack, player, location, face, cursor_pos, block, server);
         }
 
-        if let Some(cooldown) = cooldown {
-            player.start_cooldown(cooldown_group, (cooldown.seconds * 20.0) as i32);
+        let was_used = !stack.are_equal(&before);
+        if was_used {
+            if let Some(cooldown) = cooldown {
+                player.start_cooldown(cooldown_group, (cooldown.seconds * 20.0) as i32);
+            }
         }
+        was_used
     }
 
     pub fn use_on_entity(

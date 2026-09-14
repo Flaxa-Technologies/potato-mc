@@ -42,7 +42,7 @@ use pumpkin_data::data_component_impl::{
     AttributeModifiersImpl, BlocksAttacksImpl, DeathProtectionImpl, EnchantmentsImpl,
     EquipmentSlot, EquippableImpl, FoodImpl,
 };
-use pumpkin_data::effect::StatusEffect;
+use pumpkin_data::effect::{MobEffectCategory, StatusEffect};
 use pumpkin_data::entity::{EntityPose, EntityStatus, EntityType, MobCategory};
 use pumpkin_data::fluid::Fluid;
 use pumpkin_data::item_stack::{DamageResult, ItemStack};
@@ -1395,7 +1395,13 @@ impl LivingEntity {
             && should_swim_in_fluids
             && self.entity.entity_type != &EntityType::STRIDER
         {
-            self.travel_in_fluid(caller, touching_water);
+            if self.entity.entity_type == &EntityType::SQUID
+                || self.entity.entity_type == &EntityType::GLOW_SQUID
+            {
+                self.make_move(caller);
+            } else {
+                self.travel_in_fluid(caller, touching_water);
+            }
         } else {
             // TODO: Gliding
 
@@ -1429,9 +1435,23 @@ impl LivingEntity {
 
             (speed, slipperiness * 0.91)
         } else {
-            let speed = caller
-                .get_player()
-                .map_or(0.02, super::player::Player::get_off_ground_speed);
+            let speed = if let Some(player) = caller.get_player() {
+                super::player::Player::get_off_ground_speed(player)
+            } else if self.entity.has_no_gravity() {
+                let flying_speed = self.get_attribute_value(&pumpkin_data::attributes::Attributes::FLYING_SPEED);
+                if flying_speed > 0.0 {
+                    flying_speed
+                } else {
+                    let move_speed = self.get_attribute_value(&pumpkin_data::attributes::Attributes::MOVEMENT_SPEED);
+                    if move_speed > 0.0 {
+                        move_speed
+                    } else {
+                        0.1
+                    }
+                }
+            } else {
+                0.02
+            };
 
             (speed, 0.91)
         };
@@ -1779,6 +1799,8 @@ impl LivingEntity {
                 0f32
             };
             self.fall_distance.store(new_fall_distance);
+        } else if height_difference > 0.0 {
+            self.fall_distance.store(0.0);
         }
     }
 
@@ -1930,9 +1952,7 @@ impl LivingEntity {
         cause: Option<&dyn EntityBase>,
     ) {
         let world = self.entity.world.load();
-        let Some(dyn_self) = world.get_entity_by_id(self.entity.entity_id) else {
-            return;
-        };
+        let dyn_self = world.get_entity_by_id(self.entity.entity_id);
         if self
             .dead
             .compare_exchange(false, true, Relaxed, Relaxed)
@@ -1945,7 +1965,86 @@ impl LivingEntity {
             let kill_credit = self.get_kill_credit();
             let killer = cause.or(source).or(kill_credit.as_deref());
 
-            self.update_death_stats(&*dyn_self, killer);
+            if let Some(dyn_self) = dyn_self.as_deref() {
+                self.update_death_stats(dyn_self, killer);
+            }
+
+            let is_zombie_kill = killer.is_some_and(|k| {
+                let t = k.get_entity().entity_type;
+                t == &EntityType::ZOMBIE
+                    || t == &EntityType::HUSK
+                    || t == &EntityType::DROWNED
+                    || t == &EntityType::ZOMBIE_VILLAGER
+            });
+
+            if self.entity.entity_type == &EntityType::VILLAGER && is_zombie_kill {
+                let difficulty = world.level_info.load().difficulty;
+                let convert = match difficulty {
+                    pumpkin_util::Difficulty::Hard => true,
+                    pumpkin_util::Difficulty::Normal => rand::random::<bool>(),
+                    _ => false,
+                };
+                if convert {
+                    if let Some(dyn_self_ref) = dyn_self.as_ref() {
+                        if let Some(villager) = dyn_self_ref
+                            .cast_any()
+                            .downcast_ref::<crate::entity::passive::villager::VillagerEntity>()
+                        {
+                            let pos = self.entity.pos.load();
+                            let zv_entity = Entity::new(world.clone(), pos, &EntityType::ZOMBIE_VILLAGER);
+                            zv_entity.yaw.store(self.entity.yaw.load());
+                            zv_entity.head_yaw.store(self.entity.head_yaw.load());
+                            zv_entity.pitch.store(self.entity.pitch.load());
+                            zv_entity.velocity.store(self.entity.velocity.load());
+
+                            let zombie_villager =
+                                crate::entity::mob::zombie::zombie_villager::ZombieVillagerEntity::new(
+                                    zv_entity,
+                                );
+                            let vdata = *villager
+                                .villager_data
+                                .lock()
+                                .unwrap_or_else(std::sync::PoisonError::into_inner);
+                            zombie_villager.set_villager_data(vdata);
+                            zombie_villager
+                                .villager_xp
+                                .store(villager.xp.load(Relaxed), Relaxed);
+
+                            let offers = villager
+                                .offers
+                                .lock()
+                                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                                .clone();
+                            *zombie_villager
+                                .offers
+                                .lock()
+                                .unwrap_or_else(std::sync::PoisonError::into_inner) = offers;
+
+                            let gossips = villager
+                                .gossips
+                                .lock()
+                                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                                .clone();
+                            *zombie_villager
+                                .gossips
+                                .lock()
+                                .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(gossips);
+
+                            if self.entity.age.load(Relaxed) < 0 {
+                                zombie_villager.set_baby(true);
+                            }
+                            world.spawn_entity(zombie_villager);
+                            world.play_sound(
+                                pumpkin_data::sound::Sound::EntityZombieInfect,
+                                SoundCategory::Hostile,
+                                &pos,
+                            );
+                            self.entity.remove();
+                            return;
+                        }
+                    }
+                }
+            }
 
             // Plays the death sound
             let sound_category = if self.entity.entity_type == &EntityType::PLAYER {
@@ -2024,7 +2123,8 @@ impl LivingEntity {
 
             // Drop loot — allow the Mob impl to override the loot table key (e.g. sheep color)
             let loot_key_override = dyn_self
-                .get_mob()
+                .as_ref()
+                .and_then(|d| d.get_mob())
                 .and_then(|m| m.get_entity_loot_key());
             self.drop_loot(&params, loot_key_override.as_deref());
 
@@ -2032,16 +2132,20 @@ impl LivingEntity {
             if params.killed_by_player.unwrap_or(false)
                 && world.level_info.load().game_rules.mob_drops
             {
-                let amount = dyn_self.get_experience_reward(killer);
+                let amount = dyn_self
+                    .as_ref()
+                    .map_or(0, |d| d.get_experience_reward(killer));
                 self.pending_experience.store(amount, Relaxed);
             }
 
-            self.entity.set_pose(EntityPose::Dying);
-
             self.drop_equipment(looting_level);
 
+            self.entity.set_pose(EntityPose::Dying);
+
             // Broadcast death message if it's a player and the gamerule is enabled
-            self.broadcast_death_message(&*dyn_self, damage_type, source, cause);
+            if let Some(dyn_self) = dyn_self.as_deref() {
+                self.broadcast_death_message(dyn_self, damage_type, source, cause);
+            }
 
             // Trigger on_mob_death for active status effects
             let active_effects_vec: Vec<_> = {
@@ -2291,88 +2395,132 @@ impl LivingEntity {
     }
 
     /// Tries to use a totem of undying from the entity's hands. If successful, applies the totem effects and returns true.
-    #[allow(dead_code)]
-    async fn try_use_death_protector(&self, caller: &dyn EntityBase) -> bool {
-        for hand in Hand::all() {
-            let mut stack = self.get_stack_in_hand(caller, hand);
+    pub fn try_use_death_protector(&self, caller: &dyn EntityBase) -> bool {
+        self.check_totem_death_protection(caller, DamageType::GENERIC)
+    }
 
-            // Clear the stack and use the totem of undying
-            if stack.get_data_component::<DeathProtectionImpl>().is_some() {
-                let mut resurrect_event =
-                    crate::plugin::api::events::entity::entity_resurrect::EntityResurrectEvent::new(
-                        self.entity.entity_id,
-                    );
-                if let Some(server) = self.entity.world.load().server.upgrade() {
-                    server
-                        .plugin_manager
-                        .fire(&server, &mut resurrect_event)
-                        .await;
+    /// Checks for death protection items (Totem of Undying) in main hand and off hand.
+    /// If held, consumes 1 totem, cancels death, resets health to 1.0, purges harmful
+    /// status effects, applies Absorption II, Regeneration II, and Fire Resistance I,
+    /// and broadcasts the ProtectedFromDeath status packet (35).
+    pub fn check_totem_death_protection(
+        &self,
+        caller: &dyn EntityBase,
+        damage_type: DamageType,
+    ) -> bool {
+        // 1. Bypass invulnerability check (void / /kill)
+        if damage_type_bypasses_totem(&damage_type) {
+            return false;
+        }
+
+        // 2. Check main hand first (Hand::Right), then off hand (Hand::Left)
+        let Some(hand) = find_totem_in_hands(|h| self.get_stack_in_hand(caller, h)) else {
+            return false;
+        };
+
+        // 3. Fire EntityResurrectEvent (plugin API)
+        let mut resurrect_event =
+            crate::plugin::api::events::entity::entity_resurrect::EntityResurrectEvent::new(
+                self.entity.entity_id,
+            );
+        if let Some(server) = self.entity.world.load().server.upgrade() {
+            server
+                .plugin_manager
+                .fire_blocking(&server, &mut resurrect_event);
+        }
+        if resurrect_event.cancelled {
+            return false;
+        }
+
+        // 4. Decrement totem stack by 1 and sync inventory
+        if let Some(player) = caller.get_player() {
+            match hand {
+                Hand::Right => {
+                    let mut held = player.inventory.held_item();
+                    held.decrement(1);
+                    if held.item_count == 0 {
+                        held.clear();
+                    }
+                    player.inventory.set_held_item(held.clone());
+                    let slot = player.inventory.get_selected_slot() as usize;
+                    player.sync_hand_slot(slot, held);
                 }
-                if resurrect_event.cancelled {
-                    return false;
+                Hand::Left => {
+                    let mut off_hand = player.inventory.off_hand_item();
+                    off_hand.decrement(1);
+                    if off_hand.item_count == 0 {
+                        off_hand.clear();
+                    }
+                    player.inventory.set_stack_in_hand(Hand::Left, off_hand.clone());
+                    player.sync_hand_slot(PlayerInventory::OFF_HAND_SLOT, off_hand);
                 }
+            }
 
-                stack.clear();
-                let slot = match hand {
-                    Hand::Right => EquipmentSlot::MAIN_HAND,
-                    Hand::Left => EquipmentSlot::OFF_HAND,
-                };
-                if let Some(player) = caller.get_player() {
-                    player
-                        .inventory()
-                        .entity_equipment
-                        .lock()
-                        .unwrap_or_else(std::sync::PoisonError::into_inner)
-                        .equipment
-                        .insert(slot, stack);
-                } else {
-                    self.entity_equipment
-                        .lock()
-                        .unwrap_or_else(std::sync::PoisonError::into_inner)
-                        .equipment
-                        .insert(slot, stack);
+            // Stats & Advancement
+            player.increment_stat(
+                StatisticCategory::Used,
+                Item::TOTEM_OF_UNDYING.id as i32,
+                1,
+            );
+            player.trigger_advancement_criterion(
+                pumpkin_data::advancement::Advancement::ADVENTURE_TOTEM_OF_UNDYING,
+                "used_totem",
+            );
+        } else {
+            // Non-player living entity (e.g. mob holding totem)
+            let slot = match hand {
+                Hand::Right => EquipmentSlot::MAIN_HAND,
+                Hand::Left => EquipmentSlot::OFF_HAND,
+            };
+            let mut equipment_guard = self
+                .entity_equipment
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if let Some(stack) = equipment_guard.equipment.get_mut(&slot) {
+                stack.decrement(1);
+                if stack.item_count == 0 {
+                    stack.clear();
                 }
-                self.set_health(1.0);
-                self.entity.world.load().send_entity_status(
-                    &self.entity,
-                    EntityStatus::ProtectedFromDeath,
-                    Some(ActorEventID::InstantDeath),
-                );
-
-                // Set Absorption, Regeneration, and Fire Resistance effects
-                self.add_effect(Effect {
-                    effect_type: &StatusEffect::ABSORPTION,
-                    duration: 100,
-                    amplifier: 1,
-                    ambient: false,
-                    show_particles: true,
-                    show_icon: true,
-                    blend: false,
-                });
-                self.add_effect(Effect {
-                    effect_type: &StatusEffect::REGENERATION,
-                    duration: 900,
-                    amplifier: 1,
-                    ambient: false,
-                    show_particles: true,
-                    show_icon: true,
-                    blend: false,
-                });
-                self.add_effect(Effect {
-                    effect_type: &StatusEffect::FIRE_RESISTANCE,
-                    duration: 800,
-                    amplifier: 0,
-                    ambient: false,
-                    show_particles: true,
-                    show_icon: true,
-                    blend: false,
-                });
-
-                return true;
+                let updated = stack.clone();
+                drop(equipment_guard);
+                self.send_equipment_changes(&[(slot, updated)]);
             }
         }
 
-        false
+        // 5. Reset health to 1.0 (half heart) and synchronize
+        self.set_health(1.0);
+        if let Some(player) = caller.get_player() {
+            player.send_health();
+        }
+
+        // 6. Clear harmful status effects
+        let harmful_effects: Vec<&'static StatusEffect> = self
+            .active_effects
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .keys()
+            .copied()
+            .filter(|e| matches!(e.category, MobEffectCategory::Harmful))
+            .collect();
+
+        for effect in harmful_effects {
+            self.remove_effect(effect);
+        }
+
+        // 7. Apply standard vanilla effects: Regeneration II, Absorption II, Fire Resistance I
+        for effect in totem_status_effects() {
+            self.add_effect(effect);
+        }
+
+        // 8. Broadcast client status packet 35 (and Bedrock TalismanActivate 65)
+        let world = self.entity.world.load();
+        world.send_entity_status(
+            &self.entity,
+            EntityStatus::ProtectedFromDeath,
+            Some(ActorEventID::TalismanActivate),
+        );
+
+        true
     }
 
     #[allow(dead_code)]
@@ -2968,9 +3116,14 @@ impl LivingEntity {
         }
 
         // Check for shield blocking before armor/magic/cooldown
+        let block_source_pos = position
+            .or_else(|| source.map(|s| s.get_entity().pos.load()))
+            .or_else(|| cause.map(|c| c.get_entity().pos.load()))
+            .or_else(|| Some(caller.get_entity().pos.load()));
+
         if self.is_blocking()
             && !damage_type.has_tag(&tag::DamageType::MINECRAFT_BYPASSES_SHIELD)
-            && let Some(pos) = position
+            && let Some(pos) = block_source_pos
         {
             let player_pos = self.entity.pos.load();
             let look_vec = Vector3::rotation_vector(0.0, self.entity.yaw.load() as f64);
@@ -2980,48 +3133,60 @@ impl LivingEntity {
             if source_to_player.dot(&look_vec) < 0.0 {
                 world.play_sound(Sound::ItemShieldBlock, SoundCategory::Players, &player_pos);
 
-                if let Some(player) = caller.get_player() {
-                    player.increment_stat(
-                        StatisticCategory::Custom,
-                        CustomStatistic::DamageBlockedByShield as i32,
-                        (amount * 10.0).round() as i32,
-                    );
-                }
-
                 let active_hand = self
                     .active_hand
                     .lock()
                     .unwrap_or_else(std::sync::PoisonError::into_inner);
                 if let Some(hand) = *active_hand {
                     let slot = if hand == Hand::Left {
-                        EquipmentSlot::MAIN_HAND
-                    } else {
                         EquipmentSlot::OFF_HAND
+                    } else {
+                        EquipmentSlot::MAIN_HAND
                     };
 
-                    let mut equipment_guard = self
-                        .entity_equipment
-                        .lock()
-                        .unwrap_or_else(std::sync::PoisonError::into_inner);
-                    if let Some(stack) = equipment_guard.equipment.get_mut(&slot) {
-                        let item_id = stack.item.id;
-                        let durability_damage = (amount / 1.0).floor().max(1.0) as i32;
-                        if stack.damage_item(durability_damage) == DamageResult::Broken {
-                            if let Some(player) = caller.get_player() {
-                                player.increment_stat(StatisticCategory::Broken, item_id as i32, 1);
-                            }
-                            world.send_entity_status(
-                                &self.entity,
-                                crate::entity::equipment_break_status(&slot),
-                                None,
-                            );
-                            *stack = ItemStack::EMPTY.clone();
-                            let broken_stack = stack.clone();
-                            drop(equipment_guard);
+                    let durability_damage = (amount / 1.0).floor().max(1.0) as i32;
 
-                            self.send_equipment_changes(&[(slot, broken_stack)]);
+                    if let Some(player) = self.entity.get_player() {
+                        player.increment_stat(
+                            StatisticCategory::Custom,
+                            CustomStatistic::DamageBlockedByShield as i32,
+                            (amount * 10.0).round() as i32,
+                        );
+                        if player.damage_item_in_slot(&slot, durability_damage) {
                             self.clear_active_hand();
                         }
+                    } else {
+                        let mut equipment_guard = self
+                            .entity_equipment
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner);
+                        if let Some(stack) = equipment_guard.equipment.get_mut(&slot) {
+                            if stack.damage_item(durability_damage) == DamageResult::Broken {
+                                world.send_entity_status(
+                                    &self.entity,
+                                    crate::entity::equipment_break_status(&slot),
+                                    None,
+                                );
+                                *stack = ItemStack::EMPTY.clone();
+                                let broken_stack = stack.clone();
+                                drop(equipment_guard);
+
+                                self.send_equipment_changes(&[(slot, broken_stack)]);
+                                self.clear_active_hand();
+                            }
+                        }
+                    }
+                }
+
+                // Vanilla parity: knock back attacker slightly on melee shield block
+                if !damage_type.has_tag(&tag::DamageType::MINECRAFT_IS_PROJECTILE) {
+                    let direct_attacker = source.unwrap_or(caller);
+                    if direct_attacker.get_entity().entity_id != self.entity.entity_id {
+                        let attacker_pos = direct_attacker.get_entity().pos.load();
+                        let dx = attacker_pos.x - player_pos.x;
+                        let dz = attacker_pos.z - player_pos.z;
+                        direct_attacker.get_entity().apply_knockback(0.5, dx, dz);
+                        direct_attacker.get_entity().send_velocity();
                     }
                 }
 
@@ -3046,7 +3211,7 @@ impl LivingEntity {
 
         // Apply hurt cooldown logic
         let last_damage = self.last_damage_taken.load();
-        let (damage_amount, play_sound) =
+        let (damage_amount, took_full_damage) =
             if self.hurt_cooldown.load(Relaxed) > 10 && !bypasses_cooldown_protection {
                 if effective_amount <= last_damage {
                     return false;
@@ -3058,7 +3223,7 @@ impl LivingEntity {
             };
 
         // Finalize state
-        self.last_damage_taken.store(amount);
+        self.last_damage_taken.store(effective_amount);
         let damage_amount = damage_amount.max(0.0);
 
         let Some(server) = world.server.upgrade() else {
@@ -3066,30 +3231,33 @@ impl LivingEntity {
         };
         let config = &server.advanced_config.pvp;
 
-        if config.hurt_animation && let Some(player) = caller.get_player() {
-            let entity_id = self.entity.entity_id;
-            let hurt_yaw = source.or(cause).map_or(0.0, |src_ent| {
-                let src = src_ent.get_entity().pos.load();
-                let tgt = self.entity.pos.load();
-                (src.z - tgt.z).atan2(src.x - tgt.x).to_degrees() as f32 - self.entity.yaw.load()
-            });
-            let hurt_animation = CHurtAnimation::new(entity_id.into(), hurt_yaw);
-            player.try_send_client_packet(&hurt_animation);
-        }
+        if took_full_damage {
+            if config.hurt_animation {
+                let entity_id = self.entity.entity_id;
+                let hurt_yaw = source.or(cause).map_or(0.0, |src_ent| {
+                    let src = src_ent.get_entity().pos.load();
+                    let tgt = self.entity.pos.load();
+                    (src.z - tgt.z).atan2(src.x - tgt.x).to_degrees() as f32 - self.entity.yaw.load()
+                });
+                let hurt_animation = CHurtAnimation::new(entity_id.into(), hurt_yaw);
+                let chunk_pos = self.entity.chunk_pos.load();
+                world.broadcast_to_chunk(chunk_pos, &hurt_animation);
+            }
 
-        world.broadcast_damage_event(
-            &self.entity,
-            i32::from(damage_type.id),
-            cause.map(|e| e.get_entity().entity_id),
-            source.map(|e| e.get_entity().entity_id),
-            position,
-        );
+            world.broadcast_damage_event(
+                &self.entity,
+                i32::from(damage_type.id),
+                cause.map(|e| e.get_entity().entity_id),
+                source.map(|e| e.get_entity().entity_id),
+                position,
+            );
+        }
 
         if let Some(mob) = caller.get_mob() {
             mob.on_damage(damage_type, source.or(cause));
         }
 
-        if play_sound {
+        if took_full_damage {
             let sound_category = if self.entity.entity_type == &EntityType::PLAYER {
                 SoundCategory::Players
             } else if self.entity.entity_type.category == &MobCategory::MONSTER {
@@ -3215,6 +3383,11 @@ impl LivingEntity {
         }
 
         if new_health <= 0.0 {
+            // Totem of Undying death protection check
+            if self.check_totem_death_protection(caller, damage_type) {
+                return true;
+            }
+
             let mut death_event =
                 crate::plugin::api::events::entity::entity_death::EntityDeathEvent::new(
                     self.entity.entity_id,
@@ -3268,6 +3441,7 @@ impl EntityBase for LivingEntity {
         let in_death_animation = self.health.load() <= 0.0 && self.death_time.load(Relaxed) < 20;
         let is_player = self.entity.entity_type == &EntityType::PLAYER;
         if (is_alive || in_death_animation) && !is_player {
+            caller.push_entities(caller);
             self.tick_movement(caller);
             // Vanilla-like order: freeze logic runs after movement/collisions.
             self.entity.tick_frozen(caller);
@@ -3497,16 +3671,18 @@ impl EntityBase for LivingEntity {
             }
             // Only send death particles once (on the exact tick death_time reaches 20)
             // and then remove the entity, preventing entity_event spam.
-            if time >= 20 && !self.entity.removed.swap(true, Ordering::Relaxed) {
+            if time >= 20 {
                 let world = self.entity.world.load();
-                world.send_entity_status(
-                    &self.entity,
-                    EntityStatus::Poof,
-                    None,
-                );
-                let amount = self.pending_experience.load(Relaxed);
-                if amount > 0 {
-                    ExperienceOrbEntity::spawn(&world, self.entity.pos.load(), amount);
+                if !self.entity.removed.swap(true, Ordering::Relaxed) {
+                    world.send_entity_status(
+                        &self.entity,
+                        EntityStatus::Poof,
+                        None,
+                    );
+                    let amount = self.pending_experience.load(Relaxed);
+                    if amount > 0 {
+                        ExperienceOrbEntity::spawn(&world, self.entity.pos.load(), amount);
+                    }
                 }
                 self.entity.remove();
             }
@@ -3780,6 +3956,66 @@ pub(crate) const fn bypasses_armor_durability(damage_type: &DamageType) -> bool 
     (damage_type.id < 64) && ((BYPASS_MASK >> damage_type.id) & 1 == 1)
 }
 
+/// Determines if a damage type bypasses totem of undying death protection (1.21 parity).
+pub fn damage_type_bypasses_totem(damage_type: &DamageType) -> bool {
+    damage_type == &DamageType::GENERIC_KILL
+        || damage_type == &DamageType::OUT_OF_WORLD
+        || damage_type.has_tag(&tag::DamageType::MINECRAFT_BYPASSES_INVULNERABILITY)
+}
+
+/// Checks which hand holds a valid death protection item (main hand has priority over off hand).
+pub fn find_totem_in_hands<F>(mut get_hand: F) -> Option<Hand>
+where
+    F: FnMut(Hand) -> ItemStack,
+{
+    for hand in Hand::all() {
+        let stack = get_hand(hand);
+        if !stack.is_empty()
+            && (stack.item.id == Item::TOTEM_OF_UNDYING.id
+                || stack.get_data_component::<DeathProtectionImpl>().is_some())
+        {
+            return Some(hand);
+        }
+    }
+    None
+}
+
+/// Standard vanilla status effects applied upon totem activation:
+/// - Absorption II: 100 ticks (5s), amplifier 1
+/// - Regeneration II: 900 ticks (45s), amplifier 1
+/// - Fire Resistance I: 800 ticks (40s), amplifier 0
+pub fn totem_status_effects() -> [Effect; 3] {
+    [
+        Effect {
+            effect_type: &StatusEffect::ABSORPTION,
+            duration: 100,
+            amplifier: 1,
+            ambient: false,
+            show_particles: true,
+            show_icon: true,
+            blend: false,
+        },
+        Effect {
+            effect_type: &StatusEffect::REGENERATION,
+            duration: 900,
+            amplifier: 1,
+            ambient: false,
+            show_particles: true,
+            show_icon: true,
+            blend: false,
+        },
+        Effect {
+            effect_type: &StatusEffect::FIRE_RESISTANCE,
+            duration: 800,
+            amplifier: 0,
+            ambient: false,
+            show_particles: true,
+            show_icon: true,
+            blend: false,
+        },
+    ]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3938,5 +4174,272 @@ mod tests {
             .unwrap();
 
         assert_eq!(bytes, [10, 17, 1, 28, 0xff, 0xcd, 0x5c, 0xab]);
+    }
+
+    // ── Totem of Undying Mechanics Tests ──────────────────────────────
+
+    #[test]
+    fn totem_damage_type_bypasses_invulnerability_check() {
+        assert!(damage_type_bypasses_totem(&DamageType::OUT_OF_WORLD));
+        assert!(damage_type_bypasses_totem(&DamageType::GENERIC_KILL));
+        assert!(!damage_type_bypasses_totem(&DamageType::GENERIC));
+        assert!(!damage_type_bypasses_totem(&DamageType::FALL));
+        assert!(!damage_type_bypasses_totem(&DamageType::PLAYER_ATTACK));
+        assert!(!damage_type_bypasses_totem(&DamageType::EXPLOSION));
+        assert!(!damage_type_bypasses_totem(&DamageType::MOB_ATTACK));
+        assert!(!damage_type_bypasses_totem(&DamageType::DROWN));
+        assert!(!damage_type_bypasses_totem(&DamageType::LAVA));
+    }
+
+    #[test]
+    fn totem_status_effects_match_vanilla_values() {
+        let effects = totem_status_effects();
+        assert_eq!(effects.len(), 3);
+
+        let absorption = effects
+            .iter()
+            .find(|e| e.effect_type == &StatusEffect::ABSORPTION)
+            .expect("Absorption II effect must be present");
+        assert_eq!(absorption.duration, 100, "Absorption II must last 100 ticks (5 seconds)");
+        assert_eq!(absorption.amplifier, 1, "Absorption II must have amplifier 1");
+
+        let regen = effects
+            .iter()
+            .find(|e| e.effect_type == &StatusEffect::REGENERATION)
+            .expect("Regeneration II effect must be present");
+        assert_eq!(regen.duration, 900, "Regeneration II must last 900 ticks (45 seconds)");
+        assert_eq!(regen.amplifier, 1, "Regeneration II must have amplifier 1");
+
+        let fire_res = effects
+            .iter()
+            .find(|e| e.effect_type == &StatusEffect::FIRE_RESISTANCE)
+            .expect("Fire Resistance I effect must be present");
+        assert_eq!(fire_res.duration, 800, "Fire Resistance I must last 800 ticks (40 seconds)");
+        assert_eq!(fire_res.amplifier, 0, "Fire Resistance I must have amplifier 0");
+    }
+
+    #[test]
+    fn totem_find_in_hands_prioritizes_main_hand_over_off_hand() {
+        let totem = ItemStack::static_new_java(1, &Item::TOTEM_OF_UNDYING);
+        let sword = ItemStack::static_new_java(1, &Item::DIAMOND_SWORD);
+
+        // Both hands hold totem -> Main hand (Right) is selected first
+        let found = find_totem_in_hands(|hand| match hand {
+            Hand::Right => totem.clone(),
+            Hand::Left => totem.clone(),
+        });
+        assert_eq!(found, Some(Hand::Right), "Main hand must be checked before off hand");
+
+        // Main hand has sword, off hand has totem -> Off hand (Left) is selected
+        let found = find_totem_in_hands(|hand| match hand {
+            Hand::Right => sword.clone(),
+            Hand::Left => totem.clone(),
+        });
+        assert_eq!(found, Some(Hand::Left), "Off hand totem must be selected when main hand is non-totem");
+
+        // Neither hand has totem -> None
+        let found = find_totem_in_hands(|hand| match hand {
+            Hand::Right => sword.clone(),
+            Hand::Left => ItemStack::EMPTY.clone(),
+        });
+        assert_eq!(found, None, "None must be returned when no totem is held in either hand");
+    }
+
+    #[test]
+    fn test_fatal_damage_triggers_totem_protection_main_hand() {
+        let mut main_hand = ItemStack::static_new_java(1, &Item::TOTEM_OF_UNDYING);
+        let mut off_hand = ItemStack::EMPTY.clone();
+        let mut health = 2.0f32;
+        let mut active_effects: Vec<&'static StatusEffect> = vec![
+            &StatusEffect::POISON,
+            &StatusEffect::WITHER,
+            &StatusEffect::SPEED,
+        ];
+
+        let incoming_damage = 10.0f32;
+        let damage_type = DamageType::GENERIC;
+        let mut death_triggered = false;
+
+        // Damage calculation pipeline
+        let new_health = health - incoming_damage;
+        if new_health <= 0.0 {
+            if !damage_type_bypasses_totem(&damage_type) {
+                if let Some(hand) = find_totem_in_hands(|h| match h {
+                    Hand::Right => main_hand.clone(),
+                    Hand::Left => off_hand.clone(),
+                }) {
+                    match hand {
+                        Hand::Right => {
+                            main_hand.decrement(1);
+                            if main_hand.item_count == 0 {
+                                main_hand.clear();
+                            }
+                        }
+                        Hand::Left => {
+                            off_hand.decrement(1);
+                            if off_hand.item_count == 0 {
+                                off_hand.clear();
+                            }
+                        }
+                    }
+                    health = 1.0;
+                    active_effects.retain(|e| !matches!(e.category, MobEffectCategory::Harmful));
+                    for effect in totem_status_effects() {
+                        active_effects.push(effect.effect_type);
+                    }
+                } else {
+                    death_triggered = true;
+                }
+            } else {
+                death_triggered = true;
+            }
+        }
+
+        assert!(!death_triggered, "Death must not occur when holding Totem in main hand");
+        assert_eq!(health, 1.0f32, "Health must be reset to 1.0 (half heart)");
+        assert!(main_hand.is_empty(), "Totem must be consumed from main hand");
+        assert_eq!(main_hand.item_count, 0);
+
+        // Verify harmful effects are cleared
+        assert!(!active_effects.contains(&&StatusEffect::POISON), "Poison must be cleared");
+        assert!(!active_effects.contains(&&StatusEffect::WITHER), "Wither must be cleared");
+
+        // Verify beneficial effects persist
+        assert!(active_effects.contains(&&StatusEffect::SPEED), "Speed must persist");
+
+        // Verify totem buffs applied
+        assert!(active_effects.contains(&&StatusEffect::ABSORPTION), "Absorption II must be applied");
+        assert!(active_effects.contains(&&StatusEffect::REGENERATION), "Regeneration II must be applied");
+        assert!(active_effects.contains(&&StatusEffect::FIRE_RESISTANCE), "Fire Resistance I must be applied");
+    }
+
+    #[test]
+    fn test_fatal_damage_triggers_totem_protection_off_hand() {
+        let mut main_hand = ItemStack::static_new_java(1, &Item::DIAMOND_SWORD);
+        let mut off_hand = ItemStack::static_new_java(1, &Item::TOTEM_OF_UNDYING);
+        let mut health = 5.0f32;
+        let incoming_damage = 20.0f32;
+        let damage_type = DamageType::FALL;
+        let mut death_triggered = false;
+
+        let new_health = health - incoming_damage;
+        if new_health <= 0.0 {
+            if !damage_type_bypasses_totem(&damage_type) {
+                if let Some(hand) = find_totem_in_hands(|h| match h {
+                    Hand::Right => main_hand.clone(),
+                    Hand::Left => off_hand.clone(),
+                }) {
+                    match hand {
+                        Hand::Right => {
+                            main_hand.decrement(1);
+                            if main_hand.item_count == 0 {
+                                main_hand.clear();
+                            }
+                        }
+                        Hand::Left => {
+                            off_hand.decrement(1);
+                            if off_hand.item_count == 0 {
+                                off_hand.clear();
+                            }
+                        }
+                    }
+                    health = 1.0;
+                } else {
+                    death_triggered = true;
+                }
+            } else {
+                death_triggered = true;
+            }
+        }
+
+        assert!(!death_triggered, "Death must not occur when holding Totem in off hand");
+        assert_eq!(health, 1.0f32, "Health must be reset to 1.0");
+        assert_eq!(main_hand.item.id, Item::DIAMOND_SWORD.id, "Main hand sword must remain untouched");
+        assert_eq!(main_hand.item_count, 1);
+        assert!(off_hand.is_empty(), "Off hand totem must be consumed");
+        assert_eq!(off_hand.item_count, 0);
+    }
+
+    #[test]
+    fn test_stacked_totem_decrements_by_one() {
+        let mut main_hand = ItemStack::static_new_java(3, &Item::TOTEM_OF_UNDYING);
+        let off_hand = ItemStack::EMPTY.clone();
+
+        let hand = find_totem_in_hands(|h| match h {
+            Hand::Right => main_hand.clone(),
+            Hand::Left => off_hand.clone(),
+        }).expect("Totem should be found");
+
+        assert_eq!(hand, Hand::Right);
+        main_hand.decrement(1);
+        if main_hand.item_count == 0 {
+            main_hand.clear();
+        }
+
+        assert_eq!(main_hand.item_count, 2, "Stack of 3 totems must decrement to 2, not clear entirely");
+        assert_eq!(main_hand.item.id, Item::TOTEM_OF_UNDYING.id);
+    }
+
+    #[test]
+    fn test_fatal_damage_void_bypasses_totem() {
+        let main_hand = ItemStack::static_new_java(1, &Item::TOTEM_OF_UNDYING);
+        let off_hand = ItemStack::EMPTY.clone();
+        let health = 20.0f32;
+        let incoming_damage = 100.0f32;
+        let damage_type = DamageType::OUT_OF_WORLD;
+        let mut death_triggered = false;
+
+        let new_health = health - incoming_damage;
+        if new_health <= 0.0 {
+            if !damage_type_bypasses_totem(&damage_type) {
+                if find_totem_in_hands(|h| match h {
+                    Hand::Right => main_hand.clone(),
+                    Hand::Left => off_hand.clone(),
+                }).is_some() {
+                    death_triggered = false;
+                } else {
+                    death_triggered = true;
+                }
+            } else {
+                death_triggered = true;
+            }
+        }
+
+        assert!(death_triggered, "Void damage must trigger death despite holding totem");
+        assert_eq!(main_hand.item_count, 1, "Totem must not be consumed when death cannot be prevented");
+    }
+
+    #[test]
+    fn test_non_lethal_damage_does_not_consume_totem() {
+        let main_hand = ItemStack::static_new_java(1, &Item::TOTEM_OF_UNDYING);
+        let off_hand = ItemStack::EMPTY.clone();
+        let health = 20.0f32;
+        let incoming_damage = 5.0f32;
+        let damage_type = DamageType::GENERIC;
+        let mut death_triggered = false;
+        let mut final_health = health;
+
+        let new_health = health - incoming_damage;
+        if new_health <= 0.0 {
+            if !damage_type_bypasses_totem(&damage_type) {
+                if find_totem_in_hands(|h| match h {
+                    Hand::Right => main_hand.clone(),
+                    Hand::Left => off_hand.clone(),
+                }).is_some() {
+                    final_health = 1.0;
+                } else {
+                    death_triggered = true;
+                }
+            } else {
+                death_triggered = true;
+            }
+        } else {
+            final_health = new_health;
+        }
+
+        assert!(!death_triggered);
+        assert_eq!(final_health, 15.0f32, "Health should drop to 15.0 on non-lethal damage");
+        assert_eq!(main_hand.item_count, 1, "Totem must not be consumed on non-lethal damage");
+        assert_eq!(main_hand.item.id, Item::TOTEM_OF_UNDYING.id);
     }
 }

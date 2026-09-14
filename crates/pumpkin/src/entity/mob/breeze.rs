@@ -143,6 +143,11 @@ impl Mob for BreezeEntity {
         &self.mob_entity
     }
 
+    fn can_attack(&self, target: &dyn EntityBase) -> bool {
+        let entity_type = target.get_entity().entity_type;
+        entity_type == &EntityType::PLAYER || entity_type == &EntityType::IRON_GOLEM
+    }
+
     fn mob_tick(&self, _caller: &dyn EntityBase) {
         let entity = &self.mob_entity.living_entity.entity;
         if !entity.is_alive() {
@@ -331,11 +336,16 @@ impl Mob for BreezeEntity {
                             gravity: WIND_CHARGE_GRAVITY,
                         };
                         let wind_charge = WindChargeEntity::new_breeze(thrown);
-                        let target_eye_height = target.get_entity().get_eye_height();
+                        let target_ent = target.get_entity();
+                        let target_height = f64::from(target_ent.entity_dimension.load().height);
+                        let progress = if target_ent.vehicle.lock().map(|v| v.is_some()).unwrap_or(false) { 0.8 } else { 0.3 };
+                        let target_y = target_pos.y + target_height * progress;
                         let xd = target_pos.x - spawn_pos.x;
-                        let yd = (target_pos.y + target_eye_height * 0.5) - spawn_pos.y;
+                        let yd = target_y - spawn_pos.y;
                         let zd = target_pos.z - spawn_pos.z;
-                        wind_charge.set_velocity(xd, yd, zd, 0.7, 1.0);
+                        let difficulty = world.level_info.load().difficulty as i32;
+                        let uncertainty = (5 - difficulty * 4).max(0) as f64;
+                        wind_charge.set_velocity(xd, yd, zd, 0.7, uncertainty);
                         world.spawn_entity_non_save(Arc::new(wind_charge));
 
                         world.play_sound_fine(

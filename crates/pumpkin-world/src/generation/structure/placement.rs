@@ -6,7 +6,8 @@ use pumpkin_data::structures::{
 use pumpkin_util::{
     math::floor_div,
     random::{
-        RandomGenerator, RandomImpl, get_carver_seed, get_region_seed, legacy_rand::LegacyRand,
+        RandomGenerator, RandomImpl, get_large_feature_seed, get_region_seed,
+        legacy_rand::LegacyRand,
     },
 };
 use std::f64::consts::PI;
@@ -39,6 +40,8 @@ pub struct GlobalStructureCache {
     /// same Arc and blocks on `get_or_init` until the first thread finishes.
     /// Result: each (key, chunk_x, chunk_z) triplet is expanded at most once.
     structure_starts: OnceLock<DashMap<(StructureKeys, i32, i32), Arc<OnceLock<Option<StructurePosition>>>>>,
+    /// Memoized column heights for Jigsaw structures to prevent redundant 3D density sampling.
+    column_heights: OnceLock<DashMap<(i32, i32, bool), i32>>,
 }
 impl GlobalStructureCache {
     /// Creates a new, empty global structure cache.
@@ -47,7 +50,25 @@ impl GlobalStructureCache {
         Self {
             stronghold_chunks: OnceLock::new(),
             structure_starts: OnceLock::new(),
+            column_heights: OnceLock::new(),
         }
+    }
+
+    pub fn get_or_compute_column_height(
+        &self,
+        x: i32,
+        z: i32,
+        ocean_floor: bool,
+        compute: impl FnOnce() -> i32,
+    ) -> i32 {
+        let cache = self.column_heights.get_or_init(DashMap::new);
+        let key = (x, z, ocean_floor);
+        if let Some(height) = cache.get(&key) {
+            return *height;
+        }
+        let height = compute();
+        cache.insert(key, height);
+        height
     }
 
     pub fn get_stronghold_chunks(&self) -> &[(i32, i32)] {
@@ -174,6 +195,13 @@ impl GlobalStructureCache {
                 let step = 4;
                 let search_radius = 112;
 
+                let mut allowed_mask = [0u64; 4];
+                for &b in allowed_biomes {
+                    if b < 256 {
+                        allowed_mask[(b as usize) >> 6] |= 1u64 << (b & 63);
+                    }
+                }
+
                 for dz in (-search_radius..=search_radius).step_by(step as usize) {
                     for dx in (-search_radius..=search_radius).step_by(step as usize) {
                         let test_x = center_block_x + dx;
@@ -181,7 +209,7 @@ impl GlobalStructureCache {
 
                         let biome = biome_supplier.get_biome(test_x, 0, test_z);
 
-                        if allowed_biomes.contains(&(biome.id as u16)) {
+                        if (allowed_mask[(biome.id as usize) >> 6] & (1u64 << (biome.id & 63))) != 0 {
                             found_count += 1;
                             // Reservoir sampling: Pick the Nth valid biome with 1/N probability
                             if found_pos.is_none()
@@ -220,6 +248,47 @@ impl Default for GlobalStructureCache {
     }
 }
 
+pub fn is_structure_set_chunk_in_range(
+    set: &StructureSet,
+    seed: i64,
+    source_x: i32,
+    source_z: i32,
+    range: i32,
+) -> bool {
+    match &set.placement.placement_type {
+        StructurePlacementType::RandomSpread(spread) => {
+            let min_rx = floor_div(source_x - range, spread.spacing);
+            let max_rx = floor_div(source_x + range, spread.spacing);
+            let min_rz = floor_div(source_z - range, spread.spacing);
+            let max_rz = floor_div(source_z + range, spread.spacing);
+
+            for rx in min_rx..=max_rx {
+                for rz in min_rz..=max_rz {
+                    let (cx, cz) =
+                        get_structure_chunk_in_region(spread, seed, rx, rz, set.placement.salt);
+                    if cx >= source_x - range
+                        && cx <= source_x + range
+                        && cz >= source_z - range
+                        && cz <= source_z + range
+                        && apply_frequency_reduction(
+                            set.placement.frequency_reduction_method,
+                            seed,
+                            cx,
+                            cz,
+                            set.placement.salt,
+                            set.placement.frequency.unwrap_or(1.0),
+                        )
+                    {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+        StructurePlacementType::ConcentricRings(_) => false,
+    }
+}
+
 #[must_use]
 // #[expect(clippy::too_many_arguments)]
 pub fn should_generate_structure(
@@ -253,25 +322,12 @@ pub fn should_generate_structure(
             .strip_prefix("minecraft:")
             .unwrap_or(zone.other_set);
         StructureSet::get(set_name).is_some_and(|set| {
-            let allowed_biomes = ProtoChunk::get_allowed_biomes(set);
-            (chunk_x - zone.chunk_count..=chunk_x + zone.chunk_count).any(|x| {
-                (chunk_z - zone.chunk_count..=chunk_z + zone.chunk_count).any(|z| {
-                    should_generate_structure(
-                        &set.placement,
-                        calculator,
-                        x,
-                        z,
-                        global_cache,
-                        biome_supplier,
-                        &allowed_biomes,
-                    )
-                })
-            })
+            is_structure_set_chunk_in_range(set, calculator.seed, chunk_x, chunk_z, zone.chunk_count)
         })
     })
 }
 
-fn apply_frequency_reduction(
+pub fn apply_frequency_reduction(
     method: Option<FrequencyReductionMethod>,
     seed: i64,
     chunk_x: i32,
@@ -314,8 +370,8 @@ fn should_generate_frequency(
             random.next_f32() < frequency
         }
         FrequencyReductionMethod::LegacyType3 => {
-            let carver_seed = get_carver_seed(seed as u64, chunk_x, chunk_z);
-            let mut random = LegacyRand::from_seed(carver_seed);
+            let large_feature_seed = get_large_feature_seed(seed as u64, chunk_x, chunk_z);
+            let mut random = LegacyRand::from_seed(large_feature_seed);
             random.next_f64() < f64::from(frequency)
         }
     }
@@ -337,6 +393,10 @@ fn is_start_chunk(
             is_start_chunk_random_spread(placement, calculator, chunk_x, chunk_z, salt)
         }
         StructurePlacementType::ConcentricRings(placement) => {
+            let min_dist_chunks = (placement.distance * 4 - (placement.distance * 5 / 4) - 8).max(0);
+            if chunk_x.saturating_mul(chunk_x) + chunk_z.saturating_mul(chunk_z) < min_dist_chunks * min_dist_chunks {
+                return false;
+            }
             let strongholds = global_cache.get_or_calculate_strongholds(
                 calculator.seed,
                 placement,
@@ -394,6 +454,15 @@ fn is_start_chunk_random_spread(
     chunk_z: i32,
     salt: u32,
 ) -> bool {
+    let bound = placement.spacing - placement.separation;
+    if bound <= 0 {
+        return false;
+    }
+    let local_x = chunk_x.rem_euclid(placement.spacing);
+    let local_z = chunk_z.rem_euclid(placement.spacing);
+    if local_x >= bound || local_z >= bound {
+        return false;
+    }
     let pos = get_start_chunk_random_spread(placement, calculator.seed, chunk_x, chunk_z, salt);
     (chunk_x == pos.0) && (chunk_z == pos.1)
 }

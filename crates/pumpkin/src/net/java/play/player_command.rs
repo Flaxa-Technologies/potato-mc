@@ -44,20 +44,29 @@ impl JavaClient {
             }
             Action::LeaveBed => player.wake_up(),
 
-            Action::StartHorseJump | Action::StopHorseJump | Action::OpenVehicleInventory => {
+            Action::StartHorseJump | Action::StopHorseJump => {
                 debug!("todo");
             }
+            Action::OpenVehicleInventory => {
+                if let Some(vehicle) = entity.get_vehicle() {
+                    vehicle.open_custom_inventory_screen(player);
+                }
+            }
             Action::StartFlyingElytra => {
-                let fall_flying = entity.check_fall_flying();
-                if entity.is_fall_flying() != fall_flying {
-                    let mut event = crate::plugin::api::events::entity::entity_toggle_glide::EntityToggleGlideEvent::new(
-                        entity.entity_id,
-                        fall_flying,
-                    );
-                    server.plugin_manager.fire_blocking(server, &mut event);
-                    if !event.cancelled {
-                        entity.set_fall_flying(event.is_gliding);
+                let can_glide = player.can_glide();
+                if can_glide {
+                    if !entity.is_fall_flying() {
+                        let mut event = crate::plugin::api::events::entity::entity_toggle_glide::EntityToggleGlideEvent::new(
+                            entity.entity_id,
+                            true,
+                        );
+                        server.plugin_manager.fire_blocking(server, &mut event);
+                        if !event.cancelled {
+                            entity.set_fall_flying(event.is_gliding);
+                        }
                     }
+                } else if entity.is_fall_flying() {
+                    entity.set_fall_flying(false);
                 }
             }
             // <= 1.21.5

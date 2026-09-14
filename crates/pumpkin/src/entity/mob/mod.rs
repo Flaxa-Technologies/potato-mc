@@ -1,7 +1,9 @@
 use super::{Entity, EntityBase, ai::pathfinder::Navigator, living::LivingEntity};
 use crate::entity::ai::control::MoveControlTrait;
+use crate::entity::ai::control::body_rotation_control::BodyRotationControl;
 use crate::entity::ai::control::look_control::LookControl;
 use crate::entity::ai::control::move_control::MoveControl;
+
 use crate::entity::ai::goal::goal_selector::GoalSelector;
 use crate::entity::player::Player;
 use crate::server::Server;
@@ -16,7 +18,7 @@ use pumpkin_data::tag::{self, Taggable};
 use pumpkin_data::tracked_data;
 use pumpkin_data::{Block, BlockDirection};
 use pumpkin_nbt::compound::NbtCompound;
-use pumpkin_protocol::java::client::play::{CHeadRot, CUpdateEntityRot};
+use pumpkin_protocol::java::client::play::CHeadRot;
 use pumpkin_util::Difficulty;
 use pumpkin_util::math::boundingbox::BoundingBox;
 use pumpkin_util::math::position::BlockPos;
@@ -61,6 +63,7 @@ pub mod silverfish;
 pub mod skeleton;
 pub mod slime;
 pub mod spider;
+pub mod sulfur_cube;
 pub mod vex;
 pub mod vindicator;
 pub mod warden;
@@ -77,15 +80,17 @@ pub struct MobEntity {
     pub target: std::sync::Mutex<Option<Arc<dyn EntityBase>>>,
     pub look_control: std::sync::Mutex<LookControl>,
     pub move_control: std::sync::Mutex<Box<dyn MoveControlTrait>>,
+    pub body_rotation_control: std::sync::Mutex<BodyRotationControl>,
     pub position_target: AtomicCell<BlockPos>,
+
     pub position_target_range: AtomicI32,
     pub love_ticks: AtomicI32,
     pub breeding_cooldown: AtomicI32,
     pub breeder: AtomicCell<Option<Uuid>>,
     pub persistence_required: AtomicBool,
+    /// Counts ticks since the mob last had a player within 32 blocks. Matches vanilla Mob.java noActionTime.
+    pub no_action_time: AtomicI32,
     mob_flags: AtomicU8,
-    last_sent_yaw: AtomicU8,
-    last_sent_pitch: AtomicU8,
     last_sent_head_yaw: AtomicU8,
 }
 impl MobEntity {
@@ -163,15 +168,16 @@ impl MobEntity {
             target: std::sync::Mutex::new(None),
             look_control: std::sync::Mutex::new(LookControl::default()),
             move_control: std::sync::Mutex::new(Box::new(MoveControl::default())),
+            body_rotation_control: std::sync::Mutex::new(BodyRotationControl::new()),
             position_target: AtomicCell::new(BlockPos::ZERO),
+
             position_target_range: AtomicI32::new(-1),
             love_ticks: AtomicI32::new(0),
             breeding_cooldown: AtomicI32::new(0),
             breeder: AtomicCell::new(None),
             persistence_required: AtomicBool::new(false),
+            no_action_time: AtomicI32::new(0),
             mob_flags: AtomicU8::new(0),
-            last_sent_yaw: AtomicU8::new(0),
-            last_sent_pitch: AtomicU8::new(0),
             last_sent_head_yaw: AtomicU8::new(0),
         }
     }
@@ -345,8 +351,12 @@ impl MobEntity {
     pub fn is_in_attack_range(&self, target: &dyn EntityBase) -> bool {
         const DEFAULT_ATTACK_RANGE: f64 = 0.828_427_12; // sqrt(2.04) - 0.6
 
-        // TODO: Implement DataComponent lookup for ATTACK_RANGE when components are ready
-        let max_range = DEFAULT_ATTACK_RANGE;
+        // Iron Golems have wide bodies (width 1.4) and long reach in vanilla (~2.0 blocks from bounding box)
+        let max_range = if self.living_entity.entity.entity_type == &pumpkin_data::entity::EntityType::IRON_GOLEM {
+            2.0
+        } else {
+            DEFAULT_ATTACK_RANGE
+        };
         let min_range = 0.0;
 
         let target_hitbox = target.get_entity().bounding_box.load();
@@ -503,6 +513,29 @@ impl MobEntity {
         }
     }
 
+    pub fn look_at(&self, target: &dyn EntityBase, max_yaw_change: f32, max_pitch_change: f32) {
+        let entity = &self.living_entity.entity;
+        let self_pos = entity.pos.load();
+        let target_entity = target.get_entity();
+        let target_pos = target_entity.pos.load();
+
+        let xd = target_pos.x - self_pos.x;
+        let zd = target_pos.z - self_pos.z;
+        let yd = target_entity.get_eye_y() - entity.get_eye_y();
+
+        let sd = xd.hypot(zd);
+        let y_rot_d = (zd.atan2(xd) as f32).to_degrees() - 90.0;
+        let x_rot_d = -((yd.atan2(sd) as f32).to_degrees());
+
+        let rotlerp = |a: f32, b: f32, max: f32| -> f32 {
+            let diff = pumpkin_util::math::wrap_degrees(b - a);
+            a + diff.clamp(-max, max)
+        };
+
+        entity.set_pitch(rotlerp(entity.pitch.load(), x_rot_d, max_pitch_change));
+        entity.yaw.store(rotlerp(entity.yaw.load(), y_rot_d, max_yaw_change));
+    }
+
     fn get_attack_box(&self, attack_range: f64) -> BoundingBox {
         let vehicle_opt = self.living_entity.entity.get_vehicle();
 
@@ -527,7 +560,7 @@ impl MobEntity {
             },
         );
 
-        base_box.expand(attack_range, 0.0, attack_range)
+        base_box.expand(attack_range, 1.0, attack_range)
     }
 
     pub fn tick_sun_burn(&self) {
@@ -637,7 +670,7 @@ impl MobEntity {
     pub fn check_despawn(&self, mob: &dyn Mob) {
         let entity = &self.living_entity.entity;
 
-        if self.persistence_required.load(Relaxed) {
+        if self.persistence_required.load(Relaxed) || mob.requires_custom_persistence() {
             return;
         }
 
@@ -661,17 +694,30 @@ impl MobEntity {
             })
             .fold(f64::MAX, f64::min);
 
+        // Vanilla parity: if no players in the dimension, do not despawn (Mob.java:700)
         if nearest_dist_sq == f64::MAX {
+            return;
+        }
+
+        // Vanilla Mob.java:707 — if any player is within 32 blocks, reset no_action_time
+        if nearest_dist_sq < 32.0 * 32.0 {
+            self.no_action_time.store(0, Relaxed);
+            return;
+        }
+
+        // Immediate hard-despawn beyond 128 blocks (Mob.java:702)
+        if nearest_dist_sq > 128.0 * 128.0 && mob.remove_when_far_away(nearest_dist_sq) {
             mob.get_entity().remove();
             return;
         }
 
-        if nearest_dist_sq > 128.0 * 128.0 {
-            mob.get_entity().remove();
-            return;
-        }
-
-        if nearest_dist_sq > 32.0 * 32.0 && rand::random::<i32>().wrapping_abs() % 800 == 0 {
+        // Vanilla Mob.java:704 — random 1/800 despawn only after noActionTime > 600 (30 seconds)
+        // This prevents newly-spawned mobs or mobs briefly unattended from being randomly deleted.
+        let no_action_time = self.no_action_time.fetch_add(1, Relaxed);
+        if no_action_time > 600
+            && mob.remove_when_far_away(nearest_dist_sq)
+            && rand::random::<i32>().wrapping_abs() % 800 == 0
+        {
             mob.get_entity().remove();
         }
     }
@@ -729,6 +775,8 @@ pub trait Mob: EntityBase + Send + Sync {
     }
 
     fn release_pending_job_site(&self, _position: BlockPos) {}
+
+    fn work_at_job_site(&self) {}
 
     fn get_trading_player(&self) -> Option<Arc<Player>> {
         None
@@ -1107,6 +1155,16 @@ pub trait Mob: EntityBase + Send + Sync {
 
     fn mob_set_variant_name(&self, _name: &str) {}
 
+    fn mob_hear_noteblock(&self, _pos: pumpkin_util::math::position::BlockPos) {}
+
+    fn mob_hear_jukebox(&self, _pos: pumpkin_util::math::position::BlockPos, _is_playing: bool) {}
+
+    fn mob_open_custom_inventory_screen(
+        &self,
+        _player: &std::sync::Arc<crate::entity::player::Player>,
+    ) {
+    }
+
     fn mob_on_lightning_strike(
         &self,
         caller: &dyn EntityBase,
@@ -1120,6 +1178,18 @@ pub trait Mob: EntityBase + Send + Sync {
 impl<T: Mob + Send + 'static> EntityBase for T {
     fn get_mob(&self) -> Option<&dyn Mob> {
         Some(self)
+    }
+
+    fn hear_noteblock(&self, pos: pumpkin_util::math::position::BlockPos) {
+        self.mob_hear_noteblock(pos);
+    }
+
+    fn hear_jukebox(&self, pos: pumpkin_util::math::position::BlockPos, is_playing: bool) {
+        self.mob_hear_jukebox(pos, is_playing);
+    }
+
+    fn open_custom_inventory_screen(&self, player: &std::sync::Arc<crate::entity::player::Player>) {
+        self.mob_open_custom_inventory_screen(player);
     }
 
     fn on_lightning_strike(
@@ -1188,12 +1258,29 @@ impl<T: Mob + Send + 'static> EntityBase for T {
             }
         }
 
-        mob_entity.check_despawn(self);
+        if self.is_sitting() {
+            mob_entity
+                .living_entity
+                .movement_input
+                .store(pumpkin_util::math::vector3::Vector3::new(0.0, 0.0, 0.0));
+            mob_entity
+                .living_entity
+                .jumping
+                .store(false, std::sync::atomic::Ordering::Relaxed);
+        }
+
+        mob_entity.living_entity.tick(caller, server);
 
         if mob_entity.living_entity.dead.load(Relaxed)
             || mob_entity.living_entity.health.load() <= 0.0
         {
-            mob_entity.living_entity.tick(caller, server);
+            return;
+        }
+
+        mob_entity.check_despawn(self);
+
+        // Early-return if check_despawn removed the entity — prevents ghost mob AI continuation
+        if mob_entity.living_entity.entity.is_removed() {
             return;
         }
 
@@ -1218,13 +1305,17 @@ impl<T: Mob + Send + 'static> EntityBase for T {
             std::mem::take(&mut *guard)
         };
 
+        let is_sleeping = mob_entity.living_entity.entity.pose.load() == pumpkin_data::entity::EntityPose::Sleeping;
+
         // 2. Perform AI logic
-        if (age + entity_id) % 2 != 0 && age > 1 {
-            target_selector.tick_goals(self, false);
-            goals_selector.tick_goals(self, false);
-        } else {
-            target_selector.tick(self);
-            goals_selector.tick(self);
+        if !is_sleeping {
+            if (age + entity_id) % 2 != 0 && age > 1 {
+                target_selector.tick_goals(self, false);
+                goals_selector.tick_goals(self, false);
+            } else {
+                target_selector.tick(self);
+                goals_selector.tick(self);
+            }
         }
 
         // 3. "Put back" selectors
@@ -1248,7 +1339,7 @@ impl<T: Mob + Send + 'static> EntityBase for T {
             std::mem::take(&mut *guard)
         };
 
-        if self.is_sitting() {
+        if self.is_sitting() || is_sleeping {
             navigator.stop();
             mob_entity
                 .living_entity
@@ -1270,65 +1361,44 @@ impl<T: Mob + Send + 'static> EntityBase for T {
         };
 
         // Controllers are synchronous, so we can just use normal blocks
-        {
-            let mut look_control = mob_entity
-                .look_control
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner);
-            look_control.tick(self);
-        };
+        if !is_sleeping {
+            {
+                let mut move_control = mob_entity
+                    .move_control
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+                move_control.tick(self);
+            };
 
-        {
-            let mut move_control = mob_entity
-                .move_control
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner);
-            move_control.tick(self);
-        };
+            {
+                let mut look_control = mob_entity
+                    .look_control
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+                look_control.tick(self);
+            };
 
-        if self.is_sitting() {
-            mob_entity
-                .living_entity
-                .movement_input
-                .store(pumpkin_util::math::vector3::Vector3::new(0.0, 0.0, 0.0));
-            mob_entity
-                .living_entity
-                .jumping
-                .store(false, std::sync::atomic::Ordering::Relaxed);
+            {
+                let mut body_rotation_control = mob_entity
+                    .body_rotation_control
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+                body_rotation_control.client_tick(self);
+            };
         }
 
-        mob_entity.living_entity.tick(caller, server);
         self.post_tick();
 
-        // --- Packet logic remains the same ---
-        let entity = &mob_entity.living_entity.entity;
-        let yaw = (entity.yaw.load() * 256.0 / 360.0).rem_euclid(256.0) as u8;
-        let pitch = (entity.pitch.load() * 256.0 / 360.0).rem_euclid(256.0) as u8;
-        let head_yaw = (entity.head_yaw.load() * 256.0 / 360.0).rem_euclid(256.0) as u8;
 
-        let last_yaw = mob_entity.last_sent_yaw.load(Relaxed);
-        let last_pitch = mob_entity.last_sent_pitch.load(Relaxed);
+        // Head rotation sync matches vanilla ServerEntity.java:215-219
+        // (Base yaw and pitch are broadcast via living_entity.send_pos_rot)
+        let entity = &mob_entity.living_entity.entity;
+        let head_yaw = (entity.head_yaw.load() * 256.0 / 360.0).rem_euclid(256.0) as u8;
         let last_head_yaw = mob_entity.last_sent_head_yaw.load(Relaxed);
 
-        let chunk_pos = entity.chunk_pos.load();
-        if yaw.abs_diff(last_yaw) >= 1 || pitch.abs_diff(last_pitch) >= 1 {
-            let world = entity.world.load();
-            world.broadcast_to_chunk(
-                chunk_pos,
-                &CUpdateEntityRot::new(
-                    entity.entity_id.into(),
-                    yaw,
-                    pitch,
-                    entity.on_ground.load(Relaxed),
-                ),
-            );
-            mob_entity.last_sent_yaw.store(yaw, Relaxed);
-            mob_entity.last_sent_pitch.store(pitch, Relaxed);
-        }
-
         if head_yaw.abs_diff(last_head_yaw) >= 1 {
+            let chunk_pos = entity.chunk_pos.load();
             let world = entity.world.load();
-
             world.broadcast_to_chunk(chunk_pos, &CHeadRot::new(entity.entity_id.into(), head_yaw));
             mob_entity.last_sent_head_yaw.store(head_yaw, Relaxed);
         }

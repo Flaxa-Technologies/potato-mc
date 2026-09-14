@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::LazyLock;
 
 use pumpkin_data::chunk::Biome;
@@ -88,16 +88,85 @@ impl PartialOrd for FeatureData {
 
 static OVERWORLD_FEATURES_PER_STEP: LazyLock<Vec<Vec<PlacedFeature>>> =
     LazyLock::new(|| sort_features_per_step(OVERWORLD_BIOMES));
-static OVERWORLD_BIOME_IDS: LazyLock<HashSet<u8>> =
-    LazyLock::new(|| OVERWORLD_BIOMES.iter().map(|biome| biome.id).collect());
+static OVERWORLD_BIOME_MASK: LazyLock<[u64; 4]> = LazyLock::new(|| {
+    let mut mask = [0u64; 4];
+    for biome in OVERWORLD_BIOMES {
+        let id = biome.id as usize;
+        mask[id / 64] |= 1u64 << (id % 64);
+    }
+    mask
+});
+
+#[inline(always)]
+fn is_overworld_biome(id: u8) -> bool {
+    let id = id as usize;
+    (OVERWORLD_BIOME_MASK[id / 64] & (1u64 << (id % 64))) != 0
+}
+
+#[derive(Clone, Copy, Default)]
+struct PlacedFeatureSet {
+    bits: [u64; 5],
+}
+
+impl PlacedFeatureSet {
+    #[inline(always)]
+    fn insert(&mut self, feature: PlacedFeature) {
+        let idx = feature as usize;
+        self.bits[idx / 64] |= 1u64 << (idx % 64);
+    }
+
+    #[inline(always)]
+    fn contains(&self, feature: PlacedFeature) -> bool {
+        let idx = feature as usize;
+        (self.bits[idx / 64] & (1u64 << (idx % 64))) != 0
+    }
+}
+
+#[inline]
+pub fn for_each_selected_feature(
+    biome_ids: &[u8],
+    step: usize,
+    mut f: impl FnMut(usize, PlacedFeature),
+) {
+    if !biome_ids.iter().any(|&biome_id| is_overworld_biome(biome_id)) {
+        for (index, feature) in select_features(biome_ids, step) {
+            f(index, feature);
+        }
+        return;
+    }
+
+    let Some(features) = OVERWORLD_FEATURES_PER_STEP.get(step) else {
+        return;
+    };
+    if features.is_empty() {
+        return;
+    }
+
+    let mut selected = PlacedFeatureSet::default();
+
+    for &biome_id in biome_ids {
+        if !is_overworld_biome(biome_id) {
+            continue;
+        }
+        if let Some(features) = Biome::from_id(biome_id).and_then(|biome| biome.features.get(step))
+        {
+            for &feature in *features {
+                selected.insert(feature);
+            }
+        }
+    }
+
+    for (global_index, &feature) in features.iter().enumerate() {
+        if selected.contains(feature) {
+            f(global_index, feature);
+        }
+    }
+}
 
 pub fn select_features(biome_ids: &[u8], step: usize) -> Vec<(usize, PlacedFeature)> {
     // Feature generation does not currently carry its biome-source identity.
     // TODO: Consider modeling the Nether and End biome feature orders
-    if !biome_ids
-        .iter()
-        .any(|biome_id| OVERWORLD_BIOME_IDS.contains(biome_id))
-    {
+    if !biome_ids.iter().any(|&biome_id| is_overworld_biome(biome_id)) {
         let mut selected: Vec<_> = biome_ids
             .iter()
             .filter_map(|biome_id| Biome::from_id(*biome_id))
@@ -109,26 +178,11 @@ pub fn select_features(biome_ids: &[u8], step: usize) -> Vec<(usize, PlacedFeatu
         return selected.into_iter().enumerate().collect();
     }
 
-    let mut selected = HashSet::new();
-
-    for biome_id in biome_ids {
-        if !OVERWORLD_BIOME_IDS.contains(biome_id) {
-            continue;
-        }
-        if let Some(features) = Biome::from_id(*biome_id).and_then(|biome| biome.features.get(step))
-        {
-            selected.extend(features.iter().copied());
-        }
-    }
-
-    OVERWORLD_FEATURES_PER_STEP
-        .get(step)
-        .into_iter()
-        .flatten()
-        .copied()
-        .enumerate()
-        .filter(|(_, feature)| selected.contains(feature))
-        .collect()
+    let mut result = Vec::new();
+    for_each_selected_feature(biome_ids, step, |global_index, feature| {
+        result.push((global_index, feature));
+    });
+    result
 }
 
 fn sort_features_per_step(biomes: &[&Biome]) -> Vec<Vec<PlacedFeature>> {
@@ -252,5 +306,24 @@ mod tests {
                 .enumerate()
                 .all(|(index, (feature_index, _))| index == *feature_index)
         );
+    }
+
+    #[test]
+    fn dump_step_9_features() {
+        use pumpkin_util::random::{RandomImpl, get_decorator_seed, worldgen_random::WorldgenRandom};
+        let world_seed = 1789322517659391064u64;
+        let cx = -20;
+        let cz = -28;
+        let origin_x = cx * 16;
+        let origin_z = cz * 16;
+        let pop_seed = WorldgenRandom::get_population_seed(world_seed, origin_x, origin_z);
+        println!("Pumpkin decorationSeed: 0x{:x}", pop_seed);
+        let dec_seed = get_decorator_seed(pop_seed, 7, 9);
+        println!("Pumpkin decorator_seed for TreesJungle: 0x{:x}", dec_seed);
+        let mut rand = WorldgenRandom::from_seed(dec_seed);
+        println!("First 20 numbers from Pumpkin trees_jungle RNG:");
+        for i in 0..20 {
+            println!("  {i}: next_bounded_i32(16)={}, next_f32={}", rand.next_bounded_i32(16), rand.next_f32());
+        }
     }
 }

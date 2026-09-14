@@ -67,6 +67,9 @@ use super::features::{
     vegetation_patch,
     vegetation_patch::VegetationPatchFeature,
     vines::VinesFeature,
+    sulfur::{
+        SulfurPoolFeature, SulfurSpikeClusterFeature, SulfurSpikeFeature, SulfurSpringFeature,
+    },
     void_start_platform::VoidStartPlatformFeature,
     waterlogged_vegetation_patch,
     waterlogged_vegetation_patch::WaterloggedVegetationPatchFeature,
@@ -77,7 +80,26 @@ use crate::world::WorldPortalExt;
 
 pub static CONFIGURED_FEATURES: LazyLock<
     HashMap<pumpkin_data::configured_feature::ConfiguredFeature, ConfiguredFeature>,
-> = LazyLock::new(build_configured_features);
+> = LazyLock::new(|| {
+    let mut map = build_configured_features();
+    map.insert(
+        pumpkin_data::configured_feature::ConfiguredFeature::SulfurSpring,
+        ConfiguredFeature::SulfurSpring(SulfurSpringFeature),
+    );
+    map.insert(
+        pumpkin_data::configured_feature::ConfiguredFeature::SulfurPool,
+        ConfiguredFeature::SulfurPool(SulfurPoolFeature),
+    );
+    map.insert(
+        pumpkin_data::configured_feature::ConfiguredFeature::SulfurSpike,
+        ConfiguredFeature::SulfurSpike(SulfurSpikeFeature),
+    );
+    map.insert(
+        pumpkin_data::configured_feature::ConfiguredFeature::SulfurSpikeCluster,
+        ConfiguredFeature::SulfurSpikeCluster(SulfurSpikeClusterFeature),
+    );
+    map
+});
 
 pub static BONE_MEAL_FEATURES: LazyLock<
     HashSet<pumpkin_data::configured_feature::ConfiguredFeature>,
@@ -157,6 +179,10 @@ pub enum ConfiguredFeature {
     LargeDripstone(LargeDripstoneFeature),
     PointedDripstone(SmallDripstoneFeature),
     SculkPatch(SculkPatchFeature),
+    SulfurSpring(SulfurSpringFeature),
+    SulfurPool(SulfurPoolFeature),
+    SulfurSpike(SulfurSpikeFeature),
+    SulfurSpikeCluster(SulfurSpikeClusterFeature),
 }
 
 // Yes this may look ugly and you wonder why this is hard coded, but it makes sense to hardcode since we have to add logic for these in code
@@ -434,7 +460,7 @@ impl ConfiguredFeature {
                 random,
                 pos,
             ),
-            Self::DripstoneCluster(feature) => feature.generate(chunk, pos),
+            Self::DripstoneCluster(feature) => feature.generate(chunk, random, pos),
             Self::LargeDripstone(feature) => feature.generate(chunk, random, pos),
             Self::EndGateway(feature) => feature.generate(chunk, pos),
             Self::FillLayer(feature) => {
@@ -476,6 +502,10 @@ impl ConfiguredFeature {
             Self::WeepingVines(feature) => {
                 feature.generate(chunk, min_y, height, feature_name, random, pos)
             }
+            Self::SulfurSpring(feature) => feature.generate(chunk, random, pos),
+            Self::SulfurPool(feature) => feature.generate(block_registry, chunk, random, pos),
+            Self::SulfurSpike(feature) => feature.generate(chunk, random, pos),
+            Self::SulfurSpikeCluster(feature) => feature.generate(chunk, random, pos),
             Self::NoOp => false,
         }
     }

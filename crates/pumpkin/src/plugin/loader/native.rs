@@ -23,8 +23,44 @@ impl PluginLoader for NativePluginLoader {
             let library = unsafe { Library::new(&path) }
                 .map_err(|e| LoaderError::LibraryLoad(e.to_string()))?;
 
-            // Ensure this plugin was built against a compatible Pumpkin plugin API version
-            // SAFETY: `PUMPKIN_API_VERSION` is an exported `u32` constant symbol created by `#[plugin_impl]`.
+            // 1. Check if this is a Potato native plugin
+            if let Ok(potato_version_sym) = unsafe { library.get::<*const u32>(b"POTATO_API_VERSION") } {
+                let potato_version = unsafe { **potato_version_sym };
+                if potato_version != potato_api::POTATO_API_VERSION {
+                    return Err(LoaderError::ApiVersionMismatch {
+                        plugin_version: potato_version,
+                        server_version: potato_api::POTATO_API_VERSION,
+                    });
+                }
+
+                let plugin_factory = unsafe {
+                    library
+                        .get::<fn() -> Box<dyn potato_api::Plugin>>(b"potato_create_plugin")
+                        .map_err(|_| LoaderError::EntrypointMissing)?
+                };
+
+                let potato_plugin_instance = plugin_factory();
+                let potato_meta = potato_plugin_instance.metadata();
+
+                let pumpkin_metadata = PluginMetadata {
+                    name: potato_meta.name,
+                    version: potato_meta.version,
+                    authors: potato_meta.authors,
+                    description: potato_meta.description,
+                    dependencies: potato_meta.dependencies,
+                    permissions: Vec::new(),
+                };
+
+                let adapter = crate::plugin::potato_host::PotatoPluginAdapter::new(potato_plugin_instance);
+
+                return Ok((
+                    Arc::new(adapter) as Arc<dyn Plugin>,
+                    pumpkin_metadata,
+                    Box::new(library) as Box<dyn Any + Send + Sync>,
+                ));
+            }
+
+            // Fallback: Check for legacy Pumpkin plugin
             let plugin_api_version = unsafe {
                 match library.get::<*const u32>(b"PUMPKIN_API_VERSION") {
                     Ok(symbol) => **symbol,

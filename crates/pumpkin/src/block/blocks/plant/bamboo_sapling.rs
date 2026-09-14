@@ -42,7 +42,7 @@ impl BlockBehaviour for BambooSaplingBlock {
                 args.world.set_block_state(
                     args.position,
                     Block::BAMBOO.default_state.id,
-                    BlockFlags::NOTIFY_NEIGHBORS,
+                    BlockFlags::NOTIFY_ALL,
                 );
             }
         }

@@ -337,7 +337,8 @@ pub fn create_block_entity(
             position,
         ))),
         "mob_spawner" => Some(Arc::new(mob_spawner::MobSpawnerBlockEntity::new(
-            position, None,
+            position,
+            Some(mob_spawner::MobSpawnerBlockEntity::DEFAULT_ENTITY_TYPE),
         ))),
         "creaking_heart" => Some(Arc::new(creaking_heart::CreakingHeartBlockEntity::new(
             position,

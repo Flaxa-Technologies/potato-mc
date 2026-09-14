@@ -672,12 +672,18 @@ impl StructurePieceBase for PoolElementStructurePiece {
                     origin.y,
                     origin.z + corner.1.min(0),
                 );
-                let processors = match processor_list {
+                let mut processors: Vec<_> = match processor_list {
                     ProcessorListRef::Named(name) => {
-                        crate::generation::structure::template::processor::load_processor_list(name)
+                        crate::generation::structure::template::processor::load_processor_list(name).to_vec()
                     }
-                    ProcessorListRef::Empty => Arc::from([]),
+                    ProcessorListRef::Empty => Vec::new(),
                 };
+                if self.projection == JigsawProjection::TerrainMatching {
+                    processors.push(crate::generation::structure::template::StructureProcessor::Gravity {
+                        heightmap: crate::generation::structure::template::processor::HeightmapType::WorldSurfaceWg,
+                        offset: -1,
+                    });
+                }
                 crate::generation::structure::template::place_template(
                     chunk,
                     &template,
@@ -686,7 +692,7 @@ impl StructurePieceBase for PoolElementStructurePiece {
                     self.rotation,
                     legacy,
                     self.liquid_settings == LiquidSettings::ApplyWaterlog,
-                    processors.as_ref(),
+                    &processors,
                     Some(chunk_box),
                 );
                 crate::generation::structure::template::place_template_entities(
@@ -733,12 +739,18 @@ pub fn place_pool_element_templates(
                 origin.y,
                 origin.z + corner.1.min(0),
             );
-            let processors = match processor_list {
+            let mut processors: Vec<_> = match processor_list {
                 ProcessorListRef::Named(name) => {
-                    crate::generation::structure::template::processor::load_processor_list(name)
+                    crate::generation::structure::template::processor::load_processor_list(name).to_vec()
                 }
-                ProcessorListRef::Empty => Arc::from([]),
+                ProcessorListRef::Empty => Vec::new(),
             };
+            if piece.projection == JigsawProjection::TerrainMatching {
+                processors.push(crate::generation::structure::template::StructureProcessor::Gravity {
+                    heightmap: crate::generation::structure::template::processor::HeightmapType::WorldSurfaceWg,
+                    offset: -1,
+                });
+            }
             crate::generation::structure::template::place_template_with_options(
                 placer,
                 &template,
@@ -747,7 +759,7 @@ pub fn place_pool_element_templates(
                 piece.rotation,
                 legacy,
                 piece.liquid_settings == LiquidSettings::ApplyWaterlog,
-                processors.as_ref(),
+                &processors,
                 chunk_box,
                 keep_jigsaws,
             );
@@ -1264,5 +1276,6 @@ mod tests {
         );
         let pos = valid_pos.unwrap();
         assert_eq!(pos.start_pos.0.y, 72);
+
     }
 }

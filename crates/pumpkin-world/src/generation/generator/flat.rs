@@ -34,6 +34,8 @@ impl FlatGenerator {
         let biome_id = pumpkin_data::chunk::Biome::from_name(clean_biome)
             .map_or(pumpkin_data::chunk::Biome::PLAINS.id, |b| b.id);
         chunk.flat_biome_map.fill(biome_id);
+        chunk.biome_mask = [0; 4];
+        chunk.biome_mask[(biome_id >> 6) as usize] |= 1u64 << (biome_id & 63);
         chunk.stage = StagedChunkEnum::Biomes;
     }
 

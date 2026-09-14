@@ -255,6 +255,27 @@ impl ChunkNoiseRouter<'_> {
     sample_function!(vein_toggle, vein_toggle_volume);
     sample_function!(vein_ridged, vein_ridged_volume);
     sample_function!(vein_gap, vein_gap_volume);
+
+    #[inline]
+    pub fn veins_volume(
+        &mut self,
+        toggle: &mut [f32],
+        ridged: &mut [f32],
+        volume: &DensityVolume,
+    ) {
+        if self.vein_toggle == 203 && self.vein_ridged == 217 && self.component_stack.len() == 222 {
+            if super::aot_noise_router::evaluate_overworld_veins_volume(
+                &self.component_stack,
+                toggle,
+                ridged,
+                volume,
+            ) {
+                return;
+            }
+        }
+        self.vein_toggle_volume(toggle, volume);
+        self.vein_ridged_volume(ridged, volume);
+    }
 }
 
 impl<'a> ChunkNoiseRouter<'a> {

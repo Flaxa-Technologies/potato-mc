@@ -86,7 +86,7 @@ impl MerchantScreenHandler {
         let Some(offer) = self.offers.get(index) else {
             return;
         };
-        let cost_a = offer.base_cost_a.0.as_ref().clone();
+        let cost_a = Self::adjusted_cost_a(offer);
         let cost_b = offer.cost_b.as_ref().map(|cost| cost.0.as_ref().clone());
         let player_slots_end = self.get_behaviour().slots.len() as i32;
 

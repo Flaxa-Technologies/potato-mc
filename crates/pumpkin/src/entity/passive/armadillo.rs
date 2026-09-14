@@ -119,6 +119,7 @@ pub struct ArmadilloEntity {
     pub in_state_ticks: AtomicU64,
     pub scute_time: AtomicI32,
     pub danger_detected_recently_ticks: AtomicI32,
+    pub next_peek_timer: AtomicI32,
 }
 
 impl ArmadilloEntity {
@@ -131,6 +132,7 @@ impl ArmadilloEntity {
             in_state_ticks: AtomicU64::new(0),
             scute_time: AtomicI32::new(pick_next_scute_drop_time()),
             danger_detected_recently_ticks: AtomicI32::new(0),
+            next_peek_timer: AtomicI32::new(100),
         };
         let mob_arc = Arc::new(armadillo);
         let mob_weak: Weak<dyn Mob> = {
@@ -295,6 +297,10 @@ impl Animal for ArmadilloEntity {
 }
 
 impl Mob for ArmadilloEntity {
+    /// Vanilla Animal.java:128 / AbstractGolem.java:36 -- passive mobs never despawn naturally.
+    fn remove_when_far_away(&self, _distance_sq: f64) -> bool { false }
+
+
     fn as_ageable(&self) -> Option<&dyn AgeableMob> {
         Some(self)
     }
@@ -332,15 +338,27 @@ impl Mob for ArmadilloEntity {
     }
 
     fn on_damage(&self, _damage_type: DamageType, source: Option<&dyn EntityBase>) {
-        if self.get_entity().is_alive()
+        let entity = self.get_entity();
+        let world = entity.world.load();
+        let sound = if self.is_scared() {
+            Sound::EntityArmadilloHurtReduced
+        } else {
+            Sound::EntityArmadilloHurt
+        };
+        world.play_sound(sound, SoundCategory::Neutral, &entity.pos.load());
+
+        if entity.is_alive()
             && let Some(src) = source
             && src.get_entity().entity_type != &EntityType::ITEM
         {
             self.danger_detected_recently_ticks
                 .store(SCARE_CHECK_INTERVAL, Ordering::Relaxed);
             if self.can_stay_rolled_up() {
-                self.danger_detected_recently_ticks
-                    .store(80, Ordering::Relaxed);
+                if self.get_state() == ArmadilloState::Idle {
+                    self.roll_up();
+                } else if self.get_state() == ArmadilloState::Unrolling {
+                    self.switch_to_state(ArmadilloState::Scared);
+                }
             }
         }
     }
@@ -357,6 +375,46 @@ impl Mob for ArmadilloEntity {
 
         let entity = self.get_entity();
         let world = entity.world.load();
+
+        // 1. Scan for nearby threats (undead mobs, sprinting/passenger players)
+        if entity.is_alive() && self.can_stay_rolled_up() {
+            let pos = entity.pos.load();
+            let nearby = world.get_nearby_entities(pos, SCARE_DISTANCE_HORIZONTAL);
+            let mut detected_danger = false;
+            for other in nearby.values() {
+                if other.get_entity().entity_id != entity.entity_id && self.is_scared_by(other.as_ref()) {
+                    detected_danger = true;
+                    break;
+                }
+            }
+
+            if detected_danger {
+                self.danger_detected_recently_ticks
+                    .store(SCARE_CHECK_INTERVAL, Ordering::Relaxed);
+                if self.get_state() == ArmadilloState::Idle {
+                    self.roll_up();
+                } else if self.get_state() == ArmadilloState::Unrolling {
+                    self.switch_to_state(ArmadilloState::Scared);
+                }
+            }
+        }
+
+        // 2. While scared / rolled up: freeze movement and stop navigator
+        if self.is_scared() {
+            self.mob_entity
+                .navigator
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .stop();
+            self.mob_entity
+                .living_entity
+                .movement_input
+                .store(pumpkin_util::math::vector3::Vector3::new(0.0, 0.0, 0.0));
+            let mut vel = entity.velocity.load();
+            vel.x = 0.0;
+            vel.z = 0.0;
+            entity.velocity.store(vel);
+        }
 
         if entity.is_alive() && !self.is_baby() {
             let scute_time = self.scute_time.fetch_sub(1, Ordering::Relaxed) - 1;
@@ -384,19 +442,46 @@ impl Mob for ArmadilloEntity {
             ArmadilloState::Rolling => {
                 if ticks_in_state > ArmadilloState::Rolling.animation_duration() {
                     self.switch_to_state(ArmadilloState::Scared);
+                    if entity.on_ground.load(Ordering::Relaxed) {
+                        world.play_sound(
+                            Sound::EntityArmadilloLand,
+                            SoundCategory::Neutral,
+                            &entity.pos.load(),
+                        );
+                    }
                 }
             }
             ArmadilloState::Scared => {
                 if !self.can_stay_rolled_up() {
                     self.roll_out();
-                } else if ticks_in_state > ArmadilloState::Scared.animation_duration()
-                    && self.danger_detected_recently_ticks.load(Ordering::Relaxed) == 0
-                {
-                    self.switch_to_state(ArmadilloState::Unrolling);
+                } else {
+                    let danger_around = danger_ticks > 75;
+                    let peek_timer = self.next_peek_timer.load(Ordering::Relaxed);
+                    if peek_timer > 0 {
+                        self.next_peek_timer.store(peek_timer - 1, Ordering::Relaxed);
+                    } else if danger_around && entity.on_ground.load(Ordering::Relaxed) {
+                        world.broadcast_packet_all(&pumpkin_protocol::java::client::play::CEntityStatus::new(
+                            entity.entity_id,
+                            64,
+                        ));
+                        let next = 50 + rand::random_range(100..400);
+                        self.next_peek_timer.store(next, Ordering::Relaxed);
+                    }
+
+                    if danger_ticks <= ArmadilloState::Unrolling.animation_duration() as i32 {
+                        world.play_sound(
+                            Sound::EntityArmadilloUnrollStart,
+                            SoundCategory::Neutral,
+                            &entity.pos.load(),
+                        );
+                        self.switch_to_state(ArmadilloState::Unrolling);
+                    }
                 }
             }
             ArmadilloState::Unrolling => {
-                if ticks_in_state > ArmadilloState::Unrolling.animation_duration() {
+                if danger_ticks > ArmadilloState::Unrolling.animation_duration() as i32 {
+                    self.switch_to_state(ArmadilloState::Scared);
+                } else if ticks_in_state > ArmadilloState::Unrolling.animation_duration() {
                     self.roll_out();
                 }
             }

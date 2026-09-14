@@ -1,7 +1,8 @@
 use crate::block::blocks::redstone::block_receives_redstone_power;
 use crate::block::registry::BlockActionResult;
 use crate::block::{
-    BlockBehaviour, ExplodeArgs, NormalUseArgs, OnNeighborUpdateArgs, OnPlaceArgs, PathComputationType,
+    BlockBehaviour, CanPlaceAtArgs, ExplodeArgs, GetStateForNeighborUpdateArgs, NormalUseArgs,
+    OnNeighborUpdateArgs, OnPlaceArgs, PathComputationType,
 };
 use crate::entity::EntityBase;
 use crate::entity::player::Player;
@@ -10,7 +11,7 @@ use pumpkin_data::BlockDirection;
 use pumpkin_data::block_properties::Half;
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_data::tag::Taggable;
-use pumpkin_data::{Block, BlockState, BlockStateId, tag};
+use pumpkin_data::{Block, BlockState, BlockStateId, HorizontalFacingExt, tag};
 use pumpkin_macros::pumpkin_block_from_tag;
 use pumpkin_util::math::position::BlockPos;
 use pumpkin_world::world::BlockFlags;
@@ -83,30 +84,46 @@ impl BlockBehaviour for TrapDoorBlock {
         trapdoor_props.waterlogged = args.replacing.water_source();
 
         let powered = block_receives_redstone_power(args.world, args.position);
-
         let player_facing = args.player.get_entity().get_horizontal_facing();
 
-        // Correct facing logic using Option unwrap
-        let facing = args
-            .direction
-            .to_horizontal_facing()
-            .unwrap_or(player_facing);
-
-        trapdoor_props.facing = facing;
-
-        trapdoor_props.half = match args.direction {
-            BlockDirection::Up => Half::Top,
-            BlockDirection::Down => Half::Bottom,
-            _ => match args.use_item_on.cursor_pos.y {
-                0.0..0.5 => Half::Bottom,
-                _ => Half::Top,
-            },
-        };
+        if let Some(horizontal_dir) = args.direction.to_horizontal_facing() {
+            trapdoor_props.facing = horizontal_dir;
+            trapdoor_props.half = if args.use_item_on.cursor_pos.y > 0.5 {
+                Half::Top
+            } else {
+                Half::Bottom
+            };
+        } else {
+            trapdoor_props.facing = player_facing.opposite();
+            trapdoor_props.half = if args.direction == BlockDirection::Up {
+                Half::Bottom
+            } else {
+                Half::Top
+            };
+        }
 
         trapdoor_props.powered = powered;
         trapdoor_props.open = powered;
 
         trapdoor_props.to_state_id(args.block)
+    }
+
+    fn can_place_at(&self, args: CanPlaceAtArgs<'_>) -> bool {
+        // Vanilla TrapDoorBlock.canSurvive: floor/ceiling clicks are always valid;
+        // side-face placement requires the adjacent block to have a sturdy face.
+        let clicked_face = args
+            .use_item_on
+            .and_then(|u| pumpkin_data::BlockDirection::try_from(u.face.0).ok())
+            .unwrap_or(BlockDirection::Up);
+        match clicked_face {
+            BlockDirection::Up | BlockDirection::Down => true,
+            horizontal => {
+                // The block behind the trapdoor (the one it attaches to) must have a sturdy face
+                let support_pos = args.position.offset(horizontal.opposite().to_offset());
+                let (_, support_state) = args.block_accessor.get_block_and_state(&support_pos);
+                support_state.is_side_solid(horizontal)
+            }
+        }
     }
 
     fn on_neighbor_update(&self, args: OnNeighborUpdateArgs<'_>) {
@@ -135,6 +152,25 @@ impl BlockBehaviour for TrapDoorBlock {
                 BlockFlags::NOTIFY_LISTENERS,
             );
         }
+    }
+
+    fn get_state_for_neighbor_update(
+        &self,
+        args: GetStateForNeighborUpdateArgs<'_>,
+    ) -> BlockStateId {
+        // Drop the trapdoor if its support block is removed (horizontal attachments only)
+        let props = TrapDoorProperties::from_state_id(args.state_id);
+        // The face the trapdoor is attached to is the opposite of its `facing` property.
+        // `facing` points outward; the support block is in the facing.opposite() direction.
+        let attach_dir = props.facing.to_block_direction().opposite();
+        if args.direction == attach_dir {
+            // neighbor_position is already the adjacent block position
+            let (_, support_state) = args.world.get_block_and_state(args.neighbor_position);
+            if !support_state.is_side_solid(props.facing.to_block_direction()) {
+                return BlockStateId::AIR;
+            }
+        }
+        args.state_id
     }
 
     fn is_pathfindable(&self, state: &BlockState, computation_type: PathComputationType) -> bool {

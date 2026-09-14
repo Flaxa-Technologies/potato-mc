@@ -77,6 +77,11 @@ impl Goal for WaterAvoidingRandomFlyingGoal {
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
             navigator.set_progress(NavigatorGoal::new(mob_pos, target, self.speed));
+            mob.get_mob_entity()
+                .move_control
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .set_wanted_position(target.x, target.y, target.z, self.speed);
         }
     }
 

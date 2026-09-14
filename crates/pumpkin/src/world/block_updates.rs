@@ -360,6 +360,7 @@ impl World {
             if !flags.contains(BlockFlags::MOVED) {
                 let mut neighbour_update_flags = flags;
                 neighbour_update_flags.remove(BlockFlags::NOTIFY_NEIGHBORS);
+                neighbour_update_flags.remove(BlockFlags::SKIP_DROPS);
                 neighbour_update_flags.remove(BlockFlags::SKIP_REDSTONE_WIRE_STATE_REPLACEMENT);
                 self.block_registry.prepare(
                     self,
@@ -379,10 +380,19 @@ impl World {
                 );
             }
 
-            self.villager_poi
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner)
-                .update_block(*position, new_block);
+            let is_bed = crate::world::villager_poi::is_bed_block(new_block);
+            let was_bed = crate::world::villager_poi::is_bed_block(old_block);
+
+            {
+                let mut poi = self
+                    .villager_poi
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+                poi.update_block(*position, new_block);
+                if is_bed || was_bed {
+                    poi.update_bed(*position, is_bed);
+                }
+            }
 
             if is_new_block {
                 let mut poi = self
@@ -394,6 +404,12 @@ impl World {
                 }
                 if let Some(poi_type) = crate::world::villager_poi::poi_type_for_block(new_block) {
                     poi.add_with_free_tickets(*position, poi_type, 1);
+                }
+                if was_bed {
+                    poi.remove(position);
+                }
+                if is_bed {
+                    poi.add_with_free_tickets(*position, "minecraft:home", 1);
                 }
             }
         }
@@ -703,9 +719,11 @@ impl World {
 
         if new_state_id != block_state_id {
             if is_air(new_state_id) {
-                self.break_block(block_pos, None, flags | BlockFlags::NOTIFY_ALL);
+                let mut break_flags = flags;
+                break_flags.remove(BlockFlags::SKIP_DROPS);
+                self.break_block(block_pos, None, break_flags | BlockFlags::NOTIFY_ALL);
             } else {
-                self.set_block_state(block_pos, new_state_id, flags);
+                self.set_block_state(block_pos, new_state_id, flags | BlockFlags::NOTIFY_LISTENERS);
             }
         }
     }

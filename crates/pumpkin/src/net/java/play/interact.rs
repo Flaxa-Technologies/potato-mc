@@ -53,9 +53,6 @@ impl JavaClient {
                     match event.action {
                         ActionType::Attack => {
                             let config = &server.advanced_config.pvp;
-                            if !config.enabled {
-                                return;
-                            }
 
                             if entity_id.0 == player.entity_id() {
                                 self.try_kick(&TextComponent::translate_cross(translation::java::MULTIPLAYER_DISCONNECT_INVALID_ENTITY_ATTACKED, translation::java::MULTIPLAYER_DISCONNECT_INVALID_ENTITY_ATTACKED, []));
@@ -63,6 +60,9 @@ impl JavaClient {
                             }
 
                             if let Some(player_victim) = &player_target {
+                                if !config.enabled {
+                                    return;
+                                }
                                 if player_victim.living_entity.health.load() <= 0.0 {
                                     return;
                                 }
@@ -74,8 +74,12 @@ impl JavaClient {
                                             Sound::EntityPlayerAttackNodamage,
                                             SoundCategory::Players,
                                             &player_victim.position(),
-                                        )
-                                        ;
+                                        );
+                                    return;
+                                }
+                            }
+                            if let Some(living) = event.target.get_living_entity() {
+                                if living.health.load() <= 0.0 || living.dead.load(std::sync::atomic::Ordering::Relaxed) {
                                     return;
                                 }
                             }

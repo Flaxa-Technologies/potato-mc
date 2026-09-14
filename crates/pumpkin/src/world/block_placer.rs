@@ -67,6 +67,25 @@ impl BlockPlacer for WorldBlockPlacer<'_> {
     fn add_block_entity(&mut self, nbt: NbtCompound) {
         self.block_entity_nbts.push(nbt);
     }
+
+    fn get_top_y(
+        &self,
+        _heightmap: pumpkin_world::generation::structure::template::processor::HeightmapType,
+        x: i32,
+        z: i32,
+    ) -> i32 {
+        let block_pos = BlockPos::new(x, 0, z);
+        let chunk_pos = block_pos.chunk_position();
+        let rel_x = (x.rem_euclid(16)) as usize;
+        let rel_z = (z.rem_euclid(16)) as usize;
+        let top_block_y = self
+            .world
+            .level
+            .read_chunk_sync(&chunk_pos, |chunk| chunk.section.get_top_y(rel_x, rel_z, 319))
+            .flatten();
+
+        top_block_y.map_or(64, |y| y + 1)
+    }
 }
 
 /// Minimal `WorldPortalExt` implementation for feature/tree generation.
@@ -171,6 +190,10 @@ impl pumpkin_world::generation::proto_chunk::GenerationCache for WorldGenAdapter
         unreachable!("Not called by tree generator")
     }
 
+    fn get_world_seed(&self) -> u64 {
+        self.world.level.world_gen().seed()
+    }
+
     fn get_chunk_mut(&mut self, _chunk_x: i32, _chunk_z: i32) -> Option<&mut pumpkin_world::generation::proto_chunk::ProtoChunk> {
         None
     }
@@ -227,8 +250,16 @@ impl pumpkin_world::generation::proto_chunk::GenerationCache for WorldGenAdapter
         320
     }
 
+    fn top_block_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
+        self.top_block_height_exclusive(x, z)
+    }
+
     fn ocean_floor_height_exclusive(&self, _x: i32, _z: i32) -> i32 {
         0
+    }
+
+    fn ocean_floor_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
+        self.ocean_floor_height_exclusive(x, z)
     }
 
     fn is_air(&self, local_pos: &Vector3<i32>) -> bool {

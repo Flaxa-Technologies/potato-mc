@@ -59,6 +59,9 @@ pub trait BlockPlacer {
     fn get_block_state(&self, pos: &Vector3<i32>) -> BlockStateId;
     fn set_block_state(&mut self, pos: &Vector3<i32>, state: &BlockState);
     fn add_block_entity(&mut self, nbt: NbtCompound);
+    fn get_top_y(&self, _heightmap: processor::HeightmapType, _x: i32, _z: i32) -> i32 {
+        64
+    }
 }
 
 /// Places a template at a world origin with an un-rotated XZ offset.
@@ -170,7 +173,7 @@ pub fn place_template_with_options(
             continue;
         }
 
-        let world_pos = Vector3::new(wx, wy, wz);
+        let mut world_pos = Vector3::new(wx, wy, wz);
 
         if apply_waterlogging
             && placer.get_block_state(&world_pos).to_block_id() == pumpkin_data::Block::WATER.id
@@ -195,7 +198,7 @@ pub fn place_template_with_options(
         for processor in processors {
             let Some(processed_state) = processor.process_with_context(
                 placer,
-                world_pos,
+                &mut world_pos,
                 state,
                 &mut block_entity_nbt,
                 &mut context,
@@ -215,7 +218,7 @@ pub fn place_template_with_options(
             continue;
         }
 
-        placer.set_block_state(&Vector3::new(wx, wy, wz), state);
+        placer.set_block_state(&world_pos, state);
 
         // Create block entities for interactive blocks (furnaces, chests, etc.)
         let final_block = pumpkin_data::Block::from_id(state.id.to_block_id());
@@ -225,9 +228,9 @@ pub fn place_template_with_options(
             let mut placed_nbt = NbtCompound::new();
 
             placed_nbt.put_string("id", fallback_id.to_string());
-            placed_nbt.put_int("x", wx);
-            placed_nbt.put_int("y", wy);
-            placed_nbt.put_int("z", wz);
+            placed_nbt.put_int("x", world_pos.x);
+            placed_nbt.put_int("y", world_pos.y);
+            placed_nbt.put_int("z", world_pos.z);
 
             if let Some(template_nbt) = &block_entity_nbt {
                 for (key, value) in &template_nbt.child_tags {
@@ -434,14 +437,15 @@ mod tests {
 
     #[test]
     fn test_village_template_entities() {
-        let name = "minecraft:village/plains/villagers/unemployed";
-        let template = get_template(name).expect("template must exist");
-        println!("Template size: {:?}", template.size);
-        println!("Entity count: {}", template.entities.len());
-        for entity in &template.entities {
-            println!("Entity pos: {:?}, block_pos: {:?}, nbt id: {:?}", entity.pos, entity.block_pos, entity.nbt.get_string("id"));
+        for name in [
+            "minecraft:village/common/iron_golem",
+            "minecraft:village/common/animals/cat_black",
+            "minecraft:village/plains/villagers/unemployed",
+        ] {
+            let t = get_template(name).unwrap();
+            println!("[TEMPLATE] {name} entities: {:?}", t.entities);
+            assert_eq!(t.entities.len(), 1);
         }
-        assert!(!template.entities.is_empty(), "unemployed villager template must have entities");
     }
 }
 

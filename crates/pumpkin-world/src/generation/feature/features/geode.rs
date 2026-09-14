@@ -17,7 +17,7 @@ use std::cmp::Ordering;
 struct NormalNoise(crate::generation::noise::perlin::DoublePerlinNoiseSampler);
 
 impl NormalNoise {
-    fn create(rand: &mut RandomGenerator, first_octave: i32, amplitudes: &[f64]) -> Self {
+    fn create(rand: &mut impl RandomImpl, first_octave: i32, amplitudes: &[f64]) -> Self {
         Self(
             crate::generation::noise::perlin::DoublePerlinNoiseSampler::new(
                 rand,
@@ -88,6 +88,33 @@ impl GeodeFeature {
             .is_some_and(|props| props.to_props().iter().any(|(k, _)| *k == property))
     }
 
+    fn collect_block_ids(wrapper: &BlockWrapper, set: &mut HashSet<BlockId>) {
+        let process = |s: &str, set: &mut HashSet<BlockId>| {
+            if let Some(tag_name) = s.strip_prefix('#') {
+                if let Some(ids) = pumpkin_data::tag::get_tag_ids(
+                    pumpkin_data::tag::RegistryKey::Block,
+                    tag_name,
+                ) {
+                    for &id in ids {
+                        if let Some(block_id) = BlockId::new(id) {
+                            set.insert(block_id);
+                        }
+                    }
+                }
+            } else if let Some(b) = Block::from_name(s) {
+                set.insert(b.id);
+            }
+        };
+        match wrapper {
+            BlockWrapper::Single(s) => process(s.as_str(), set),
+            BlockWrapper::Multi(v) => {
+                for s in v {
+                    process(s.as_str(), set);
+                }
+            }
+        }
+    }
+
     #[allow(clippy::too_many_arguments)]
     #[allow(clippy::too_many_lines)]
     pub fn generate<T: GenerationCache>(
@@ -102,40 +129,16 @@ impl GeodeFeature {
     ) -> bool {
         let origin = pos;
         let num_points = self.distribution_points.get(random);
-        let noise = NormalNoise::create(random, -4, &[1.0]);
+        let mut noise_rand =
+            pumpkin_util::random::legacy_rand::LegacyRand::from_seed(chunk.get_world_seed());
+        let noise = NormalNoise::create(&mut noise_rand, -4, &[1.0]);
 
         // Precompute sets of raw block ids for fast lookups
         let mut invalid_raw_ids: HashSet<BlockId> = HashSet::new();
-        match &self.invalid_blocks {
-            BlockWrapper::Single(s) => {
-                if let Some(b) = Block::from_name(s.as_str()) {
-                    invalid_raw_ids.insert(b.id);
-                }
-            }
-            BlockWrapper::Multi(v) => {
-                for s in v {
-                    if let Some(b) = Block::from_name(s.as_str()) {
-                        invalid_raw_ids.insert(b.id);
-                    }
-                }
-            }
-        }
+        Self::collect_block_ids(&self.invalid_blocks, &mut invalid_raw_ids);
 
         let mut cannot_replace_raw_ids: HashSet<BlockId> = HashSet::new();
-        match &self.cannot_replace {
-            BlockWrapper::Single(s) => {
-                if let Some(b) = Block::from_name(s.as_str()) {
-                    cannot_replace_raw_ids.insert(b.id);
-                }
-            }
-            BlockWrapper::Multi(v) => {
-                for s in v {
-                    if let Some(b) = Block::from_name(s.as_str()) {
-                        cannot_replace_raw_ids.insert(b.id);
-                    }
-                }
-            }
-        }
+        Self::collect_block_ids(&self.cannot_replace, &mut cannot_replace_raw_ids);
 
         let mut points: Vec<(BlockPos, i32)> = Vec::with_capacity(num_points as usize);
         let mut crack_points: Vec<BlockPos> = Vec::new();

@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::sync::RwLock;
 use std::sync::atomic::{AtomicBool, AtomicU8, AtomicU32, AtomicU64, Ordering};
 
-use crate::entity::projectile::ProjectileHit;
+use crate::entity::projectile::{ProjectileHit, clip_aabb};
 use crate::{
     entity::{Entity, EntityBase, living::LivingEntity, player::Player},
     server::Server,
@@ -16,7 +16,9 @@ use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::particle::Particle;
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_protocol::IdOr;
-use pumpkin_protocol::java::client::play::{CEntityVelocity, CSoundEffect, Metadata};
+use pumpkin_protocol::java::client::play::{
+    CEntityPositionSync, CEntityVelocity, CSoundEffect, Metadata,
+};
 use pumpkin_util::math::boundingbox::BoundingBox;
 use pumpkin_util::math::position::BlockPos;
 use pumpkin_util::math::vector3::Vector3;
@@ -89,10 +91,11 @@ impl ArrowEntity {
         item_stack: &ItemStack,
         pickup: ArrowPickup,
     ) -> Self {
+        let (item_stack, pickup) = Self::pickup_item_and_rule(item_stack, pickup);
         Self {
             entity,
             owner_id,
-            item_stack: RwLock::new(item_stack.copy_with_count(1)),
+            item_stack: RwLock::new(item_stack),
             base_damage: AtomicU64::new(Self::ARROW_BASE_DAMAGE.to_bits()),
             pickup,
             is_critical: AtomicBool::new(false),
@@ -119,7 +122,8 @@ impl ArrowEntity {
     ) -> Self {
         let mut owner_pos = shooter.pos.load();
         owner_pos.y = owner_pos.y + f64::from(shooter.entity_dimension.load().eye_height) - 0.1;
-        entity.pos.store(owner_pos);
+        entity.set_pos(owner_pos);
+        entity.last_sent_pos.store(owner_pos);
         let mut launch_event =
             crate::plugin::api::events::entity::projectile_launch::ProjectileLaunchEvent::new(
                 entity.entity_id,
@@ -131,10 +135,11 @@ impl ArrowEntity {
                 .fire_blocking(&server, &mut launch_event);
         }
 
+        let (item_stack, pickup) = Self::pickup_item_and_rule(item_stack, pickup);
         Self {
             entity,
             owner_id: Some(shooter.entity_id),
-            item_stack: RwLock::new(item_stack.copy_with_count(1)),
+            item_stack: RwLock::new(item_stack),
             base_damage: AtomicU64::new(Self::ARROW_BASE_DAMAGE.to_bits()),
             pickup,
             is_critical: AtomicBool::new(false),
@@ -163,6 +168,24 @@ impl ArrowEntity {
         let mut arrow = Self::new_shot(entity, shooter, item_stack, pickup);
         arrow.weapon = RwLock::new(Some(weapon.copy_with_count(1)));
         arrow
+    }
+
+    fn pickup_item_and_rule(
+        item_stack: &ItemStack,
+        pickup: ArrowPickup,
+    ) -> (ItemStack, ArrowPickup) {
+        let mut pickup_item_stack = item_stack.copy_with_count(1);
+        if pickup_item_stack
+            .get_data_component::<pumpkin_data::data_component_impl::IntangibleProjectileImpl>()
+            .is_some()
+        {
+            pickup_item_stack.remove_data_component(
+                pumpkin_data::data_component::DataComponent::IntangibleProjectile,
+            );
+            (pickup_item_stack, ArrowPickup::CreativeOnly)
+        } else {
+            (pickup_item_stack, pickup)
+        }
     }
 
     #[must_use]
@@ -597,6 +620,7 @@ impl EntityBase for ArrowEntity {
                 let block = world.get_block(&pos);
                 if block.is_air() {
                     self.in_ground.store(false, Ordering::Relaxed);
+                    self.has_hit.store(false, Ordering::Relaxed);
                     entity.set_synced_data(
                         pumpkin_data::tracked_data::abstract_arrow::IN_GROUND,
                         false,
@@ -620,45 +644,67 @@ impl EntityBase for ArrowEntity {
             return;
         }
 
-        // Arrow is flying
+        // Arrow is flying — match vanilla AbstractArrow.tick() physics order:
+        // 1. Read current velocity (used for THIS tick's movement)
+        // 2. If in water: apply water drag BEFORE moving
+        // 3. Move by the (possibly water-dragged) velocity (`movement`)
+        // 4. If not in water: apply air drag AFTER moving
+        // 5. Apply gravity AFTER moving (only when physics enabled & not in ground)
         let start_pos = entity.pos.load();
         let mut velocity = entity.velocity.load();
 
-        // Apply gravity
-        velocity.y -= Self::GRAVITY;
+        // Step 2: water drag applied before move (vanilla: applyInertia inside isInWater block)
+        if in_water {
+            velocity = velocity.multiply(
+                Self::WATER_INERTIA,
+                Self::WATER_INERTIA,
+                Self::WATER_INERTIA,
+            );
+        }
 
-        // Apply inertia (air resistance or water drag)
-        let inertia = if in_water {
-            Self::WATER_INERTIA
+        // Update rotation based on the velocity used for movement this tick
+        let no_physics = self.no_physics.load(Ordering::Relaxed);
+        let len = velocity.horizontal_length();
+        let yaw = if no_physics {
+            // When no_physics: face opposite direction (vanilla: atan2(-x, -z))
+            ((-velocity.z).atan2(-velocity.x).to_degrees() as f32) - 90.0
         } else {
-            Self::AIR_INERTIA
+            velocity.x.atan2(velocity.z) as f32 * 57.295_776
         };
-        velocity = velocity.multiply(inertia, inertia, inertia);
+        entity.set_rotation(yaw, velocity.y.atan2(len) as f32 * 57.295_776);
+
+        // Step 3: Move arrow by current velocity
+        // `movement` = the displacement vector this tick — used for collision + particles
+        let movement = velocity;
+        let new_pos = start_pos.add(&movement);
+        entity.set_pos(new_pos);
+        if entity.age.load(Ordering::Relaxed) % 20 == 0 {
+            entity.send_pos_rot();
+        }
+
+        // Step 4: air drag AFTER move (vanilla: applyInertia(getAirDrag()) outside isInWater)
+        if !in_water {
+            velocity = velocity.multiply(Self::AIR_INERTIA, Self::AIR_INERTIA, Self::AIR_INERTIA);
+        }
+
+        // Step 5: gravity AFTER move (vanilla: applyGravity() at end, only if physics enabled)
+        if !no_physics {
+            velocity.y -= Self::GRAVITY;
+        }
 
         entity.velocity.store(velocity);
 
-        // Update rotation based on velocity
-        let len = velocity.horizontal_length();
-        entity.set_rotation(
-            velocity.x.atan2(velocity.z) as f32 * 57.295_776,
-            velocity.y.atan2(len) as f32 * 57.295_776,
-        );
-
-        // Move arrow
-        let new_pos = start_pos.add(&velocity);
-        entity.set_pos(new_pos);
-
-        // Spawn particles while arrow is flying
+        // Spawn particles while arrow is flying (use movement, not next-tick velocity)
         if in_water {
             for i in 0..4 {
                 let factor = 0.25 * f64::from(i);
                 world.spawn_particle(
                     Vector3::new(
-                        new_pos.x - velocity.x * factor,
-                        new_pos.y - velocity.y * factor,
-                        new_pos.z - velocity.z * factor,
+                        new_pos.x - movement.x * factor,
+                        new_pos.y - movement.y * factor,
+                        new_pos.z - movement.z * factor,
                     ),
-                    Vector3::new(velocity.x as f32, velocity.y as f32, velocity.z as f32),
+                    Vector3::new(movement.x as f32, movement.y as f32, movement.z as f32),
                     0.0,
                     1,
                     Particle::Bubble,
@@ -681,14 +727,14 @@ impl EntityBase for ArrowEntity {
                 let factor = f64::from(i) / 4.0;
                 world.spawn_particle(
                     Vector3::new(
-                        start_pos.x + velocity.x * factor,
-                        start_pos.y + velocity.y * factor,
-                        start_pos.z + velocity.z * factor,
+                        start_pos.x + movement.x * factor,
+                        start_pos.y + movement.y * factor,
+                        start_pos.z + movement.z * factor,
                     ),
                     Vector3::new(
-                        -velocity.x as f32,
-                        (-velocity.y + 0.2) as f32,
-                        -velocity.z as f32,
+                        -movement.x as f32,
+                        (-movement.y + 0.2) as f32,
+                        -movement.z as f32,
                     ),
                     0.0,
                     1,
@@ -697,13 +743,13 @@ impl EntityBase for ArrowEntity {
             }
         }
 
-        // Broadcast velocity update
+        // Broadcast next-tick velocity
         let packet = CEntityVelocity::new(entity.entity_id.into(), velocity);
 
         let chunk_pos = entity.chunk_pos.load();
         world.broadcast_to_chunk(chunk_pos, &packet);
 
-        // Check for collisions using raycasting
+        // Check for collisions using raycasting (use `movement` = this tick's displacement)
         let search_box = BoundingBox::new(
             Vector3::new(
                 start_pos.x.min(new_pos.x),
@@ -725,46 +771,47 @@ impl EntityBase for ArrowEntity {
         let (block_cols, block_positions) =
             world.get_block_collisions(search_box, self.get_entity());
         for (idx, bb) in block_cols.iter().enumerate() {
-            if let Some(t) = calculate_ray_intersection(&start_pos, &velocity, bb)
+            if let Some((t, face)) = clip_aabb(&start_pos, &movement, bb)
                 && t < closest_t
             {
                 closest_t = t;
 
-                // Map back to block pos
-                let mut curr = 0;
-                for (len, pos) in &block_positions {
-                    curr += len;
-                    if idx < curr {
-                        let hit_pos = start_pos.add(&velocity.multiply(t, t, t));
-                        hit = Some(ProjectileHit::Block {
-                            pos: *pos,
-                            face: get_hit_face(hit_pos, *pos),
-                            hit_pos,
-                            normal: velocity.normalize().multiply(-1.0, -1.0, -1.0),
-                        });
+                // Map back to block pos: block_positions contains (cumulative_len, pos)
+                let mut hit_block_pos = BlockPos::floored_v(start_pos.add(&movement.multiply(t, t, t)));
+                for (end_idx, pos) in &block_positions {
+                    if idx < *end_idx {
+                        hit_block_pos = *pos;
                         break;
                     }
                 }
+
+                let hit_pos = start_pos.add(&movement.multiply(t, t, t));
+                hit = Some(ProjectileHit::Block {
+                    pos: hit_block_pos,
+                    face,
+                    hit_pos,
+                    normal: movement.normalize().multiply(-1.0, -1.0, -1.0),
+                });
             }
         }
 
-        // Entity collisions
-        let candidates = world.get_entities_at_box(&search_box);
+        // Entity collisions (includes players via get_all_at_box)
+        let candidates = world.get_all_at_box(&search_box);
         for cand in candidates {
             if self.should_skip_collision(entity, &cand) {
                 continue;
             }
 
             let ebb = cand.get_entity().bounding_box.load().expand(0.3, 0.3, 0.3);
-            if let Some(t) = calculate_ray_intersection(&start_pos, &velocity, &ebb)
+            if let Some((t, _face)) = clip_aabb(&start_pos, &movement, &ebb)
                 && t < closest_t
             {
                 closest_t = t;
-                let hit_pos = start_pos.add(&velocity.multiply(t, t, t));
+                let hit_pos = start_pos.add(&movement.multiply(t, t, t));
                 hit = Some(ProjectileHit::Entity {
                     entity: cand.clone(),
                     hit_pos,
-                    normal: velocity.normalize().multiply(-1.0, -1.0, -1.0),
+                    normal: movement.normalize().multiply(-1.0, -1.0, -1.0),
                 });
             }
         }
@@ -856,8 +903,22 @@ impl EntityBase for ArrowEntity {
                     velocity.z.signum(),
                 );
                 let offset = norm_dir.multiply(0.05, 0.05, 0.05);
-                entity.set_pos(hit_pos.sub(&offset));
+                let stick_pos = hit_pos.sub(&offset);
+                entity.set_pos(stick_pos);
                 entity.velocity.store(Vector3::new(0.0, 0.0, 0.0));
+                entity.last_sent_pos.store(stick_pos);
+                let sync_packet = CEntityPositionSync::new(
+                    entity.entity_id.into(),
+                    stick_pos,
+                    Vector3::new(0.0, 0.0, 0.0),
+                    entity.yaw.load(),
+                    entity.pitch.load(),
+                    true,
+                );
+                world.broadcast_to_chunk(entity.chunk_pos.load(), &sync_packet);
+                let zero_vel =
+                    CEntityVelocity::new(entity.entity_id.into(), Vector3::new(0.0, 0.0, 0.0));
+                world.broadcast_to_chunk(entity.chunk_pos.load(), &zero_vel);
 
                 // Notify client that arrow is in ground
                 entity.set_synced_data(pumpkin_data::tracked_data::abstract_arrow::IN_GROUND, true);
@@ -1026,13 +1087,19 @@ impl EntityBase for ArrowEntity {
             }
         }
 
+        if self.pickup == ArrowPickup::CreativeOnly {
+            player.living_entity.pickup(&self.entity, 1);
+            self.get_entity().remove();
+            return;
+        }
+
         // Try to insert an arrow into the player's inventory
         let item_stack = self
             .item_stack
             .read()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
         let mut stack = Self::pickup_item_stack(&item_stack);
-        if player.is_creative() || player.inventory.insert_stack_anywhere(&mut stack) {
+        if player.inventory.insert_stack_anywhere(&mut stack) {
             player.increment_stat(
                 pumpkin_data::statistic::StatisticCategory::PickedUp,
                 stack.item.id as i32,
@@ -1059,9 +1126,21 @@ impl ArrowEntity {
             return true;
         }
 
-        // Skip owner for initial frames (5 ticks)
-        if Some(other_ent.entity_id) == self.owner_id && self_ent.age.load(Ordering::Relaxed) < 5 {
+        // Skip owner collision
+        if Some(other_ent.entity_id) == self.owner_id {
             return true;
+        }
+
+        // Skip shooter's vehicle or passengers (e.g. spider jockey mount)
+        if let Some(owner) = self
+            .owner_id
+            .and_then(|id| self_ent.world.load().get_entity_by_id(id))
+        {
+            if owner.get_entity().has_passenger(other_ent.entity_id)
+                || other_ent.has_passenger(owner.get_entity().entity_id)
+            {
+                return true;
+            }
         }
 
         // Skip already pierced entities
@@ -1079,12 +1158,13 @@ impl ArrowEntity {
             return true;
         }
 
-        // Skip other arrows, item entities, falling block entities, and area effect clouds
+        // Skip other arrows, item entities, falling block entities, area effect clouds, exp orbs
         if (other_ent.entity_type == &pumpkin_data::entity::EntityType::ARROW
             || other_ent.entity_type == &pumpkin_data::entity::EntityType::SPECTRAL_ARROW)
             || other_ent.entity_type == &pumpkin_data::entity::EntityType::ITEM
             || other_ent.entity_type == &pumpkin_data::entity::EntityType::FALLING_BLOCK
             || other_ent.entity_type == &pumpkin_data::entity::EntityType::AREA_EFFECT_CLOUD
+            || other_ent.entity_type == &pumpkin_data::entity::EntityType::EXPERIENCE_ORB
         {
             return true;
         }
@@ -1093,64 +1173,12 @@ impl ArrowEntity {
     }
 }
 
-/// Ray intersection algorithm for AABBs
-fn calculate_ray_intersection(
-    start: &Vector3<f64>,
-    dir: &Vector3<f64>,
-    bb: &pumpkin_util::math::boundingbox::BoundingBox,
-) -> Option<f64> {
-    let mut t_min = 0.0f64;
-    let mut t_max = 1.0f64;
-
-    let b_min = [bb.min.x, bb.min.y, bb.min.z];
-    let b_max = [bb.max.x, bb.max.y, bb.max.z];
-    let s = [start.x, start.y, start.z];
-    let d = [dir.x, dir.y, dir.z];
-
-    for i in 0..3 {
-        if d[i].abs() < 1e-9 {
-            if s[i] < b_min[i] || s[i] > b_max[i] {
-                return None;
-            }
-        } else {
-            let t1 = (b_min[i] - s[i]) / d[i];
-            let t2 = (b_max[i] - s[i]) / d[i];
-            t_min = t_min.max(t1.min(t2));
-            t_max = t_max.min(t1.max(t2));
-        }
-    }
-
-    (0.0..=1.0).contains(&t_min).then_some(t_min)
-}
-
-/// Get the face of the block that was hit
-fn get_hit_face(hit_pos: Vector3<f64>, block_pos: BlockPos) -> pumpkin_data::BlockDirection {
-    use pumpkin_data::BlockDirection;
-
-    let local = hit_pos.sub(&block_pos.0.to_f64());
-    let eps = 1.0e-4;
-
-    if local.x <= eps {
-        BlockDirection::West
-    } else if local.x >= 1.0 - eps {
-        BlockDirection::East
-    } else if local.y <= eps {
-        BlockDirection::Down
-    } else if local.y >= 1.0 - eps {
-        BlockDirection::Up
-    } else if local.z <= eps {
-        BlockDirection::North
-    } else {
-        BlockDirection::South
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::ArrowEntity;
+    use super::{ArrowEntity, ArrowPickup};
     use pumpkin_data::data_component::DataComponent;
     use pumpkin_data::data_component_impl::{
-        DataComponentImpl, PotionContentsImpl, PotionDurationScaleImpl,
+        DataComponentImpl, IntangibleProjectileImpl, PotionContentsImpl, PotionDurationScaleImpl,
     };
     use pumpkin_data::entity::EntityType;
     use pumpkin_data::item::Item;
@@ -1214,6 +1242,19 @@ mod tests {
 
         assert_eq!(pickup.item_count, 1);
         assert!(pickup.are_items_and_components_equal(&payload));
+    }
+
+    #[test]
+    fn intangible_projectile_is_creative_only_and_not_pickup_payload() {
+        let mut payload = ItemStack::new(1, &Item::ARROW);
+        payload.set_data_component(IntangibleProjectileImpl);
+
+        let (pickup_item, pickup_rule) =
+            ArrowEntity::pickup_item_and_rule(&payload, ArrowPickup::Allowed);
+
+        assert_eq!(pickup_rule, ArrowPickup::CreativeOnly);
+        assert!(!pickup_item.has_data_component(DataComponent::IntangibleProjectile));
+        assert!(payload.has_data_component(DataComponent::IntangibleProjectile));
     }
 
     #[test]

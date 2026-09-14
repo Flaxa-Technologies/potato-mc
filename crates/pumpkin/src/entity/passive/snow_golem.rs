@@ -119,6 +119,10 @@ impl SnowGolemEntity {
 }
 
 impl Mob for SnowGolemEntity {
+    /// Vanilla Animal.java:128 / AbstractGolem.java:36 -- passive mobs never despawn naturally.
+    fn remove_when_far_away(&self, _distance_sq: f64) -> bool { false }
+
+
     fn mob_write_nbt(&self, nbt: &mut NbtCompound) {
         nbt.put_bool("Pumpkin", self.has_pumpkin());
     }

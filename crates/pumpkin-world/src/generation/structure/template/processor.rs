@@ -374,7 +374,7 @@ impl StructureProcessor {
     pub fn process(
         &self,
         placer: &impl BlockPlacer,
-        world_pos: Vector3<i32>,
+        mut world_pos: Vector3<i32>,
         state: &'static BlockState,
     ) -> Option<&'static BlockState> {
         let mut nbt = None;
@@ -384,7 +384,7 @@ impl StructureProcessor {
             LegacyRand::from_seed(hash_block_pos(world_pos.x, world_pos.y, world_pos.z) as u64);
         self.process_with_context(
             placer,
-            world_pos,
+            &mut world_pos,
             state,
             &mut nbt,
             &mut context,
@@ -398,7 +398,7 @@ impl StructureProcessor {
     pub fn process_with_context(
         &self,
         placer: &impl BlockPlacer,
-        world_pos: Vector3<i32>,
+        world_pos: &mut Vector3<i32>,
         state: &'static BlockState,
         nbt: &mut Option<NbtCompound>,
         context: &mut ProcessorContext,
@@ -407,17 +407,17 @@ impl StructureProcessor {
     ) -> Option<&'static BlockState> {
         match self {
             Self::Rule(rules) => {
-                let world_state_id = placer.get_block_state(&world_pos);
+                let world_state_id = placer.get_block_state(world_pos);
                 let world_state = BlockState::from_id(world_state_id);
                 for rule in rules {
                     if rule
                         .position_predicate
-                        .test(world_pos, context.structure_start, rng)
+                        .test(*world_pos, context.structure_start, rng)
                         && rule.input_predicate.test(state, rng)
                         && rule.location_predicate.test(world_state, rng)
                     {
                         if let Some(modifier) = &rule.block_entity_modifier {
-                            modifier.apply(nbt, world_pos, rng);
+                            modifier.apply(nbt, *world_pos, rng);
                         }
                         return Some(rule.output_state);
                     }
@@ -444,9 +444,14 @@ impl StructureProcessor {
                     Some(state)
                 }
             }
-            Self::Gravity { .. } | Self::Nop => Some(state),
+            Self::Gravity { heightmap, offset } => {
+                let top_y = placer.get_top_y(*heightmap, world_pos.x, world_pos.z);
+                world_pos.y = top_y + *offset + (world_pos.y - context.structure_start.y);
+                Some(state)
+            }
+            Self::Nop => Some(state),
             Self::ProtectedBlocks(tag) => {
-                let world_state_id = placer.get_block_state(&world_pos);
+                let world_state_id = placer.get_block_state(world_pos);
                 if check_block_has_tag(world_state_id.to_block_id(), tag) {
                     None
                 } else {

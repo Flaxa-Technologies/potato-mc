@@ -200,6 +200,9 @@ pub trait InventoryPlayer: Send + Sync {
         false
     }
 
+    /// Plays the enchantment table enchant sound.
+    fn play_enchantment_sound(&self) {}
+
     /// Fires an enchant item event. Returns true if cancelled.
     fn fire_enchant_item_event(
         &self,

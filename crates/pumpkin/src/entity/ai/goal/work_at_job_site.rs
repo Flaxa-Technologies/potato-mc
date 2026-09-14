@@ -6,6 +6,7 @@ use crate::entity::{ai::pathfinder::NavigatorGoal, mob::Mob};
 pub struct WorkAtJobSiteGoal {
     speed: f64,
     target: Option<BlockPos>,
+    work_timer: i32,
 }
 
 impl WorkAtJobSiteGoal {
@@ -14,6 +15,7 @@ impl WorkAtJobSiteGoal {
         Self {
             speed,
             target: None,
+            work_timer: 0,
         }
     }
 
@@ -29,6 +31,36 @@ impl WorkAtJobSiteGoal {
             .query_daytime();
         (2_000..9_000).contains(&daytime)
     }
+    fn find_stand_pos(
+        world: &crate::world::World,
+        target: BlockPos,
+        current_pos: pumpkin_util::math::vector3::Vector3<f64>,
+    ) -> pumpkin_util::math::vector3::Vector3<f64> {
+        let offsets = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+        let mut best_pos = None;
+        let mut best_dist_sq = f64::MAX;
+
+        for (dx, dz) in offsets {
+            for dy in [0, -1, 1] {
+                let stand_pos = BlockPos(target.0.add_raw(dx, dy, dz));
+                let state = world.get_block_state(&stand_pos);
+                let state_above = world.get_block_state(&stand_pos.up());
+                let state_below = world.get_block_state(&stand_pos.down());
+
+                if !state.is_solid() && !state_above.is_solid() && state_below.is_solid() {
+                    let center = stand_pos.to_centered_f64();
+                    let dist = center.squared_distance_to_vec(&current_pos);
+                    if dist < best_dist_sq {
+                        best_dist_sq = dist;
+                        best_pos = Some(center);
+                    }
+                    break;
+                }
+            }
+        }
+
+        best_pos.unwrap_or_else(|| target.to_centered_f64())
+    }
 }
 
 impl Goal for WorkAtJobSiteGoal {
@@ -39,10 +71,6 @@ impl Goal for WorkAtJobSiteGoal {
         if !Self::should_move_to_job_site(mob) {
             return false;
         }
-        let position = mob.get_mob_entity().living_entity.entity.pos.load();
-        if target.to_centered_f64().squared_distance_to_vec(&position) < 1.73f64.powi(2) {
-            return false;
-        }
         self.target = Some(target);
         true
     }
@@ -51,34 +79,28 @@ impl Goal for WorkAtJobSiteGoal {
         let Some(target) = self.target else {
             return false;
         };
-        if mob.get_job_site() != Some(target) || !Self::should_move_to_job_site(mob) {
-            return false;
-        }
-        let entity = &mob.get_mob_entity().living_entity.entity;
-        target
-            .to_centered_f64()
-            .squared_distance_to_vec(&entity.pos.load())
-            >= 1.73f64.powi(2)
-            && !mob
-                .get_mob_entity()
-                .navigator
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner)
-                .is_idle()
+        mob.get_job_site() == Some(target) && Self::should_move_to_job_site(mob)
     }
 
     fn start(&mut self, mob: &dyn Mob) {
+        self.work_timer = 20;
         if let Some(target) = self.target {
             let entity = &mob.get_mob_entity().living_entity.entity;
-            mob.get_mob_entity()
-                .navigator
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner)
-                .set_progress(NavigatorGoal::new(
-                    entity.pos.load(),
-                    target.to_centered_f64(),
-                    self.speed,
-                ));
+            let pos = entity.pos.load();
+            let target_pos = target.to_centered_f64();
+            if target_pos.squared_distance_to_vec(&pos) >= 1.73f64.powi(2) {
+                let world = entity.world.load();
+                let nav_target = Self::find_stand_pos(&world, target, pos);
+                mob.get_mob_entity()
+                    .navigator
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                    .set_progress(NavigatorGoal::new(
+                        pos,
+                        nav_target,
+                        self.speed,
+                    ));
+            }
         }
     }
 
@@ -100,7 +122,51 @@ impl Goal for WorkAtJobSiteGoal {
             .stop();
     }
 
+    fn tick(&mut self, mob: &dyn Mob) {
+        let Some(target) = self.target else {
+            return;
+        };
+        let mob_entity = mob.get_mob_entity();
+        let entity = &mob_entity.living_entity.entity;
+        let pos = entity.pos.load();
+        let target_pos = target.to_centered_f64();
+        let dist_sq = target_pos.squared_distance_to_vec(&pos);
+
+        if dist_sq < 1.73f64.powi(2) {
+            mob_entity
+                .navigator
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .stop();
+            mob_entity
+                .look_control
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .look_at(mob, target_pos.x, target_pos.y, target_pos.z);
+
+            self.work_timer -= 1;
+            if self.work_timer <= 0 {
+                self.work_timer = 300;
+                mob.work_at_job_site();
+            }
+        } else {
+            let mut nav = mob_entity
+                .navigator
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if nav.is_idle() {
+                let world = entity.world.load();
+                let nav_target = Self::find_stand_pos(&world, target, pos);
+                nav.set_progress(NavigatorGoal::new(pos, nav_target, self.speed));
+            }
+        }
+    }
+
+    fn should_run_every_tick(&self) -> bool {
+        true
+    }
+
     fn controls(&self) -> Controls {
-        Controls::MOVE
+        Controls::MOVE | Controls::LOOK
     }
 }

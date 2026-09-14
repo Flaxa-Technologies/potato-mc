@@ -67,11 +67,21 @@ impl JukeboxBlock {
     fn stop_playing(block: &Block, position: &BlockPos, world: &Arc<World>) {
         Self::set_record_state(false, block, position, world);
         world.sync_world_event(WorldEvent::SoundStopJukeboxSong, *position, 0);
+        let center = position.to_centered_f64();
+        let nearby = world.get_nearby_entities(center, 16.0);
+        for ent in nearby.values() {
+            ent.hear_jukebox(*position, false);
+        }
     }
 
     /// Starts playing music
     fn start_playing(position: &BlockPos, world: &Arc<World>, song_id: u32) {
         world.sync_world_event(WorldEvent::SoundPlayJukeboxSong, *position, song_id as i32);
+        let center = position.to_centered_f64();
+        let nearby = world.get_nearby_entities(center, 16.0);
+        for ent in nearby.values() {
+            ent.hear_jukebox(*position, true);
+        }
     }
 }
 
@@ -167,6 +177,11 @@ impl BlockBehaviour for JukeboxBlock {
         // Stop the music
         args.world
             .sync_world_event(WorldEvent::SoundStopJukeboxSong, *args.position, 0);
+        let center = args.position.to_centered_f64();
+        let nearby = args.world.get_nearby_entities(center, 16.0);
+        for ent in nearby.values() {
+            ent.hear_jukebox(*args.position, false);
+        }
     }
 
     /// Vanilla: `JukeboxBlock.onStateReplaced()` -> `ItemScatterer.onStateReplaced()`

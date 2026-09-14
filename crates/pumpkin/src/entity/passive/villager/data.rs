@@ -193,6 +193,57 @@ pub fn parse_villager_type(name: &str) -> VillagerType {
 }
 
 #[must_use]
+pub fn villager_type_by_biome(biome: &pumpkin_data::chunk::Biome) -> VillagerType {
+    use pumpkin_data::chunk::Biome;
+    match biome.id {
+        id if id == Biome::DESERT.id
+            || id == Biome::BADLANDS.id
+            || id == Biome::ERODED_BADLANDS.id
+            || id == Biome::WOODED_BADLANDS.id =>
+        {
+            VillagerType::Desert
+        }
+        id if id == Biome::JUNGLE.id
+            || id == Biome::BAMBOO_JUNGLE.id
+            || id == Biome::SPARSE_JUNGLE.id =>
+        {
+            VillagerType::Jungle
+        }
+        id if id == Biome::SAVANNA.id
+            || id == Biome::SAVANNA_PLATEAU.id
+            || id == Biome::WINDSWEPT_SAVANNA.id =>
+        {
+            VillagerType::Savanna
+        }
+        id if id == Biome::SNOWY_PLAINS.id
+            || id == Biome::ICE_SPIKES.id
+            || id == Biome::SNOWY_TAIGA.id
+            || id == Biome::SNOWY_BEACH.id
+            || id == Biome::GROVE.id
+            || id == Biome::SNOWY_SLOPES.id
+            || id == Biome::JAGGED_PEAKS.id
+            || id == Biome::FROZEN_PEAKS.id
+            || id == Biome::FROZEN_RIVER.id
+            || id == Biome::FROZEN_OCEAN.id
+            || id == Biome::DEEP_FROZEN_OCEAN.id =>
+        {
+            VillagerType::Snow
+        }
+        id if id == Biome::SWAMP.id || id == Biome::MANGROVE_SWAMP.id => VillagerType::Swamp,
+        id if id == Biome::TAIGA.id
+            || id == Biome::OLD_GROWTH_SPRUCE_TAIGA.id
+            || id == Biome::OLD_GROWTH_PINE_TAIGA.id
+            || id == Biome::WINDSWEPT_HILLS.id
+            || id == Biome::WINDSWEPT_GRAVELLY_HILLS.id
+            || id == Biome::WINDSWEPT_FOREST.id =>
+        {
+            VillagerType::Taiga
+        }
+        _ => VillagerType::Plains,
+    }
+}
+
+#[must_use]
 pub fn random_villager_type() -> VillagerType {
     use rand::RngExt;
     let mut rng = rand::rng();

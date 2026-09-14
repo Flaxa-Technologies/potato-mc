@@ -35,11 +35,11 @@ impl OreVeinSampler {
                 let mut random = ore_random_deriver.split_pos(pos.x, block_y, pos.z);
 
                 let vein_ridged_sample = veins.ridged;
-                if random.next_f32() <= 0.7 && vein_ridged_sample < 0.0 {
+                if random.next_f32() <= 0.7 && vein_ridged_sample > 0.0 {
                     let clamped_sample = clamped_map(abs_sample, 0.4, 0.6, 0.1, 0.3);
 
                     let vein_gap = router.vein_gap(pos);
-                    return if random.next_f32() < clamped_sample && vein_gap > -0.3 {
+                    return if random.next_f32() < clamped_sample && vein_gap < 0.0 {
                         Some(if random.next_f32() < 0.02 {
                             vein_type.raw_ore.default_state
                         } else {

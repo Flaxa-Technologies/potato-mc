@@ -32,6 +32,11 @@ impl SculkPatchFeature {
         random: &mut RandomGenerator,
         pos: BlockPos,
     ) -> bool {
+        if chunk.get_biome_for_terrain_gen(pos.0.x, pos.0.y, pos.0.z)
+            != &pumpkin_data::biome::Biome::DEEP_DARK
+        {
+            return false;
+        }
         if !Self::can_spread_from(chunk, pos) {
             return false;
         }
@@ -88,6 +93,11 @@ impl SculkPatchFeature {
         random: &mut RandomGenerator,
         pos: BlockPos,
     ) -> bool {
+        if chunk.get_terrain_gen_biome(pos.0.x, pos.0.y, pos.0.z)
+            != &pumpkin_data::biome::Biome::DEEP_DARK
+        {
+            return false;
+        }
         if !can_spread_from_proto_chunk(chunk, pos) {
             return false;
         }
@@ -261,6 +271,11 @@ impl SculkSpreader {
             let dy = random.next_bounded_i32(3) - 1;
             let dz = random.next_bounded_i32(3) - 1;
             let target_pos = cursor.pos.offset(Vector3::new(dx, dy, dz));
+            if chunk.get_biome_for_terrain_gen(target_pos.0.x, target_pos.0.y, target_pos.0.z)
+                != &pumpkin_data::biome::Biome::DEEP_DARK
+            {
+                continue;
+            }
 
             let target_state = GenerationCache::get_block_state(chunk, &target_pos.0);
             let target_block_id = target_state.to_block_id();
@@ -301,6 +316,11 @@ impl SculkSpreader {
                 random.next_bounded_i32(3) - 1,
                 random.next_bounded_i32(3) - 1,
             ));
+            if chunk.get_terrain_gen_biome(target_pos.0.x, target_pos.0.y, target_pos.0.z)
+                != &pumpkin_data::biome::Biome::DEEP_DARK
+            {
+                continue;
+            }
             let Some(target_state) = proto_chunk_state(chunk, target_pos) else {
                 continue;
             };

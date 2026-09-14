@@ -3153,6 +3153,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "potato-api"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "uuid",
+]
+
+[[package]]
 name = "potential_utf"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3351,10 +3361,12 @@ dependencies = [
  "indexmap",
  "libc",
  "libloading",
+ "md5",
  "notify",
  "num-bigint 0.5.1",
  "ordered-float",
  "postcard",
+ "potato-api",
  "pumpkin-codecs",
  "pumpkin-config",
  "pumpkin-data",
@@ -4881,6 +4893,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "test-plugin"
+version = "0.1.0"
+dependencies = [
+ "potato-api",
 ]
 
 [[package]]

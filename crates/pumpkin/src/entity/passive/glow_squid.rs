@@ -3,6 +3,7 @@ use std::sync::{
     atomic::{AtomicI32, Ordering},
 };
 
+use crossbeam::atomic::AtomicCell;
 use pumpkin_data::damage::DamageType;
 use pumpkin_data::particle::Particle;
 use pumpkin_data::sound::{Sound, SoundCategory};
@@ -13,7 +14,7 @@ use rand::RngExt;
 
 use crate::entity::{
     Entity, EntityBase,
-    ai::goal::{escape_danger::EscapeDangerGoal, try_find_water::TryFindWaterGoal},
+    ai::goal::try_find_water::TryFindWaterGoal,
     mob::{Mob, MobEntity},
 };
 
@@ -23,9 +24,10 @@ use crate::entity::{
 /// Base class:    `net.minecraft.world.entity.animal.squid.Squid`
 ///
 /// Behaviors implemented:
-/// - Panic and flee when hurt (EscapeDangerGoal, speed 1.4)
+/// - SquidRandomMovementGoal: periodic direction change with gentle horizontal/vertical thrust
+/// - SquidFleeGoal: flees from attacker on taking damage with accelerated swimming impulse
+/// - Tentacle propulsion cycle (tentacle_movement 0..2*PI) with entity event 19 sync
 /// - Water finding when stranded (TryFindWaterGoal)
-/// - Periodic swimming thrust impulse in water
 /// - Squirts glow ink cloud (Particle::GlowSquidInk) and squirt sound on taking damage
 /// - Dark ticks mechanism: stops glowing for 100 ticks after taking damage (DATA_DARK_TICKS_REMAINING)
 /// - Emits glowing aura particles (Particle::Glow) when not darkened
@@ -41,17 +43,35 @@ pub struct GlowSquidEntity {
     air_supply: AtomicI32,
     ambient_sound_time: AtomicI32,
     swim_pulse_timer: AtomicI32,
+    tentacle_movement: AtomicCell<f32>,
+    tentacle_speed: AtomicCell<f32>,
+    movement_vector: AtomicCell<Vector3<f64>>,
+    rotate_speed: AtomicCell<f32>,
 }
 
 impl GlowSquidEntity {
     pub fn new(entity: Entity) -> Arc<Self> {
+        let mut rng = rand::rng();
+        let tentacle_speed = 1.0 / (rng.random::<f32>() + 1.0) * 0.2;
+        let angle = rng.random::<f32>() * std::f32::consts::PI * 2.0;
+        let initial_mv = Vector3::new(
+            f64::from(angle.cos()) * 0.2,
+            -0.1 + f64::from(rng.random::<f32>()) * 0.2,
+            f64::from(angle.sin()) * 0.2,
+        );
+        entity.velocity.store(initial_mv * 0.5);
         let mob_entity = MobEntity::new(entity);
+
         let glow_squid = Self {
             mob_entity,
             dark_ticks_remaining: AtomicI32::new(0),
             air_supply: AtomicI32::new(300),
             ambient_sound_time: AtomicI32::new(-120),
             swim_pulse_timer: AtomicI32::new(0),
+            tentacle_movement: AtomicCell::new(0.0),
+            tentacle_speed: AtomicCell::new(tentacle_speed),
+            movement_vector: AtomicCell::new(initial_mv),
+            rotate_speed: AtomicCell::new(0.0),
         };
         let mob_arc = Arc::new(glow_squid);
 
@@ -62,8 +82,6 @@ impl GlowSquidEntity {
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner);
 
-            // Priority 0: Panic when hurt
-            goal_selector.add_goal(0, EscapeDangerGoal::new(1.4));
             // Priority 1: Seek water when stranded on land
             goal_selector.add_goal(1, Box::new(TryFindWaterGoal));
         };
@@ -117,6 +135,9 @@ impl GlowSquidEntity {
 }
 
 impl Mob for GlowSquidEntity {
+    /// Vanilla Animal.java:128 / AbstractGolem.java:36 -- passive mobs never despawn naturally.
+    fn remove_when_far_away(&self, _distance_sq: f64) -> bool { false }
+
     fn get_mob_entity(&self) -> &MobEntity {
         &self.mob_entity
     }
@@ -147,6 +168,22 @@ impl Mob for GlowSquidEntity {
         let entity = self.get_entity();
         let in_water = entity.is_in_water() || entity.touching_water.load(Ordering::Relaxed);
 
+        // Vanilla: tentacle movement progresses each tick
+        let tentacle_speed = self.tentacle_speed.load();
+        let mut tentacle_movement = self.tentacle_movement.load() + tentacle_speed;
+        if tentacle_movement > std::f32::consts::PI * 2.0 {
+            tentacle_movement -= std::f32::consts::PI * 2.0;
+            if rand::random_range(0..10) == 0 {
+                self.tentacle_speed.store(1.0 / (rand::random::<f32>() + 1.0) * 0.2);
+            }
+            let world = entity.world.load();
+            world.broadcast_packet_all(&pumpkin_protocol::java::client::play::CEntityStatus::new(
+                entity.entity_id,
+                19,
+            ));
+        }
+        self.tentacle_movement.store(tentacle_movement);
+
         if in_water {
             self.air_supply.store(300, Ordering::Relaxed);
 
@@ -173,16 +210,53 @@ impl Mob for GlowSquidEntity {
                 );
             }
 
-            // Periodic swimming thrust
-            let timer = self.swim_pulse_timer.fetch_add(1, Ordering::Relaxed);
-            if timer % 25 == 0 {
-                let yaw_rad = f64::from(entity.yaw.load()).to_radians();
-                let thrust = 0.12;
-                let vel = entity.velocity.load();
-                let dx = -yaw_rad.sin() * thrust;
-                let dz = yaw_rad.cos() * thrust;
-                entity.velocity.store(Vector3::new(vel.x + dx, vel.y + 0.04, vel.z + dz));
+            let mut rotate_speed = self.rotate_speed.load();
+            if tentacle_movement < std::f32::consts::PI {
+                let tentacle_scale = tentacle_movement / std::f32::consts::PI;
+                if tentacle_scale > 0.75 {
+                    let mv = self.movement_vector.load();
+                    entity.velocity.store(mv);
+                    entity.velocity_dirty.store(true, Ordering::Relaxed);
+                    rotate_speed = 1.0;
+                } else {
+                    rotate_speed *= 0.8;
+                }
+            } else {
+                let mut vel = entity.velocity.load();
+                vel.x *= 0.9;
+                vel.y *= 0.9;
+                vel.z *= 0.9;
+                entity.velocity.store(vel);
                 entity.velocity_dirty.store(true, Ordering::Relaxed);
+                rotate_speed *= 0.99;
+            }
+            self.rotate_speed.store(rotate_speed);
+
+            // Periodic random movement vector selection matching SquidRandomMovementGoal
+            let timer = self.swim_pulse_timer.fetch_add(1, Ordering::Relaxed);
+            let mv = self.movement_vector.load();
+            let has_mv = mv.length_squared() > 1.0e-5;
+            if timer % 50 == 0 || !has_mv {
+                let mut rng = rand::rng();
+                let angle = rng.random::<f32>() * std::f32::consts::PI * 2.0;
+                let new_mv = Vector3::new(
+                    f64::from(angle.cos()) * 0.2,
+                    -0.1 + f64::from(rng.random::<f32>()) * 0.2,
+                    f64::from(angle.sin()) * 0.2,
+                );
+                self.movement_vector.store(new_mv);
+            }
+
+            // Orientation: smooth yaw tracking movement direction
+            let vel = entity.velocity.load();
+            let horiz = (vel.x * vel.x + vel.z * vel.z).sqrt();
+            if horiz > 0.005 {
+                let target_yaw = (-vel.x.atan2(vel.z).to_degrees()) as f32;
+                let cur_yaw = entity.yaw.load();
+                let diff = ((target_yaw - cur_yaw + 180.0).rem_euclid(360.0) - 180.0) * 0.1;
+                let new_yaw = cur_yaw + diff;
+                entity.set_rotation(new_yaw, 0.0);
+                entity.head_yaw.store(new_yaw);
             }
 
             // Ambient sound (vanilla WaterAnimal.AMBIENT_SOUND_INTERVAL = 120)
@@ -209,7 +283,7 @@ impl Mob for GlowSquidEntity {
         }
     }
 
-    fn on_damage(&self, _damage_type: DamageType, _source: Option<&dyn EntityBase>) {
+    fn on_damage(&self, _damage_type: DamageType, source: Option<&dyn EntityBase>) {
         self.ambient_sound_time.store(-120, Ordering::Relaxed);
         self.set_dark_ticks(100);
         let entity = self.get_entity();
@@ -219,5 +293,24 @@ impl Mob for GlowSquidEntity {
             &entity.pos.load(),
         );
         self.spawn_ink();
+
+        // Flee from attacker matching vanilla SquidFleeGoal
+        if let Some(src) = source {
+            let src_pos = src.get_entity().pos.load();
+            let pos = entity.pos.load();
+            let mut flee = pos - src_pos;
+            let len = flee.length();
+            if len > 0.001 {
+                flee = flee.normalize();
+                let mut speed = 3.0;
+                if len > 5.0 {
+                    speed -= (len - 5.0) / 5.0;
+                }
+                if speed > 0.0 {
+                    flee = flee * speed;
+                }
+                self.movement_vector.store(Vector3::new(flee.x / 20.0, flee.y / 20.0, flee.z / 20.0));
+            }
+        }
     }
 }

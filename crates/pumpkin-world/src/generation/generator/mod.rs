@@ -75,6 +75,13 @@ pub trait CustomChunkGenerator: Send + Sync {
 
     fn set_structure_starts(&self, _chunk: &mut ProtoChunk) {}
     fn set_structure_references(&self, _chunk: &mut ProtoChunk) {}
+    fn is_in_structure_bounds(
+        &self,
+        _key: pumpkin_data::structures::StructureKeys,
+        _pos: &pumpkin_util::math::position::BlockPos,
+    ) -> bool {
+        false
+    }
 }
 
 pub enum WorldGenerator {
@@ -120,6 +127,19 @@ impl WorldGenerator {
             _ => pumpkin_util::math::position::BlockPos::ZERO,
         }
     }
+
+    #[must_use]
+    pub fn is_in_structure_bounds(
+        &self,
+        key: pumpkin_data::structures::StructureKeys,
+        pos: &pumpkin_util::math::position::BlockPos,
+    ) -> bool {
+        match self {
+            Self::Noise(noise_gen) => noise_gen.is_in_structure_bounds(key, pos),
+            Self::Flat(_) => false,
+            Self::Custom(custom_gen) => custom_gen.is_in_structure_bounds(key, pos),
+        }
+    }
 }
 
 pub struct VanillaGenerator {
@@ -154,6 +174,109 @@ impl VanillaGenerator {
             self.settings.spawn_target,
             &mut sampler,
         )
+    }
+
+    #[must_use]
+    pub fn is_in_structure_bounds(
+        &self,
+        key: pumpkin_data::structures::StructureKeys,
+        pos: &pumpkin_util::math::position::BlockPos,
+    ) -> bool {
+        let set = key.structure_set();
+        let pumpkin_data::structures::StructurePlacementType::RandomSpread(spread) =
+            &set.placement.placement_type
+        else {
+            return false;
+        };
+
+        let chunk_x = pos.0.x >> 4;
+        let chunk_z = pos.0.z >> 4;
+        let region_x = pumpkin_util::math::floor_div(chunk_x, spread.spacing);
+        let region_z = pumpkin_util::math::floor_div(chunk_z, spread.spacing);
+        let seed = self.random_config.seed as i64;
+
+        for dx in -1..=1 {
+            for dz in -1..=1 {
+                let rx = region_x + dx;
+                let rz = region_z + dz;
+                let (scx, scz) =
+                    crate::generation::structure::placement::get_structure_chunk_in_region(
+                        spread,
+                        seed,
+                        rx,
+                        rz,
+                        set.placement.salt,
+                    );
+
+                let max_chunk_dist = match key {
+                    pumpkin_data::structures::StructureKeys::PillagerOutpost => 5,
+                    pumpkin_data::structures::StructureKeys::SwampHut => 2,
+                    _ => 4,
+                };
+                if (scx - chunk_x).abs() > max_chunk_dist || (scz - chunk_z).abs() > max_chunk_dist
+                {
+                    continue;
+                }
+
+                let start = self.global_structure_cache.get_or_compute_structure_start(
+                    key,
+                    scx,
+                    scz,
+                    || {
+                        let settings = self.settings;
+                        let mut height_sampler =
+                            crate::generation::structure::height_sampler::NoiseHeightSampler::new(
+                                self,
+                            );
+                        let mut biome_sampler =
+                            crate::generation::noise::router::multi_noise_sampler::MultiNoiseSampler::generate(
+                                &self.base_router.multi_noise,
+                            );
+                        let context =
+                            crate::generation::structure::structures::StructureGeneratorContext {
+                                seed,
+                                chunk_x: scx,
+                                chunk_z: scz,
+                                random:
+                                    crate::generation::structure::structures::create_chunk_random(
+                                        seed, scx, scz,
+                                    ),
+                                sea_level: settings.sea_level,
+                                min_y: self.dimension.min_y,
+                                height_sampler: Some(&mut height_sampler),
+                                structure_key: Some(key),
+                            };
+                        let biome_supplier: &dyn crate::biome::BiomeSupplier =
+                            if self.dimension == Dimension::THE_END {
+                                &crate::biome::end::TheEndBiomeSupplier
+                            } else if self.dimension == Dimension::THE_NETHER {
+                                &crate::biome::MultiNoiseBiomeSupplier::NETHER
+                            } else {
+                                &crate::biome::MultiNoiseBiomeSupplier::OVERWORLD
+                            };
+                        crate::generation::structure::lazily_generate_structure(
+                            &key,
+                            pumpkin_data::structures::Structure::get(&key),
+                            context,
+                            biome_supplier,
+                            &mut biome_sampler,
+                        )
+                    },
+                );
+
+                if let Some(start) = start {
+                    let mut collector = start
+                        .collector
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
+                    let bbox = collector.get_bounding_box();
+                    if bbox.contains_pos(&pos.0) {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
     }
 }
 

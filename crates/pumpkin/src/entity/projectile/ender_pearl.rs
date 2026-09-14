@@ -12,6 +12,7 @@ use pumpkin_data::damage::DamageType;
 use pumpkin_data::entity::{EntityPose, EntityStatus};
 use pumpkin_data::particle::Particle;
 use pumpkin_data::sound::{Sound, SoundCategory};
+use pumpkin_data::BlockDirection;
 use pumpkin_protocol::bedrock::server::actor_event::ActorEventID;
 use pumpkin_util::math::vector3::Vector3;
 
@@ -98,7 +99,23 @@ impl EntityBase for EnderPearlEntity {
         }
 
         let owner_id = self.thrown.owner_id;
-        let teleport_pos = entity.last_pos.load();
+        let teleport_pos = match &hit {
+            ProjectileHit::Block { face, hit_pos, .. } => {
+                if *face == BlockDirection::Up {
+                    *hit_pos
+                } else if *face == BlockDirection::Down {
+                    Vector3::new(hit_pos.x, hit_pos.y - 2.0, hit_pos.z)
+                } else {
+                    let offset = face.to_offset();
+                    Vector3::new(
+                        hit_pos.x + f64::from(offset.x) * 0.3,
+                        hit_pos.y,
+                        hit_pos.z + f64::from(offset.z) * 0.3,
+                    )
+                }
+            }
+            ProjectileHit::Entity { hit_pos, .. } => *hit_pos,
+        };
 
         if let (
             ProjectileHit::Entity {
@@ -145,6 +162,11 @@ impl EntityBase for EnderPearlEntity {
                 Some(owner.get_entity().pitch.load()),
                 world.clone(),
             );
+
+            // Reset fall distance on teleport
+            if let Some(living) = owner.get_living_entity() {
+                living.fall_distance.store(0.0);
+            }
 
             // Play teleport sound at new position
             world.play_sound(

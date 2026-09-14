@@ -448,7 +448,11 @@ impl JavaClient {
                     None
                 };
 
-                serialized.push((Bytes::from(buf), light_buf));
+                serialized.push((
+                    pumpkin_util::math::vector2::Vector2::new(chunk.x, chunk.z),
+                    Bytes::from(buf),
+                    light_buf,
+                ));
             }
             let _ = tx.send(serialized);
         });
@@ -461,13 +465,22 @@ impl JavaClient {
             return;
         }
 
+        if let Ok(mut sender) = player.chunk_sender.lock() {
+            for (pos, _, _) in &serialized {
+                sender.mark_chunk_as_sent(*pos);
+            }
+            if version >= JavaMinecraftVersion::V_1_20_2 {
+                sender.in_flight_batches = sender.in_flight_batches.saturating_add(1);
+            }
+        }
+
         if version >= JavaMinecraftVersion::V_1_20_2 {
             self.send_packet(&CChunkBatchStart).await;
         }
 
         // Keep the whole batch on the priority queue. Otherwise the batch end can overtake chunk
         // data queued on the normal channel, leaving the client unable to render those chunks.
-        for (chunk_data, light_data) in serialized {
+        for (_, chunk_data, light_data) in serialized {
             self.send_packet_now_data(chunk_data).await;
             if let Some(light_data) = light_data {
                 self.send_packet_now_data(light_data).await;
@@ -530,6 +543,11 @@ impl JavaClient {
                 }
             }
         }
+    }
+
+    #[must_use]
+    pub fn is_network_congested(&self) -> bool {
+        self.outgoing_packet_queue_send.capacity() < 256
     }
 
     pub async fn await_close_interrupt(&self) {

@@ -10,6 +10,7 @@ use crate::item::{ItemBehaviour, ItemMetadata};
 use pumpkin_data::entity::EntityType;
 use pumpkin_data::item::Item;
 use pumpkin_data::sound::Sound;
+use pumpkin_util::math::vector3::Vector3;
 
 pub struct EnderPearlItem;
 
@@ -26,23 +27,25 @@ const THROW_SOUND_VOLUME: f32 = 0.5;
 
 impl ItemBehaviour for EnderPearlItem {
     fn normal_use(&self, _item: &Item, player: &Player) {
-        let position = player.position();
+        let eye_pos = player.eye_position();
+        let spawn_pos = Vector3::new(player.position().x, eye_pos.y - 0.1, player.position().z);
         let world = player.world();
         world.play_sound_fine(
             Sound::EntityEnderPearlThrow,
             pumpkin_data::sound::SoundCategory::Neutral,
-            &position,
+            &spawn_pos,
             THROW_SOUND_VOLUME,
             0.4 / (rng().random::<f32>() * 0.4 + 0.8),
         );
 
-        let entity = Entity::new(world.clone(), position, &EntityType::ENDER_PEARL);
+        let entity = Entity::new(world.clone(), spawn_pos, &EntityType::ENDER_PEARL);
         let pearl = EnderPearlEntity::new_shot(entity, player.get_entity());
         let (yaw, pitch) = player.rotation();
         pearl
             .thrown
             .set_velocity_from(pitch, yaw, ROLL, POWER, DIVERGENCE);
         world.spawn_entity(Arc::new(pearl));
+        player.swing_hand(pumpkin_util::Hand::Right, true);
 
         // Consume item
         let mut main_hand = player.inventory.held_item();

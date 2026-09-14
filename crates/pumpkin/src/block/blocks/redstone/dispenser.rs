@@ -23,6 +23,7 @@ use crate::entity::projectile::snowball::SnowballEntity;
 use crate::entity::projectile::splash_potion::SplashPotionEntity;
 use crate::entity::projectile::wind_charge::{WIND_CHARGE_GRAVITY, WindChargeEntity};
 use crate::entity::tnt::TNTEntity;
+use crate::entity::mob::sulfur_cube::SulfurCubeEntity;
 use crate::entity::r#type::from_type;
 use crate::entity::vehicle::boat::BoatEntity;
 use crate::entity::{Entity, EntityBase};
@@ -303,12 +304,33 @@ impl DispenserBlock {
         } else if item.item.id == Item::HONEYCOMB.id {
             // Honeycombs wax copper blocks
             Self::dispense_honeycomb(ctx, item);
+        } else if item.item.id == Item::SHEARS.id {
+            // Shears shear sheep and sulfur cubes
+            Self::dispense_shears(ctx, item);
         } else if entity_from_egg(item.item.id).is_some() {
             // Spawn eggs
             Self::dispense_spawn_egg(ctx, item);
         } else {
-            // Default / Drop
-            Self::drop_item(ctx, item);
+            // Check if facing a Sulfur Cube that can swallow this item
+            let front = Self::target_position(ctx);
+            let front_box = BoundingBox::from_block(&front);
+            let entities = ctx.world.get_entities_at_box(&front_box);
+            let mut swallowed = false;
+            for entity in entities {
+                if let Some(sulfur_cube) = entity.cast_any().downcast_ref::<SulfurCubeEntity>() {
+                    let to_absorb = item.clone();
+                    if sulfur_cube.absorb_block(&to_absorb) {
+                        item.decrement(1);
+                        Self::play_dispense_effects(ctx, WorldEvent::SoundDispenserDispense);
+                        swallowed = true;
+                        break;
+                    }
+                }
+            }
+            if !swallowed {
+                // Default / Drop
+                Self::drop_item(ctx, item);
+            }
         }
     }
 
@@ -769,6 +791,44 @@ impl DispenserBlock {
 
         if try_wax_block(ctx.world, front, front_block) {
             item.decrement(1);
+            Self::play_dispense_effects(ctx, WorldEvent::SoundDispenserDispense);
+        } else {
+            Self::play_dispense_effects(ctx, WorldEvent::SoundDispenserFail);
+        }
+    }
+
+    fn dispense_shears(ctx: &DispenseContext<'_>, item: &mut ItemStack) {
+        let front = Self::target_position(ctx);
+        let front_box = BoundingBox::from_block(&front);
+
+        let entities = ctx.world.get_entities_at_box(&front_box);
+        let mut sheared = false;
+        for entity in entities {
+            if let Some(sulfur_cube) = entity.cast_any().downcast_ref::<SulfurCubeEntity>() {
+                if sulfur_cube.ready_for_shearing() && sulfur_cube.shear_block() {
+                    sheared = true;
+                    break;
+                }
+            } else if let Some(sheep) = entity
+                .cast_any()
+                .downcast_ref::<crate::entity::passive::sheep::SheepEntity>()
+            {
+                if !sheep.is_sheared() {
+                    sheep.set_sheared(true);
+                    let pos = sheep.mob_entity.living_entity.entity.pos.load();
+                    ctx.world.play_sound(
+                        Sound::EntitySheepShear,
+                        SoundCategory::Blocks,
+                        &pos,
+                    );
+                    sheared = true;
+                    break;
+                }
+            }
+        }
+
+        if sheared {
+            let _ = item.damage_item(1);
             Self::play_dispense_effects(ctx, WorldEvent::SoundDispenserDispense);
         } else {
             Self::play_dispense_effects(ctx, WorldEvent::SoundDispenserFail);

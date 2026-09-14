@@ -50,6 +50,10 @@ pub trait StructurePieceBase: Send + Sync {
 
     fn as_any(&self) -> &dyn std::any::Any;
 
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        panic!("as_any_mut not implemented");
+    }
+
     fn bounding_box(&self) -> BlockBox {
         self.get_structure_piece().bounding_box
     }
@@ -648,6 +652,10 @@ impl StructurePiece {
 
 impl StructurePieceBase for StructurePiece {
     fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
         self
     }
 

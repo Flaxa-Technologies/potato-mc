@@ -54,7 +54,8 @@ impl Xoroshiro {
     ///
     /// # Returns
     /// A new `Xoroshiro` instance.
-    const fn new(lo: u64, hi: u64) -> Self {
+    #[must_use]
+    pub const fn new(lo: u64, hi: u64) -> Self {
         let (lo, hi) = if (lo | hi) == 0 {
             (0x9E3779B97F4A7C15, 0x6A09E667F3BCC909)
         } else {
@@ -155,7 +156,8 @@ impl GaussianGenerator for Xoroshiro {
 ///
 /// # Returns
 /// The mixed value.
-const fn mix_stafford_13(z: u64) -> u64 {
+#[must_use]
+pub const fn mix_stafford_13(z: u64) -> u64 {
     let z = (z ^ (z >> 30)).wrapping_mul(0xBF58476D1CE4E5B9);
     let z = (z ^ (z >> 27)).wrapping_mul(0x94D049BB133111EB);
     z ^ (z >> 31)

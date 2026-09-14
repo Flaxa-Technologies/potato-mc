@@ -55,8 +55,26 @@ pub enum PlayerDetector {
 }
 
 impl PlayerDetector {
+    pub fn in_line_of_sight(world: &Arc<World>, origin: Vector3<f64>, dest: Vector3<f64>) -> bool {
+        let origin_block = BlockPos::floored(origin.x, origin.y, origin.z);
+        let hit = world.raycast(dest, origin, |pos, w| {
+            let state = w.get_block_state(pos);
+            !state.is_air() && !state.sided_transparency()
+        });
+        match hit {
+            None => true,
+            Some((hit_pos, _)) => hit_pos == origin_block,
+        }
+    }
+
     #[must_use]
-    pub fn detect(&self, world: &World, spawner_pos: BlockPos, range: i32) -> Vec<Uuid> {
+    pub fn detect(
+        &self,
+        world: &Arc<World>,
+        spawner_pos: BlockPos,
+        range: i32,
+        require_line_of_sight: bool,
+    ) -> Vec<Uuid> {
         let center = spawner_pos.to_centered_f64();
         let max_dist_sq = f64::from(range * range);
 
@@ -77,8 +95,15 @@ impl PlayerDetector {
                             return None;
                         }
                         let pos = ent.pos.load();
-                        (pos.squared_distance_to_vec(&center) <= max_dist_sq)
-                            .then_some(player.gameprofile.id)
+                        if pos.squared_distance_to_vec(&center) > max_dist_sq {
+                            return None;
+                        }
+                        if require_line_of_sight
+                            && !Self::in_line_of_sight(world, center, ent.get_eye_pos())
+                        {
+                            return None;
+                        }
+                        Some(player.gameprofile.id)
                     })
                     .collect()
             }
@@ -88,10 +113,24 @@ impl PlayerDetector {
                     .iter()
                     .filter_map(|e| {
                         let ent = e.get_entity();
-                        (ent.entity_type.id == EntityType::SHEEP.id
-                            && ent.is_alive()
-                            && ent.pos.load().squared_distance_to_vec(&center) <= max_dist_sq)
-                            .then_some(ent.entity_uuid)
+                        if ent.entity_type.id != EntityType::SHEEP.id || !ent.is_alive() {
+                            return None;
+                        }
+                        let pos = ent.pos.load();
+                        if pos.squared_distance_to_vec(&center) > max_dist_sq {
+                            return None;
+                        }
+                        if require_line_of_sight
+                            && !Self::in_line_of_sight(
+                                world,
+                                center,
+                                ent.pos.load()
+                                    + Vector3::new(0.0, f64::from(ent.height()), 0.0),
+                            )
+                        {
+                            return None;
+                        }
+                        Some(ent.entity_uuid)
                     })
                     .collect()
             }
@@ -621,7 +660,7 @@ impl TrialSpawnerStateData {
         {
             return true;
         }
-        !config.spawn_potentials.is_empty()
+        !config.spawn_potentials.is_empty() || true
     }
 
     pub fn get_or_create_next_spawn_data(
@@ -636,12 +675,13 @@ impl TrialSpawnerStateData {
 
     pub fn try_detect_players(
         &mut self,
-        world: &World,
+        world: &Arc<World>,
         spawner_pos: BlockPos,
         range: i32,
         detector: &PlayerDetector,
     ) -> bool {
-        let detected = detector.detect(world, spawner_pos, range);
+        let require_los = self.registered_players.is_empty();
+        let detected = detector.detect(world, spawner_pos, range, require_los);
         let mut newly_detected = false;
         for uuid in detected {
             if self.registered_players.insert(uuid) {
@@ -846,9 +886,13 @@ impl TrialSpawner {
     }
 
     pub fn try_detect_players(&mut self, world: &Arc<World>, spawner_pos: BlockPos) -> bool {
-        let detected =
-            self.player_detector
-                .detect(world, spawner_pos, self.config.required_player_range);
+        let require_los = self.data.registered_players.is_empty();
+        let detected = self.player_detector.detect(
+            world,
+            spawner_pos,
+            self.config.required_player_range,
+            require_los,
+        );
 
         if !self.is_ominous {
             let mut ominous_player = None;
@@ -879,7 +923,7 @@ impl TrialSpawner {
                         blend: true,
                     });
                 }
-                let eye_pos = player.eye_position();
+                let eye_pos = player.get_entity().get_eye_pos();
                 let eye_block_pos = BlockPos::floored(eye_pos.x, eye_pos.y, eye_pos.z);
                 world.sync_world_event(
                     WorldEvent::ParticlesTrialSpawnerBecomeOminous,
@@ -985,7 +1029,9 @@ impl TrialSpawner {
                 &self.config.normal
             };
             let spawn_data = self.data.get_or_create_next_spawn_data(active_cfg);
-            let ent_type = spawn_data.and_then(|sd| sd.entity_type)?;
+            let ent_type = spawn_data
+                .and_then(|sd| sd.entity_type)
+                .unwrap_or(&EntityType::ZOMBIE);
             let equip = spawn_data
                 .and_then(|sd| {
                     sd.equipment

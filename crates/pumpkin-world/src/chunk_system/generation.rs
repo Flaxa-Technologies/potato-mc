@@ -12,13 +12,23 @@ pub fn generate_single_chunk(
     chunk_z: i32,
     target_stage: StagedChunkEnum,
 ) -> Chunk {
+    // Surface stage's prepare_surface_biomes() requires cache.size >= 3 (radius >= 1).
+    // If target_stage.get_direct_radius() is 0 (e.g. Carvers) but target_stage >= Surface,
+    // the cache would be 1x1 and prepare_surface_biomes would early-return, leaving
+    // surface_biomes as None and panicking. Ensure the radius covers Surface's needs.
+    let min_radius = if target_stage as u8 >= StagedChunkEnum::Surface as u8 {
+        StagedChunkEnum::Surface.get_direct_radius()
+    } else {
+        0
+    };
+    let radius = target_stage.get_direct_radius().max(min_radius);
     generate_single_chunk_with_radius(
         generator,
         block_registry,
         chunk_x,
         chunk_z,
         target_stage,
-        target_stage.get_direct_radius(),
+        radius,
     )
 }
 
@@ -65,7 +75,6 @@ pub fn generate_single_chunk_with_radius(
             stage,
             StagedChunkEnum::Biomes
                 | StagedChunkEnum::StructureStart
-                | StagedChunkEnum::StructureReferences
         ) {
             cache.advance_all(
                 stage,
@@ -318,6 +327,134 @@ mod tests {
     }
 
     #[test]
+    fn seed_zero_generates_swamp_hut_chunk() {
+        let dimension = Dimension::OVERWORLD;
+        let seed = Seed(0);
+        let block_registry = Arc::new(BlockRegistry);
+        let world_gen = get_world_gen(seed, dimension, false, Vec::new(), String::new());
+
+        let chunk = generate_single_chunk_with_radius(
+            &world_gen,
+            block_registry.as_ref(),
+            -361,
+            -443,
+            StagedChunkEnum::Features,
+            8,
+        );
+        let super::Chunk::Proto(mut chunk) = chunk else {
+            panic!("spawn stage should return a proto chunk");
+        };
+        let mut hut_blocks = 0;
+        let start_x = -361 * 16;
+        let start_z = -443 * 16;
+        for x in start_x..start_x + 16 {
+            for z in start_z..start_z + 16 {
+                for y in -64..320 {
+                    let block = chunk
+                        .get_block_state(&pumpkin_util::math::vector3::Vector3::new(x, y, z))
+                        .to_block_id();
+                    if [
+                        pumpkin_data::Block::SPRUCE_PLANKS.id,
+                        pumpkin_data::Block::CAULDRON.id,
+                        pumpkin_data::Block::CRAFTING_TABLE.id,
+                    ]
+                    .contains(&block)
+                    {
+                        hut_blocks += 1;
+                    }
+                }
+            }
+        }
+        println!("[DEBUG] Swamp hut blocks found: {}", hut_blocks);
+        let entities = chunk.take_pending_structure_entities();
+        println!("[DEBUG] Pending structure entities: {}", entities.len());
+        for e in &entities {
+            println!("[DEBUG]   entity id: {:?}", e.get_string("id"));
+        }
+        assert!(hut_blocks > 0, "Swamp hut blocks must generate in chunk (-361, -443)");
+    }
+
+    #[test]
+    fn test_locate_outpost_and_swamp_hut() {
+        let dimension = Dimension::OVERWORLD;
+        let seed = Seed(0);
+        let world_gen = get_world_gen(seed, dimension, false, Vec::new(), String::new());
+        let origin = pumpkin_util::math::position::BlockPos::new(0, 70, 0);
+
+        let outpost_res = crate::generation::generator::structure_finder::find_nearest_structure_start(
+            origin,
+            &pumpkin_data::structures::StructureSet::PILLAGER_OUTPOSTS,
+            &[pumpkin_data::structures::StructureKeys::PillagerOutpost],
+            50,
+            &world_gen,
+        );
+        println!("[DEBUG] Nearest outpost: {:?}", outpost_res);
+
+        if let Some((pos, _)) = outpost_res {
+            let cx = pos.0.x >> 4;
+            let cz = pos.0.z >> 4;
+            println!("[DEBUG] Generating outpost chunk ({}, {})...", cx, cz);
+            let block_registry = Arc::new(BlockRegistry);
+            let chunk = generate_single_chunk_with_radius(
+                &world_gen,
+                block_registry.as_ref(),
+                cx,
+                cz,
+                StagedChunkEnum::Features,
+                16,
+            );
+            let super::Chunk::Proto(chunk) = chunk else { panic!() };
+            let mut outpost_blocks = 0;
+            let start_x = cx * 16;
+            let start_z = cz * 16;
+            for x in start_x..start_x + 16 {
+                for z in start_z..start_z + 16 {
+                    for y in -64..320 {
+                        let block = chunk
+                            .get_block_state(&pumpkin_util::math::vector3::Vector3::new(x, y, z))
+                            .to_block_id();
+                        if [
+                            pumpkin_data::Block::DARK_OAK_PLANKS.id,
+                            pumpkin_data::Block::COBBLESTONE.id,
+                        ]
+                        .contains(&block)
+                        {
+                            outpost_blocks += 1;
+                        }
+                    }
+                }
+            }
+            println!("[DEBUG] Outpost chunk ({}, {}) outpost blocks found: {}", cx, cz, outpost_blocks);
+            assert!(outpost_blocks > 0, "Outpost blocks must generate in located chunk!");
+        }
+
+        let swamp_res = crate::generation::generator::structure_finder::find_nearest_structure_start(
+            origin,
+            &pumpkin_data::structures::StructureSet::SWAMP_HUTS,
+            &[pumpkin_data::structures::StructureKeys::SwampHut],
+            50,
+            &world_gen,
+        );
+        println!("[DEBUG] Nearest swamp hut: {:?}", swamp_res);
+
+        assert!(outpost_res.is_some(), "Pillager outpost must be discoverable");
+        assert!(swamp_res.is_some(), "Swamp hut must be discoverable");
+
+        if let Some((pos, _)) = outpost_res {
+            assert!(
+                world_gen.is_in_structure_bounds(pumpkin_data::structures::StructureKeys::PillagerOutpost, &pos),
+                "Outpost position must be in structure bounds"
+            );
+        }
+        if let Some((pos, _)) = swamp_res {
+            assert!(
+                world_gen.is_in_structure_bounds(pumpkin_data::structures::StructureKeys::SwampHut, &pos),
+                "Swamp hut position must be in structure bounds"
+            );
+        }
+    }
+
+    #[test]
     fn fixed_seed_generates_vanilla_end_ship_chunk() {
         // Vanilla 26.2 places this seed's ship in chunk (-306, -275).
         let dimension = Dimension::THE_END;
@@ -385,6 +522,7 @@ mod tests {
         let super::Chunk::Proto(chunk) = chunk else {
             panic!("features stage should return a proto chunk");
         };
+
 
         for (x, y, z) in [(1173, 70, -1311), (1173, 70, -1305)] {
             let state = chunk.get_block_state(&pumpkin_util::math::vector3::Vector3::new(x, y, z));

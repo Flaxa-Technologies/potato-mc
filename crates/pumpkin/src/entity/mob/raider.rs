@@ -154,13 +154,33 @@ impl Goal for HoldGroundAttackGoal {
         if raider.has_active_raid() || !raider.is_patrolling() {
             return false;
         }
-        let target = mob.get_mob_entity().get_target().clone();
-        target.is_some()
+        let Some(target) = mob.get_mob_entity().get_target().clone() else {
+            return false;
+        };
+        if !target.get_entity().is_alive() {
+            return false;
+        }
+        let mob_pos = mob.get_entity().pos.load();
+        let target_pos = target.get_entity().pos.load();
+        mob_pos.squared_distance_to_vec(&target_pos) <= self.hostile_radius_sqr
     }
 
     fn should_continue(&self, mob: &dyn Mob) -> bool {
-        let target = mob.get_mob_entity().get_target().clone();
-        target.is_some()
+        let Some(raider) = mob.as_raider() else {
+            return false;
+        };
+        if raider.has_active_raid() || !raider.is_patrolling() {
+            return false;
+        }
+        let Some(target) = mob.get_mob_entity().get_target().clone() else {
+            return false;
+        };
+        if !target.get_entity().is_alive() {
+            return false;
+        }
+        let mob_pos = mob.get_entity().pos.load();
+        let target_pos = target.get_entity().pos.load();
+        mob_pos.squared_distance_to_vec(&target_pos) <= self.hostile_radius_sqr
     }
 
     fn start(&mut self, mob: &dyn Mob) {
@@ -188,6 +208,12 @@ impl Goal for HoldGroundAttackGoal {
         }
     }
 
+    fn stop(&mut self, mob: &dyn Mob) {
+        if let Some(raider) = mob.as_raider() {
+            raider.set_patrolling(false);
+        }
+    }
+
     fn controls(&self) -> Controls {
         Controls::MOVE | Controls::LOOK
     }
@@ -199,7 +225,7 @@ impl Goal for HoldGroundAttackGoal {
             let target_pos = target.get_entity().pos.load();
             let dist_sq = mob_pos.squared_distance_to_vec(&target_pos);
 
-            if dist_sq > self.hostile_radius_sqr {
+            if dist_sq <= self.hostile_radius_sqr {
                 mob.get_mob_entity()
                     .look_control
                     .lock()

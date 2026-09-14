@@ -12,9 +12,6 @@ impl JavaClient {
         let world = player_entity.world.load_full();
 
         let config = &server.advanced_config.pvp;
-        if !config.enabled {
-            return;
-        }
 
         if entity_id.0 == player.entity_id() {
             self.try_kick(&TextComponent::translate_cross(
@@ -31,14 +28,12 @@ impl JavaClient {
             .map(|p| Arc::clone(p) as Arc<dyn EntityBase>)
             .or_else(|| world.get_entity_by_id(entity_id.0));
         let Some(target) = target else {
-            self.try_kick(&TextComponent::translate_cross(
-                translation::java::MULTIPLAYER_DISCONNECT_INVALID_ENTITY_ATTACKED,
-                translation::java::MULTIPLAYER_DISCONNECT_INVALID_ENTITY_ATTACKED,
-                [],
-            ));
             return;
         };
         if let Some(player_victim) = &player_target {
+            if !config.enabled {
+                return;
+            }
             if player_victim.living_entity.health.load() <= 0.0 {
                 return;
             }
@@ -48,6 +43,11 @@ impl JavaClient {
                     SoundCategory::Players,
                     &player_victim.position(),
                 );
+                return;
+            }
+        }
+        if let Some(living) = target.get_living_entity() {
+            if living.health.load() <= 0.0 || living.dead.load(std::sync::atomic::Ordering::Relaxed) {
                 return;
             }
         }

@@ -88,6 +88,10 @@ impl DolphinEntity {
 }
 
 impl Mob for DolphinEntity {
+    /// Vanilla Animal.java:128 / AbstractGolem.java:36 -- passive mobs never despawn naturally.
+    fn remove_when_far_away(&self, _distance_sq: f64) -> bool { false }
+
+
     fn mob_write_nbt(&self, nbt: &mut NbtCompound) {
         nbt.put_bool("GotFish", self.got_fish());
         nbt.put_int("Moistness", self.moistness_level.load(Ordering::Relaxed));

@@ -295,7 +295,7 @@ impl BiasedToBottomIntProvider {
     /// # Returns
     /// A random integer in the range [`min_inclusive`, `max_inclusive`], with lower values more likely.
     pub fn get(&self, random: &mut impl RandomImpl) -> i32 {
-        if self.min_inclusive >= self.max_inclusive {
+        if self.min_inclusive > self.max_inclusive {
             return self.min_inclusive;
         }
         let range = self.max_inclusive - self.min_inclusive + 1;
@@ -361,7 +361,7 @@ impl VeryBiasedToBottomIntProvider {
     }
 
     pub fn get(&self, random: &mut impl RandomImpl) -> i32 {
-        if self.min_inclusive >= self.max_inclusive {
+        if self.min_inclusive > self.max_inclusive {
             return self.min_inclusive;
         }
         let range = self.max_inclusive - self.min_inclusive + 1;
@@ -516,18 +516,22 @@ impl TrapezoidIntProvider {
     /// # Returns
     /// A random integer from the source provider, clamped to [`min_inclusive`, `max_inclusive`].
     pub fn get(&self, random: &mut impl RandomImpl) -> i32 {
-        if self.min_inclusive >= self.max_inclusive {
+        if self.min_inclusive > self.max_inclusive {
             return self.min_inclusive;
         }
+        if self.plateau == 0 && self.max_inclusive == -self.min_inclusive {
+            return random.next_bounded_i32(self.max_inclusive + 1)
+                - random.next_bounded_i32(self.max_inclusive + 1);
+        }
         let range = self.max_inclusive - self.min_inclusive;
-        if self.plateau >= range {
-            return self.min_inclusive + random.next_bounded_i32(range + 1);
+        if self.plateau == range {
+            return random.next_inbetween_i32(self.min_inclusive, self.max_inclusive);
         }
         let plateau_start = (range - self.plateau) / 2;
         let plateau_end = range - plateau_start;
         self.min_inclusive
-            + random.next_bounded_i32(plateau_end + 1)
-            + random.next_bounded_i32(plateau_start + 1)
+            + random.next_inbetween_i32(0, plateau_end)
+            + random.next_inbetween_i32(0, plateau_start)
     }
 
     /// Returns the maximum value after clamping.

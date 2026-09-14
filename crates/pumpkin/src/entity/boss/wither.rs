@@ -27,8 +27,8 @@ use crate::{
     entity::{
         Entity, EntityBase,
         ai::goal::{
-            look_around::RandomLookAroundGoal, look_at_entity::LookAtEntityGoal,
-            revenge::RevengeGoal,
+            active_target::ActiveTargetGoal, look_around::RandomLookAroundGoal,
+            look_at_entity::LookAtEntityGoal, revenge::RevengeGoal,
         },
         mob::{Mob, MobEntity},
         projectile::wither_skull::WitherSkullEntity,
@@ -94,6 +94,14 @@ impl WitherEntity {
             goal_selector.add_goal(7, Box::new(RandomLookAroundGoal::default()));
 
             target_selector.add_goal(1, Box::new(RevengeGoal::new(true)));
+            target_selector.add_goal(
+                2,
+                ActiveTargetGoal::with_default(&mob_arc.mob_entity, &EntityType::PLAYER, true),
+            );
+            target_selector.add_goal(
+                3,
+                ActiveTargetGoal::with_default(&mob_arc.mob_entity, &EntityType::IRON_GOLEM, true),
+            );
         };
 
         mob_arc
@@ -384,9 +392,51 @@ impl WitherEntity {
                 living.heal(1.0);
             }
 
+            // Main head attack cooldown countdown every tick
+            let attack_timer = self.main_attack_timer.load(Ordering::Relaxed);
+            if attack_timer > 0 {
+                self.main_attack_timer
+                    .store(attack_timer - 1, Ordering::Relaxed);
+            }
+
             // AI step - movement towards main target
             let mut delta_movement = entity.velocity.load().multiply(1.0, 0.6, 1.0);
-            let target_opt = self.mob_entity.get_target();
+            let mut target_opt = self.mob_entity.get_target();
+
+            // If no target from AI goal selector yet, actively acquire the closest attackable living entity
+            if target_opt.is_none() {
+                let wither_pos = entity.pos.load();
+                let search_box = entity.bounding_box.load().expand(20.0, 8.0, 20.0);
+                let entities = world.get_entities_at_box(&search_box);
+                let mut best_target: Option<Arc<dyn EntityBase>> = None;
+                let mut best_dist_sq = 400.0f64;
+
+                for e in entities {
+                    let ent = e.get_entity();
+                    if ent.entity_id == entity.entity_id || !ent.is_alive() {
+                        continue;
+                    }
+                    if ent
+                        .entity_type
+                        .has_tag(&tag::EntityType::MINECRAFT_WITHER_FRIENDS)
+                    {
+                        continue;
+                    }
+                    if e.get_living_entity().is_none() {
+                        continue;
+                    }
+                    let dist_sq = (wither_pos - ent.pos.load()).length_squared();
+                    if dist_sq < best_dist_sq {
+                        best_dist_sq = dist_sq;
+                        best_target = Some(e.clone());
+                    }
+                }
+
+                if let Some(ref target) = best_target {
+                    self.mob_entity.set_target(Some(target.clone()));
+                    target_opt = Some(target.clone());
+                }
+            }
 
             if let Some(ref target) = target_opt {
                 if target.get_entity().is_alive() {
@@ -399,6 +449,9 @@ impl WitherEntity {
                     {
                         yd = yd.max(0.0);
                         yd += 0.3 - yd * 0.6;
+                    } else if self.is_powered() && wither_pos.y > target_pos.y + 0.5 {
+                        // In phase 2 (half health), actively descend towards the target so players can hit with melee!
+                        yd = (yd - 0.05).max(-0.3);
                     }
 
                     delta_movement.y = yd;
@@ -418,23 +471,17 @@ impl WitherEntity {
 
                     // Main head attack
                     let dist_sq = (wither_pos - target_pos).length_squared();
-                    if dist_sq <= 400.0 {
-                        let attack_timer = self.main_attack_timer.load(Ordering::Relaxed);
-                        if attack_timer <= 0 {
-                            self.main_attack_timer.store(40, Ordering::Relaxed);
-                            let dangerous = rand::random_range(0.0..1.0) < 0.001;
-                            let eye_h = target.get_entity().get_eye_height();
-                            self.perform_ranged_attack(
-                                0,
-                                target_pos.x,
-                                target_pos.y + eye_h * 0.5,
-                                target_pos.z,
-                                dangerous,
-                            );
-                        } else {
-                            self.main_attack_timer
-                                .store(attack_timer - 1, Ordering::Relaxed);
-                        }
+                    if dist_sq <= 400.0 && self.main_attack_timer.load(Ordering::Relaxed) <= 0 {
+                        self.main_attack_timer.store(40, Ordering::Relaxed);
+                        let dangerous = rand::random_range(0.0..1.0) < 0.001;
+                        let eye_h = target.get_entity().get_eye_height();
+                        self.perform_ranged_attack(
+                            0,
+                            target_pos.x,
+                            target_pos.y + eye_h * 0.5,
+                            target_pos.z,
+                            dangerous,
+                        );
                     }
                 } else {
                     self.set_alternative_target(0, 0);
@@ -618,6 +665,7 @@ impl Mob for WitherEntity {
             if self.is_powered()
                 && (src_type == &EntityType::ARROW
                     || src_type == &EntityType::SPECTRAL_ARROW
+                    || src_type == &EntityType::TRIDENT
                     || src_type == &EntityType::WIND_CHARGE
                     || src_type == &EntityType::BREEZE_WIND_CHARGE)
             {
@@ -664,5 +712,31 @@ impl Mob for WitherEntity {
         if let Some(invul) = nbt.get_int("Invul") {
             self.set_invulnerable_ticks(invul);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_wither_skull_angle_calculation() {
+        // South (positive Z)
+        let vel = Vector3::<f64>::new(0.0, 0.0, 1.0);
+        let len = vel.horizontal_length();
+        let yaw = (vel.z.atan2(vel.x).to_degrees() as f32) - 90.0;
+        let pitch = -(vel.y.atan2(len).to_degrees() as f32);
+        assert!((yaw - 0.0).abs() < 1e-4);
+        assert!((pitch - 0.0).abs() < 1e-4);
+
+        // East (positive X)
+        let vel = Vector3::<f64>::new(1.0, 0.0, 0.0);
+        let yaw = (vel.z.atan2(vel.x).to_degrees() as f32) - 90.0;
+        assert!((yaw - (-90.0)).abs() < 1e-4);
+
+        // West (negative X)
+        let vel = Vector3::<f64>::new(-1.0, 0.0, 0.0);
+        let yaw = (vel.z.atan2(vel.x).to_degrees() as f32) - 90.0;
+        assert!((yaw - 90.0).abs() < 1e-4);
     }
 }

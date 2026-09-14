@@ -27,7 +27,30 @@ impl SimpleBlockFeature {
             return false;
         }
 
-        chunk.set_block_state(&pos.0, state);
+        let is_double_plant = matches!(
+            block.name,
+            "tall_grass"
+                | "large_fern"
+                | "sunflower"
+                | "lilac"
+                | "peony"
+                | "rose_bush"
+                | "pitcher_plant"
+        );
+        if is_double_plant {
+            let up_pos = pos.up();
+            let up_block = chunk.get_block(&up_pos);
+            if !up_block.is_air() {
+                return false;
+            }
+            chunk.set_block_state(&pos.0, state);
+            let upper_state =
+                pumpkin_data::BlockStateId::new_or_air(state.id.as_u16().saturating_sub(1))
+                    .to_state();
+            chunk.set_block_state(&up_pos.0, upper_state);
+        } else {
+            chunk.set_block_state(&pos.0, state);
+        }
         true
     }
 }

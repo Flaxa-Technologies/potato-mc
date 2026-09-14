@@ -321,6 +321,11 @@ impl BiomeSupplier for BlenderBiomeSupplier<'_> {
             .blend_biome(x, z, &self.shift_noise)
             .unwrap_or_else(|| self.base.biome(x, y, z, sampler))
     }
+
+    #[inline]
+    fn biome_from_point(&self, point_list: [i64; 7], noise: &mut MultiNoiseSampler<'_>) -> &'static Biome {
+        self.base.biome_from_point(point_list, noise)
+    }
 }
 
 pub trait BlenderImpl {

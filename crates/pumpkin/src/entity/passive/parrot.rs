@@ -287,6 +287,10 @@ impl ParrotEntity {
 }
 
 impl Mob for ParrotEntity {
+    /// Vanilla Animal.java:128 / AbstractGolem.java:36 -- passive mobs never despawn naturally.
+    fn remove_when_far_away(&self, _distance_sq: f64) -> bool { false }
+
+
     fn get_mob_entity(&self) -> &MobEntity {
         &self.mob_entity
     }

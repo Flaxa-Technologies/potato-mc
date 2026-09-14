@@ -1,7 +1,7 @@
-use std::{collections::HashMap, sync::Weak};
+use std::{collections::{HashMap, HashSet}, sync::Weak};
 
-use pumpkin_data::{Block, villager::VillagerProfession};
-use pumpkin_util::math::position::BlockPos;
+use pumpkin_data::{Block, tag::Taggable, villager::VillagerProfession};
+use pumpkin_util::math::{position::BlockPos, vector2::Vector2};
 
 use crate::entity::EntityBase;
 
@@ -10,12 +10,27 @@ struct JobSite {
     owner: Option<Weak<dyn EntityBase>>,
 }
 
+struct BedSite {
+    owner: Option<Weak<dyn EntityBase>>,
+}
+
 #[derive(Default)]
 pub struct VillagerPoiStorage {
     job_sites: HashMap<BlockPos, JobSite>,
+    bed_sites: HashMap<BlockPos, BedSite>,
+    scanned_chunks: HashSet<Vector2<i32>>,
 }
 
 impl VillagerPoiStorage {
+    #[must_use]
+    pub fn is_chunk_scanned(&self, chunk_pos: &Vector2<i32>) -> bool {
+        self.scanned_chunks.contains(chunk_pos)
+    }
+
+    pub fn mark_chunk_scanned(&mut self, chunk_pos: Vector2<i32>) {
+        self.scanned_chunks.insert(chunk_pos);
+    }
+
     fn live_owner(owner: &Weak<dyn EntityBase>) -> Option<std::sync::Arc<dyn EntityBase>> {
         owner.upgrade().filter(|entity| {
             entity
@@ -120,6 +135,64 @@ impl VillagerPoiStorage {
         }
         closest
     }
+
+    pub fn update_bed(&mut self, position: BlockPos, is_bed: bool) {
+        if is_bed {
+            self.bed_sites.entry(position).or_insert(BedSite { owner: None });
+        } else {
+            self.bed_sites.remove(&position);
+        }
+    }
+
+    pub fn claim_bed(
+        &mut self,
+        position: BlockPos,
+        owner: Weak<dyn EntityBase>,
+    ) -> bool {
+        let Some(site) = self.bed_sites.get_mut(&position) else {
+            return false;
+        };
+        let owner_uuid = owner.upgrade().map(|o| o.get_entity().entity_uuid);
+        if let Some(current_owner) = site.owner.as_ref().and_then(Self::live_owner)
+            && Some(current_owner.get_entity().entity_uuid) != owner_uuid
+        {
+            return false;
+        }
+        site.owner = Some(owner);
+        true
+    }
+
+    pub fn release_bed(&mut self, position: BlockPos, owner: uuid::Uuid) {
+        if let Some(site) = self.bed_sites.get_mut(&position) {
+            if site
+                .owner
+                .as_ref()
+                .and_then(Weak::upgrade)
+                .is_none_or(|current| current.get_entity().entity_uuid == owner)
+            {
+                site.owner = None;
+            }
+        }
+    }
+
+    #[must_use]
+    pub fn available_beds(&self, origin: BlockPos, radius: i32) -> Vec<BlockPos> {
+        let radius_squared = i64::from(radius).pow(2);
+        let mut sites = self
+            .bed_sites
+            .iter()
+            .filter(|(_, site)| site.owner.as_ref().and_then(Self::live_owner).is_none())
+            .filter_map(|(position, _)| {
+                let delta = position.0 - origin.0;
+                let distance_squared = i64::from(delta.x).pow(2)
+                    + i64::from(delta.y).pow(2)
+                    + i64::from(delta.z).pow(2);
+                (distance_squared <= radius_squared).then_some((distance_squared, *position))
+            })
+            .collect::<Vec<_>>();
+        sites.sort_unstable_by_key(|(distance, _)| *distance);
+        sites.into_iter().map(|(_, position)| position).collect()
+    }
 }
 
 #[must_use]
@@ -170,6 +243,16 @@ pub fn poi_type_for_block(block: &Block) -> Option<&'static str> {
         VillagerProfession::Weaponsmith => "minecraft:weaponsmith",
         VillagerProfession::None | VillagerProfession::Nitwit => return None,
     })
+}
+
+#[must_use]
+pub fn is_job_site_block(block: &Block) -> bool {
+    profession_for_block(block).is_some()
+}
+
+#[must_use]
+pub fn is_bed_block(block: &Block) -> bool {
+    block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_BEDS)
 }
 
 #[cfg(test)]
@@ -228,5 +311,21 @@ mod tests {
             storage.available_job_sites(origin, 48, Some(VillagerProfession::Farmer)),
             vec![composter]
         );
+    }
+
+    #[test]
+    fn available_beds_respect_search_radius() {
+        let origin = BlockPos::new(0, 64, 0);
+        let bed1 = BlockPos::new(20, 64, 0);
+        let bed_too_far = BlockPos::new(50, 64, 0);
+        let mut storage = VillagerPoiStorage::default();
+
+        storage.update_bed(bed1, true);
+        storage.update_bed(bed_too_far, true);
+
+        assert_eq!(storage.available_beds(origin, 48), vec![bed1]);
+
+        storage.update_bed(bed1, false);
+        assert_eq!(storage.available_beds(origin, 48), Vec::<BlockPos>::new());
     }
 }

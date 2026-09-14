@@ -88,6 +88,7 @@ impl ToFromWasmEvent for ChunkLoad {
                     pending_block_entities: std::sync::Mutex::new(
                         std::collections::HashMap::default(),
                     ),
+                    pending_structure_entities: std::sync::Mutex::new(Vec::new()),
                     light_engine: std::sync::Mutex::new(pumpkin_world::chunk::ChunkLight::default()),
                     light_populated: std::sync::atomic::AtomicBool::new(false),
                     status: pumpkin_data::chunk::ChunkStatus::Empty,
@@ -141,6 +142,7 @@ impl ToFromWasmEvent for ChunkSave {
                     pending_block_entities: std::sync::Mutex::new(
                         std::collections::HashMap::default(),
                     ),
+                    pending_structure_entities: std::sync::Mutex::new(Vec::new()),
                     light_engine: std::sync::Mutex::new(pumpkin_world::chunk::ChunkLight::default()),
                     light_populated: std::sync::atomic::AtomicBool::new(false),
                     status: pumpkin_data::chunk::ChunkStatus::Empty,
@@ -190,6 +192,7 @@ impl ToFromWasmEvent for ChunkSend {
                     pending_block_entities: std::sync::Mutex::new(
                         std::collections::HashMap::default(),
                     ),
+                    pending_structure_entities: std::sync::Mutex::new(Vec::new()),
                     light_engine: std::sync::Mutex::new(pumpkin_world::chunk::ChunkLight::default()),
                     light_populated: std::sync::atomic::AtomicBool::new(false),
                     status: pumpkin_data::chunk::ChunkStatus::Empty,

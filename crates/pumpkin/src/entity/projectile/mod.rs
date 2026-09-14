@@ -92,7 +92,8 @@ impl ThrownItemEntity {
     ) -> Self {
         let mut owner_pos = owner.pos.load();
         owner_pos.y += owner.get_eye_height() + eye_offset;
-        entity.pos.store(owner_pos);
+        entity.set_pos(owner_pos);
+        entity.last_pos.store(owner_pos);
         Self {
             entity,
             owner_id: Some(owner.entity_id),
@@ -202,10 +203,8 @@ impl ThrownItemEntity {
             {
                 closest_t = t;
                 // Map back to block pos
-                let mut curr = 0;
-                for (len, pos) in &block_positions {
-                    curr += len;
-                    if idx < curr {
+                for (cum_len, pos) in &block_positions {
+                    if idx < *cum_len {
                         let hit_pos = start_pos.add(&delta.multiply(t, t, t));
                         hit = Some(ProjectileHit::Block {
                             pos: *pos,
@@ -219,8 +218,8 @@ impl ThrownItemEntity {
             }
         }
 
-        // Entity collisions
-        let candidates = world.get_entities_at_box(&search_box);
+        // Entity collisions (includes players via get_all_at_box)
+        let candidates = world.get_all_at_box(&search_box);
         for cand in candidates {
             if self.should_skip_collision(entity, &cand) {
                 continue;
@@ -350,14 +349,14 @@ fn clip_point(
     let s = (point - from_a) / da;
     let pb = from_b + s * db;
     let pc = from_c + s * dc;
-    if 0.0 < s
+    if s >= -1.0e-5
         && s < *scale_reference
-        && min_b - 1.0e-7 < pb
-        && pb < max_b + 1.0e-7
-        && min_c - 1.0e-7 < pc
-        && pc < max_c + 1.0e-7
+        && min_b - 1.0e-5 <= pb
+        && pb <= max_b + 1.0e-5
+        && min_c - 1.0e-5 <= pc
+        && pc <= max_c + 1.0e-5
     {
-        *scale_reference = s;
+        *scale_reference = s.max(0.0);
         *direction = Some(new_direction);
     }
 }
@@ -368,12 +367,44 @@ pub fn clip_aabb(
     delta: &Vector3<f64>,
     bb: &BoundingBox,
 ) -> Option<(f64, BlockDirection)> {
-    let mut scale = 1.0f64;
-    let mut direction = None;
-
     let dx = delta.x;
     let dy = delta.y;
     let dz = delta.z;
+
+    // If ray start is already inside or right on the boundary of the bounding box,
+    // immediately hit at t = 0.0 on the entry face matching the movement vector.
+    if bb.min.x - 1.0e-5 <= start.x
+        && start.x <= bb.max.x + 1.0e-5
+        && bb.min.y - 1.0e-5 <= start.y
+        && start.y <= bb.max.y + 1.0e-5
+        && bb.min.z - 1.0e-5 <= start.z
+        && start.z <= bb.max.z + 1.0e-5
+    {
+        let abs_dx = dx.abs();
+        let abs_dy = dy.abs();
+        let abs_dz = dz.abs();
+        let face = if abs_dy >= abs_dx && abs_dy >= abs_dz {
+            if dy < 0.0 {
+                BlockDirection::Up
+            } else {
+                BlockDirection::Down
+            }
+        } else if abs_dx >= abs_dz {
+            if dx < 0.0 {
+                BlockDirection::East
+            } else {
+                BlockDirection::West
+            }
+        } else if dz < 0.0 {
+            BlockDirection::South
+        } else {
+            BlockDirection::North
+        };
+        return Some((0.0, face));
+    }
+
+    let mut scale = 1.0f64;
+    let mut direction = None;
 
     if dx > 1.0e-7 {
         clip_point(
@@ -526,3 +557,56 @@ impl ProjectileHit {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pumpkin_util::math::boundingbox::BoundingBox;
+
+    #[test]
+    fn point_blank_shooting_down_hits_top_face() {
+        // Ground block spanning Y: 63.0 to 64.0
+        let ground_bb = BoundingBox::new(
+            Vector3::new(0.0, 63.0, 0.0),
+            Vector3::new(1.0, 64.0, 1.0),
+        );
+
+        // Projectile ray starting at top surface Y=64.0 shooting downward towards Y=62.5
+        let start = Vector3::new(0.5, 64.0, 0.5);
+        let end = Vector3::new(0.5, 62.5, 0.5);
+
+        let delta = end - start;
+        let hit = clip_aabb(&start, &delta, &ground_bb);
+        assert!(hit.is_some(), "Point-blank ray at surface must hit the ground block");
+
+        let (scale, face) = hit.unwrap();
+        assert_eq!(face, BlockDirection::Up, "Must hit the top face (Up), not punch through to Down");
+        assert!(scale <= 1e-4, "Scale must be ~0.0 at the point-blank surface");
+
+        let hit_pos = start + (end - start) * scale;
+        assert!((hit_pos.y - 64.0).abs() < 1e-4, "Impact point Y must be on ground surface (64.0)");
+    }
+
+    #[test]
+    fn point_blank_just_above_surface_hits_top_face() {
+        let ground_bb = BoundingBox::new(
+            Vector3::new(0.0, 63.0, 0.0),
+            Vector3::new(1.0, 64.0, 1.0),
+        );
+
+        // Ray starting just above surface Y=64.02 shooting downward towards Y=62.0
+        let start = Vector3::new(0.5, 64.02, 0.5);
+        let end = Vector3::new(0.5, 62.0, 0.5);
+
+        let delta = end - start;
+        let hit = clip_aabb(&start, &delta, &ground_bb);
+        assert!(hit.is_some());
+
+        let (scale, face) = hit.unwrap();
+        assert_eq!(face, BlockDirection::Up);
+
+        let hit_pos = start + (end - start) * scale;
+        assert!((hit_pos.y - 64.0).abs() < 1e-4);
+    }
+}
+

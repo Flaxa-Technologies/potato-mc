@@ -3,7 +3,6 @@ use std::sync::{Arc, Weak};
 
 use pumpkin_data::damage::DamageType;
 use pumpkin_data::entity::EntityType;
-use pumpkin_util::math::vector3::Vector3;
 
 use crate::entity::{
     Entity, EntityBase,
@@ -68,6 +67,19 @@ impl BlazeEntity {
         };
 
         mob_arc
+            .entity
+            .living_entity
+            .set_attribute_base(&pumpkin_data::attributes::Attributes::ATTACK_DAMAGE, 6.0);
+        mob_arc
+            .entity
+            .living_entity
+            .set_attribute_base(&pumpkin_data::attributes::Attributes::MOVEMENT_SPEED, 0.23);
+        mob_arc
+            .entity
+            .living_entity
+            .set_attribute_base(&pumpkin_data::attributes::Attributes::FOLLOW_RANGE, 48.0);
+
+        mob_arc
     }
 
     pub fn is_charged(&self) -> bool {
@@ -95,6 +107,10 @@ impl Mob for BlazeEntity {
         entity.set_synced_data(pumpkin_data::tracked_data::blaze::DATA_FLAGS_ID, flags);
     }
 
+    fn on_attack(&self, target: &dyn EntityBase) {
+        target.get_entity().set_on_fire_for(5.0);
+    }
+
     fn mob_tick(&self, caller: &dyn EntityBase) {
         let base_entity = &self.entity.living_entity.entity;
         if !base_entity.is_alive() {
@@ -102,11 +118,19 @@ impl Mob for BlazeEntity {
         }
 
         let on_ground = base_entity.on_ground.load(Ordering::Relaxed);
-        let vel = base_entity.velocity.load();
+        let mut vel = base_entity.velocity.load();
         if !on_ground && vel.y < 0.0 {
-            base_entity
-                .velocity
-                .store(Vector3::new(vel.x, vel.y * 0.6, vel.z));
+            vel.y *= 0.6;
+            base_entity.velocity.store(vel);
+        }
+
+        if let Some(target) = self.entity.get_target() {
+            let target_pos = target.get_entity().pos.load();
+            let blaze_pos = base_entity.pos.load();
+            if target_pos.y > blaze_pos.y + 0.5 {
+                vel.y += (0.3 - vel.y) * 0.3;
+                base_entity.velocity.store(vel);
+            }
         }
 
         if base_entity.touching_water.load(Ordering::Relaxed) {

@@ -304,6 +304,20 @@ impl CanyonCarver {
             *has_grass = true;
         }
 
+        let is_overworld = run.ctx.carver_aquifer.is_some();
+        let replaceable = if is_overworld {
+            block
+                .id
+                .has_tag(pumpkin_data::tag::Block::MINECRAFT_OVERWORLD_CARVER_REPLACEABLES)
+        } else {
+            block
+                .id
+                .has_tag(pumpkin_data::tag::Block::MINECRAFT_NETHER_CARVER_REPLACEABLES)
+        };
+        if !replaceable {
+            return false;
+        }
+
         let Some((state, should_schedule_fluid_update)) = overworld_carve_state(run, x, y, z)
         else {
             return false;
@@ -315,7 +329,7 @@ impl CanyonCarver {
             state,
             should_schedule_fluid_update,
             *has_grass,
-            true,
+            is_overworld,
         );
 
         true

@@ -152,6 +152,7 @@ pub struct Server {
     // world stuff which maybe should be put into a struct
     pub level_info: Arc<ArcSwap<LevelData>>,
     world_info_writer: Arc<dyn WorldInfoWriter>,
+    pub spear_switch_delay: std::sync::atomic::AtomicI64,
 }
 
 impl Server {
@@ -321,6 +322,7 @@ impl Server {
             mojang_public_keys: ArcSwap::from_pointee(Vec::new()),
             world_info_writer: Arc::new(AnvilLevelInfo),
             level_info,
+            spear_switch_delay: std::sync::atomic::AtomicI64::new(0),
         };
         let server = Arc::new(server);
 

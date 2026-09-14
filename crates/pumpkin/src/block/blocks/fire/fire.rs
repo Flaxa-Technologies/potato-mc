@@ -4,7 +4,7 @@ use pumpkin_data::block_properties::HorizontalAxis;
 use pumpkin_data::dimension::Dimension;
 use pumpkin_data::fluid::Fluid;
 use pumpkin_data::tag::{self, Taggable};
-use pumpkin_data::{Block, BlockDirection};
+use pumpkin_data::{Block, BlockDirection, BlockId};
 use pumpkin_macros::pumpkin_block;
 use pumpkin_util::math::position::BlockPos;
 use pumpkin_util::math::vector3::Vector3;
@@ -44,11 +44,29 @@ impl FireBlock {
         block.flammable.as_ref().is_some_and(|f| f.burn_chance > 0)
     }
 
-    fn are_blocks_around_flammable(block_accessor: &dyn BlockAccessor, pos: &BlockPos) -> bool {
-        for direction in BlockDirection::all() {
+    pub fn is_foliage_block(block: &Block) -> bool {
+        block.id == BlockId::SHORT_GRASS
+            || block.id == BlockId::FERN
+            || block.id == BlockId::DEAD_BUSH
+            || block.id == BlockId::SHORT_DRY_GRASS
+            || block.id == BlockId::TALL_DRY_GRASS
+            || block.has_tag(&tag::Block::MINECRAFT_FLOWERS)
+            || block.has_tag(&tag::Block::MINECRAFT_REPLACEABLE)
+    }
+
+    fn has_solid_flammable_neighbor(block_accessor: &dyn BlockAccessor, pos: &BlockPos) -> bool {
+        for direction in [
+            BlockDirection::North,
+            BlockDirection::South,
+            BlockDirection::East,
+            BlockDirection::West,
+            BlockDirection::Up,
+        ] {
             let neighbor_pos = pos.offset(direction.to_offset());
-            let state_id = block_accessor.get_block_state_id(&neighbor_pos);
-            if Self::is_flammable(state_id) {
+            let neighbor_state = block_accessor.get_block_state(&neighbor_pos);
+            if Self::is_flammable(neighbor_state.id)
+                && neighbor_state.is_side_solid(direction.opposite())
+            {
                 return true;
             }
         }
@@ -67,10 +85,20 @@ impl FireBlock {
             return block.default_state.id;
         }
         let mut fire_props = FireProperties::from_state_id(block.default_state.id);
-        for direction in BlockDirection::all() {
+        let mut has_attached_face = false;
+        for direction in [
+            BlockDirection::North,
+            BlockDirection::South,
+            BlockDirection::East,
+            BlockDirection::West,
+            BlockDirection::Up,
+        ] {
             let neighbor_pos = pos.offset(direction.to_offset());
-            let neighbor_state_id = world.get_block_state_id(&neighbor_pos);
-            if Self::is_flammable(neighbor_state_id) {
+            let neighbor_state = world.get_block_state(&neighbor_pos);
+            if Self::is_flammable(neighbor_state.id)
+                && neighbor_state.is_side_solid(direction.opposite())
+            {
+                has_attached_face = true;
                 match direction {
                     BlockDirection::North => fire_props.north = true,
                     BlockDirection::South => fire_props.south = true,
@@ -81,7 +109,11 @@ impl FireBlock {
                 }
             }
         }
-        fire_props.to_state_id(block)
+        if has_attached_face {
+            fire_props.to_state_id(block)
+        } else {
+            Block::AIR.default_state.id
+        }
     }
 
     // Used for spreading fire
@@ -93,9 +125,13 @@ impl FireBlock {
         let mut total_burn_chance = 0;
 
         for dir in BlockDirection::all() {
-            let neighbor_block = world.get_block(&pos.offset(dir.to_offset()));
-            if *world.get_fluid(&pos.offset(dir.to_offset())) != Fluid::EMPTY {
+            let neighbor_pos = pos.offset(dir.to_offset());
+            let neighbor_block = world.get_block(&neighbor_pos);
+            if *world.get_fluid(&neighbor_pos) != Fluid::EMPTY {
                 continue; // Skip if there is a fluid
+            }
+            if Self::is_foliage_block(neighbor_block) {
+                continue;
             }
             if let Some(flammable) = &neighbor_block.flammable {
                 total_burn_chance = total_burn_chance.max(i32::from(flammable.spread_chance));
@@ -159,15 +195,21 @@ impl FireBlock {
                 }
             }
             let old_block = block;
-            if rand::rng().random_range(0..(age + 10) as i32) < 5
+            let is_foliage = Self::is_foliage_block(block);
+            if !is_foliage
+                && rand::rng().random_range(0..(age + 10) as i32) < 5
                 && !Self::is_near_rain(world.as_ref(), pos)
             {
                 let new_age = (age + (rand::rng().random_range(0..5) / 4)).min(15) as u8;
                 let state_id = self.get_state_for_position(world.as_ref(), &Block::FIRE, pos);
-                let mut fire_props = FireProperties::from_state_id(state_id);
-                fire_props.age = new_age;
-                let new_state_id = fire_props.to_state_id(&Block::FIRE);
-                world.set_block_state(pos, new_state_id, BlockFlags::NOTIFY_ALL);
+                if Block::from_state_id(state_id) != &Block::AIR {
+                    let mut fire_props = FireProperties::from_state_id(state_id);
+                    fire_props.age = new_age;
+                    let new_state_id = fire_props.to_state_id(&Block::FIRE);
+                    world.set_block_state(pos, new_state_id, BlockFlags::NOTIFY_ALL);
+                } else {
+                    world.set_block_state(pos, Block::AIR.default_state.id, BlockFlags::NOTIFY_ALL);
+                }
             } else {
                 world.set_block_state(pos, Block::AIR.default_state.id, BlockFlags::NOTIFY_ALL);
             }
@@ -187,8 +229,10 @@ impl BlockBehaviour for FireBlock {
         }
 
         let dimension = &args.world.dimension;
-        // First lets check if we are in OverWorld or Nether, its not possible to place an Nether portal in other dimensions in Vanilla
-        if (dimension == &Dimension::OVERWORLD || dimension == &Dimension::THE_NETHER)
+        // First lets check if we are in OverWorld or Nether, and only scan for portal if obsidian is underneath
+        let is_obsidian_under = args.world.get_block(&args.position.down()) == &Block::OBSIDIAN;
+        if is_obsidian_under
+            && (dimension == &Dimension::OVERWORLD || dimension == &Dimension::THE_NETHER)
             && let Some(portal) =
                 NetherPortal::get_new_portal(args.world, args.position, HorizontalAxis::X)
         {
@@ -235,10 +279,10 @@ impl BlockBehaviour for FireBlock {
             return false;
         }
         let down_state = args.block_accessor.get_block_state(&args.position.down());
-        if down_state.is_side_solid(BlockDirection::Up) {
+        if down_state.is_side_solid(BlockDirection::Up) || Self::is_flammable(down_state.id) {
             return true;
         }
-        Self::are_blocks_around_flammable(args.block_accessor, args.position)
+        Self::has_solid_flammable_neighbor(args.block_accessor, args.position)
     }
 
     #[expect(clippy::too_many_lines)]
@@ -322,10 +366,10 @@ impl BlockBehaviour for FireBlock {
 
         if !infiniburn {
             let is_flammable_below = Self::is_flammable(world.get_block_state_id(&pos.down()));
-            let are_blocks_around_flammable = Self::are_blocks_around_flammable(world.as_ref(), pos);
+            let has_solid_flammable_neighbor = Self::has_solid_flammable_neighbor(world.as_ref(), pos);
 
             // Check if fire should extinguish due to lack of fuel
-            if !are_blocks_around_flammable {
+            if !has_solid_flammable_neighbor {
                 let block_below_state = world.get_block_state(&pos.down());
                 if !block_below_state.is_side_solid(BlockDirection::Up) || new_age > 3 {
                     world.set_block_state(pos, Block::AIR.default_state.id, BlockFlags::NOTIFY_ALL);
@@ -387,104 +431,106 @@ impl BlockBehaviour for FireBlock {
             new_age,
         );
 
-        // Respect the `fire_spread_radius_around_player` gamerule.
-        // -1 = disabled (allow unlimited spread), 0 = disabled (no spread), >0 = radius in blocks
-        let spread_radius = world
-            .level_info
-            .load()
-            .game_rules
-            .fire_spread_radius_around_player;
+        if !infiniburn {
+            // Respect the `fire_spread_radius_around_player` gamerule.
+            // -1 = disabled (allow unlimited spread), 0 = disabled (no spread), >0 = radius in blocks
+            let spread_radius = world
+                .level_info
+                .load()
+                .game_rules
+                .fire_spread_radius_around_player;
+            if spread_radius == 0 {
+                return;
+            }
+            if spread_radius != -1 {
+                let center = pos.to_centered_f64();
+                if world
+                    .get_closest_player(center, spread_radius as f64)
+                    .is_none()
+                {
+                    return;
+                }
+            }
 
-        // Try to spread fire to nearby air blocks
-        let difficulty = world.level_info.load().difficulty as i32;
-        for xx in -1..=1 {
-            for zz in -1..=1 {
-                for yy in -1..=4 {
-                    if xx != 0 || yy != 0 || zz != 0 {
-                        let offset_pos = pos.offset(Vector3::new(xx, yy, zz));
+            // Try to spread fire to nearby air blocks (sample attempts matching vanilla FireBlock)
+            let difficulty = world.level_info.load().difficulty as i32;
+            for _ in 0..4 {
+                let xx = rand::rng().random_range(-1..=1);
+                let zz = rand::rng().random_range(-1..=1);
+                let yy = rand::rng().random_range(-1..=4);
+                if xx == 0 && yy == 0 && zz == 0 {
+                    continue;
+                }
+                let offset_pos = pos.offset(Vector3::new(xx, yy, zz));
 
-                        // Only air blocks can become fire
-                        let offset_state = world.get_block_state(&offset_pos);
-                        if !offset_state.is_air() {
-                            continue;
-                        }
+                // Only air blocks can become fire
+                let offset_state = world.get_block_state(&offset_pos);
+                if !offset_state.is_air() {
+                    continue;
+                }
 
-                        let ignite_odds = self.get_burn_chance(world, &offset_pos);
+                let ignite_odds = self.get_burn_chance(world, &offset_pos);
 
-                        if ignite_odds > 0 {
-                            // Target position must be able to support fire
-                            if !self.can_place_at(CanPlaceAtArgs {
-                                server: None,
-                                world: Some(world),
-                                block_accessor: world.as_ref(),
-                                block,
-                                state: block.default_state,
-                                position: &offset_pos,
-                                direction: None,
-                                player: None,
-                                use_item_on: None,
-                            }) {
-                                continue;
-                            }
+                if ignite_odds > 0 {
+                    // Target position must be able to support fire
+                    if !self.can_place_at(CanPlaceAtArgs {
+                        server: None,
+                        world: Some(world),
+                        block_accessor: world.as_ref(),
+                        block,
+                        state: block.default_state,
+                        position: &offset_pos,
+                        direction: None,
+                        player: None,
+                        use_item_on: None,
+                    }) {
+                        continue;
+                    }
 
-                            // Skip if spreading is disabled or if there are no players nearby
-                            if spread_radius == 0 {
-                                continue;
-                            }
-                            if spread_radius != -1 {
-                                let center = offset_pos.to_centered_f64();
-                                if world
-                                    .get_closest_player(center, spread_radius as f64)
-                                    .is_none()
-                                {
+                    // Calculate spread rate based on height
+                    let rate = if yy > 1 { 100 + (yy - 1) * 100 } else { 100 };
+
+                    // Calculate odds of spreading
+                    let mut odds =
+                        (ignite_odds + 40 + difficulty * 7) / (new_age as i32 + 30);
+
+                    // Reduce spread odds in certain biomes
+                    if Self::is_increased_burnout_biome(world, &offset_pos) {
+                        odds /= 2; // Fire spreads 50% slower
+                    }
+
+                    if odds > 0
+                        && rand::rng().random_range(0..rate) <= odds
+                        && !Self::is_near_rain(world.as_ref(), &offset_pos)
+                    {
+                        let spread_age =
+                            (new_age + rand::rng().random_range(0..5) / 4).min(15) as u8;
+                        let fire_state_id =
+                            self.get_state_for_position(world.as_ref(), block, &offset_pos);
+                        if Block::from_state_id(fire_state_id) != &Block::AIR {
+                            let mut new_fire_props =
+                                FireProperties::from_state_id(fire_state_id);
+                            new_fire_props.age = spread_age;
+                            let new_state_id = new_fire_props.to_state_id(&Block::FIRE);
+
+                            if let Some(server) = world.server.upgrade() {
+                                let mut event = crate::plugin::api::events::block::block_spread::BlockSpreadEvent::new(
+                                    *pos,
+                                    offset_pos,
+                                    world.clone(),
+                                    new_state_id,
+                                );
+                                server.plugin_manager.fire_blocking(&server, &mut event);
+                                if event.cancelled {
                                     continue;
                                 }
                             }
 
-                            // Calculate spread rate based on height
-                            let rate = if yy > 1 { 100 + (yy - 1) * 100 } else { 100 };
-
-                            // Calculate odds of spreading
-                            let mut odds =
-                                (ignite_odds + 40 + difficulty * 7) / (new_age as i32 + 30);
-
-                            // Reduce spread odds in certain biomes
-                            if Self::is_increased_burnout_biome(world, &offset_pos) {
-                                odds /= 2; // Fire spreads 50% slower
-                            }
-
-                            if odds > 0
-                                && rand::rng().random_range(0..rate) <= odds
-                                && !Self::is_near_rain(world.as_ref(), &offset_pos)
-                            {
-                                let spread_age =
-                                    (new_age + rand::rng().random_range(0..5) / 4).min(15) as u8;
-                                let fire_state_id =
-                                    self.get_state_for_position(world.as_ref(), block, &offset_pos);
-                                let mut new_fire_props =
-                                    FireProperties::from_state_id(fire_state_id);
-                                new_fire_props.age = spread_age;
-                                let new_state_id = new_fire_props.to_state_id(&Block::FIRE);
-
-                                if let Some(server) = world.server.upgrade() {
-                                    let mut event = crate::plugin::api::events::block::block_spread::BlockSpreadEvent::new(
-                                        *pos,
-                                        offset_pos,
-                                        world.clone(),
-                                        new_state_id,
-                                    );
-                                    server.plugin_manager.fire_blocking(&server, &mut event);
-                                    if event.cancelled {
-                                        continue;
-                                    }
-                                }
-
-                                world.set_block_state(
-                                    &offset_pos,
-                                    new_state_id,
-                                    BlockFlags::NOTIFY_NEIGHBORS,
-                                );
-                            }
+                            world.set_block_state(
+                                &offset_pos,
+                                new_state_id,
+                                BlockFlags::NOTIFY_NEIGHBORS,
+                            );
                         }
                     }
                 }

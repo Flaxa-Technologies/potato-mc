@@ -108,12 +108,12 @@ fn get_hinge(
     let left_dir = facing.rotate_counter_clockwise();
     let left_pos = pos.offset(left_dir.to_offset());
     let (_left_block, left_state) = world.get_block_and_state(&left_pos);
-    let top_facing = top_pos.offset(facing.to_offset());
-    let top_state = world.get_block_state(&top_facing);
+    let top_left = top_pos.offset(left_dir.to_offset());
+    let top_state = world.get_block_state(&top_left);
     let right_dir = facing.rotate_clockwise();
     let right_pos = pos.offset(right_dir.to_offset());
     let (_right_block, right_state) = world.get_block_and_state(&right_pos);
-    let top_right = top_pos.offset(facing.to_offset());
+    let top_right = top_pos.offset(right_dir.to_offset());
     let top_right_state = world.get_block_state(&top_right);
 
     let has_left_door = world
@@ -217,8 +217,7 @@ impl BlockBehaviour for DoorBlock {
             .player
             .living_entity
             .entity
-            .get_horizontal_facing()
-            .opposite();
+            .get_horizontal_facing();
         door_props.facing = facing;
         door_props.half = DoubleBlockHalf::Lower;
         door_props.hinge = get_hinge(args.world, args.position, args.use_item_on, facing);

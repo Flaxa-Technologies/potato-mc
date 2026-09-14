@@ -27,7 +27,7 @@ const DIR_WEST: u8 = 4;
 const DIR_EAST: u8 = 5;
 const DIR_NONE: u8 = 255;
 
-const SPEED: f64 = 0.15;
+const SPEED: f64 = 0.25;
 
 pub struct ShulkerBulletEntity {
     pub entity: Entity,
@@ -572,6 +572,21 @@ impl EntityBase for ShulkerBulletEntity {
                     // Aligned on this axis -> switch to next best axis
                     self.select_next_dir(axis, Some(tp));
                 }
+            }
+        } else if let Some(tp) = target_pos {
+            // Direct homing: dynamically steer toward moving target
+            let target_x = tp.x;
+            let target_y = tp.y + 0.5;
+            let target_z = tp.z;
+            let pos = entity.pos.load();
+            let xa = target_x - pos.x;
+            let ya = target_y - pos.y;
+            let za = target_z - pos.z;
+            let dist = (xa * xa + ya * ya + za * za).sqrt();
+            if dist > 1e-4 {
+                self.target_delta_x.store(xa / dist * SPEED);
+                self.target_delta_y.store(ya / dist * SPEED);
+                self.target_delta_z.store(za / dist * SPEED);
             }
         }
     }

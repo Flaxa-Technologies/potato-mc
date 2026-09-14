@@ -76,6 +76,8 @@ pub struct GenerationSchedule {
     listener: Arc<ChunkListener>,
     lighting_config: LightingEngineConfig,
     last_unload: std::time::Instant,
+    /// Tracks the last time `garbage_collect_dependencies` ran so we can debounce it.
+    last_gc: std::time::Instant,
     generation_pool: Arc<rayon::ThreadPool>,
 }
 
@@ -132,8 +134,12 @@ impl GenerationSchedule {
             io_lock.clone(),
         ));
 
-        let cpus = thread::available_parallelism().map_or(1, std::num::NonZero::get);
-        let gen_threads = cpus.saturating_sub(1).clamp(4, 32);
+        let cpus = thread::available_parallelism().map_or(2, std::num::NonZero::get);
+        // Use all available cores for generation. The scheduler thread itself is nearly
+        // idle between iterations (channel waits), so it does not meaningfully compete
+        // with generation workers even on a 2-core machine. Cap at 32 to avoid rayon
+        // overhead from excessively large pools.
+        let gen_threads = cpus.max(2).min(32);
         let generation_pool = Arc::new(
             rayon::ThreadPoolBuilder::new()
                 .num_threads(gen_threads)
@@ -141,13 +147,18 @@ impl GenerationSchedule {
                 .build()
                 .expect("Failed to build Chunk Generation ThreadPool"),
         );
-        let max_in_flight = (gen_threads * 4) as u16;
+        // 4x in-flight is enough to saturate the rayon pool across pipeline stages and
+        // hide I/O latency. Using 8x previously caused the scheduler's result-drain loop
+        // to accumulate deep result queues, adding latency per generation cycle especially
+        // on 2-core machines. Minimum 8 so single-core CI still has enough pipelining.
+        let max_in_flight = (gen_threads * 4).max(8) as u16;
 
         let level_sched = level;
         let lighting_config = level_sched.lighting_config;
         let handle = thread::Builder::new()
             .name("Schedule".to_string())
             .spawn(move || {
+                let now = std::time::Instant::now();
                 let scheduler = Self {
                     queue: BinaryHeap::new(),
                     graph: DAG::default(),
@@ -169,7 +180,8 @@ impl GenerationSchedule {
                     listener,
                     chunk_map: HashMap::default(),
                     lighting_config,
-                    last_unload: std::time::Instant::now(),
+                    last_unload: now,
+                    last_gc: now,
                     generation_pool,
                 };
                 scheduler.work(&level_sched);
@@ -238,7 +250,10 @@ impl GenerationSchedule {
     }
 
     fn sort_queue(&mut self) {
-        if self.queue.is_empty() {
+        // Skip the O(n log n) drain-rebuild when the queue is small enough that
+        // order doesn't matter for throughput (≤4 ready tasks means the rayon
+        // pool can absorb them all immediately anyway).
+        if self.queue.len() <= 4 {
             return;
         }
         let mut tasks: Vec<_> = self.queue.drain().collect();
@@ -1284,16 +1299,26 @@ impl GenerationSchedule {
             }
 
             // 1. Get latest world state (player moves, etc)
-            if self.resort_work(self.send_level.get()) {
+            let level_changed = self.resort_work(self.send_level.get());
+
+            // Debounce garbage_collect_dependencies: it walks the entire chunk_map
+            // (O(n)) on every call. Run at most once per second regardless of how
+            // frequently resort_work fires (player movement sends a level-change
+            // every tick on some clients).
+            let gc_elapsed = self.last_gc.elapsed();
+            if level_changed && gc_elapsed >= std::time::Duration::from_secs(1) {
                 self.garbage_collect_dependencies();
+                self.last_gc = std::time::Instant::now();
             }
 
-            // Process unload queue periodically (every 1 second) to batch writes together
-            // and act as a brief memory cache if a player walks back into the chunk.
-            // This must run even when the queue is empty: `garbage_collect_dependencies`
-            // is what puts stale dependency holders into the queue in the first place.
+            // Process unload queue periodically (every 1 second) to batch writes
+            // together and act as a brief memory cache if a player walks back.
             if self.last_unload.elapsed() >= std::time::Duration::from_secs(1) {
-                self.garbage_collect_dependencies();
+                if gc_elapsed < std::time::Duration::from_secs(1) {
+                    // GC wasn't triggered above by level_changed; do it now.
+                    self.garbage_collect_dependencies();
+                    self.last_gc = std::time::Instant::now();
+                }
                 self.process_unload_queue();
                 self.last_unload = std::time::Instant::now();
             }
@@ -1322,18 +1347,6 @@ impl GenerationSchedule {
                 if self.running_task_count >= self.max_in_flight {
                     self.queue.push(task);
                     break 'out2;
-                }
-
-                // Briefly check for high-priority results or world changes to avoid stalling
-                while let Ok((pos, data)) = self.recv_chunk.try_recv() {
-                    self.receive_chunk(pos, data);
-                    if self.resort_work(self.send_level.get()) {
-                        // If world state changed, we MUST re-sort before continuing
-                        self.garbage_collect_dependencies();
-                        self.queue.push(task);
-                        self.queue_dirty = true;
-                        break 'out2;
-                    }
                 }
 
                 if let Some(node) = self.graph.nodes.get_mut(task.1) {
@@ -1404,7 +1417,9 @@ impl GenerationSchedule {
                         holder.occupied = occupy;
 
                         io_batch.push(node.pos);
-                        if io_batch.len() >= 16
+                        // Flush in batches of 32 to halve the number of channel sends
+                        // compared to the old threshold of 16.
+                        if io_batch.len() >= 32
                             && self
                                 .io_read
                                 .blocking_send(std::mem::take(&mut io_batch))
@@ -1559,7 +1574,11 @@ impl GenerationSchedule {
                         let send_chunk = self.send_chunk.clone();
                         let level = level.clone();
 
-                        self.generation_pool.spawn(move || {
+                        // spawn_fifo processes tasks in submission (FIFO) order rather than
+                        // work-stealing order. This keeps later pipeline stages (Noise, Surface,
+                        // Features) from being preempted by earlier stages of newly-queued chunks,
+                        // reducing head-of-line blocking in the DAG dependency chain.
+                        self.generation_pool.spawn_fifo(move || {
                             let result = crate::chunk_system::worker_logic::run_generation(
                                 pos, cache, stage, &level,
                             );
@@ -1583,17 +1602,27 @@ impl GenerationSchedule {
             // 5. Wait for work or results
             if self.queue.is_empty() {
                 if self.running_task_count > 0 {
-                    match self.recv_chunk.recv_timeout(Duration::from_millis(5)) {
+                    // Use 1ms timeout instead of 5ms: on a 2-core machine, generation tasks
+                    // complete in 2–8ms, so a 5ms wait was sleeping through result windows
+                    // and starving the rayon pool. 1ms keeps the scheduler reactive without
+                    // busy-spinning (crossbeam parks the thread between polls).
+                    match self.recv_chunk.recv_timeout(Duration::from_millis(1)) {
                         Ok((pos, data)) => {
                             self.receive_chunk(pos, data);
-                            if self.resort_work(self.send_level.get()) {
+                            if self.resort_work(self.send_level.get())
+                                && self.last_gc.elapsed() >= std::time::Duration::from_secs(1)
+                            {
                                 self.garbage_collect_dependencies();
+                                self.last_gc = std::time::Instant::now();
                             }
                         }
                         Err(crossbeam::channel::RecvTimeoutError::Timeout) => {
                             // Periodically check LevelChannel for new requests
-                            if self.resort_work(self.send_level.get()) {
+                            if self.resort_work(self.send_level.get())
+                                && self.last_gc.elapsed() >= std::time::Duration::from_secs(1)
+                            {
                                 self.garbage_collect_dependencies();
+                                self.last_gc = std::time::Instant::now();
                             }
                         }
                         Err(crossbeam::channel::RecvTimeoutError::Disconnected) => break,
@@ -1621,8 +1650,11 @@ impl GenerationSchedule {
                     }
                     debug_assert!(self.debug_check());
                     debug_assert_eq!(self.running_task_count, 0);
-                    if self.resort_work(self.send_level.wait_and_get(level)) {
+                    if self.resort_work(self.send_level.wait_and_get(level))
+                        && self.last_gc.elapsed() >= std::time::Duration::from_secs(1)
+                    {
                         self.garbage_collect_dependencies();
+                        self.last_gc = std::time::Instant::now();
                     }
                 }
                 if self.queue_dirty {
@@ -1632,16 +1664,23 @@ impl GenerationSchedule {
             } else if self.running_task_count >= self.max_in_flight {
                 // Queue has tasks, but we are at maximum in-flight capacity.
                 // Wait for an in-flight worker to finish instead of busy-spinning.
-                match self.recv_chunk.recv_timeout(Duration::from_millis(5)) {
+                // 1ms timeout (down from 5ms) to match the queue-empty wait above.
+                match self.recv_chunk.recv_timeout(Duration::from_millis(1)) {
                     Ok((pos, data)) => {
                         self.receive_chunk(pos, data);
-                        if self.resort_work(self.send_level.get()) {
+                        if self.resort_work(self.send_level.get())
+                            && self.last_gc.elapsed() >= std::time::Duration::from_secs(1)
+                        {
                             self.garbage_collect_dependencies();
+                            self.last_gc = std::time::Instant::now();
                         }
                     }
                     Err(crossbeam::channel::RecvTimeoutError::Timeout) => {
-                        if self.resort_work(self.send_level.get()) {
+                        if self.resort_work(self.send_level.get())
+                            && self.last_gc.elapsed() >= std::time::Duration::from_secs(1)
+                        {
                             self.garbage_collect_dependencies();
+                            self.last_gc = std::time::Instant::now();
                         }
                     }
                     Err(crossbeam::channel::RecvTimeoutError::Disconnected) => break,

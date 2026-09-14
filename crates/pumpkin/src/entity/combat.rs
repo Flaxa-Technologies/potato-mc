@@ -36,7 +36,11 @@ impl AttackType {
         let held_item = player.inventory().held_item();
         let is_mace = held_item.item.id == pumpkin_data::item::Item::MACE.id;
 
-        if is_mace && fall_distance > 1.5 && !entity.is_fall_flying() {
+        let has_slow_falling = player
+            .living_entity
+            .has_effect(&pumpkin_data::effect::StatusEffect::SLOW_FALLING);
+
+        if is_mace && fall_distance > 1.5 && !entity.is_fall_flying() && !has_slow_falling {
             return Self::MaceSmash;
         }
 
@@ -48,11 +52,42 @@ impl AttackType {
             return Self::Knockback;
         }
 
-        if is_strong && !on_ground && fall_distance > 0.0 {
+        let world = player.world();
+        let fall_location = FallLocation::get_current_fall_location(&player.living_entity, &world);
+        let on_climbable =
+            fall_location != FallLocation::Generic && fall_location != FallLocation::Water;
+        let in_water = fall_location == FallLocation::Water || entity.is_in_water();
+        let is_blind = player
+            .living_entity
+            .has_effect(&pumpkin_data::effect::StatusEffect::BLINDNESS);
+        let is_passenger = entity.has_vehicle();
+        // Vanilla canCriticalAttack: fallDistance > 0 && !onGround && !onClimbable && !inWater
+        // && !isMobilityRestricted (==blindness) && !isPassenger && !isSprinting.
+        let is_falling = (fall_distance > 0.0 || entity.velocity.load().y < -0.01) && !on_ground;
+
+        let can_crit = is_falling
+            && !on_climbable
+            && !in_water
+            && !is_blind
+            && !is_passenger
+            && !sprinting;
+
+        if is_strong && can_crit {
             return Self::Critical;
         }
 
-        if sword && is_strong && !is_bedrock {
+        // Vanilla isSweepAttack: sword, fullStrength, onGround, !crit, !knockback,
+        // and horizontalDistanceSqr < (MOVEMENT_SPEED * 2.5)^2.
+        let can_sweep = sword && is_strong && on_ground && !is_bedrock && {
+            let vel = entity.velocity.load();
+            let horiz_sq = vel.x * vel.x + vel.z * vel.z;
+            let move_speed = player
+                .living_entity
+                .get_attribute_value(&pumpkin_data::attributes::Attributes::MOVEMENT_SPEED);
+            let max_sq = (move_speed * 2.5) * (move_speed * 2.5);
+            horiz_sq < max_sq
+        };
+        if can_sweep {
             return Self::Sweeping;
         }
 
@@ -147,14 +182,14 @@ impl CombatRules {
         armor_toughness: f32,
         breach_level: u32,
     ) -> f32 {
-        let toughness = Self::BASE_ARMOR_TOUGHNESS + armor_toughness / 4.0;
-        let real_armor = (total_armor - damage / toughness)
-            .clamp(total_armor * Self::MIN_ARMOR_RATIO, Self::MAX_ARMOR);
-        let mut armor_fraction = real_armor / Self::ARMOR_PROTECTION_DIVIDER;
+        let effective_armor_ratio = (1.0 - 0.15 * breach_level as f32).max(0.0);
+        let eff_armor = total_armor * effective_armor_ratio;
+        let eff_toughness = armor_toughness * effective_armor_ratio;
 
-        if breach_level > 0 {
-            armor_fraction = (armor_fraction - breach_level as f32 * 0.15).clamp(0.0, 1.0);
-        }
+        let toughness = Self::BASE_ARMOR_TOUGHNESS + eff_toughness / 4.0;
+        let real_armor = (eff_armor - damage / toughness)
+            .clamp(eff_armor * Self::MIN_ARMOR_RATIO, Self::MAX_ARMOR);
+        let armor_fraction = real_armor / Self::ARMOR_PROTECTION_DIVIDER;
 
         let damage_multiplier = 1.0 - armor_fraction;
         damage * damage_multiplier
@@ -649,5 +684,26 @@ mod tests {
         // Stacked armour modifiers can push resistance above 1.0; the result is
         // negative and callers guard on `strength > 0.0`.
         assert!(knockback_after_resistance(0.4, 1.2) < 0.0);
+    }
+
+    #[test]
+    fn breach_reduces_effective_armor_and_increases_damage() {
+        let base_damage = 10.0;
+        let total_armor = 20.0;
+        let armor_toughness = 8.0;
+
+        let no_breach = CombatRules::get_damage_after_absorb(base_damage, total_armor, armor_toughness, 0);
+        let breach_1 = CombatRules::get_damage_after_absorb(base_damage, total_armor, armor_toughness, 1);
+        let breach_4 = CombatRules::get_damage_after_absorb(base_damage, total_armor, armor_toughness, 4);
+
+        // Breach 1 (15% armor reduction) deals more damage than no breach
+        assert!(breach_1 > no_breach);
+        // Breach 4 (60% armor reduction) deals significantly more damage than Breach 1
+        assert!(breach_4 > breach_1);
+        // No breach damage should be around 20-30% of base damage against full netherite
+        assert!(no_breach < base_damage);
+        // At breach level 7 (105% reduction, clamped to 0.0), target takes 100% true damage
+        let breach_7 = CombatRules::get_damage_after_absorb(base_damage, total_armor, armor_toughness, 7);
+        assert!((breach_7 - base_damage).abs() < 1e-5);
     }
 }

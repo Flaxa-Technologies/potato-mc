@@ -18,6 +18,11 @@ pub use pumpkin_data::chunk::{
 
 pub trait BiomeSupplier {
     fn biome(&self, x: i32, y: i32, z: i32, noise: &mut MultiNoiseSampler<'_>) -> &'static Biome;
+    #[inline]
+    fn biome_from_point(&self, point_list: [i64; 7], noise: &mut MultiNoiseSampler<'_>) -> &'static Biome {
+        let _ = (point_list, noise);
+        &Biome::PLAINS
+    }
 }
 
 pub struct MultiNoiseBiomeSupplier {
@@ -31,13 +36,37 @@ impl MultiNoiseBiomeSupplier {
     const fn new(source: &'static BiomeTree) -> Self {
         Self { source }
     }
+
+    #[inline]
+    pub fn get_biome_from_point(&self, point_list: [i64; 7], noise: &mut MultiNoiseSampler<'_>) -> &'static Biome {
+        let mut h = (point_list[0] as u64).wrapping_mul(0x517cc1b727220a95);
+        h = (h ^ (point_list[1] as u64)).wrapping_mul(0x517cc1b727220a95);
+        h = (h ^ (point_list[2] as u64)).wrapping_mul(0x517cc1b727220a95);
+        h = (h ^ (point_list[3] as u64)).wrapping_mul(0x517cc1b727220a95);
+        h = (h ^ (point_list[4] as u64)).wrapping_mul(0x517cc1b727220a95);
+        h = (h ^ (point_list[5] as u64)).wrapping_mul(0x517cc1b727220a95);
+        let idx = (h as usize) & (noise.biome_cache.len() - 1);
+        if noise.biome_cache[idx].0 == point_list
+            && let Some(biome) = noise.biome_cache[idx].1
+        {
+            return biome;
+        }
+        let biome = self.source.get(&point_list, &mut None);
+        noise.biome_cache[idx] = (point_list, Some(biome));
+        biome
+    }
 }
 
 impl BiomeSupplier for MultiNoiseBiomeSupplier {
+    #[inline]
     fn biome(&self, x: i32, y: i32, z: i32, noise: &mut MultiNoiseSampler<'_>) -> &'static Biome {
         let point = noise.sample(x, y, z);
-        let point_list = point.convert_to_list();
-        self.source.get(&point_list, &mut None)
+        self.get_biome_from_point(point.convert_to_list(), noise)
+    }
+
+    #[inline]
+    fn biome_from_point(&self, point_list: [i64; 7], noise: &mut MultiNoiseSampler<'_>) -> &'static Biome {
+        self.get_biome_from_point(point_list, noise)
     }
 }
 

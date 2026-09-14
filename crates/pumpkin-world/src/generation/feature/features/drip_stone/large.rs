@@ -12,12 +12,18 @@ impl LargeDripstoneFeature {
         random: &mut RandomGenerator,
         pos: BlockPos,
     ) -> bool {
+        if !super::is_empty_or_water(chunk, pos) {
+            return false;
+        }
         let height = random.next_bounded_i32(8) + 4;
         let mut generated = false;
 
         let mut current_pos = pos;
         while chunk.is_air(&current_pos.0) && current_pos.0.y > chunk.bottom_y() as i32 + 2 {
             current_pos = current_pos.down();
+        }
+        if current_pos == pos {
+            return false;
         }
 
         for i in 0..height {

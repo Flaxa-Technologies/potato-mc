@@ -21,6 +21,7 @@ use tracing::{debug, error, info, warn};
 pub mod api;
 pub mod cache;
 pub mod loader;
+pub mod potato_host;
 /// Constants for plugin permissions.
 ///
 /// Plugins can request these permissions in their metadata to access specific

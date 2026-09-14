@@ -56,13 +56,10 @@ impl DoorInteractGoal {
     }
 
     pub fn can_use(&mut self, mob: &dyn Mob) -> bool {
-        if !mob
+        let has_collision = mob
             .get_entity()
             .horizontal_collision
-            .load(Ordering::Relaxed)
-        {
-            return false;
-        }
+            .load(Ordering::Relaxed);
 
         let navigator = mob
             .get_mob_entity()
@@ -86,24 +83,35 @@ impl DoorInteractGoal {
             let Some(node) = path.get_node(i) else {
                 continue;
             };
-            let door_pos = BlockPos::new(node.pos.0.x, node.pos.0.y + 1, node.pos.0.z);
-            let dx = mob_pos.x - f64::from(door_pos.0.x);
-            let dz = mob_pos.z - f64::from(door_pos.0.z);
+            let dx = mob_pos.x - (f64::from(node.pos.0.x) + 0.5);
+            let dz = mob_pos.z - (f64::from(node.pos.0.z) + 0.5);
             let dist_sqr = dx * dx + dz * dz;
 
-            if dist_sqr <= 2.25 {
-                self.door_pos = door_pos;
-                self.has_door = DoorBlock::is_wooden_door(&world, &self.door_pos);
-                if self.has_door {
+            if has_collision || dist_sqr <= 4.0 {
+                let door_pos_lower = BlockPos::new(node.pos.0.x, node.pos.0.y, node.pos.0.z);
+                if DoorBlock::is_wooden_door(&world, &door_pos_lower) {
+                    self.door_pos = door_pos_lower;
+                    self.has_door = true;
+                    return true;
+                }
+                let door_pos_upper = BlockPos::new(node.pos.0.x, node.pos.0.y + 1, node.pos.0.z);
+                if DoorBlock::is_wooden_door(&world, &door_pos_upper) {
+                    self.door_pos = door_pos_upper;
+                    self.has_door = true;
                     return true;
                 }
             }
         }
 
-        let above_pos = mob.get_entity().block_pos.load().up();
-        self.door_pos = above_pos;
-        self.has_door = DoorBlock::is_wooden_door(&world, &self.door_pos);
-        self.has_door
+        let mob_block = mob.get_entity().block_pos.load();
+        for check_pos in [mob_block, mob_block.up()] {
+            if DoorBlock::is_wooden_door(&world, &check_pos) {
+                self.door_pos = check_pos;
+                self.has_door = true;
+                return true;
+            }
+        }
+        false
     }
 
     #[must_use]

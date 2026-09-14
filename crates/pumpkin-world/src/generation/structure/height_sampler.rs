@@ -108,7 +108,12 @@ impl HeightSampler for NoiseHeightSampler<'_> {
         if let Some(height) = self.heights.get(&key) {
             return *height;
         }
-        let height = self.sample_column(block_x, block_z, false);
+        let height = self.generator.global_structure_cache.get_or_compute_column_height(
+            block_x,
+            block_z,
+            false,
+            || self.sample_column(block_x, block_z, false),
+        );
         self.heights.insert(key, height);
         height
     }
@@ -120,7 +125,12 @@ impl HeightSampler for NoiseHeightSampler<'_> {
         }
         // Vanilla's structure helper asks for the highest occupied block, while
         // heightmaps store the first free block above it.
-        let height = self.sample_column(block_x, block_z, true) - 1;
+        let height = self.generator.global_structure_cache.get_or_compute_column_height(
+            block_x,
+            block_z,
+            true,
+            || self.sample_column(block_x, block_z, true) - 1,
+        );
         self.ocean_floor_heights.insert(key, height);
         height
     }

@@ -250,7 +250,7 @@ impl PistonBlock {
         if sticky {
             let pull_pos = pos.offset_dir(dir.to_offset(), 2);
             let (block, state) = world.get_block_and_state(&pull_pos);
-            if data == 2 {
+            if r#type == 2 {
                 world.set_block_state(
                     &extended_pos,
                     Block::AIR.default_state.id,
@@ -259,8 +259,7 @@ impl PistonBlock {
             } else {
                 let is_air = state.is_air();
                 if !is_air
-                    && (Self::is_movable(block, state, dir, false, dir.opposite())
-                        || Self::is_movable(block, state, dir, false, dir))
+                    && Self::is_movable(block, state, dir.opposite(), false, dir)
                     && (state.piston_behavior == PistonBehavior::Normal
                         || block == &Block::PISTON
                         || block == &Block::STICKY_PISTON)
@@ -309,7 +308,7 @@ fn should_extend(world: &World, block_pos: &BlockPos, piston_dir: BlockDirection
     }
     let neighbor_pos = block_pos.offset(BlockDirection::Down.to_offset());
     let (block, state) = world.get_block_and_state(&neighbor_pos);
-    if is_emitting_redstone_power(block, state, world, block_pos, BlockDirection::Down) {
+    if is_emitting_redstone_power(block, state, world, &neighbor_pos, BlockDirection::Down) {
         return true;
     }
     for dir in BlockDirection::all() {
@@ -332,7 +331,7 @@ pub fn try_move(world: &Arc<World>, _block: &Block, block_pos: &BlockPos) {
     let should_extent = should_extend(world, block_pos, dir);
 
     if should_extent && !props.extended {
-        if PistonHandler::new(world, *block_pos, dir, true).calculate_push() {
+        if PistonHandler::new(world.as_ref(), *block_pos, dir, true).calculate_push() {
             world.add_synced_block_event(*block_pos, 0, dir.to_index());
         }
     } else if !should_extent && props.extended {
@@ -376,7 +375,7 @@ fn move_piston(
             BlockFlags::FORCE_STATE,
         );
     }
-    let mut handler = PistonHandler::new(world, *block_pos, dir, extend);
+    let mut handler = PistonHandler::new(world.as_ref(), *block_pos, dir, extend);
     if !handler.calculate_push() {
         return false;
     }

@@ -640,6 +640,7 @@ impl JigsawPlacement {
             }
         }
 
+        let center_element_projection = center_element.projection;
         let ground_level_delta = center_element.get_ground_level_delta();
         let old_absolute_ground_y = box_.min.y + ground_level_delta;
         let y_offset = bottom_y - old_absolute_ground_y;
@@ -679,7 +680,7 @@ impl JigsawPlacement {
             junctions: Vec::new(),
             ground_level_delta,
             liquid_settings,
-            projection: pool.elements[0].projection,
+            projection: center_element_projection,
         });
 
         let mut collector = super::StructurePiecesCollector::new();

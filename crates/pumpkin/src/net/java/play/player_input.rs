@@ -61,5 +61,17 @@ impl JavaClient {
                 vehicle.get_entity().remove_passenger(player.entity_id());
             }
         }
+
+        let sprint = input.input & SPlayerInput::SPRINT != 0;
+        if player.get_entity().is_sprinting() != sprint {
+            send_cancellable_blocking! {{
+                server;
+                PlayerToggleSprintEvent::new(player.clone(), sprint);
+                'after: {
+                    player.set_sprinting(event.is_sprinting);
+                    player.update_player_pose();
+                }
+            }}
+        }
     }
 }

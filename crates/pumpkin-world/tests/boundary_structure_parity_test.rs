@@ -356,3 +356,122 @@ fn test_distance_gate_per_structure_set_safety() {
         assert!(radius <= 8, "Radius must not exceed 8 for set index {}", i);
     }
 }
+
+#[test]
+fn test_mineshaft_parity() {
+    let seed = 1789322517659391064u64;
+    let world_gen = get_world_gen(Seed(seed), Dimension::OVERWORLD, false, Vec::new(), String::new());
+    let WorldGenerator::Noise(generator) = &*world_gen else { unreachable!() };
+
+    let key = StructureKeys::Mineshaft;
+    let structure = Structure::get(&key);
+
+    let cx = -9;
+    let cz = -22;
+
+    println!("[TEST] Checking mineshaft at ({}, {})...", cx, cz);
+
+    // 1. Check if mineshaft set is in dimension_structure_sets
+    let mut ms_set_index = None;
+    for (i, set) in StructureSet::ALL.iter().enumerate() {
+        if set.structures.iter().any(|s| s.structure == key) {
+            ms_set_index = Some(i);
+            println!("[TEST] Found Mineshaft StructureSet at index {}", i);
+        }
+    }
+    let ms_idx = ms_set_index.expect("Mineshaft set should exist");
+    let in_dim = generator.dimension_structure_sets.contains(&ms_idx);
+    println!("[TEST] Is Mineshaft set in generator.dimension_structure_sets? {}", in_dim);
+
+    // 2. Check should_generate_structure
+    let set = &StructureSet::ALL[ms_idx];
+    let allowed = &generator.structure_allowed_biomes[&ms_idx];
+    let mut chunk = ProtoChunk::new(cx, cz, &world_gen);
+    chunk.step_to_biomes(generator);
+
+    let should = pumpkin_world::generation::structure::placement::should_generate_structure(
+        &set.placement,
+        &generator.structure_calculator,
+        cx,
+        cz,
+        &generator.global_structure_cache,
+        &chunk,
+        allowed,
+    );
+    println!("[TEST] should_generate_structure at ({}, {}): {}", cx, cz, should);
+
+    // 3. Ground truth lazy generate
+    let gt = ground_truth_lazily_generate(&key, structure, cx, cz, seed as i64, generator);
+    println!("[TEST] ground_truth_lazily_generate: {:?}", gt.as_ref().map(|p| (p.start_pos, p.collector.lock().unwrap().pieces.len())));
+
+    // 4. Test chunk.set_structure_starts
+    chunk.set_structure_starts(generator);
+    println!("[TEST] chunk.structure_starts after set_structure_starts: {:?}", chunk.structure_starts().keys().collect::<Vec<_>>());
+}
+
+#[test]
+fn test_diagnose_playtest_structures() {
+    let seed: i64 = 1789122783640570907;
+    let world_gen = get_world_gen(Seed(seed as u64), Dimension::OVERWORLD, false, Vec::new(), String::new());
+    let WorldGenerator::Noise(generator) = &*world_gen else { unreachable!() };
+
+    // Find Pillager Outposts in regions -5..5
+    for set_index in [11, 18] { // 11: outposts, 18: villages
+        let set = &StructureSet::ALL[set_index];
+        let pumpkin_data::structures::StructurePlacementType::RandomSpread(spread) = &set.placement.placement_type else { continue };
+        println!("\n=== Checking Set {} (spacing={}, separation={}) ===", set_index, spread.spacing, spread.separation);
+
+        for rx in -3..=3 {
+            for rz in -3..=3 {
+                let (cx, cz) = pumpkin_world::generation::structure::placement::get_structure_chunk_in_region(
+                    spread, seed, rx, rz, set.placement.salt,
+                );
+                for entry in set.structures {
+                    let key = entry.structure;
+                    let structure = Structure::get(&key);
+                    let mut height_sampler =
+                        pumpkin_world::generation::structure::height_sampler::NoiseHeightSampler::new(generator);
+                    let random = pumpkin_world::generation::structure::structures::create_chunk_random(seed, cx, cz);
+                    let context = StructureGeneratorContext {
+                        seed,
+                        chunk_x: cx,
+                        chunk_z: cz,
+                        random,
+                        sea_level: generator.settings.sea_level,
+                        min_y: generator.settings.shape.min_y as i32,
+                        height_sampler: Some(&mut height_sampler),
+                        structure_key: Some(key),
+                    };
+                    let supplier = MultiNoiseBiomeSupplier::OVERWORLD;
+                    let mut sampler = MultiNoiseSampler::generate(&generator.base_router.multi_noise);
+                    let (Some(start_pool), Some(size)) = (structure.start_pool, structure.size) else { continue };
+                    use pumpkin_world::generation::structure::structures::{HeightSampler, StructureGenerator};
+                    let mut jgen = pumpkin_world::generation::structure::structures::jigsaw::JigsawGenerator::new(start_pool, size).with_pool_aliases(structure.pool_aliases);
+                    if structure.use_expansion_hack.unwrap_or(false) { jgen = jgen.with_expansion_hack(true); }
+                    let struct_pos = jgen.get_structure_position(context);
+                    if struct_pos.is_none() {
+                        // Why did it fail? Let's check estimate_height!
+                        let mut hs = pumpkin_world::generation::structure::height_sampler::NoiseHeightSampler::new(generator);
+                        let bx = cx * 16 + 8;
+                        let bz = cz * 16 + 8;
+                        let h = hs.estimate_height(bx, bz);
+                        let of = hs.estimate_ocean_floor_height(bx, bz);
+                        println!("Candidate {:?} at ({}, {}) REJECTED by get_structure_position: h={}, of={}, sea_level={}", key, cx, cz, h, of, generator.settings.sea_level);
+                    } else if let Some(pos) = struct_pos {
+                        let biome_x = pumpkin_world::generation::biome_coords::from_block(pos.start_pos.0.x);
+                        let biome_y = pumpkin_world::generation::biome_coords::from_block(pos.start_pos.0.y);
+                        let biome_z = pumpkin_world::generation::biome_coords::from_block(pos.start_pos.0.z);
+                        let biome = supplier.biome(biome_x, biome_y, biome_z, &mut sampler);
+                        let biomes = pumpkin_data::tag::get_tag_ids(pumpkin_data::tag::RegistryKey::WorldgenBiome, structure.biomes.strip_prefix('#').unwrap_or(structure.biomes)).unwrap();
+                        if !biomes.contains(&(biome.id as u16)) {
+                            println!("Candidate {:?} at ({}, {}) REJECTED by biome at start_pos {:?}: biome_id={}", key, cx, cz, pos.start_pos, biome.id);
+                        } else {
+                            println!("Candidate {:?} at ({}, {}) ACCEPTED! start_pos={:?}", key, cx, cz, pos.start_pos);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

@@ -533,9 +533,21 @@ pub fn value_to_configured_feature(v: &Value) -> TokenStream {
             let placements_require_layer0_alternate = config["placements_require_layer0_alternate"]
                 .as_bool()
                 .unwrap_or(true);
-            let outer_wall_distance = value_to_int_provider(&config["outer_wall_distance"]);
-            let distribution_points = value_to_int_provider(&config["distribution_points"]);
-            let point_offset = value_to_int_provider(&config["point_offset"]);
+            let outer_wall_distance = if config["outer_wall_distance"].is_null() {
+                quote! { IntProvider::Object(NormalIntProvider::Uniform(UniformIntProvider { min_inclusive: 4, max_inclusive: 5 })) }
+            } else {
+                value_to_int_provider(&config["outer_wall_distance"])
+            };
+            let distribution_points = if config["distribution_points"].is_null() {
+                quote! { IntProvider::Object(NormalIntProvider::Uniform(UniformIntProvider { min_inclusive: 3, max_inclusive: 4 })) }
+            } else {
+                value_to_int_provider(&config["distribution_points"])
+            };
+            let point_offset = if config["point_offset"].is_null() {
+                quote! { IntProvider::Object(NormalIntProvider::Uniform(UniformIntProvider { min_inclusive: 1, max_inclusive: 2 })) }
+            } else {
+                value_to_int_provider(&config["point_offset"])
+            };
             let min_gen_offset = config["min_gen_offset"].as_i64().unwrap_or(-16) as i32;
             let max_gen_offset = config["max_gen_offset"].as_i64().unwrap_or(16) as i32;
             let noise_multiplier = config["noise_multiplier"].as_f64().unwrap_or(0.05);

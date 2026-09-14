@@ -36,6 +36,14 @@ impl NoteBlock {
                 return;
             }
             world.add_synced_block_event(*pos, 0, 0);
+
+            // Vanilla AllayAi.hearNoteblock: Allays within 16 blocks hear the noteblock
+            let center = pos.to_centered_f64();
+            for entity in world.get_nearby_entities(center, 16.0).into_values() {
+                if entity.get_entity().entity_type == &pumpkin_data::entity::EntityType::ALLAY {
+                    entity.hear_noteblock(*pos);
+                }
+            }
         }
     }
     fn get_note_pitch(note: u16) -> f32 {

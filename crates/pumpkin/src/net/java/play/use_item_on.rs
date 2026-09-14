@@ -150,15 +150,22 @@ impl JavaClient {
             return Ok(());
         }
 
-        server
-            .item_registry
-            .use_on_block(&mut item, player, position, face, cursor_pos, block, server);
-
         // Check if the item is a block, because not every item can be placed :D
         let item_id = item.item.id;
         if let Some(block) = Block::from_item_id(item_id) {
             should_try_decrement =
                 Self::run_is_block_place(player, block, server, use_item_on, position, face)?;
+        } else {
+            let used_on_block = server
+                .item_registry
+                .use_on_block(&mut item, player, position, face, cursor_pos, block, server);
+
+            if !used_on_block {
+                let stack_for_use = item.clone();
+                Self::prepare_hand_item_for_use(player, hand, &mut item);
+                server.item_registry.on_use(&stack_for_use, player);
+                item = inventory.get_stack_in_hand(hand);
+            }
         }
 
         if should_try_decrement {

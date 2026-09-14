@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::chunk_state::{Chunk, StagedChunkEnum};
 use crate::ProtoChunk;
 use crate::chunk::ChunkHeightmapType;
@@ -25,12 +27,13 @@ pub struct Cache {
     surface_biomes: Option<Box<SurfaceBiomeNeighborhood>>,
 }
 
-struct SurfaceBiomePalette {
-    chunk_x: i32,
-    chunk_z: i32,
-    bottom_quart_y: i32,
-    height_quarts: usize,
-    biomes: Box<[u8]>,
+pub(crate) struct SurfaceBiomePalette {
+    pub(crate) chunk_x: i32,
+    pub(crate) chunk_z: i32,
+    pub(crate) bottom_quart_y: i32,
+    pub(crate) height_quarts: usize,
+    pub(crate) biome_mask: [u64; 4],
+    pub(crate) biomes: Arc<[u8]>,
 }
 
 impl SurfaceBiomePalette {
@@ -41,7 +44,8 @@ impl SurfaceBiomePalette {
                 chunk_z: chunk.z,
                 bottom_quart_y: biome_coords::from_block(chunk.bottom_y() as i32),
                 height_quarts: chunk.height() as usize >> 2,
-                biomes: chunk.flat_biome_map.clone(),
+                biome_mask: chunk.biome_mask,
+                biomes: Arc::from(chunk.flat_biome_map.as_ref()),
             }),
             Chunk::Level(chunk) => {
                 let bottom_y = chunk.section.min_y;
@@ -49,17 +53,28 @@ impl SurfaceBiomePalette {
                 let bottom_quart_y = biome_coords::from_block(bottom_y);
                 let mut biomes = vec![0; 4 * height_quarts * 4];
 
+                // Hoist the loop-invariant parts of the flattened index out of the
+                // inner loops instead of recomputing `height_quarts * 4 * local_x`
+                // and `4 * local_y` on every single (x, y, z) sample.
                 for local_x in 0..4 {
+                    let x_offset = height_quarts * 4 * local_x;
                     for local_y in 0..height_quarts {
+                        let xy_offset = x_offset + 4 * local_y;
+                        let block_y = biome_coords::to_block(bottom_quart_y + local_y as i32);
                         for local_z in 0..4 {
-                            let index = height_quarts * 4 * local_x + 4 * local_y + local_z;
+                            let index = xy_offset + local_z;
                             biomes[index] = chunk.section.get_rough_biome_absolute_y(
                                 local_x << 2,
-                                biome_coords::to_block(bottom_quart_y + local_y as i32),
+                                block_y,
                                 local_z << 2,
                             )?;
                         }
                     }
+                }
+
+                let mut biome_mask = [0u64; 4];
+                for &id in &biomes {
+                    biome_mask[(id >> 6) as usize] |= 1u64 << (id & 63);
                 }
 
                 Some(Self {
@@ -67,18 +82,22 @@ impl SurfaceBiomePalette {
                     chunk_z: chunk.z,
                     bottom_quart_y,
                     height_quarts,
-                    biomes: biomes.into_boxed_slice(),
+                    biome_mask,
+                    biomes: Arc::from(biomes),
                 })
             }
         }
     }
 
+    #[inline(always)]
     fn get_biome_id(&self, quart_x: i32, quart_y: i32, quart_z: i32) -> Option<u8> {
         if quart_x >> 2 != self.chunk_x || quart_z >> 2 != self.chunk_z {
             return None;
         }
         let local_y = quart_y - self.bottom_quart_y;
-        if !(0..self.height_quarts as i32).contains(&local_y) {
+        // Equivalent to `!(0..height_quarts as i32).contains(&local_y)` but a single
+        // unsigned comparison instead of two signed ones.
+        if (local_y as u32) >= self.height_quarts as u32 {
             return None;
         }
         let local_x = (quart_x & 3) as usize;
@@ -108,16 +127,49 @@ impl SurfaceBiomeNeighborhood {
         let Some(palette) = SurfaceBiomePalette::from_chunk(chunk) else {
             return false;
         };
-        let dx = palette.chunk_x - self.center_x;
-        let dz = palette.chunk_z - self.center_z;
-        if !(-1..=1).contains(&dx) || !(-1..=1).contains(&dz) {
+        let idx_x = palette.chunk_x - self.center_x + 1;
+        let idx_z = palette.chunk_z - self.center_z + 1;
+        if (idx_x as u32) >= 3 || (idx_z as u32) >= 3 {
             return false;
         }
-        let slot = &mut self.palettes[((dx + 1) * 3 + dz + 1) as usize];
+        let slot = &mut self.palettes[(idx_x * 3 + idx_z) as usize];
         if slot.is_some() {
             return false;
         }
         *slot = Some(palette);
+        true
+    }
+
+    pub(crate) fn push_proto_biome(&mut self, chunk: &ProtoChunk) -> bool {
+        self.push_palette(&SurfaceBiomePalette {
+            chunk_x: chunk.x,
+            chunk_z: chunk.z,
+            bottom_quart_y: biome_coords::from_block(chunk.bottom_y() as i32),
+            height_quarts: chunk.height() as usize >> 2,
+            biome_mask: chunk.biome_mask,
+            biomes: Arc::from(chunk.flat_biome_map.as_ref()),
+        })
+    }
+
+    /// Insert a palette, cloning only the shared `Arc` biome buffer (not the bytes).
+    pub(crate) fn push_palette(&mut self, palette: &SurfaceBiomePalette) -> bool {
+        let idx_x = palette.chunk_x - self.center_x + 1;
+        let idx_z = palette.chunk_z - self.center_z + 1;
+        if (idx_x as u32) >= 3 || (idx_z as u32) >= 3 {
+            return false;
+        }
+        let slot = &mut self.palettes[(idx_x * 3 + idx_z) as usize];
+        if slot.is_some() {
+            return false;
+        }
+        *slot = Some(SurfaceBiomePalette {
+            chunk_x: palette.chunk_x,
+            chunk_z: palette.chunk_z,
+            bottom_quart_y: palette.bottom_quart_y,
+            height_quarts: palette.height_quarts,
+            biome_mask: palette.biome_mask,
+            biomes: Arc::clone(&palette.biomes),
+        });
         true
     }
 
@@ -127,19 +179,31 @@ impl SurfaceBiomeNeighborhood {
     }
 
     #[must_use]
+    #[inline(always)]
     pub(crate) fn get_biome_id(&self, quart_x: i32, quart_y: i32, quart_z: i32) -> Option<u8> {
-        let dx = (quart_x >> 2) - self.center_x;
-        let dz = (quart_z >> 2) - self.center_z;
-        if !(-1..=1).contains(&dx) || !(-1..=1).contains(&dz) {
+        let idx_x = (quart_x >> 2) - self.center_x + 1;
+        let idx_z = (quart_z >> 2) - self.center_z + 1;
+        if (idx_x as u32) >= 3 || (idx_z as u32) >= 3 {
             return None;
         }
-        self.palettes[((dx + 1) * 3 + dz + 1) as usize]
+        self.palettes[(idx_x * 3 + idx_z) as usize]
             .as_ref()
             .and_then(|palette| palette.get_biome_id(quart_x, quart_y, quart_z))
+    }
+
+    #[must_use]
+    pub(crate) fn contains_biome(&self, id: u8) -> bool {
+        let word = (id >> 6) as usize;
+        let bit = 1u64 << (id & 63);
+        self.palettes
+            .iter()
+            .flatten()
+            .any(|palette| palette.biome_mask[word] & bit != 0)
     }
 }
 
 impl HeightLimitView for Cache {
+    #[inline(always)]
     fn height(&self) -> u16 {
         let mid = ((self.size * self.size) >> 1) as usize;
         match &self.chunks[mid] {
@@ -148,6 +212,7 @@ impl HeightLimitView for Cache {
         }
     }
 
+    #[inline(always)]
     fn bottom_y(&self) -> i8 {
         let mid = ((self.size * self.size) >> 1) as usize;
         match &self.chunks[mid] {
@@ -158,18 +223,22 @@ impl HeightLimitView for Cache {
 }
 
 impl BlockAccessor for Cache {
+    #[inline(always)]
     fn get_block(&self, position: &BlockPos) -> &'static Block {
         GenerationCache::get_block_state(self, &position.0).to_block()
     }
 
+    #[inline(always)]
     fn get_block_state(&self, position: &BlockPos) -> &'static BlockState {
         GenerationCache::get_block_state(self, &position.0).to_state()
     }
 
+    #[inline(always)]
     fn get_block_state_id(&self, position: &BlockPos) -> BlockStateId {
         GenerationCache::get_block_state(self, &position.0)
     }
 
+    #[inline(always)]
     fn get_block_and_state(&self, position: &BlockPos) -> (&'static Block, &'static BlockState) {
         let id = GenerationCache::get_block_state(self, &position.0);
         BlockState::from_id_with_block(id)
@@ -177,51 +246,45 @@ impl BlockAccessor for Cache {
 }
 
 impl GenerationCache for Cache {
+    #[inline(always)]
     fn get_chunk_mut(&mut self, chunk_x: i32, chunk_z: i32) -> Option<&mut ProtoChunk> {
         let dx = chunk_x - self.x;
         let dz = chunk_z - self.z;
+        let idx = self.chunk_index(dx, dz)?;
 
-        if dx < 0 || dx >= self.size || dz < 0 || dz >= self.size {
-            return None;
-        }
-
-        match &mut self.chunks[(dx * self.size + dz) as usize] {
+        match &mut self.chunks[idx] {
             Chunk::Proto(chunk) => Some(chunk),
             Chunk::Level(_) => None,
         }
     }
 
+    #[inline(always)]
     fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<&ProtoChunk> {
         let dx = chunk_x - self.x;
         let dz = chunk_z - self.z;
+        let idx = self.chunk_index(dx, dz)?;
 
-        if dx < 0 || dx >= self.size || dz < 0 || dz >= self.size {
-            return None;
-        }
-
-        match &self.chunks[(dx * self.size + dz) as usize] {
+        match &self.chunks[idx] {
             Chunk::Proto(chunk) => Some(chunk),
             Chunk::Level(_) => None,
         }
     }
 
+    #[inline(always)]
     fn try_get_proto_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<&ProtoChunk> {
-        let dx = chunk_x - self.x;
-        let dz = chunk_z - self.z;
-
-        if dx < 0 || dx >= self.size || dz < 0 || dz >= self.size {
-            return None;
-        }
-
-        match &self.chunks[(dx * self.size + dz) as usize] {
-            Chunk::Proto(chunk) => Some(chunk),
-            Chunk::Level(_) => None,
-        }
+        // Identical to `get_chunk` — kept as a separate trait method for callers that
+        // want the "try" naming, but there is no reason to maintain two copies of the
+        // same bounds-check/match logic.
+        self.get_chunk(chunk_x, chunk_z)
     }
 
     fn get_center_chunk(&self) -> &ProtoChunk {
         let mid = ((self.size * self.size) >> 1) as usize;
         self.chunks[mid].get_proto_chunk()
+    }
+
+    fn get_world_seed(&self) -> u64 {
+        self.get_center_chunk().world_seed
     }
 
     fn get_center_chunk_mut(&mut self) -> &mut ProtoChunk {
@@ -249,20 +312,16 @@ impl GenerationCache for Cache {
         (fluid.clone(), state)
     }
 
+    #[inline(always)]
     fn get_block_state(&self, pos: &Vector3<i32>) -> BlockStateId {
         let dx = (pos.x >> 4) - self.x;
         let dz = (pos.z >> 4) - self.z;
-        // debug_assert!(dx < self.size && dz < self.size);
-        // debug_assert!(dx >= 0 && dz >= 0);
-        if !(dx < self.size && dz < self.size && dx >= 0 && dz >= 0) {
-            // breakpoint here
-            debug!(
-                "illegal get_block_state {pos:?} cache pos ({}, {}) size {}",
-                self.x, self.z, self.size
-            );
+        let Some(idx) = self.chunk_index(dx, dz) else {
+            Self::log_out_of_cache_bounds("get_block_state", pos, self.x, self.z, self.size);
             return BlockStateId::AIR;
-        }
-        match &self.chunks[(dx * self.size + dz) as usize] {
+        };
+
+        match &self.chunks[idx] {
             Chunk::Level(data) => data
                 .section
                 .get_block_absolute_y((pos.x & 15) as usize, pos.y, (pos.z & 15) as usize)
@@ -271,20 +330,17 @@ impl GenerationCache for Cache {
             Chunk::Proto(data) => data.get_block_state(pos),
         }
     }
+
+    #[inline(always)]
     fn set_block_state(&mut self, pos: &Vector3<i32>, block_state: &BlockState) {
         let dx = (pos.x >> 4) - self.x;
         let dz = (pos.z >> 4) - self.z;
-        // debug_assert!(dx < self.size && dz < self.size);
-        // debug_assert!(dx >= 0 && dz >= 0);
-        if !(dx < self.size && dz < self.size && dx >= 0 && dz >= 0) {
-            // breakpoint here
-            debug!(
-                "illegal set_block_state {pos:?} cache pos ({}, {}) size {}",
-                self.x, self.z, self.size
-            );
+        let Some(idx) = self.chunk_index(dx, dz) else {
+            Self::log_out_of_cache_bounds("set_block_state", pos, self.x, self.z, self.size);
             return;
-        }
-        match &mut self.chunks[(dx * self.size + dz) as usize] {
+        };
+
+        match &mut self.chunks[idx] {
             Chunk::Level(data) => {
                 data.set_block_absolute_y(
                     (pos.x & 15) as usize,
@@ -302,15 +358,12 @@ impl GenerationCache for Cache {
     fn add_block_entity(&mut self, pos: &Vector3<i32>, nbt: NbtCompound) {
         let dx = (pos.x >> 4) - self.x;
         let dz = (pos.z >> 4) - self.z;
-        if !(dx < self.size && dz < self.size && dx >= 0 && dz >= 0) {
-            debug!(
-                "illegal add_block_entity {pos:?} cache pos ({}, {}) size {}",
-                self.x, self.z, self.size
-            );
+        let Some(idx) = self.chunk_index(dx, dz) else {
+            Self::log_out_of_cache_bounds("add_block_entity", pos, self.x, self.z, self.size);
             return;
-        }
+        };
 
-        match &mut self.chunks[(dx * self.size + dz) as usize] {
+        match &mut self.chunks[idx] {
             Chunk::Level(_) => {
                 debug!("add_block_entity on non-proto chunk at {pos:?}");
             }
@@ -322,12 +375,10 @@ impl GenerationCache for Cache {
 
     fn get_top_y(&self, heightmap: &HeightMap, x: i32, z: i32) -> i32 {
         match heightmap {
-            HeightMap::WorldSurfaceWg | HeightMap::WorldSurface => {
-                self.top_block_height_exclusive(x, z)
-            }
-            HeightMap::OceanFloorWg | HeightMap::OceanFloor => {
-                self.ocean_floor_height_exclusive(x, z)
-            }
+            HeightMap::WorldSurfaceWg => self.top_block_wg_height_exclusive(x, z),
+            HeightMap::WorldSurface => self.top_block_height_exclusive(x, z),
+            HeightMap::OceanFloorWg => self.ocean_floor_wg_height_exclusive(x, z),
+            HeightMap::OceanFloor => self.ocean_floor_height_exclusive(x, z),
             HeightMap::MotionBlocking => self.top_motion_blocking_block_height_exclusive(x, z),
             HeightMap::MotionBlockingNoLeaves => {
                 self.top_motion_blocking_block_no_leaves_height_exclusive(x, z)
@@ -393,10 +444,10 @@ impl GenerationCache for Cache {
     fn ocean_floor_height_exclusive(&self, x: i32, z: i32) -> i32 {
         let dx = (x >> 4) - self.x;
         let dy = (z >> 4) - self.z;
-        if dx < 0 || dy < 0 || dx >= self.size || dy >= self.size {
+        let Some(idx) = self.chunk_index(dx, dy) else {
             return 0;
-        }
-        match &self.chunks[(dx * self.size + dy) as usize] {
+        };
+        match &self.chunks[idx] {
             Chunk::Level(_data) => {
                 0 // todo missing
             }
@@ -404,11 +455,44 @@ impl GenerationCache for Cache {
         }
     }
 
+    fn top_block_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
+        let dx = (x >> 4) - self.x;
+        let dy = (z >> 4) - self.z;
+        let Some(idx) = self.chunk_index(dx, dy) else {
+            return 0;
+        };
+        match &self.chunks[idx] {
+            Chunk::Level(data) => {
+                let heightmap = data
+                    .heightmap
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+                let min_y = data.section.min_y;
+                heightmap.get(ChunkHeightmapType::WorldSurface, x, z, min_y)
+            }
+            Chunk::Proto(data) => data.top_block_wg_height_exclusive(x, z),
+        }
+    }
+
+    fn ocean_floor_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
+        let dx = (x >> 4) - self.x;
+        let dy = (z >> 4) - self.z;
+        let Some(idx) = self.chunk_index(dx, dy) else {
+            return 0;
+        };
+        match &self.chunks[idx] {
+            Chunk::Level(_data) => 0,
+            Chunk::Proto(data) => data.ocean_floor_wg_height_exclusive(x, z),
+        }
+    }
+
     fn get_biome_for_terrain_gen(&self, x: i32, y: i32, z: i32) -> &'static Biome {
         let biome_pos = self.get_center_chunk().get_terrain_gen_biome_pos(x, y, z);
         let dx = (biome_pos.x >> 2) - self.x;
         let dz = (biome_pos.z >> 2) - self.z;
-        let (dx, dz) = if dx < 0 || dz < 0 || dx >= self.size || dz >= self.size {
+        // Equivalent to the original `dx < 0 || dx >= size || dz < 0 || dz >= size`
+        // but collapses each axis's pair of signed comparisons into one unsigned one.
+        let (dx, dz) = if (dx as u32) >= self.size as u32 || (dz as u32) >= self.size as u32 {
             // Position is outside the cache — fall back to the centre chunk's biome
             let mid = self.size / 2;
             (mid, mid)
@@ -440,17 +524,15 @@ impl GenerationCache for Cache {
     ) -> Option<&crate::generation::blender::blending_data::BlendingData> {
         let dx = chunk_x - self.x;
         let dz = chunk_z - self.z;
+        let idx = self.chunk_index(dx, dz)?;
 
-        if dx < 0 || dx >= self.size || dz < 0 || dz >= self.size {
-            return None;
-        }
-
-        match &self.chunks[(dx * self.size + dz) as usize] {
+        match &self.chunks[idx] {
             Chunk::Proto(chunk) => chunk.blending_data.as_ref(),
             Chunk::Level(data) => data.blending_data.as_ref(),
         }
     }
 
+    #[inline(always)]
     fn is_air(&self, local_pos: &Vector3<i32>) -> bool {
         is_air(GenerationCache::get_block_state(self, local_pos))
     }
@@ -461,6 +543,36 @@ impl GenerationCache for Cache {
 }
 
 impl Cache {
+    /// Converts cache-relative chunk offsets into a flat index, or `None` if they
+    /// fall outside the cache. This is the single hottest check in the whole
+    /// generation pipeline (called once per block, per biome sample, per structure
+    /// lookup, ...), so it is written to compile down to one unsigned compare per
+    /// axis instead of the four signed comparisons (`dx < 0 || dx >= size || ...`)
+    /// that were previously duplicated across every accessor:
+    ///
+    /// For any `size >= 0`, `dx < 0 || dx >= size` is exactly equivalent to
+    /// `(dx as u32) >= (size as u32)`, because a negative `dx` wraps around to a
+    /// huge `u32` value that is trivially `>= size`. This removes a branch and a
+    /// comparison per axis with no change in observable behaviour.
+    #[inline(always)]
+    fn chunk_index(&self, dx: i32, dz: i32) -> Option<usize> {
+        if (dx as u32) >= self.size as u32 || (dz as u32) >= self.size as u32 {
+            return None;
+        }
+        Some((dx * self.size + dz) as usize)
+    }
+
+    /// Cold, never-inlined logging path for cache-bounds violations. Splitting this
+    /// out of the hot accessors keeps their generated code small (better icache
+    /// behaviour, better branch prediction) since this should effectively never run
+    /// in a correctly wired-up generation cache. Produces the exact same message
+    /// text each call site logged before.
+    #[cold]
+    #[inline(never)]
+    fn log_out_of_cache_bounds(op: &str, pos: &Vector3<i32>, x: i32, z: i32, size: i32) {
+        debug!("illegal {op} {pos:?} cache pos ({x}, {z}) size {size}");
+    }
+
     pub fn advance_all(
         &mut self,
         stage: StagedChunkEnum,
@@ -579,7 +691,6 @@ impl Cache {
             Chunk::Proto(chunk) if chunk.stage >= stage => return,
             Chunk::Proto(_) => {}
         }
-        let stage_start = std::time::Instant::now();
         match stage {
             StagedChunkEnum::Empty => panic!("empty stage"),
             StagedChunkEnum::StructureStart => match generator {
@@ -684,16 +795,19 @@ impl Cache {
                 }
             },
             StagedChunkEnum::Lighting => {
-                let mut engine = crate::lighting::LightEngine::new();
-                engine.initialize_light(self, lighting_config);
+                thread_local! {
+                    static LIGHT_ENGINE: std::cell::RefCell<crate::lighting::LightEngine> =
+                        std::cell::RefCell::new(crate::lighting::LightEngine::new());
+                }
+                LIGHT_ENGINE.with_borrow_mut(|engine| {
+                    engine.initialize_light(self, lighting_config, generator.dimension().has_skylight);
+                });
                 // Only set stage to Lighting if it wasn't already at Lighting or higher
                 // (initialize_light may short-circuit for already-lit chunks)
                 let chunk = self.chunks[mid].get_proto_chunk_mut();
                 if chunk.stage < StagedChunkEnum::Lighting {
                     chunk.stage = StagedChunkEnum::Lighting;
                 }
-                // Engine's internal state is cleared by initialize_light() and will be dropped here
-                drop(engine);
             }
             StagedChunkEnum::Spawn => {
                 ProtoChunk::spawn_mobs(self, block_registry);
@@ -703,7 +817,6 @@ impl Cache {
                 debug_assert_eq!(chunk.stage, StagedChunkEnum::Spawn);
                 chunk.stage = StagedChunkEnum::Full;
                 self.chunks[mid].upgrade_to_level_chunk(generator.dimension(), lighting_config);
-                let _duration = stage_start.elapsed();
             }
             StagedChunkEnum::None => {}
         }

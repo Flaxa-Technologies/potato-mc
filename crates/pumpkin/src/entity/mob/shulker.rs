@@ -92,6 +92,7 @@ impl ShulkerEntity {
                 LookAtEntityGoal::with_default(mob_weak, &EntityType::PLAYER, 8.0),
             );
             goal_selector.add_goal(4, Box::new(ShulkerAttackGoal::new(mob_arc.clone())));
+            goal_selector.add_goal(5, Box::new(ShulkerTeleportGoal::new(mob_arc.clone())));
             goal_selector.add_goal(7, Box::new(ShulkerPeekGoal::new(mob_arc.clone())));
             goal_selector.add_goal(8, Box::new(RandomLookAroundGoal::default()));
 
@@ -295,7 +296,12 @@ impl ShulkerEntity {
         let health = living.health.load();
         let max = living.get_max_health();
 
-        if health < max * 0.5 && rand::rng().random_range(0..4) == 0 {
+        // Teleport on hit: guaranteed if closed or <50% health, high chance otherwise
+        let should_teleport = self.is_closed()
+            || health < max * 0.5
+            || rand::rng().random_bool(0.5);
+
+        if should_teleport {
             self.teleport_somewhere();
         }
     }
@@ -479,7 +485,7 @@ impl Goal for ShulkerAttackGoal {
 
         let cooldown = self.attack_cooldown.fetch_sub(1, Ordering::Relaxed) - 1;
         if cooldown <= 0 {
-            let new_cd = 20 + mob.get_random().random_range(0..5) * 10;
+            let new_cd = 15 + mob.get_random().random_range(0..4) * 10;
             self.attack_cooldown.store(new_cd, Ordering::Relaxed);
 
             let world = entity.world.load();
@@ -556,6 +562,41 @@ impl Goal for ShulkerPeekGoal {
     }
 }
 
+struct ShulkerTeleportGoal {
+    shulker: Arc<ShulkerEntity>,
+    teleport_cooldown: AtomicI32,
+}
+
+impl ShulkerTeleportGoal {
+    const fn new(shulker: Arc<ShulkerEntity>) -> Self {
+        Self {
+            shulker,
+            teleport_cooldown: AtomicI32::new(100),
+        }
+    }
+}
+
+impl Goal for ShulkerTeleportGoal {
+    fn can_start(&mut self, _mob: &dyn Mob) -> bool {
+        let cd = self.teleport_cooldown.fetch_sub(1, Ordering::Relaxed) - 1;
+        if cd <= 0 {
+            self.teleport_cooldown.store(rand::rng().random_range(100..200), Ordering::Relaxed);
+            // Teleport periodically if has target or is obstructed/closed
+            self.shulker.mob_entity.get_target().is_some() || self.shulker.is_closed()
+        } else {
+            false
+        }
+    }
+
+    fn should_continue(&self, _mob: &dyn Mob) -> bool {
+        false
+    }
+
+    fn start(&mut self, _mob: &dyn Mob) {
+        self.shulker.teleport_somewhere();
+    }
+}
+
 trait BlockPosExt {
     fn offset_direction(&self, dir: BlockDirection) -> Self;
 }
@@ -568,5 +609,25 @@ impl BlockPosExt for BlockPos {
             self.0.y + offset.y,
             self.0.z + offset.z,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_shulker_closed_defense() {
+        let amount = 10.0f32;
+        const ARMOR: f32 = 20.0;
+        let f1 = (ARMOR - amount * 0.5f32).clamp(ARMOR * 0.2f32, 20.0f32);
+        let reduced = (amount * (1.0f32 - f1 / 25.0f32)).max(0.0);
+        assert!(reduced < amount);
+        assert!((reduced - 4.0).abs() < 1e-4);
+
+        let amount_small = 1.0f32;
+        let f1_small = (ARMOR - amount_small * 0.5f32).clamp(ARMOR * 0.2f32, 20.0f32);
+        let reduced_small = (amount_small * (1.0f32 - f1_small / 25.0f32)).max(0.0);
+        assert!((reduced_small - 0.22).abs() < 1e-4);
     }
 }

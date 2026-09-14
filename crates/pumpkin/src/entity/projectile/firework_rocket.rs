@@ -109,11 +109,12 @@ impl EntityBase for FireworkRocketEntity {
 
                 if shooter.is_fall_flying() {
                     let mut boost_cancelled = false;
-                    if let Some(player) = world.get_player_by_id(shooter_id)
+                    let player_opt = world.get_player_by_id(shooter_id);
+                    if let Some(player) = &player_opt
                         && let Some(server) = world.server.upgrade()
                     {
                         let mut event = crate::plugin::api::events::player::player_elytra_boost::PlayerElytraBoostEvent {
-                            player,
+                            player: player.clone(),
                             firework_id: entity.entity_id,
                             cancelled: false,
                         };
@@ -129,7 +130,11 @@ impl EntityBase for FireworkRocketEntity {
                         let new_shooter_vel =
                             shooter_vel + (rotation * 0.1 + (rotation * 1.5 - shooter_vel) * 0.5);
 
-                        shooter.set_velocity(new_shooter_vel);
+                        if let Some(player) = player_opt {
+                            player.set_velocity(new_shooter_vel);
+                        } else {
+                            shooter.set_velocity(new_shooter_vel);
+                        }
 
                         entity.set_pos(shooter.pos.load());
                         entity.set_velocity(new_shooter_vel);

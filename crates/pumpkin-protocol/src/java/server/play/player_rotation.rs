@@ -18,7 +18,8 @@ impl<'a> ServerPacket<'a> for SPlayerRotation {
         Ok(Self {
             yaw: bytebuf.get_f32_be()?,
             pitch: bytebuf.get_f32_be()?,
-            ground: bytebuf.get_bool()?,
+            // Since 1.21.2 this byte is a flags field: bit 0 = on_ground, bit 1 = in_wall.
+            ground: bytebuf.get_u8()? & 0x01 != 0,
         })
     }
 }
@@ -32,7 +33,7 @@ impl crate::ClientPacket for SPlayerRotation {
         use crate::ser::NetworkWriteExt;
         write.write_f32_be(self.yaw)?;
         write.write_f32_be(self.pitch)?;
-        write.write_bool(self.ground)?;
+        write.write_u8(self.ground as u8)?;
         Ok(())
     }
 }

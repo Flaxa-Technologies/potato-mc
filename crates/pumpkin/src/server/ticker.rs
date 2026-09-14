@@ -1,0 +1,119 @@
+use super::server_test_manager::drain_game_test_queue;
+
+use crate::{
+    STOP_INTERRUPT,
+    plugin::server::{
+        server_tick_end::ServerTickEndEvent, server_tick_start::ServerTickStartEvent,
+    },
+    server::Server,
+};
+use pumpkin_gametest::GameTestRunner;
+use std::sync::Arc;
+use std::sync::atomic::Ordering;
+use std::time::{Duration, Instant};
+use tracing::debug;
+
+pub struct Ticker;
+
+impl Ticker {
+    /// Runs the main server tick loop on a dedicated thread.
+    pub fn run(server: &Arc<Server>) {
+        let _guard = server.runtime.enter();
+        let mut next_tick = Instant::now();
+        let mut game_test_runner = GameTestRunner::new();
+
+        'ticker: loop {
+            let tick_start_time = Instant::now();
+            let manager = &server.tick_rate_manager;
+
+            manager.tick();
+
+            let tick_number = server.tick_count.load(Ordering::Relaxed);
+            if server.plugin_manager.has_handlers::<ServerTickStartEvent>() {
+                server.runtime.block_on(
+                    server
+                        .plugin_manager
+                        .fire(server, &mut ServerTickStartEvent::new(tick_number)),
+                );
+            }
+
+            let should_tick_game_tests = manager.runs_normally() || manager.is_sprinting();
+
+            if manager.is_sprinting() {
+                manager.start_sprint_tick_work();
+                server.tick();
+
+                if manager.end_sprint_tick_work() {
+                    manager.finish_tick_sprint(server);
+                }
+            } else {
+                server.tick();
+            }
+
+            if should_tick_game_tests {
+                server.runtime.block_on(async {
+                    drain_game_test_queue(server, &mut game_test_runner).await;
+                    game_test_runner.tick().await;
+                });
+            }
+
+            let tick_duration_nanos = tick_start_time.elapsed().as_nanos() as i64;
+
+            let tick_number = server.tick_count.load(Ordering::Relaxed);
+            if server.plugin_manager.has_handlers::<ServerTickEndEvent>() {
+                server.runtime.block_on(server.plugin_manager.fire(
+                    server,
+                    &mut ServerTickEndEvent::new(tick_number, tick_duration_nanos),
+                ));
+            }
+
+            server.update_tick_times(tick_duration_nanos);
+
+            let tick_interval = if manager.is_sprinting() {
+                Duration::ZERO
+            } else {
+                Duration::from_nanos(manager.nanoseconds_per_tick() as u64)
+            };
+
+            next_tick += tick_interval;
+
+            if STOP_INTERRUPT.is_cancelled() {
+                break 'ticker;
+            }
+
+            // High-precision tick wait loop:
+            // Prevents early wakeups on Windows where OS timer resolution (15.6ms) can cause
+            // tokio::time::sleep to return early and run unthrottled ticks faster than 20 TPS.
+            while Instant::now() < next_tick {
+                let now = Instant::now();
+                let remaining = next_tick.saturating_duration_since(now);
+                if remaining > Duration::from_millis(2) {
+                    let cancelled = STOP_INTERRUPT.clone();
+                    let sleep_target = remaining - Duration::from_millis(1);
+                    server.runtime.block_on(async {
+                        tokio::select! {
+                            () = tokio::time::sleep(sleep_target) => {},
+                            () = cancelled.cancelled() => {},
+                        }
+                    });
+
+                    if STOP_INTERRUPT.is_cancelled() {
+                        break 'ticker;
+                    }
+                } else {
+                    std::hint::spin_loop();
+                }
+            }
+
+            // Death Spiral Prevention / Catch-up Clamping
+            // If the server fell behind the scheduled tick, clamp next_tick to now
+            // so we don't run a burst of back-to-back ticks with zero sleep.
+            let now = Instant::now();
+            if now > next_tick {
+                next_tick = now;
+            }
+        }
+
+        debug!("Ticker stopped");
+    }
+}

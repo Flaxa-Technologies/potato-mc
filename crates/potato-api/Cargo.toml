@@ -1,0 +1,13 @@
+[package]
+name = "potato-api"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0"
+description = "Native Rust Plugin API and SDK for PotatoMC"
+
+[dependencies]
+uuid = { version = "1.10", features = ["v4", "serde"] }
+serde = { version = "1.0", features = ["derive", "std"] }
+serde_json = { version = "1.0", features = ["std"] }
+serde_yaml = "0.9"
+

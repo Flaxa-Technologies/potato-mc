@@ -8,6 +8,7 @@
     <a href="https://potatomc.flaxa.in/"><img src="https://img.shields.io/badge/Website-potatomc.flaxa.in-blue?style=for-the-badge" alt="Website"/></a>
     <a href="https://discord.com/invite/UUaNzfZyc6"><img src="https://img.shields.io/badge/Discord-Join%20Flaxa%20Studios-5865F2?style=for-the-badge&amp;logo=discord&amp;logoColor=white" alt="Discord"/></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-green?style=for-the-badge" alt="License"/></a>
+    <a href="https://github.com/Pumpkin-MC/Pumpkin"><img src="https://img.shields.io/badge/Fork%20of-PumpkinMC-orange.svg?style=for-the-badge" alt="PumpkinMC Upstream"/></a>
   </p>
 </div>
 
@@ -26,7 +27,7 @@ Whether hosting massive survival networks, minigames, or custom game modes, Pota
 - **Blazing Native Performance**: Written entirely in Rust with zero garbage collection overhead and minimal idle memory usage (~30MB vs 1GB+ on Java).
 - **Native Rust Plugin Architecture (`potato-api`)**: Write plugins directly in native Rust (`.dll` / `.so`). Experience zero-cost FFI abstractions, direct memory safety, and synchronous execution without JVM overhead.
 - **Cross-Play Networking**: Native dual-stack support for both Minecraft Java Edition and Minecraft Bedrock Edition clients.
-- **Concurrent Chunk Pipeline**: Asynchronous world generation, radial distance streaming, and lock-free entity processing across all available CPU cores.
+- **Concurrent Chunk Pipeline**: Asynchronous world generation, radial distance streaming, batched StageCache chunk system, and lock-free entity processing across all available CPU cores.
 - **Memory Safety**: Guaranteed compile-time concurrency and memory safety, eliminating memory leaks and data races at the architectural level.
 
 ---
@@ -38,9 +39,9 @@ Grab the official pre-compiled assets from [GitHub Releases](https://github.com/
 
 | Platform / Host | Download Link | Description |
 |---|---|---|
-| **Pterodactyl & Game Panels** | [**server.jar**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/server.jar) | Universal Bootstrap JAR for Pterodactyl, Multicraft, and existing game hosts |
-| **Windows** | [**pumpkin-windows-x86_64.exe**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-windows-x86_64.exe) | 64-bit Standalone Windows Binary |
-| **Linux** | [**pumpkin-linux-x86_64**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-linux-x86_64) | 64-bit MUSL Static Linux Binary |
+| **Pterodactyl & Game Panels** | [**server.jar**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.2.0/server.jar) | Universal Bootstrap JAR for Pterodactyl, Multicraft, and existing game hosts |
+| **Windows** | [**potato-windows-x86_64.exe**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.2.0/potato-windows-x86_64.exe) | 64-bit Standalone Windows Binary |
+| **Linux** | [**potato-linux-x86_64**](https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.2.0/potato-linux-x86_64) | 64-bit MUSL Static Linux Binary |
 
 ### 2. Run the Server
 
@@ -53,19 +54,37 @@ The bootstrap JAR will automatically detect your OS/architecture, download the m
 
 #### On Standalone Windows:
 ```powershell
-# Place pumpkin-windows-x86_64.exe in your server folder and run:
-.\pumpkin-windows-x86_64.exe
+# Place potato-windows-x86_64.exe in your server folder and run:
+.\potato-windows-x86_64.exe
 ```
 
 #### On Standalone Linux:
 ```bash
 # Download and grant execution permissions:
-curl -LO https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.1.0/pumpkin-linux-x86_64
-chmod +x pumpkin-linux-x86_64
-./pumpkin-linux-x86_64
+curl -LO https://github.com/Flaxa-Technologies/potato-mc/releases/download/beta.2.0/potato-linux-x86_64
+chmod +x potato-linux-x86_64
+./potato-linux-x86_64
 ```
 
 The server will automatically generate world data and configuration files on first launch.
+
+---
+
+## Building From Source
+
+Prerequisites:
+- [Rust toolchain](https://rustup.rs/) (1.85+ recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/Flaxa-Technologies/potato-mc.git
+cd potato-mc
+
+# Build optimized release binary
+cargo build --release -p pumpkin --bin pumpkin
+```
+
+The compiled binary will be located in `target/release/pumpkin` (or `pumpkin.exe` on Windows).
 
 ---
 
@@ -114,6 +133,8 @@ We are actively seeking:
 
 ---
 
-<div align="center">
-  <sub>Built with care by <a href="https://potatomc.flaxa.in/">Flaxa Studios</a>.</sub>
-</div>
+## Attribution & License
+
+PotatoMC is an open-source project based on [PumpkinMC](https://pumpkinmc.org/). We are grateful to the PumpkinMC contributors for their foundational work.
+
+PotatoMC is released under the [GNU General Public License v3.0](LICENSE).

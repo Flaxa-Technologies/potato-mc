@@ -1,0 +1,569 @@
+use pumpkin_data::structures::{
+    ConcentricRingsStructurePlacement, FrequencyReductionMethod, RandomSpreadStructurePlacement,
+    SpreadType, StructurePlacement, StructurePlacementCalculator, StructurePlacementType,
+    StructureSet,
+};
+use pumpkin_util::{
+    math::floor_div,
+    random::{
+        RandomGenerator, RandomImpl, get_large_feature_seed, get_region_seed,
+        legacy_rand::LegacyRand,
+    },
+};
+use std::f64::consts::PI;
+use std::sync::{Arc, OnceLock};
+
+use crate::ProtoChunk;
+use dashmap::DashMap;
+use pumpkin_data::structures::StructureKeys;
+
+use super::structures::StructurePosition;
+
+/// Diagnostic counter: how many times a thread found a structure-start slot already
+/// being computed by another thread and had to wait (thundering-herd events prevented).
+pub static JIGSAW_CONCURRENT_MISSES: std::sync::atomic::AtomicU64 =
+    std::sync::atomic::AtomicU64::new(0);
+
+/// A thread-safe global cache for structures that require world-wide placement calculations
+/// rather than localized chunk-based math (e.g., Strongholds using Concentric Rings).
+///
+/// This prevents chunk generation deadlocks by allowing chunks to query a pre-calculated
+/// mathematical layout in `O(1)` time instead of triggering cascading chunk loads.
+pub struct GlobalStructureCache {
+    /// A cached list of mathematically predicted (`chunk_x`, `chunk_z`) coordinates.
+    stronghold_chunks: OnceLock<Vec<(i32, i32)>>,
+    /// Single-flight memoized structure starts.
+    ///
+    /// Each entry holds an `Arc<OnceLock<Option<StructurePosition>>>`.
+    /// The first thread to insert a slot runs `compute()` inside `get_or_init`;
+    /// every other thread that arrives before or after completion receives the
+    /// same Arc and blocks on `get_or_init` until the first thread finishes.
+    /// Result: each (key, chunk_x, chunk_z) triplet is expanded at most once.
+    structure_starts: OnceLock<DashMap<(StructureKeys, i32, i32), Arc<OnceLock<Option<StructurePosition>>>>>,
+    /// Memoized column heights for Jigsaw structures to prevent redundant 3D density sampling.
+    column_heights: OnceLock<DashMap<(i32, i32, bool), i32>>,
+}
+impl GlobalStructureCache {
+    /// Creates a new, empty global structure cache.
+    #[must_use]
+    pub const fn new() -> Self {
+        Self {
+            stronghold_chunks: OnceLock::new(),
+            structure_starts: OnceLock::new(),
+            column_heights: OnceLock::new(),
+        }
+    }
+
+    pub fn get_or_compute_column_height(
+        &self,
+        x: i32,
+        z: i32,
+        ocean_floor: bool,
+        compute: impl FnOnce() -> i32,
+    ) -> i32 {
+        let cache = self.column_heights.get_or_init(DashMap::new);
+        let key = (x, z, ocean_floor);
+        if let Some(height) = cache.get(&key) {
+            return *height;
+        }
+        let height = compute();
+        cache.insert(key, height);
+        height
+    }
+
+    pub fn get_stronghold_chunks(&self) -> &[(i32, i32)] {
+        self.stronghold_chunks
+            .get()
+            .map_or(&[], std::vec::Vec::as_slice)
+    }
+
+    /// Returns the memoized structure start for the given structure and start chunk,
+    /// computing it via `compute` on the first request and caching the result.
+    ///
+    /// **Single-flight guarantee**: concurrent threads requesting the same
+    /// `(key, chunk_x, chunk_z)` triplet all share one `Arc<OnceLock>`.
+    /// Only the first thread runs `compute()`; all others block on `get_or_init`
+    /// until it completes, then clone the cached result.  This eliminates the
+    /// thundering-herd where N workers each independently pay the full Jigsaw
+    /// expansion cost for the same structure chunk.
+    pub fn get_or_compute_structure_start(
+        &self,
+        key: StructureKeys,
+        chunk_x: i32,
+        chunk_z: i32,
+        compute: impl FnOnce() -> Option<StructurePosition>,
+    ) -> Option<StructurePosition> {
+        let cache = self.structure_starts.get_or_init(DashMap::new);
+        let map_key = (key, chunk_x, chunk_z);
+
+        // Fast path: slot already fully computed (OnceLock already initialised).
+        if let Some(slot) = cache.get(&map_key) {
+            if let Some(result) = slot.get() {
+                return result.clone();
+            }
+            // The slot exists but get_or_init hasn't returned yet on the owning
+            // thread — track this as a prevented concurrent expansion.
+            let slot_arc = slot.clone();
+            drop(slot); // release DashMap shard before blocking
+            JIGSAW_CONCURRENT_MISSES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            return slot_arc.get_or_init(|| compute()).clone();
+        }
+
+        // Slow path: atomically get-or-insert a fresh Arc<OnceLock> for this key.
+        // entry().or_insert_with holds the shard write-lock only long enough to
+        // store the Arc; concurrent threads racing on the same key all get the
+        // same Arc once the winner releases the shard.
+        let slot_arc = cache
+            .entry(map_key)
+            .or_insert_with(|| Arc::new(OnceLock::new()))
+            .clone();
+
+        // get_or_init ensures exactly one thread executes compute().
+        // Threads that lose the race block here until the winner's result is stored.
+        let t_jigsaw = std::time::Instant::now();
+        let result = slot_arc.get_or_init(|| {
+            let v = compute();
+            if crate::generation::proto_chunk::STRUCT_REF_PROF_ENABLED
+                .load(std::sync::atomic::Ordering::Relaxed)
+            {
+                crate::generation::proto_chunk::PROF_JIGSAW_COUNT
+                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                crate::generation::proto_chunk::PROF_JIGSAW_NS
+                    .fetch_add(
+                        t_jigsaw.elapsed().as_nanos() as u64,
+                        std::sync::atomic::Ordering::Relaxed,
+                    );
+            }
+            v
+        });
+        result.clone()
+    }
+
+    /// Retrieves the list of chunk coordinates for Concentric Ring structures.
+    /// If the cache is empty, it calculates the 128 ring positions mathematically.
+    #[allow(clippy::cast_precision_loss)]
+    pub fn get_or_calculate_strongholds(
+        &self,
+        seed: i64,
+        placement: &ConcentricRingsStructurePlacement,
+        biome_supplier: &ProtoChunk,
+        allowed_biomes: &[u16],
+    ) -> &[(i32, i32)] {
+        self.stronghold_chunks.get_or_init(|| {
+            let mut chunks = Vec::with_capacity(placement.count as usize);
+
+            let distance_param = f64::from(placement.distance); // Usually 32
+            let mut spread = placement.spread; // Usually 3
+            let count = placement.count; // Usually 128
+
+            // The random generator for stronghold placement is based on the world seed and a fixed salt.
+            // This ensures that the stronghold layout is consistent across all worlds with the same seed.
+            let mut random = RandomGenerator::Legacy(LegacyRand::from_seed(seed as u64));
+
+            // The initial angle includes a random rotation jitter for the whole world
+            let mut angle = random.next_f64() * PI * 2.0;
+            let mut position_in_circle = 0;
+            let mut circle = 0;
+
+            for i in 0..count {
+                // 1. Distance Formula
+                // dist = (4 * spacing) + (spacing * ring_index * 6) + (random_jitter)
+                // The jitter is +/- (spacing * 1.25)
+                let dist = 4.0 * distance_param
+                    + distance_param * f64::from(circle) * 6.0
+                    + (random.next_f64() - 0.5) * (distance_param * 2.5);
+
+                let initial_x = (angle.cos() * dist + 0.5).floor() as i32;
+                let initial_z = (angle.sin() * dist + 0.5).floor() as i32;
+
+                // 2. RNG Forking
+                // We must fork/split the random generator for the biome search.
+                // This keeps the main angle/distance sequence identical across all worlds.
+                let fork_seed = random.next_i64();
+
+                let mut biome_search_generator =
+                    RandomGenerator::Legacy(LegacyRand::from_seed(fork_seed as u64));
+
+                // 3. Reservoir Sampling Biome Search
+                // Strongholds search the entire 112-block square
+                // and pick one valid location at random (Reservoir Sampling).
+                let mut found_pos = None;
+                let mut found_count = 0;
+
+                let center_block_x = (initial_x << 4) + 8;
+                let center_block_z = (initial_z << 4) + 8;
+                let step = 4;
+                let search_radius = 112;
+
+                let mut allowed_mask = [0u64; 4];
+                for &b in allowed_biomes {
+                    if b < 256 {
+                        allowed_mask[(b as usize) >> 6] |= 1u64 << (b & 63);
+                    }
+                }
+
+                for dz in (-search_radius..=search_radius).step_by(step as usize) {
+                    for dx in (-search_radius..=search_radius).step_by(step as usize) {
+                        let test_x = center_block_x + dx;
+                        let test_z = center_block_z + dz;
+
+                        let biome = biome_supplier.get_biome(test_x, 0, test_z);
+
+                        if (allowed_mask[(biome.id as usize) >> 6] & (1u64 << (biome.id & 63))) != 0 {
+                            found_count += 1;
+                            // Reservoir sampling: Pick the Nth valid biome with 1/N probability
+                            if found_pos.is_none()
+                                || biome_search_generator.next_bounded_i32(found_count) == 0
+                            {
+                                found_pos = Some((test_x >> 4, test_z >> 4));
+                            }
+                        }
+                    }
+                }
+
+                let (final_chunk_x, final_chunk_z) = found_pos.unwrap_or((initial_x, initial_z));
+                chunks.push((final_chunk_x, final_chunk_z));
+
+                // 4. Dynamic Ring Progression
+                angle += (PI * 2.0) / f64::from(spread);
+                position_in_circle += 1;
+
+                if position_in_circle == spread {
+                    circle += 1;
+                    position_in_circle = 0;
+
+                    spread += 2 * spread / (circle + 1);
+                    spread = spread.min(count - i);
+                    angle += random.next_f64() * PI * 2.0;
+                }
+            }
+            chunks
+        })
+    }
+}
+
+impl Default for GlobalStructureCache {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+pub fn is_structure_set_chunk_in_range(
+    set: &StructureSet,
+    seed: i64,
+    source_x: i32,
+    source_z: i32,
+    range: i32,
+) -> bool {
+    match &set.placement.placement_type {
+        StructurePlacementType::RandomSpread(spread) => {
+            let min_rx = floor_div(source_x - range, spread.spacing);
+            let max_rx = floor_div(source_x + range, spread.spacing);
+            let min_rz = floor_div(source_z - range, spread.spacing);
+            let max_rz = floor_div(source_z + range, spread.spacing);
+
+            for rx in min_rx..=max_rx {
+                for rz in min_rz..=max_rz {
+                    let (cx, cz) =
+                        get_structure_chunk_in_region(spread, seed, rx, rz, set.placement.salt);
+                    if cx >= source_x - range
+                        && cx <= source_x + range
+                        && cz >= source_z - range
+                        && cz <= source_z + range
+                        && apply_frequency_reduction(
+                            set.placement.frequency_reduction_method,
+                            seed,
+                            cx,
+                            cz,
+                            set.placement.salt,
+                            set.placement.frequency.unwrap_or(1.0),
+                        )
+                    {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+        StructurePlacementType::ConcentricRings(_) => false,
+    }
+}
+
+#[must_use]
+// #[expect(clippy::too_many_arguments)]
+pub fn should_generate_structure(
+    placement: &StructurePlacement,
+    calculator: &StructurePlacementCalculator,
+    chunk_x: i32,
+    chunk_z: i32,
+    global_cache: &GlobalStructureCache,
+    biome_supplier: &ProtoChunk,
+    allowed_biomes: &[u16],
+) -> bool {
+    is_start_chunk(
+        &placement.placement_type,
+        calculator,
+        chunk_x,
+        chunk_z,
+        placement.salt,
+        global_cache,
+        biome_supplier,
+        allowed_biomes,
+    ) && apply_frequency_reduction(
+        placement.frequency_reduction_method,
+        calculator.seed,
+        chunk_x,
+        chunk_z,
+        placement.salt,
+        placement.frequency.unwrap_or(1.0),
+    ) && !placement.exclusion_zone.as_ref().is_some_and(|zone| {
+        let set_name = zone
+            .other_set
+            .strip_prefix("minecraft:")
+            .unwrap_or(zone.other_set);
+        StructureSet::get(set_name).is_some_and(|set| {
+            is_structure_set_chunk_in_range(set, calculator.seed, chunk_x, chunk_z, zone.chunk_count)
+        })
+    })
+}
+
+pub fn apply_frequency_reduction(
+    method: Option<FrequencyReductionMethod>,
+    seed: i64,
+    chunk_x: i32,
+    chunk_z: i32,
+    salt: u32,
+    frequency: f32,
+) -> bool {
+    if frequency >= 1.0 {
+        return true;
+    }
+
+    let method = method.unwrap_or(FrequencyReductionMethod::Default);
+    should_generate_frequency(method, seed, chunk_x, chunk_z, salt, frequency)
+}
+
+fn should_generate_frequency(
+    method: FrequencyReductionMethod,
+    seed: i64,
+    chunk_x: i32,
+    chunk_z: i32,
+    salt: u32,
+    frequency: f32,
+) -> bool {
+    match method {
+        FrequencyReductionMethod::Default => {
+            let region_seed = get_region_seed(seed as u64, salt as i32, chunk_x, chunk_z as u32);
+            let mut random = LegacyRand::from_seed(region_seed);
+            random.next_f32() < frequency
+        }
+        FrequencyReductionMethod::LegacyType1 => {
+            let x = chunk_x >> 4;
+            let z = chunk_z >> 4;
+            let mut random = LegacyRand::from_seed((i64::from(x ^ (z << 4)) ^ seed) as u64);
+            random.next_i32();
+            random.next_bounded_i32((1.0 / frequency) as i32) == 0
+        }
+        FrequencyReductionMethod::LegacyType2 => {
+            let region_seed = get_region_seed(seed as u64, chunk_x, chunk_z, 10387320);
+            let mut random = LegacyRand::from_seed(region_seed);
+            random.next_f32() < frequency
+        }
+        FrequencyReductionMethod::LegacyType3 => {
+            let large_feature_seed = get_large_feature_seed(seed as u64, chunk_x, chunk_z);
+            let mut random = LegacyRand::from_seed(large_feature_seed);
+            random.next_f64() < f64::from(frequency)
+        }
+    }
+}
+
+#[expect(clippy::too_many_arguments)]
+fn is_start_chunk(
+    placement_type: &StructurePlacementType,
+    calculator: &StructurePlacementCalculator,
+    chunk_x: i32,
+    chunk_z: i32,
+    salt: u32,
+    global_cache: &GlobalStructureCache,
+    biome_supplier: &ProtoChunk,
+    allowed_biomes: &[u16],
+) -> bool {
+    match placement_type {
+        StructurePlacementType::RandomSpread(placement) => {
+            is_start_chunk_random_spread(placement, calculator, chunk_x, chunk_z, salt)
+        }
+        StructurePlacementType::ConcentricRings(placement) => {
+            let min_dist_chunks = (placement.distance * 4 - (placement.distance * 5 / 4) - 8).max(0);
+            if chunk_x.saturating_mul(chunk_x) + chunk_z.saturating_mul(chunk_z) < min_dist_chunks * min_dist_chunks {
+                return false;
+            }
+            let strongholds = global_cache.get_or_calculate_strongholds(
+                calculator.seed,
+                placement,
+                biome_supplier,
+                allowed_biomes,
+            );
+            strongholds.contains(&(chunk_x, chunk_z))
+        }
+    }
+}
+
+/// Predicts the exact chunk (X, Z) where a structure will attempt to spawn in a given Region (rx, rz).
+#[must_use]
+pub fn get_structure_chunk_in_region(
+    placement: &RandomSpreadStructurePlacement,
+    seed: i64,
+    rx: i32,
+    rz: i32,
+    salt: u32,
+) -> (i32, i32) {
+    let region_seed = get_region_seed(seed as u64, rx, rz, salt);
+    let mut random = RandomGenerator::Legacy(LegacyRand::from_seed(region_seed));
+
+    let bound = placement.spacing - placement.separation;
+    let spread_type = placement.spread_type.unwrap_or(SpreadType::Linear);
+
+    let rand_x = spread_type.get(&mut random, bound);
+    let rand_z = spread_type.get(&mut random, bound);
+
+    (
+        rx * placement.spacing + rand_x,
+        rz * placement.spacing + rand_z,
+    )
+}
+
+fn get_start_chunk_random_spread(
+    placement: &RandomSpreadStructurePlacement,
+    seed: i64,
+    chunk_x: i32,
+    chunk_z: i32,
+    salt: u32,
+) -> (i32, i32) {
+    // 1. Find the region
+    let rx = floor_div(chunk_x, placement.spacing);
+    let rz = floor_div(chunk_z, placement.spacing);
+
+    // 2. Get the structure chunk for that region
+    get_structure_chunk_in_region(placement, seed, rx, rz, salt)
+}
+
+fn is_start_chunk_random_spread(
+    placement: &RandomSpreadStructurePlacement,
+    calculator: &StructurePlacementCalculator,
+    chunk_x: i32,
+    chunk_z: i32,
+    salt: u32,
+) -> bool {
+    let bound = placement.spacing - placement.separation;
+    if bound <= 0 {
+        return false;
+    }
+    let local_x = chunk_x.rem_euclid(placement.spacing);
+    let local_z = chunk_z.rem_euclid(placement.spacing);
+    if local_x >= bound || local_z >= bound {
+        return false;
+    }
+    let pos = get_start_chunk_random_spread(placement, calculator.seed, chunk_x, chunk_z, salt);
+    (chunk_x == pos.0) && (chunk_z == pos.1)
+}
+#[cfg(test)]
+mod tests {
+    use pumpkin_data::{
+        dimension::Dimension,
+        structures::{RandomSpreadStructurePlacement, StructurePlacementCalculator, StructureSet},
+    };
+    use pumpkin_util::random::{
+        RandomGenerator, RandomImpl, get_region_seed, legacy_rand::LegacyRand,
+    };
+    use pumpkin_util::world_seed::Seed;
+
+    use crate::{
+        ProtoChunk,
+        generation::{
+            get_world_gen,
+            structure::placement::{
+                GlobalStructureCache, apply_frequency_reduction, get_start_chunk_random_spread,
+                is_start_chunk, should_generate_structure,
+            },
+        },
+    };
+
+    #[test]
+    fn get_start_chunk_random() {
+        let region_seed = get_region_seed(123, 1, 1, 14357620);
+        let mut random = RandomGenerator::Legacy(LegacyRand::from_seed(region_seed));
+        assert_eq!(random.next_bounded_i32(32 - 8), 8);
+    }
+
+    #[test]
+    fn get_start_chunk() {
+        let random = RandomSpreadStructurePlacement {
+            spacing: 32,
+            separation: 8,
+            spread_type: None,
+        };
+        let (x, z) = get_start_chunk_random_spread(&random, 123, 1, 1, 14357620);
+        assert_eq!(x, 5);
+        assert_eq!(z, 4);
+    }
+
+    #[test]
+    fn pillager_outposts_respect_the_village_exclusion_zone() {
+        let seed = 0;
+        let calculator = StructurePlacementCalculator::new(seed);
+        let cache = GlobalStructureCache::new();
+        let generator = get_world_gen(
+            Seed(seed as u64),
+            Dimension::OVERWORLD,
+            false,
+            Vec::new(),
+            String::new(),
+        );
+        let chunk = ProtoChunk::new(0, 0, &generator);
+        let outposts = &StructureSet::PILLAGER_OUTPOSTS;
+        let villages = &StructureSet::VILLAGES;
+        let excluded = (-1002, -595);
+        assert!(is_start_chunk(
+            &outposts.placement.placement_type,
+            &calculator,
+            excluded.0,
+            excluded.1,
+            outposts.placement.salt,
+            &cache,
+            &chunk,
+            &[],
+        ));
+        assert!(apply_frequency_reduction(
+            outposts.placement.frequency_reduction_method,
+            seed,
+            excluded.0,
+            excluded.1,
+            outposts.placement.salt,
+            outposts.placement.frequency.unwrap(),
+        ));
+        assert!((-10..=10).any(|dx| {
+            (-10..=10).any(|dz| {
+                is_start_chunk(
+                    &villages.placement.placement_type,
+                    &calculator,
+                    excluded.0 + dx,
+                    excluded.1 + dz,
+                    villages.placement.salt,
+                    &cache,
+                    &chunk,
+                    &[],
+                )
+            })
+        }));
+
+        assert!(!should_generate_structure(
+            &outposts.placement,
+            &calculator,
+            excluded.0,
+            excluded.1,
+            &cache,
+            &chunk,
+            &[],
+        ));
+    }
+}

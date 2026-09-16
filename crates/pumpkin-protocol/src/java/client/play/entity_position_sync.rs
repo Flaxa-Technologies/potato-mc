@@ -68,16 +68,27 @@ impl ClientPacket for CEntityPositionSync {
         version: &JavaMinecraftVersion,
     ) -> Result<(), crate::ser::WritingError> {
         write.write_var_int(&self.entity_id)?;
-        write.write_f64_be(self.position.x)?;
-        write.write_f64_be(self.position.y)?;
-        write.write_f64_be(self.position.z)?;
-        if version >= &JavaMinecraftVersion::V_1_21_2 {
+        if version >= &JavaMinecraftVersion::V_26_3 {
+            // In 26.3, PositionPath replaces delta movement. Type::LINEAR is ordinal 0.
+            write.write_var_int(&VarInt(0))?;
+            write.write_f64_be(self.position.x)?;
+            write.write_f64_be(self.position.y)?;
+            write.write_f64_be(self.position.z)?;
+            write.write_f32_be(self.yaw)?;
+            write.write_f32_be(self.pitch)?;
+        } else if version >= &JavaMinecraftVersion::V_1_21_2 {
+            write.write_f64_be(self.position.x)?;
+            write.write_f64_be(self.position.y)?;
+            write.write_f64_be(self.position.z)?;
             write.write_f64_be(self.delta.x)?;
             write.write_f64_be(self.delta.y)?;
             write.write_f64_be(self.delta.z)?;
             write.write_f32_be(self.yaw)?;
             write.write_f32_be(self.pitch)?;
         } else {
+            write.write_f64_be(self.position.x)?;
+            write.write_f64_be(self.position.y)?;
+            write.write_f64_be(self.position.z)?;
             write.write_u8((self.yaw.rem_euclid(360.0) * 256.0 / 360.0).floor() as u8)?;
             write.write_u8((self.pitch.rem_euclid(360.0) * 256.0 / 360.0).floor() as u8)?;
         }

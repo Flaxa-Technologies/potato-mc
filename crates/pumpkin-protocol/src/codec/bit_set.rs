@@ -98,7 +98,7 @@ impl BitSet {
         write: &mut impl Write,
         version: &JavaMinecraftVersion,
     ) -> Result<(), WritingError> {
-        if *version >= JavaMinecraftVersion::V_1_20_5 {
+        if *version >= JavaMinecraftVersion::V_26_3 {
             let bytes = self.to_bytes();
             write.write_var_int(&VarInt(bytes.len() as i32))?;
             write.write_slice(&bytes)?;

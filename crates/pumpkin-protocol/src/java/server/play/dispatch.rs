@@ -1,4 +1,4 @@
-﻿use pumpkin_data::packet::PacketId;
+use pumpkin_data::packet::PacketId;
 use pumpkin_data::packet::serverbound::play as play_packets;
 use pumpkin_util::version::JavaMinecraftVersion;
 
@@ -118,6 +118,7 @@ const PAIRS: &[(PacketId, ServerboundPlayPacketKind)] = &[
     (play_packets::SET_CARRIED_ITEM, ServerboundPlayPacketKind::SetHeldItem),
     (play_packets::SET_CREATIVE_MODE_SLOT, ServerboundPlayPacketKind::SetCreativeSlot),
     (play_packets::SWING_ARM, ServerboundPlayPacketKind::SwingArm),
+    (play_packets::PUNCH, ServerboundPlayPacketKind::SwingArm),
     (play_packets::SIGN_UPDATE, ServerboundPlayPacketKind::UpdateSign),
     (play_packets::EDIT_BOOK, ServerboundPlayPacketKind::EditBook),
     (play_packets::USE_ITEM_ON, ServerboundPlayPacketKind::UseItemOn),
@@ -175,6 +176,7 @@ pub static PLAY_ID_MAP_1_21_9: [Option<ServerboundPlayPacketKind>; 128] = build_
 pub static PLAY_ID_MAP_1_21_11: [Option<ServerboundPlayPacketKind>; 128] = build_play_table(JavaMinecraftVersion::V_1_21_11);
 pub static PLAY_ID_MAP_26_1: [Option<ServerboundPlayPacketKind>; 128] = build_play_table(JavaMinecraftVersion::V_26_1);
 pub static PLAY_ID_MAP_26_2: [Option<ServerboundPlayPacketKind>; 128] = build_play_table(JavaMinecraftVersion::V_26_2);
+pub static PLAY_ID_MAP_26_3: [Option<ServerboundPlayPacketKind>; 128] = build_play_table(JavaMinecraftVersion::V_26_3);
 
 #[inline]
 #[must_use]
@@ -197,6 +199,7 @@ pub fn resolve_play_packet_kind(
         JavaMinecraftVersion::V_1_21_11 => &PLAY_ID_MAP_1_21_11,
         JavaMinecraftVersion::V_26_1 => &PLAY_ID_MAP_26_1,
         JavaMinecraftVersion::V_26_2 => &PLAY_ID_MAP_26_2,
+        JavaMinecraftVersion::V_26_3 => &PLAY_ID_MAP_26_3,
         _ => return build_play_table(*version)[idx],
     };
     table[idx]

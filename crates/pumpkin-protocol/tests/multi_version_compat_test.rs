@@ -36,7 +36,8 @@ use pumpkin_protocol::java::client::config::{
 };
 use pumpkin_protocol::java::client::login::CLoginSuccess;
 use pumpkin_protocol::java::client::play::{
-    CChunkData, CLogin, CParticle, CSpawnEntity, CUpdateEntityPosRot, PlayerSpawnData,
+    CChunkData, CEntityPositionSync, CLogin, CParticle, CSpawnEntity, CUpdateEntityPosRot,
+    PlayerSpawnData,
 };
 use pumpkin_protocol::java::client::status::{CPingResponse, CStatusResponse};
 use pumpkin_protocol::java::server::config::{SAcknowledgeFinishConfig, SKnownPacks};
@@ -1579,6 +1580,75 @@ mod tier4_real_world_simulation {
             .write(&mut buf_age, &JavaMinecraftVersion::V_1_21_11)
             .unwrap();
         assert!(buf_age.is_empty(), "AGE_LOCKED must not be serialized for 1.21.11");
+    }
+
+    #[test]
+    fn test_entity_position_sync_26_3_position_path_and_legacy_delta() {
+        let packet = CEntityPositionSync::new(
+            VarInt(42),
+            Vector3::new(10.0, 64.0, -20.0),
+            Vector3::new(0.5, 0.0, -0.5),
+            90.0,
+            0.0,
+            true,
+        );
+
+        // 26.3 uses PositionPath (LINEAR: VarInt(0) + 3 f64 doubles = 25 bytes), NO delta, yaw/pitch f32, on_ground bool
+        let mut buf_26_3 = Vec::new();
+        packet
+            .write_packet_data(&mut buf_26_3, &JavaMinecraftVersion::V_26_3)
+            .unwrap();
+        // entity_id (VarInt: 1 byte) + path_type (VarInt: 1 byte) + 3*8 + 4 + 4 + 1 = 35 bytes
+        assert_eq!(buf_26_3.len(), 35, "26.3 entity_position_sync payload length");
+
+        // 26.2 includes delta movement: entity_id (1) + pos (24) + delta (24) + yaw/pitch (8) + on_ground (1) = 58 bytes
+        let mut buf_26_2 = Vec::new();
+        packet
+            .write_packet_data(&mut buf_26_2, &JavaMinecraftVersion::V_26_2)
+            .unwrap();
+        assert_eq!(buf_26_2.len(), 58, "26.2 entity_position_sync payload length");
+    }
+
+    #[test]
+    fn test_bitset_encoding_long_array_vs_byte_array() {
+        use pumpkin_protocol::codec::bit_set::BitSet;
+
+        let bitset = BitSet::from_u64(0b1011);
+
+        // For <= 26.2, BitSet encodes as long array: VarInt(num_longs) + i64
+        let mut buf_26_2 = Vec::new();
+        bitset
+            .encode_for_version(&mut buf_26_2, &JavaMinecraftVersion::V_26_2)
+            .unwrap();
+        // VarInt(1) + 8 bytes i64 = 9 bytes
+        assert_eq!(buf_26_2.len(), 9, "26.2 BitSet must encode as long array (9 bytes)");
+
+        // For >= 26.3, BitSet encodes as byte array: VarInt(num_bytes) + bytes
+        let mut buf_26_3 = Vec::new();
+        bitset
+            .encode_for_version(&mut buf_26_3, &JavaMinecraftVersion::V_26_3)
+            .unwrap();
+        // VarInt(1) + 1 byte (0b1011 = 11) = 2 bytes
+        assert_eq!(buf_26_3.len(), 2, "26.3 BitSet must encode as byte array (2 bytes)");
+    }
+
+    #[test]
+    fn test_punch_packet_26_3_resolves_to_swing_arm() {
+        use pumpkin_protocol::java::server::play::{ServerboundPlayPacketKind, resolve_play_packet_kind};
+        use pumpkin_protocol::java::server::play::SSwingArm;
+
+        // Packet ID 46 in 26.3 is PUNCH, which should route to SwingArm
+        let kind = resolve_play_packet_kind(46, &JavaMinecraftVersion::V_26_3);
+        assert_eq!(
+            kind,
+            Some(ServerboundPlayPacketKind::SwingArm),
+            "Packet 46 on 26.3 must resolve to SwingArm"
+        );
+
+        // In 26.3, SSwingArm reads 0 bytes (unit packet) without error
+        let mut empty_payload: &[u8] = &[];
+        let swing = SSwingArm::read(&mut empty_payload, &JavaMinecraftVersion::V_26_3).unwrap();
+        assert_eq!(swing.hand.0, 0);
     }
 }
 

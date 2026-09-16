@@ -36,7 +36,7 @@ use pumpkin_protocol::java::client::config::{
 };
 use pumpkin_protocol::java::client::login::CLoginSuccess;
 use pumpkin_protocol::java::client::play::{
-    CChunkData, CLogin, CParticle, CSpawnEntity, PlayerSpawnData,
+    CChunkData, CLogin, CParticle, CSpawnEntity, CUpdateEntityPosRot, PlayerSpawnData,
 };
 use pumpkin_protocol::java::client::status::{CPingResponse, CStatusResponse};
 use pumpkin_protocol::java::server::config::{SAcknowledgeFinishConfig, SKnownPacks};
@@ -1465,6 +1465,55 @@ mod tier4_real_world_simulation {
             buf_26_2.len() + 9,
             "26.3 particle packet must be 9 bytes longer than 26.2 (2 extra speed floats + randomizationType VarInt)"
         );
+    }
+    #[test]
+    fn test_entity_pos_rot_26_3_properties_varint() {
+        use pumpkin_protocol::ser::NetworkReadExt;
+        use pumpkin_util::math::vector3::Vector3;
+        // For 26.3, the wire format is:
+        //   VarInt entityId
+        //   VarInt properties (onGround in bit 0, stepCount in bits 1+)
+        //   i16 deltaX, i16 deltaY, i16 deltaZ
+        //   u8 yaw, u8 pitch
+        // For pre-26.3 (e.g., 26.2):
+        //   VarInt entityId
+        //   i16 deltaX, i16 deltaY, i16 deltaZ
+        //   u8 yaw, u8 pitch
+        //   bool onGround
+        let packet = CUpdateEntityPosRot::new(
+            VarInt(42),
+            Vector3::new(100i16, 200i16, 300i16),
+            128u8, // yaw
+            64u8,  // pitch
+            true,  // on_ground
+        );
+
+        let mut buf_26_2 = Vec::new();
+        packet.write_packet_data(&mut buf_26_2, &JavaMinecraftVersion::V_26_2).unwrap();
+        let mut buf_26_3 = Vec::new();
+        packet.write_packet_data(&mut buf_26_3, &JavaMinecraftVersion::V_26_3).unwrap();
+
+        // Both formats have the same number of bytes:
+        // 26.2: VarInt(42)=1B + i16*3=6B + u8*2=2B + bool=1B = 10B
+        // 26.3: VarInt(42)=1B + VarInt(1)=1B + i16*3=6B + u8*2=2B = 10B
+        // (onGround bool moved into properties; net size same)
+        assert_eq!(
+            buf_26_2.len(), buf_26_3.len(),
+            "26.2 and 26.3 entity pos_rot must be same total length"
+        );
+
+        // In 26.3, byte[1] is the properties VarInt (value=1 for onGround=true, stepCount=0)
+        // In 26.2, byte[1] is the first byte of deltaX i16 (high byte of 100 = 0x00)
+        let mut slice_26_3 = buf_26_3.as_slice();
+        let entity_id = slice_26_3.get_var_int().unwrap();
+        assert_eq!(entity_id, VarInt(42));
+        let properties = slice_26_3.get_var_int().unwrap();
+        assert_eq!(properties.0 & 1, 1, "onGround must be bit 0 of properties");
+        assert_eq!(properties.0 >> 1, 0, "stepCount must be 0 for a simple Linear move");
+        let dx = slice_26_3.get_i16_be().unwrap();
+        let dy = slice_26_3.get_i16_be().unwrap();
+        let dz = slice_26_3.get_i16_be().unwrap();
+        assert_eq!((dx, dy, dz), (100, 200, 300));
     }
     #[test]
     fn test_fox_metadata_indices_across_versions() {

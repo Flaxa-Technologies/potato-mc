@@ -153,7 +153,7 @@ pub enum ActionType {
     InteractAt = 2,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct InvalidActionType;
 
 impl TryFrom<i32> for ActionType {

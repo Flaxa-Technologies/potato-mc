@@ -149,6 +149,7 @@ impl PendingConnection {
         server: &Arc<Server>,
         profile: &GameProfile,
     ) -> Option<PacketHandlerResult> {
+        info!("UUID of player {} is {}", profile.name, profile.id);
         let mut pre_login_event =
             crate::plugin::api::events::player::async_player_pre_login::AsyncPlayerPreLoginEvent {
                 player_name: profile.name.clone(),

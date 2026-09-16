@@ -587,3 +587,275 @@ impl SoundEvent {
         Self { sound_name, range }
     }
 }
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ResolvableInt {
+    Constant(i32),
+    Reference(String),
+}
+
+impl ResolvableInt {
+    pub fn read_data(data: &NbtTag) -> Option<Self> {
+        if let Some(val) = data.extract_int() {
+            Some(Self::Constant(val))
+        } else {
+            data.extract_string().map(|val| Self::Reference(val.to_string()))
+        }
+    }
+
+    pub fn write_data(&self) -> NbtTag {
+        match self {
+            Self::Constant(val) => NbtTag::Int(*val),
+            Self::Reference(key) => NbtTag::String(key.clone().into()),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ResolvableFloat {
+    Constant(f32),
+    Reference(String),
+}
+
+impl ResolvableFloat {
+    pub fn read_data(data: &NbtTag) -> Option<Self> {
+        if let Some(val) = data.extract_float() {
+            Some(Self::Constant(val))
+        } else {
+            data.extract_string().map(|val| Self::Reference(val.to_string()))
+        }
+    }
+
+    pub fn write_data(&self) -> NbtTag {
+        match self {
+            Self::Constant(val) => NbtTag::Float(*val),
+            Self::Reference(key) => NbtTag::String(key.clone().into()),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct CompostableImpl {
+    pub layers: ResolvableInt,
+}
+
+impl CompostableImpl {
+    pub fn read_data(data: &NbtTag) -> Option<Self> {
+        if let NbtTag::Compound(compound) = data {
+            let layers_tag = compound.get("layers")?;
+            let layers = ResolvableInt::read_data(layers_tag)?;
+            Some(Self { layers })
+        } else if let Some(layers) = ResolvableInt::read_data(data) {
+            Some(Self { layers })
+        } else {
+            None
+        }
+    }
+}
+
+impl DataComponentImpl for CompostableImpl {
+    fn write_data(&self) -> NbtTag {
+        let mut compound = NbtCompound::new();
+        compound.put("layers", self.layers.write_data());
+        NbtTag::Compound(compound)
+    }
+    default_impl!(Compostable);
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct CookingFuelImpl {
+    pub burn_time: ResolvableInt,
+    pub speed_multiplier: ResolvableFloat,
+}
+
+impl CookingFuelImpl {
+    pub fn read_data(data: &NbtTag) -> Option<Self> {
+        let compound = data.extract_compound()?;
+        let burn_time = ResolvableInt::read_data(compound.get("burn_time")?)?;
+        let speed_multiplier = compound
+            .get("speed_multiplier")
+            .and_then(ResolvableFloat::read_data)
+            .unwrap_or(ResolvableFloat::Constant(1.0));
+        Some(Self {
+            burn_time,
+            speed_multiplier,
+        })
+    }
+}
+
+impl DataComponentImpl for CookingFuelImpl {
+    fn write_data(&self) -> NbtTag {
+        let mut compound = NbtCompound::new();
+        compound.put("burn_time", self.burn_time.write_data());
+        compound.put("speed_multiplier", self.speed_multiplier.write_data());
+        NbtTag::Compound(compound)
+    }
+    default_impl!(CookingFuel);
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct BrewingFuelImpl {
+    pub uses: ResolvableInt,
+    pub speed_multiplier: ResolvableFloat,
+}
+
+impl BrewingFuelImpl {
+    pub fn read_data(data: &NbtTag) -> Option<Self> {
+        let compound = data.extract_compound()?;
+        let uses = ResolvableInt::read_data(compound.get("uses")?)?;
+        let speed_multiplier = compound
+            .get("speed_multiplier")
+            .and_then(ResolvableFloat::read_data)
+            .unwrap_or(ResolvableFloat::Constant(1.0));
+        Some(Self {
+            uses,
+            speed_multiplier,
+        })
+    }
+}
+
+impl DataComponentImpl for BrewingFuelImpl {
+    fn write_data(&self) -> NbtTag {
+        let mut compound = NbtCompound::new();
+        compound.put("uses", self.uses.write_data());
+        compound.put("speed_multiplier", self.speed_multiplier.write_data());
+        NbtTag::Compound(compound)
+    }
+    default_impl!(BrewingFuel);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct CushionColorImpl {
+    pub color: String,
+}
+
+impl CushionColorImpl {
+    pub fn read_data(data: &NbtTag) -> Option<Self> {
+        data.extract_string().map(|color| Self {
+            color: color.to_string(),
+        })
+    }
+}
+
+impl DataComponentImpl for CushionColorImpl {
+    fn write_data(&self) -> NbtTag {
+        NbtTag::String(self.color.clone().into())
+    }
+    default_impl!(CushionColor);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct MobVisibilityImpl;
+impl MobVisibilityImpl {
+    pub const fn read_data(_data: &NbtTag) -> Option<Self> {
+        Some(Self)
+    }
+}
+impl DataComponentImpl for MobVisibilityImpl {
+    default_impl!(MobVisibility);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct AttackAnimationImpl {
+    pub duration: i32,
+}
+impl AttackAnimationImpl {
+    pub fn read_data(data: &NbtTag) -> Option<Self> {
+        let duration = data.extract_compound().and_then(|c| c.get_int("duration")).unwrap_or(6);
+        Some(Self { duration })
+    }
+}
+impl DataComponentImpl for AttackAnimationImpl {
+    fn write_data(&self) -> NbtTag {
+        let mut c = NbtCompound::new();
+        c.put_int("duration", self.duration);
+        NbtTag::Compound(c)
+    }
+    default_impl!(AttackAnimation);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct InteractAnimationImpl {
+    pub duration: i32,
+}
+impl InteractAnimationImpl {
+    pub fn read_data(data: &NbtTag) -> Option<Self> {
+        let duration = data.extract_compound().and_then(|c| c.get_int("duration")).unwrap_or(6);
+        Some(Self { duration })
+    }
+}
+impl DataComponentImpl for InteractAnimationImpl {
+    fn write_data(&self) -> NbtTag {
+        let mut c = NbtCompound::new();
+        c.put_int("duration", self.duration);
+        NbtTag::Compound(c)
+    }
+    default_impl!(InteractAnimation);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct BlockTransformerImpl;
+impl BlockTransformerImpl {
+    pub const fn read_data(_data: &NbtTag) -> Option<Self> {
+        Some(Self)
+    }
+}
+impl DataComponentImpl for BlockTransformerImpl {
+    default_impl!(BlockTransformer);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct VillagerFoodImpl;
+impl VillagerFoodImpl {
+    pub const fn read_data(_data: &NbtTag) -> Option<Self> {
+        Some(Self)
+    }
+}
+impl DataComponentImpl for VillagerFoodImpl {
+    default_impl!(VillagerFood);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct ProvidesPotteryPatternImpl;
+impl ProvidesPotteryPatternImpl {
+    pub const fn read_data(_data: &NbtTag) -> Option<Self> {
+        Some(Self)
+    }
+}
+impl DataComponentImpl for ProvidesPotteryPatternImpl {
+    default_impl!(ProvidesPotteryPattern);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct SignTextFrontImpl;
+impl SignTextFrontImpl {
+    pub const fn read_data(_data: &NbtTag) -> Option<Self> {
+        Some(Self)
+    }
+}
+impl DataComponentImpl for SignTextFrontImpl {
+    default_impl!(SignTextFront);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct SignTextBackImpl;
+impl SignTextBackImpl {
+    pub const fn read_data(_data: &NbtTag) -> Option<Self> {
+        Some(Self)
+    }
+}
+impl DataComponentImpl for SignTextBackImpl {
+    default_impl!(SignTextBack);
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct WaxedImpl;
+impl WaxedImpl {
+    pub const fn read_data(_data: &NbtTag) -> Option<Self> {
+        Some(Self)
+    }
+}
+impl DataComponentImpl for WaxedImpl {
+    default_impl!(Waxed);
+}
+

@@ -1072,6 +1072,21 @@ pub fn deserialize(
         DataComponent::CatCollar => Ok(CatCollarImpl::deserialize(seq)?.to_dyn()),
         DataComponent::SheepColor => Ok(SheepColorImpl::deserialize(seq)?.to_dyn()),
         DataComponent::ShulkerColor => Ok(ShulkerColorImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::Compostable => Ok(CompostableImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::CookingFuel => Ok(CookingFuelImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::BrewingFuel => Ok(BrewingFuelImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::MobVisibility => Ok(MobVisibilityImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::AttackAnimation => Ok(AttackAnimationImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::InteractAnimation => Ok(InteractAnimationImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::BlockTransformer => Ok(BlockTransformerImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::VillagerFood => Ok(VillagerFoodImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::ProvidesPotteryPattern => {
+            Ok(ProvidesPotteryPatternImpl::deserialize(seq)?.to_dyn())
+        }
+        DataComponent::SignTextFront => Ok(SignTextFrontImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::SignTextBack => Ok(SignTextBackImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::Waxed => Ok(WaxedImpl::deserialize(seq)?.to_dyn()),
+        DataComponent::CushionColor => Ok(CushionColorImpl::deserialize(seq)?.to_dyn()),
     }
 }
 
@@ -1211,6 +1226,21 @@ pub fn serialize(
         DataComponent::CatCollar => get::<CatCollarImpl>(value).serialize(seq),
         DataComponent::SheepColor => get::<SheepColorImpl>(value).serialize(seq),
         DataComponent::ShulkerColor => get::<ShulkerColorImpl>(value).serialize(seq),
+        DataComponent::Compostable => get::<CompostableImpl>(value).serialize(seq),
+        DataComponent::CookingFuel => get::<CookingFuelImpl>(value).serialize(seq),
+        DataComponent::BrewingFuel => get::<BrewingFuelImpl>(value).serialize(seq),
+        DataComponent::MobVisibility => get::<MobVisibilityImpl>(value).serialize(seq),
+        DataComponent::AttackAnimation => get::<AttackAnimationImpl>(value).serialize(seq),
+        DataComponent::InteractAnimation => get::<InteractAnimationImpl>(value).serialize(seq),
+        DataComponent::BlockTransformer => get::<BlockTransformerImpl>(value).serialize(seq),
+        DataComponent::VillagerFood => get::<VillagerFoodImpl>(value).serialize(seq),
+        DataComponent::ProvidesPotteryPattern => {
+            get::<ProvidesPotteryPatternImpl>(value).serialize(seq)
+        }
+        DataComponent::SignTextFront => get::<SignTextFrontImpl>(value).serialize(seq),
+        DataComponent::SignTextBack => get::<SignTextBackImpl>(value).serialize(seq),
+        DataComponent::Waxed => get::<WaxedImpl>(value).serialize(seq),
+        DataComponent::CushionColor => get::<CushionColorImpl>(value).serialize(seq),
     }
 }
 
@@ -2810,6 +2840,209 @@ impl DataComponentCodec<Self> for BreakSoundImpl {
 
     fn deserialize(seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
         let _ = seq.get_var_int()?;
+        Ok(Self)
+    }
+}
+
+impl DataComponentCodec<Self> for CompostableImpl {
+    fn serialize(&self, seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        match &self.layers {
+            ResolvableInt::Constant(val) => {
+                seq.write_bool(true)?;
+                seq.write_i32(*val)
+            }
+            ResolvableInt::Reference(key) => {
+                seq.write_bool(false)?;
+                seq.write_string(key)
+            }
+        }
+    }
+
+    fn deserialize(seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        let is_constant = seq.get_bool()?;
+        let layers = if is_constant {
+            ResolvableInt::Constant(seq.get_i32()?)
+        } else {
+            ResolvableInt::Reference(seq.get_str()?.to_string())
+        };
+        Ok(Self { layers })
+    }
+}
+
+impl DataComponentCodec<Self> for CookingFuelImpl {
+    fn serialize(&self, seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        match &self.burn_time {
+            ResolvableInt::Constant(val) => {
+                seq.write_bool(true)?;
+                seq.write_i32(*val)?;
+            }
+            ResolvableInt::Reference(key) => {
+                seq.write_bool(false)?;
+                seq.write_string(key)?;
+            }
+        }
+        match &self.speed_multiplier {
+            ResolvableFloat::Constant(val) => {
+                seq.write_bool(true)?;
+                seq.write_f32(*val)
+            }
+            ResolvableFloat::Reference(key) => {
+                seq.write_bool(false)?;
+                seq.write_string(key)
+            }
+        }
+    }
+
+    fn deserialize(seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        let burn_time = if seq.get_bool()? {
+            ResolvableInt::Constant(seq.get_i32()?)
+        } else {
+            ResolvableInt::Reference(seq.get_str()?.to_string())
+        };
+        let speed_multiplier = if seq.get_bool()? {
+            ResolvableFloat::Constant(seq.get_f32()?)
+        } else {
+            ResolvableFloat::Reference(seq.get_str()?.to_string())
+        };
+        Ok(Self {
+            burn_time,
+            speed_multiplier,
+        })
+    }
+}
+
+impl DataComponentCodec<Self> for BrewingFuelImpl {
+    fn serialize(&self, seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        match &self.uses {
+            ResolvableInt::Constant(val) => {
+                seq.write_bool(true)?;
+                seq.write_i32(*val)?;
+            }
+            ResolvableInt::Reference(key) => {
+                seq.write_bool(false)?;
+                seq.write_string(key)?;
+            }
+        }
+        match &self.speed_multiplier {
+            ResolvableFloat::Constant(val) => {
+                seq.write_bool(true)?;
+                seq.write_f32(*val)
+            }
+            ResolvableFloat::Reference(key) => {
+                seq.write_bool(false)?;
+                seq.write_string(key)
+            }
+        }
+    }
+
+    fn deserialize(seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        let uses = if seq.get_bool()? {
+            ResolvableInt::Constant(seq.get_i32()?)
+        } else {
+            ResolvableInt::Reference(seq.get_str()?.to_string())
+        };
+        let speed_multiplier = if seq.get_bool()? {
+            ResolvableFloat::Constant(seq.get_f32()?)
+        } else {
+            ResolvableFloat::Reference(seq.get_str()?.to_string())
+        };
+        Ok(Self {
+            uses,
+            speed_multiplier,
+        })
+    }
+}
+
+impl DataComponentCodec<Self> for CushionColorImpl {
+    fn serialize(&self, seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        seq.write_string(&self.color)
+    }
+
+    fn deserialize(seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        let color = seq.get_str()?.to_string();
+        Ok(Self { color })
+    }
+}
+
+impl DataComponentCodec<Self> for MobVisibilityImpl {
+    fn serialize(&self, _seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        Ok(())
+    }
+    fn deserialize(_seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        Ok(Self)
+    }
+}
+
+impl DataComponentCodec<Self> for AttackAnimationImpl {
+    fn serialize(&self, seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        seq.write_var_int(&VarInt(self.duration))
+    }
+    fn deserialize(seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        let duration = seq.get_var_int()?.0;
+        Ok(Self { duration })
+    }
+}
+
+impl DataComponentCodec<Self> for InteractAnimationImpl {
+    fn serialize(&self, seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        seq.write_var_int(&VarInt(self.duration))
+    }
+    fn deserialize(seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        let duration = seq.get_var_int()?.0;
+        Ok(Self { duration })
+    }
+}
+
+impl DataComponentCodec<Self> for BlockTransformerImpl {
+    fn serialize(&self, _seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        Ok(())
+    }
+    fn deserialize(_seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        Ok(Self)
+    }
+}
+
+impl DataComponentCodec<Self> for VillagerFoodImpl {
+    fn serialize(&self, _seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        Ok(())
+    }
+    fn deserialize(_seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        Ok(Self)
+    }
+}
+
+impl DataComponentCodec<Self> for ProvidesPotteryPatternImpl {
+    fn serialize(&self, _seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        Ok(())
+    }
+    fn deserialize(_seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        Ok(Self)
+    }
+}
+
+impl DataComponentCodec<Self> for SignTextFrontImpl {
+    fn serialize(&self, _seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        Ok(())
+    }
+    fn deserialize(_seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        Ok(Self)
+    }
+}
+
+impl DataComponentCodec<Self> for SignTextBackImpl {
+    fn serialize(&self, _seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        Ok(())
+    }
+    fn deserialize(_seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
+        Ok(Self)
+    }
+}
+
+impl DataComponentCodec<Self> for WaxedImpl {
+    fn serialize(&self, _seq: &mut impl NetworkWriteExt) -> Result<(), WritingError> {
+        Ok(())
+    }
+    fn deserialize(_seq: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
         Ok(Self)
     }
 }

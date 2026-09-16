@@ -1,5 +1,5 @@
 use crate::VarInt;
-use crate::codec::item_stack_seralizer::OptionalItemStackHash;
+use crate::codec::item_stack_seralizer::{ItemStackSerializer, OptionalItemStackHash};
 use crate::{
     ServerPacket,
     ser::{NetworkReadExt, ReadingError},
@@ -53,14 +53,24 @@ impl<'a> ServerPacket<'a> for SClickSlot {
             ));
         }
         let mut array_of_changed_slots = Vec::with_capacity(length_of_array.0 as usize);
-        for _ in 0..length_of_array.0 {
-            array_of_changed_slots.push((
-                bytebuf.get_i16_be()?,
-                OptionalItemStackHash::read(&mut bytebuf)?,
-            ));
-        }
-
-        let carried_item = OptionalItemStackHash::read(&mut bytebuf)?;
+        let carried_item = if *version >= JavaMinecraftVersion::V_26_1 {
+            for _ in 0..length_of_array.0 {
+                array_of_changed_slots.push((
+                    bytebuf.get_i16_be()?,
+                    OptionalItemStackHash::read(&mut bytebuf)?,
+                ));
+            }
+            OptionalItemStackHash::read(&mut bytebuf)?
+        } else {
+            for _ in 0..length_of_array.0 {
+                let slot = bytebuf.get_i16_be()?;
+                let item = ItemStackSerializer::read_with_version(&mut bytebuf, version)?;
+                array_of_changed_slots
+                    .push((slot, OptionalItemStackHash::from_stack(item.0.as_ref())));
+            }
+            let carried = ItemStackSerializer::read_with_version(&mut bytebuf, version)?;
+            OptionalItemStackHash::from_stack(carried.0.as_ref())
+        };
 
         Ok(Self {
             sync_id,
@@ -165,3 +175,74 @@ impl TryFrom<i32> for SlotActionType {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ser::NetworkWriteExt;
+
+    #[test]
+    fn test_click_slot_empty_slots_1_21() {
+        let mut buf = Vec::new();
+        // sync_id (VarInt on 1.21)
+        buf.write_var_int(&VarInt(1)).unwrap();
+        // revision (VarInt on >= 1.17.1)
+        buf.write_var_int(&VarInt(5)).unwrap();
+        // slot (i16)
+        buf.write_i16_be(36).unwrap();
+        // button (i8)
+        buf.write_i8(0).unwrap();
+        // mode (VarInt)
+        buf.write_var_int(&VarInt(0)).unwrap(); // Pickup
+        // length_of_array (VarInt)
+        buf.write_var_int(&VarInt(1)).unwrap();
+        // changed slot 0: slot index = 36, empty item stack on 1.21 (item_count = 0)
+        buf.write_i16_be(36).unwrap();
+        buf.write_var_int(&VarInt(0)).unwrap(); // 0 count -> empty stack
+        // carried item: empty stack on 1.21 (item_count = 0)
+        buf.write_var_int(&VarInt(0)).unwrap();
+
+        let mut slice = &buf[..];
+        let packet = SClickSlot::read(&mut slice, &JavaMinecraftVersion::V_1_21).unwrap();
+        assert_eq!(packet.sync_id.0, 1);
+        assert_eq!(packet.revision.0, 5);
+        assert_eq!(packet.slot, 36);
+        assert_eq!(packet.button, 0);
+        assert_eq!(packet.mode, SlotActionType::Pickup);
+        assert_eq!(packet.array_of_changed_slots.len(), 1);
+        assert_eq!(packet.array_of_changed_slots[0].0, 36);
+        assert_eq!(packet.array_of_changed_slots[0].1, OptionalItemStackHash(None));
+        assert_eq!(packet.carried_item, OptionalItemStackHash(None));
+        assert!(slice.is_empty());
+    }
+
+    #[test]
+    fn test_click_slot_empty_slots_26_1() {
+        let mut buf = Vec::new();
+        // sync_id (VarInt)
+        buf.write_var_int(&VarInt(1)).unwrap();
+        // revision (VarInt)
+        buf.write_var_int(&VarInt(5)).unwrap();
+        // slot (i16)
+        buf.write_i16_be(36).unwrap();
+        // button (i8)
+        buf.write_i8(0).unwrap();
+        // mode (VarInt)
+        buf.write_var_int(&VarInt(0)).unwrap();
+        // length_of_array (VarInt)
+        buf.write_var_int(&VarInt(1)).unwrap();
+        // changed slot 0: slot index = 36, empty OptionalItemStackHash (bool = false)
+        buf.write_i16_be(36).unwrap();
+        buf.write_bool(false).unwrap();
+        // carried item: empty OptionalItemStackHash (bool = false)
+        buf.write_bool(false).unwrap();
+
+        let mut slice = &buf[..];
+        let packet = SClickSlot::read(&mut slice, &JavaMinecraftVersion::V_26_1).unwrap();
+        assert_eq!(packet.sync_id.0, 1);
+        assert_eq!(packet.array_of_changed_slots[0].1, OptionalItemStackHash(None));
+        assert_eq!(packet.carried_item, OptionalItemStackHash(None));
+        assert!(slice.is_empty());
+    }
+}
+

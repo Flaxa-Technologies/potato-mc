@@ -2,12 +2,11 @@ use crate::entity::player::Player;
 use base64::{Engine as _, engine::general_purpose};
 use core::error;
 use pumpkin_config::BasicConfiguration;
-use pumpkin_data::packet::{CURRENT_MC_VERSION, LOWEST_SUPPORTED_MC_VERSION};
 use pumpkin_protocol::{
     Players, Sample, StatusResponse, Version,
     java::client::{config::CPluginMessage, status::CStatusResponse},
 };
-use pumpkin_util::text::TextComponent;
+use pumpkin_util::{text::TextComponent, version::JavaMinecraftVersion};
 use std::{fs, path::Path};
 use tracing::{debug, info, warn};
 use uuid::Uuid;
@@ -94,8 +93,8 @@ impl CachedStatus {
     pub fn get_status_response(&self, client_protocol: i32) -> StatusResponse {
         let mut response = self.status_response.clone();
 
-        let supported_min = LOWEST_SUPPORTED_MC_VERSION.protocol_version();
-        let supported_max = CURRENT_MC_VERSION.protocol_version();
+        let supported_min = JavaMinecraftVersion::V_1_21.protocol_version();
+        let supported_max = JavaMinecraftVersion::V_26_3.protocol_version();
 
         if client_protocol >= supported_min
             && client_protocol <= supported_max
@@ -209,8 +208,8 @@ impl CachedStatus {
 
         StatusResponse {
             version: Some(Version {
-                name: format!("{LOWEST_SUPPORTED_MC_VERSION}-{CURRENT_MC_VERSION}"),
-                protocol: LOWEST_SUPPORTED_MC_VERSION.protocol_version() as u32,
+                name: "1.21 - 26.2".to_string(),
+                protocol: JavaMinecraftVersion::V_1_21.protocol_version() as u32,
             }),
             players: Some(Players {
                 max: max_players,

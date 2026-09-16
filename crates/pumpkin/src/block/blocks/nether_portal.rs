@@ -33,11 +33,12 @@ impl NetherPortalBlock {
             id if id == EntityType::PLAYER.id => (world
                 .get_player_by_id(entity.get_entity().entity_id))
             .map_or(80, |player| match player.gamemode.load() {
-                GameMode::Creative => {
+                GameMode::Creative | GameMode::Spectator => {
                     level_info.game_rules.players_nether_portal_creative_delay as u32
                 }
                 _ => level_info.game_rules.players_nether_portal_default_delay as u32,
             }),
+
             _ => 0,
         }
     }

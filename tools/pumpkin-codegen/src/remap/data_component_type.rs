@@ -99,6 +99,42 @@ pub fn build() -> TokenStream {
         }
     }
 
+    let remap_internal_to_26_3: &[u32] = &[
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 45, 46, 47, 0, 48,
+        49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
+        71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 88, 89, 90, 91, 92, 93, 94, 95, 96,
+        97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114,
+        115, 116, 84, 85, 86, 87, 40, 41, 43, 44, 117, 118, 119, 120, 121,
+    ];
+    let remap_26_3_to_internal: &[u32] = &[
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 115, 116, 41, 117, 118, 42,
+        43, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65,
+        66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 111, 112, 113, 114, 82,
+        83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103,
+        104, 105, 106, 107, 108, 109, 110, 119, 120, 121, 122, 123,
+    ];
+
+    static_values.extend(quote! {
+        pub static DATA_COMPONENT_TYPE_ID_REMAP_INTERNAL_TO_V_26_3: &[u32] = &[#(#remap_internal_to_26_3),*];
+        pub static DATA_COMPONENT_TYPE_ID_REMAP_V_26_3_TO_INTERNAL: &[u32] = &[#(#remap_26_3_to_internal),*];
+    });
+
+    match_arms_id_for_ver.extend(quote! {
+        pumpkin_util::version::JavaMinecraftVersion::V_26_3 => DATA_COMPONENT_TYPE_ID_REMAP_INTERNAL_TO_V_26_3
+            .get(data_component_type_id as usize)
+            .copied()
+            .unwrap_or(data_component_type_id),
+    });
+
+    match_arms_id_from_ver.extend(quote! {
+        pumpkin_util::version::JavaMinecraftVersion::V_26_3 => DATA_COMPONENT_TYPE_ID_REMAP_V_26_3_TO_INTERNAL
+            .get(data_component_type_id as usize)
+            .copied()
+            .unwrap_or(data_component_type_id),
+    });
+
     quote! {
         use pumpkin_util::version::JavaMinecraftVersion;
 

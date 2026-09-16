@@ -21,7 +21,7 @@ use pumpkin_protocol::{
     },
 };
 use pumpkin_util::{Hand, text::TextComponent};
-use tracing::{debug, trace, warn};
+use tracing::{debug, info, trace, warn};
 
 const BRAND_CHANNEL_PREFIX: &str = "minecraft:brand";
 

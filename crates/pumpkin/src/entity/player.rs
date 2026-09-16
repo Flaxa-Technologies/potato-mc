@@ -1487,7 +1487,10 @@ impl Player {
                 AttackType::Knockback => {
                     knockback_strength += 1.0;
                     self.set_sprinting(false);
+                    let cur_vel = self.living_entity.entity.velocity.load();
+                    self.set_velocity(Vector3::new(cur_vel.x * 0.6, cur_vel.y, cur_vel.z * 0.6));
                 }
+
                 AttackType::Sweeping => {
                     combat::spawn_sweep_particle(attacker_entity, &world, &pos);
 

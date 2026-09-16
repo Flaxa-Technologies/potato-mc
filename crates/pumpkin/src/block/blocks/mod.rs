@@ -140,3 +140,9 @@ pub mod vault;
 
 pub mod potent_sulfur;
 pub mod sulfur_spike;
+
+// 26.3 new block gameplay
+pub mod red_shrub;
+pub mod shelf_mushroom;
+pub mod straw_bed;
+

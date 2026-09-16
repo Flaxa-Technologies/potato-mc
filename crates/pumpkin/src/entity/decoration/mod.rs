@@ -4,3 +4,5 @@ pub mod end_crystal;
 pub mod item_frame;
 pub mod leash_knot;
 pub mod painting;
+pub mod cushion;
+

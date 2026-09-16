@@ -77,6 +77,7 @@ pub enum JavaMinecraftVersion {
     //  26.1: Tiny Takeover
     V_26_1,
     V_26_2,
+    V_26_3,
     /// Fallback for unrecognized protocol versions.
     Unknown,
 }
@@ -139,6 +140,7 @@ impl JavaMinecraftVersion {
             Self::V_1_21_11 => 774,
             Self::V_26_1 => 775,
             Self::V_26_2 => 776,
+            Self::V_26_3 => 777,
             Self::Unknown => -1,
         }
     }
@@ -200,6 +202,7 @@ impl JavaMinecraftVersion {
             774 => Self::V_1_21_11,
             775 => Self::V_26_1,
             776 => Self::V_26_2,
+            777 => Self::V_26_3,
             _ => Self::Unknown,
         }
     }
@@ -220,6 +223,63 @@ impl JavaMinecraftVersion {
     #[must_use]
     pub const fn has_registries(&self) -> bool {
         self.protocol_version() >= Self::V_1_16.protocol_version()
+    }
+
+    /// Returns `true` for versions that use the structured Data Components item format
+    /// introduced in 1.20.5 (protocol 766), replacing legacy NBT item stacks.
+    #[inline]
+    #[must_use]
+    pub const fn has_data_components(&self) -> bool {
+        self.protocol_version() >= Self::V_1_20_5.protocol_version()
+    }
+
+    /// Returns `true` for versions that support the Known Packs negotiation during
+    /// the Configuration state (added in 1.20.5, protocol 766).
+    #[inline]
+    #[must_use]
+    pub const fn supports_known_packs(&self) -> bool {
+        self.protocol_version() >= Self::V_1_20_5.protocol_version()
+    }
+
+    /// Returns `true` for versions that include the sea level field in the Login packet
+    /// (added in 1.21.2, protocol 768).
+    #[inline]
+    #[must_use]
+    pub const fn has_sea_level_in_login(&self) -> bool {
+        self.protocol_version() >= Self::V_1_21_2.protocol_version()
+    }
+
+    /// Returns `true` for versions that include the portal cooldown field in the Login packet
+    /// (added in 1.20, protocol 763).
+    #[inline]
+    #[must_use]
+    pub const fn has_portal_cooldown_in_login(&self) -> bool {
+        self.protocol_version() >= Self::V_1_20.protocol_version()
+    }
+
+    /// Returns `true` for versions that include the `liquid_count` field in chunk section headers
+    /// (added in 26.1, protocol 775).
+    #[inline]
+    #[must_use]
+    pub const fn has_chunk_liquid_count(&self) -> bool {
+        self.protocol_version() >= Self::V_26_1.protocol_version()
+    }
+
+    /// Returns `true` for versions that use a compact indexed heightmap format (added in 1.21.5,
+    /// protocol 770) instead of NBT-encoded heightmaps.
+    #[inline]
+    #[must_use]
+    pub const fn has_indexed_heightmaps(&self) -> bool {
+        self.protocol_version() >= Self::V_1_21_5.protocol_version()
+    }
+
+    /// Returns `true` if the client is within the supported multi-version range
+    /// (1.21 through 26.3, protocols 767–777).
+    #[inline]
+    #[must_use]
+    pub const fn is_in_supported_range(&self) -> bool {
+        let proto = self.protocol_version();
+        proto >= Self::V_1_21.protocol_version() && proto <= Self::V_26_3.protocol_version()
     }
 }
 
@@ -277,6 +337,7 @@ impl std::fmt::Display for JavaMinecraftVersion {
             Self::V_1_21_11 => write!(f, "1.21.11"),
             Self::V_26_1 => write!(f, "26.1"),
             Self::V_26_2 => write!(f, "26.2"),
+            Self::V_26_3 => write!(f, "26.3"),
 
             Self::Unknown => write!(f, "unknown"),
         }
@@ -333,7 +394,7 @@ impl std::fmt::Display for BedrockMinecraftVersion {
 
 #[cfg(test)]
 mod tests {
-    use super::BedrockMinecraftVersion;
+    use super::{BedrockMinecraftVersion, JavaMinecraftVersion};
 
     #[test]
     fn resolves_bedrock_26_45_protocol() {
@@ -342,5 +403,98 @@ mod tests {
         assert_eq!(version, BedrockMinecraftVersion::V_1_26_45);
         assert_eq!(version.protocol_version(), 2169);
         assert_eq!(version.to_string(), "1.26.45");
+    }
+
+    #[test]
+    fn has_data_components_gating() {
+        // 1.20.5 and later have data components
+        assert!(JavaMinecraftVersion::V_1_20_5.has_data_components());
+        assert!(JavaMinecraftVersion::V_1_21.has_data_components());
+        assert!(JavaMinecraftVersion::V_1_21_2.has_data_components());
+        assert!(JavaMinecraftVersion::V_1_21_4.has_data_components());
+        assert!(JavaMinecraftVersion::V_26_1.has_data_components());
+        assert!(JavaMinecraftVersion::V_26_2.has_data_components());
+
+        // Older versions do not
+        assert!(!JavaMinecraftVersion::V_1_20_3.has_data_components());
+        assert!(!JavaMinecraftVersion::V_1_20_2.has_data_components());
+        assert!(!JavaMinecraftVersion::V_1_20.has_data_components());
+    }
+
+    #[test]
+    fn has_chunk_liquid_count_gating() {
+        assert!(JavaMinecraftVersion::V_26_1.has_chunk_liquid_count());
+        assert!(JavaMinecraftVersion::V_26_2.has_chunk_liquid_count());
+        // Versions below 26.1 must not include liquid_count
+        assert!(!JavaMinecraftVersion::V_1_21.has_chunk_liquid_count());
+        assert!(!JavaMinecraftVersion::V_1_21_2.has_chunk_liquid_count());
+        assert!(!JavaMinecraftVersion::V_1_21_4.has_chunk_liquid_count());
+        assert!(!JavaMinecraftVersion::V_1_21_5.has_chunk_liquid_count());
+    }
+
+    #[test]
+    fn has_indexed_heightmaps_gating() {
+        assert!(JavaMinecraftVersion::V_1_21_5.has_indexed_heightmaps());
+        assert!(JavaMinecraftVersion::V_26_1.has_indexed_heightmaps());
+        assert!(JavaMinecraftVersion::V_26_2.has_indexed_heightmaps());
+        // Versions below 1.21.5 use NBT heightmaps
+        assert!(!JavaMinecraftVersion::V_1_21.has_indexed_heightmaps());
+        assert!(!JavaMinecraftVersion::V_1_21_2.has_indexed_heightmaps());
+        assert!(!JavaMinecraftVersion::V_1_21_4.has_indexed_heightmaps());
+    }
+
+    #[test]
+    fn has_sea_level_in_login_gating() {
+        assert!(JavaMinecraftVersion::V_1_21_2.has_sea_level_in_login());
+        assert!(JavaMinecraftVersion::V_1_21_4.has_sea_level_in_login());
+        assert!(JavaMinecraftVersion::V_26_1.has_sea_level_in_login());
+        assert!(JavaMinecraftVersion::V_26_2.has_sea_level_in_login());
+        // 1.21 does not have sea level
+        assert!(!JavaMinecraftVersion::V_1_21.has_sea_level_in_login());
+    }
+
+    #[test]
+    fn is_in_supported_range_checks() {
+        // All target versions are in range
+        for proto in 767u32..=777 {
+            let version = JavaMinecraftVersion::from_protocol(proto);
+            assert!(
+                version.is_in_supported_range(),
+                "Protocol {proto} ({version}) should be in supported range"
+            );
+        }
+        // Legacy versions are not
+        assert!(!JavaMinecraftVersion::V_1_20_5.is_in_supported_range());
+        assert!(!JavaMinecraftVersion::V_1_20_3.is_in_supported_range());
+        assert!(!JavaMinecraftVersion::Unknown.is_in_supported_range());
+    }
+
+    #[test]
+    fn supports_configuration_state_covers_1_21_range() {
+        // All 1.21+ clients support config state
+        assert!(JavaMinecraftVersion::V_1_21.supports_configuration_state());
+        assert!(JavaMinecraftVersion::V_1_21_2.supports_configuration_state());
+        assert!(JavaMinecraftVersion::V_1_21_4.supports_configuration_state());
+        assert!(JavaMinecraftVersion::V_26_1.supports_configuration_state());
+        assert!(JavaMinecraftVersion::V_26_2.supports_configuration_state());
+        assert!(JavaMinecraftVersion::V_26_3.supports_configuration_state());
+    }
+
+    #[test]
+    fn protocol_version_roundtrips_for_all_target_versions() {
+        let target_protocols = [767u32, 768, 769, 770, 771, 772, 773, 774, 775, 776, 777];
+        for proto in target_protocols {
+            let version = JavaMinecraftVersion::from_protocol(proto);
+            assert_ne!(
+                version,
+                JavaMinecraftVersion::Unknown,
+                "Protocol {proto} must resolve to a known version"
+            );
+            assert_eq!(
+                version.protocol_version() as u32,
+                proto,
+                "Protocol {proto} round-trip mismatch"
+            );
+        }
     }
 }

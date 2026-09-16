@@ -15,7 +15,7 @@ use pumpkin_protocol::{
 };
 use pumpkin_util::{text::TextComponent, version::JavaMinecraftVersion};
 use std::sync::Arc;
-use tracing::debug;
+use tracing::{debug, info};
 use uuid::Uuid;
 
 use crate::{

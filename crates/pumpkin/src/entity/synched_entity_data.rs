@@ -56,7 +56,7 @@ pub struct DataItem {
 }
 
 pub struct SynchedEntityData {
-    items: Mutex<HashMap<u8, DataItem>>,
+    items: Mutex<HashMap<u16, DataItem>>,
     is_dirty: AtomicBool,
 }
 
@@ -75,12 +75,17 @@ impl SynchedEntityData {
         }
     }
 
+    #[inline]
+    fn item_key(tracked: &TrackedData) -> u16 {
+        (u16::from(tracked.id.v26_2) << 8) | u16::from(tracked.id.v26_3)
+    }
+
     pub fn define<T: MetadataSerializer + Clone + Send + Sync + 'static>(
         &self,
         tracked: TrackedData,
         value: T,
     ) {
-        let id = tracked.id.v26_2;
+        let key = Self::item_key(&tracked);
         let holder = SerializerHolder { value };
         let canonical_bytes = holder.write_canonical(tracked.id, tracked.r#type);
         let mut items = self
@@ -88,7 +93,7 @@ impl SynchedEntityData {
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
         items.insert(
-            id,
+            key,
             DataItem {
                 tracked,
                 serializer: Box::new(holder),
@@ -104,7 +109,7 @@ impl SynchedEntityData {
         tracked: TrackedData,
         value: T,
     ) -> bool {
-        let id = tracked.id.v26_2;
+        let key = Self::item_key(&tracked);
         let holder = SerializerHolder { value };
         let new_canonical = holder.write_canonical(tracked.id, tracked.r#type);
 
@@ -112,7 +117,7 @@ impl SynchedEntityData {
             .items
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
-        if let Some(item) = items.get_mut(&id) {
+        if let Some(item) = items.get_mut(&key) {
             if item.canonical_bytes == new_canonical {
                 return false;
             }
@@ -122,7 +127,7 @@ impl SynchedEntityData {
             item.is_default = false;
         } else {
             items.insert(
-                id,
+                key,
                 DataItem {
                     tracked,
                     serializer: Box::new(holder),

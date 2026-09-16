@@ -271,7 +271,7 @@ fn reverse_mapping(mapping: &[u16], mapped_size: usize) -> Vec<u16> {
     let mut result = vec![0u16; mapped_size];
     for (new_id, old_id) in mapping.iter().enumerate() {
         let old_id = *old_id as usize;
-        if old_id != 0 && old_id < mapped_size {
+        if old_id != 0 && old_id < mapped_size && result[old_id] == 0 {
             result[old_id] = new_id as u16;
         }
     }

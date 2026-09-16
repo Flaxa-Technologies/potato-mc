@@ -72,8 +72,17 @@ impl PlayerSpawnData {
         }
         write.write_string(self.dimension.minecraft_name)?;
         write.write_i64_be(self.hashed_seed)?;
-        write.write_u8(self.game_mode)?;
-        write.write_i8(self.previous_gamemode)?;
+        if version >= &JavaMinecraftVersion::V_26_1 {
+            write.write_var_int(&VarInt(self.game_mode as i32))?;
+            if self.previous_gamemode >= 0 {
+                write.write_var_int(&VarInt(self.previous_gamemode as i32 + 1))?;
+            } else {
+                write.write_var_int(&VarInt(0))?;
+            }
+        } else {
+            write.write_u8(self.game_mode)?;
+            write.write_i8(self.previous_gamemode)?;
+        }
         write.write_bool(self.debug)?;
         write.write_bool(self.is_flat)?;
         if version >= &JavaMinecraftVersion::V_1_19 {
@@ -124,8 +133,17 @@ impl PlayerSpawnData {
 
         let _world_name = read.get_str()?;
         let hashed_seed = read.get_i64_be()?;
-        let game_mode = read.get_u8()?;
-        let previous_gamemode = read.get_i8()?;
+        let game_mode = if version >= &JavaMinecraftVersion::V_26_1 {
+            read.get_var_int()?.0 as u8
+        } else {
+            read.get_u8()?
+        };
+        let previous_gamemode = if version >= &JavaMinecraftVersion::V_26_1 {
+            let opt = read.get_var_int()?.0;
+            if opt == 0 { -1 } else { (opt - 1) as i8 }
+        } else {
+            read.get_i8()?
+        };
         let debug = read.get_bool()?;
         let is_flat = read.get_bool()?;
 

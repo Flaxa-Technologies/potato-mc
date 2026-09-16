@@ -40,7 +40,9 @@ impl ClientPacket for CRegistryData<'_> {
         for entry in self.entries {
             write.write_string(&entry.entry_id.clone())?;
 
-            if let Some(data) = &entry.data {
+            if let Some(data) = &entry.data
+                && !data.is_empty()
+            {
                 write.write_bool(true)?;
                 write.write_all(data).map_err(WritingError::IoError)?;
             } else {

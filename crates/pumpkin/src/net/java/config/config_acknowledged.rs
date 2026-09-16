@@ -4,6 +4,10 @@ use super::*;
 impl JavaClient {
     pub async fn handle_config_acknowledged(&self, server: &Server) -> PacketHandlerResult {
         debug!("Handling config acknowledgement");
+        info!(
+            "Player {} configuration complete, entering Play state",
+            self.gameprofile.name
+        );
         self.connection_state.store(ConnectionState::Play);
 
         let profile = self.gameprofile.clone();
@@ -49,5 +53,5 @@ pub(crate) fn build_dimension_nbt(dim: &pumpkin_data::dimension::Dimension) -> V
     monster_spawn.put_compound("value", value);
     compound.put_compound("monster_spawn_light_level", monster_spawn);
 
-    pumpkin_nbt::Nbt::from(compound).write().to_vec()
+    pumpkin_nbt::Nbt::from(compound).write_unnamed().to_vec()
 }

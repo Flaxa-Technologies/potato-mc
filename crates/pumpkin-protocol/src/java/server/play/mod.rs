@@ -154,3 +154,6 @@ pub use change_difficulty::*;
 
 mod chat_command_signed;
 pub use chat_command_signed::*;
+
+mod dispatch;
+pub use dispatch::*;

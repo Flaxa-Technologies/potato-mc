@@ -197,15 +197,19 @@ impl ArmadilloEntity {
     }
 
     pub fn can_stay_rolled_up(&self) -> bool {
+        let entity = self.get_entity();
         !self.is_panicking()
             && !self.mob_entity.living_entity.is_in_water()
-            && !self.get_entity().has_vehicle()
+            && !entity.touching_lava.load(Ordering::Relaxed)
+            && !entity.touching_water.load(Ordering::Relaxed)
+            && !entity.has_vehicle()
     }
 
     pub fn roll_up(&self) {
-        if !self.is_scared() {
+        if !self.is_scared() && self.can_stay_rolled_up() {
             self.mob_entity.reset_love_ticks();
             let entity = self.get_entity();
+
             let world = entity.world.load();
             world.play_sound(
                 Sound::EntityArmadilloRoll,
@@ -366,7 +370,12 @@ impl Mob for ArmadilloEntity {
     fn mob_tick(&self, _caller: &dyn EntityBase) {
         self.ageable_ai_step();
 
+        if self.is_scared() && !self.can_stay_rolled_up() {
+            self.roll_out();
+        }
+
         self.in_state_ticks.fetch_add(1, Ordering::Relaxed);
+
         let danger_ticks = self.danger_detected_recently_ticks.load(Ordering::Relaxed);
         if danger_ticks > 0 {
             self.danger_detected_recently_ticks

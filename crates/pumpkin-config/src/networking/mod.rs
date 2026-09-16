@@ -24,6 +24,10 @@ pub mod query;
 /// RCON remote console configuration.
 pub mod rcon;
 
+/// Management API configuration (Minecraft 26.3).
+pub mod management;
+pub use management::ManagementConfig;
+
 /// Packet limiter configuration.
 pub mod packet_limiter;
 pub use packet_limiter::PacketLimiterConfig;
@@ -47,4 +51,7 @@ pub struct NetworkingConfig {
     pub java: JavaConfig,
     /// Bedrock Edition configuration settings.
     pub bedrock: BedrockConfig,
+    /// Dedicated server management service settings (Minecraft 26.3).
+    pub management: ManagementConfig,
 }
+

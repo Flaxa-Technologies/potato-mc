@@ -613,6 +613,8 @@ pub fn version_patterns(ver: JavaMinecraftVersion) -> Vec<JavaMinecraftVersion> 
         JavaMinecraftVersion::V_1_21_11 => vec![JavaMinecraftVersion::V_1_21_11],
         JavaMinecraftVersion::V_26_1 => vec![JavaMinecraftVersion::V_26_1],
         JavaMinecraftVersion::V_26_2 => vec![JavaMinecraftVersion::V_26_2],
+        JavaMinecraftVersion::V_26_3 => vec![JavaMinecraftVersion::V_26_3],
         _ => vec![ver],
     }
 }
+

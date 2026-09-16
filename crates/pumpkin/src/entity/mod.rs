@@ -1741,7 +1741,14 @@ impl Entity {
     }
 
     pub fn tick_block_collisions(&self, caller: &dyn EntityBase) -> bool {
-        if !self.is_affected_by_blocks() {
+        if self.is_removed() {
+            return false;
+        }
+
+        let is_no_physics = self.no_physics.load(Ordering::Relaxed);
+        let is_spectator_player = is_no_physics && caller.get_player().is_some();
+
+        if is_no_physics && !is_spectator_player {
             return false;
         }
 
@@ -1771,6 +1778,31 @@ impl Entity {
             if state.is_air() {
                 continue;
             }
+
+            if is_spectator_player {
+                let is_portal = block == &Block::NETHER_PORTAL
+                    || block == &Block::END_PORTAL
+                    || block == &Block::END_GATEWAY;
+                if is_portal {
+                    let collision_shape = world
+                        .block_registry
+                        .get_inside_collision_shape(block, &world, state, &pos);
+                    if bounding_box.intersects(&collision_shape.at_pos(pos)) {
+                        if let Some(server_arc) = world.server.upgrade() {
+                            world.block_registry.on_entity_collision(
+                                block,
+                                &world,
+                                caller,
+                                &pos,
+                                state,
+                                &server_arc,
+                            );
+                        }
+                    }
+                }
+                continue;
+            }
+
 
             // TODO: this is default predicate, vanilla overwrites it for some blocks,
             // see .suffocates(...) in Blocks.java

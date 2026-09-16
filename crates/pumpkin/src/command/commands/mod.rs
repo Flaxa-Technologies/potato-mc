@@ -14,8 +14,10 @@ mod banlist;
 mod bossbar;
 mod clear;
 mod clone;
+mod compute;
 mod damage;
 mod data;
+
 mod datapack;
 mod debug;
 pub mod defaultgamemode;
@@ -107,7 +109,9 @@ pub fn default_dispatcher(
     let mut dispatcher = CommandDispatcher::new();
 
     wgen::register(&mut dispatcher, registry);
+    compute::register(&mut dispatcher, registry);
     say::register(&mut dispatcher, registry);
+
     banlist::register(&mut dispatcher, registry);
     difficulty::register(&mut dispatcher, registry);
     debug::register(&mut dispatcher, registry);

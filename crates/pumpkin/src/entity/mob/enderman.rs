@@ -3,13 +3,14 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
 };
 
+use crossbeam::atomic::AtomicCell;
+
 use crate::entity::attributes::Modifier;
 use crate::entity::attributes::ModifierOperation;
-use pumpkin_data::{BlockStateId, attributes::Attributes};
-
-use crossbeam::atomic::AtomicCell;
 use pumpkin_data::{
+    Block, BlockStateId, attributes::Attributes,
     damage::DamageType,
+
     data_component_impl::EquipmentSlot,
     entity::EntityType,
     item::Item,
@@ -191,12 +192,22 @@ impl EndermanEntity {
             return false;
         };
 
+        if entity.has_vehicle() {
+            return false;
+        }
+
+        let (ground_block, _) = world.get_block_and_state(&ground_pos);
+        if ground_block == &Block::BEDROCK {
+            return false;
+        }
+
         if world
             .get_fluid(&ground_pos)
             .has_tag(&tag::Fluid::MINECRAFT_WATER)
         {
             return false;
         }
+
 
         let bb = BoundingBox::new_from_pos(x, target_y, z, &entity.entity_dimension.load());
         if !world.is_space_empty(bb) || world.contains_any_liquid(bb) {
@@ -418,7 +429,8 @@ impl Mob for EndermanEntity {
 
     fn pre_damage(&self, damage_type: DamageType, _source: Option<&dyn EntityBase>) -> bool {
         let is_projectile = is_projectile_damage(damage_type);
-        if is_projectile {
+        let is_passenger = self.mob_entity.living_entity.entity.has_vehicle();
+        if is_projectile && !is_passenger {
             for _ in 0..64 {
                 if self.teleport_randomly() {
                     return false;
@@ -427,6 +439,7 @@ impl Mob for EndermanEntity {
         }
         true
     }
+
 
     fn on_damage(&self, _damage_type: DamageType, source: Option<&dyn EntityBase>) {
         if source.is_some_and(|s| s.get_living_entity().is_some()) {

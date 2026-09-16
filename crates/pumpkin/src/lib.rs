@@ -581,6 +581,7 @@ impl PumpkinServer {
                                      }
                                      player.remove().await;
                                      server_clone.remove_player(&player);
+                                     info!("{}[{}] lost connection", player.gameprofile.name, client_addr);
                                     if let Err(e) = server_clone
                                         .player_data_storage
                                         .handle_player_leave(&player)

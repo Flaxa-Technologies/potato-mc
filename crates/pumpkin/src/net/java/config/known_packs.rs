@@ -6,6 +6,11 @@ impl JavaClient {
         debug!("Handling known packs");
 
         let version = self.version.load();
+        info!(
+            "Player {} entering configuration with protocol {}",
+            self.gameprofile.name,
+            version.protocol_version()
+        );
 
         if version.supports_configuration_state() {
             self.send_packet(&CFeatureFlags::new(&["minecraft:vanilla".to_string()]))

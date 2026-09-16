@@ -15,6 +15,7 @@ use pumpkin_protocol::{
         server::config::{
             SAcceptCodeOfConduct, SAcknowledgeFinishConfig, SClientInformationConfig,
             SConfigCookieResponse, SConfigPong, SConfigResourcePack, SKnownPacks, SPluginMessage,
+            SCustomClickAction, SKeepAlive as SConfigKeepAlive,
         },
     },
     packet::MultiVersionJavaPacket,
@@ -438,6 +439,14 @@ impl PendingConnection {
             }
             id if id == SConfigPong::to_id(version) => {
                 let _pong = SConfigPong::read(&mut payload, &version)?;
+                Ok(None)
+            }
+            id if id == SConfigKeepAlive::to_id(version) => {
+                let _keep_alive = SConfigKeepAlive::read(&mut payload, &version)?;
+                Ok(None)
+            }
+            id if id == SCustomClickAction::to_id(version) => {
+                let _click = SCustomClickAction::read(&mut payload, &version)?;
                 Ok(None)
             }
             id if id == SAcceptCodeOfConduct::to_id(version) => {

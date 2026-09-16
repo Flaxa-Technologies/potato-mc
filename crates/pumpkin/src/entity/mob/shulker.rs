@@ -2,9 +2,10 @@ use std::sync::atomic::{AtomicI32, AtomicU8, Ordering};
 use std::sync::{Arc, Weak};
 
 use crossbeam::atomic::AtomicCell;
-use pumpkin_data::BlockDirection;
+use pumpkin_data::{Block, BlockDirection};
 use pumpkin_data::damage::DamageType;
 use pumpkin_data::entity::EntityType;
+
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_nbt::compound::NbtCompound;
 use pumpkin_protocol::codec::var_int::VarInt;
@@ -210,9 +211,13 @@ impl ShulkerEntity {
         }
 
         let neighbour = pos.offset_direction(face);
-        let state = world.get_block_state(&neighbour);
+        let (block, state) = world.get_block_and_state(&neighbour);
+        if block == &Block::BEDROCK {
+            return false;
+        }
         state.is_solid()
     }
+
 
     fn find_new_attachment(&self) {
         let pos = self.mob_entity.living_entity.entity.block_pos.load();

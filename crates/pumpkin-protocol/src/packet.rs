@@ -17,6 +17,8 @@ pub trait MultiVersionJavaPacket {
     fn to_id(version: JavaMinecraftVersion) -> i32;
 }
 
+pub use crate::java::server::play::{ServerboundPlayPacketKind, resolve_play_packet_kind};
+
 impl<P: Packet + PacketWrite> BClientPacket for P {
     fn write_packet(&self, mut writer: impl Write) -> Result<(), Error> {
         self.write(&mut writer)

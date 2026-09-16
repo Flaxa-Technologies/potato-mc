@@ -718,7 +718,7 @@ impl From<Option<ItemStack>> for ItemStackSerializer<'_> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ItemComponentHash {
     pub added: Vec<(VarInt, i32)>,
     pub removed: Vec<VarInt>,
@@ -766,17 +766,38 @@ impl ItemComponentHash {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ItemStackHash {
-    item_id: VarInt,
-    count: VarInt,
-    components: ItemComponentHash,
+    pub item_id: VarInt,
+    pub count: VarInt,
+    pub components: ItemComponentHash,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OptionalItemStackHash(pub Option<ItemStackHash>);
 
 impl OptionalItemStackHash {
+    #[must_use]
+    pub fn from_stack(stack: &ItemStack) -> Self {
+        if stack.is_empty() {
+            return Self(None);
+        }
+        let mut added = Vec::new();
+        let mut removed = Vec::new();
+        for (id, data) in &stack.patch {
+            if let Some(data) = data {
+                added.push((VarInt::from(id.to_id()), data.get_hash()));
+            } else {
+                removed.push(VarInt::from(id.to_id()));
+            }
+        }
+        Self(Some(ItemStackHash {
+            item_id: VarInt::from(stack.item.id),
+            count: VarInt::from(stack.item_count),
+            components: ItemComponentHash { added, removed },
+        }))
+    }
+
     pub fn read(read: &mut impl NetworkReadExt) -> Result<Self, ReadingError> {
         let is_some = read.get_bool()?;
         if is_some {
@@ -855,6 +876,31 @@ impl OptionalItemStackHash {
         }
     }
 }
+
+impl From<&ItemStack> for OptionalItemStackHash {
+    fn from(stack: &ItemStack) -> Self {
+        Self::from_stack(stack)
+    }
+}
+
+impl From<ItemStack> for OptionalItemStackHash {
+    fn from(stack: ItemStack) -> Self {
+        Self::from_stack(&stack)
+    }
+}
+
+impl From<&ItemStackSerializer<'_>> for OptionalItemStackHash {
+    fn from(serializer: &ItemStackSerializer<'_>) -> Self {
+        Self::from_stack(serializer.0.as_ref())
+    }
+}
+
+impl From<ItemStackSerializer<'_>> for OptionalItemStackHash {
+    fn from(serializer: ItemStackSerializer<'_>) -> Self {
+        Self::from_stack(serializer.0.as_ref())
+    }
+}
+
 
 pub struct ItemStackTemplateSerializer<'a>(pub Cow<'a, ItemStack>);
 

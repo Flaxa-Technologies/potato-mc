@@ -1871,6 +1871,16 @@ impl World {
         let Some(client) = player.client.java() else {
             return;
         };
+        let pos = player.position();
+        info!(
+            "{}[{}] logged in with entity id {} at ({:.1}, {:.1}, {:.1})",
+            player.gameprofile.name,
+            client.address,
+            entity_id,
+            pos.x,
+            pos.y,
+            pos.z
+        );
         // Send the login packet for our new player
         client
             .send_packet(&CLogin::new(

@@ -114,6 +114,19 @@ pub enum DataComponent {
     CatCollar = 108u8,
     SheepColor = 109u8,
     ShulkerColor = 110u8,
+    Compostable = 111u8,
+    CookingFuel = 112u8,
+    BrewingFuel = 113u8,
+    MobVisibility = 114u8,
+    AttackAnimation = 115u8,
+    InteractAnimation = 116u8,
+    BlockTransformer = 117u8,
+    VillagerFood = 118u8,
+    ProvidesPotteryPattern = 119u8,
+    SignTextFront = 120u8,
+    SignTextBack = 121u8,
+    Waxed = 122u8,
+    CushionColor = 123u8,
 }
 impl DataComponent {
     #[must_use]
@@ -235,6 +248,19 @@ impl DataComponent {
             108u8 => Some(Self::CatCollar),
             109u8 => Some(Self::SheepColor),
             110u8 => Some(Self::ShulkerColor),
+            111u8 => Some(Self::Compostable),
+            112u8 => Some(Self::CookingFuel),
+            113u8 => Some(Self::BrewingFuel),
+            114u8 => Some(Self::MobVisibility),
+            115u8 => Some(Self::AttackAnimation),
+            116u8 => Some(Self::InteractAnimation),
+            117u8 => Some(Self::BlockTransformer),
+            118u8 => Some(Self::VillagerFood),
+            119u8 => Some(Self::ProvidesPotteryPattern),
+            120u8 => Some(Self::SignTextFront),
+            121u8 => Some(Self::SignTextBack),
+            122u8 => Some(Self::Waxed),
+            123u8 => Some(Self::CushionColor),
             _ => None,
         }
     }
@@ -249,9 +275,7 @@ impl DataComponent {
             "minecraft:unbreakable" | "unbreakable" => Some(Self::Unbreakable),
             "minecraft:use_effects" | "use_effects" => Some(Self::UseEffects),
             "minecraft:custom_name" | "custom_name" => Some(Self::CustomName),
-            "minecraft:minimum_attack_charge" | "minimum_attack_charge" => {
-                Some(Self::MinimumAttackCharge)
-            }
+            "minecraft:minimum_attack_charge" | "minimum_attack_charge" => Some(Self::MinimumAttackCharge),
             "minecraft:damage_type" | "damage_type" => Some(Self::DamageType),
             "minecraft:item_name" | "item_name" => Some(Self::ItemName),
             "minecraft:item_model" | "item_model" => Some(Self::ItemModel),
@@ -260,19 +284,13 @@ impl DataComponent {
             "minecraft:enchantments" | "enchantments" => Some(Self::Enchantments),
             "minecraft:can_place_on" | "can_place_on" => Some(Self::CanPlaceOn),
             "minecraft:can_break" | "can_break" => Some(Self::CanBreak),
-            "minecraft:attribute_modifiers" | "attribute_modifiers" => {
-                Some(Self::AttributeModifiers)
-            }
+            "minecraft:attribute_modifiers" | "attribute_modifiers" => Some(Self::AttributeModifiers),
             "minecraft:custom_model_data" | "custom_model_data" => Some(Self::CustomModelData),
             "minecraft:tooltip_display" | "tooltip_display" => Some(Self::TooltipDisplay),
             "minecraft:repair_cost" | "repair_cost" => Some(Self::RepairCost),
             "minecraft:creative_slot_lock" | "creative_slot_lock" => Some(Self::CreativeSlotLock),
-            "minecraft:enchantment_glint_override" | "enchantment_glint_override" => {
-                Some(Self::EnchantmentGlintOverride)
-            }
-            "minecraft:intangible_projectile" | "intangible_projectile" => {
-                Some(Self::IntangibleProjectile)
-            }
+            "minecraft:enchantment_glint_override" | "enchantment_glint_override" => Some(Self::EnchantmentGlintOverride),
+            "minecraft:intangible_projectile" | "intangible_projectile" => Some(Self::IntangibleProjectile),
             "minecraft:food" | "food" => Some(Self::Food),
             "minecraft:consumable" | "consumable" => Some(Self::Consumable),
             "minecraft:use_remainder" | "use_remainder" => Some(Self::UseRemainder),
@@ -291,53 +309,31 @@ impl DataComponent {
             "minecraft:piercing_weapon" | "piercing_weapon" => Some(Self::PiercingWeapon),
             "minecraft:kinetic_weapon" | "kinetic_weapon" => Some(Self::KineticWeapon),
             "minecraft:swing_animation" | "swing_animation" => Some(Self::SwingAnimation),
-            "minecraft:additional_trade_cost" | "additional_trade_cost" => {
-                Some(Self::AdditionalTradeCost)
-            }
-            "minecraft:stored_enchantments" | "stored_enchantments" => {
-                Some(Self::StoredEnchantments)
-            }
+            "minecraft:additional_trade_cost" | "additional_trade_cost" => Some(Self::AdditionalTradeCost),
+            "minecraft:stored_enchantments" | "stored_enchantments" => Some(Self::StoredEnchantments),
             "minecraft:dye" | "dye" => Some(Self::Dye),
             "minecraft:dyed_color" | "dyed_color" => Some(Self::DyedColor),
             "minecraft:map_color" | "map_color" => Some(Self::MapColor),
             "minecraft:map_id" | "map_id" => Some(Self::MapId),
             "minecraft:map_decorations" | "map_decorations" => Some(Self::MapDecorations),
-            "minecraft:map_post_processing" | "map_post_processing" => {
-                Some(Self::MapPostProcessing)
-            }
-            "minecraft:charged_projectiles" | "charged_projectiles" => {
-                Some(Self::ChargedProjectiles)
-            }
+            "minecraft:map_post_processing" | "map_post_processing" => Some(Self::MapPostProcessing),
+            "minecraft:charged_projectiles" | "charged_projectiles" => Some(Self::ChargedProjectiles),
             "minecraft:bundle_contents" | "bundle_contents" => Some(Self::BundleContents),
             "minecraft:potion_contents" | "potion_contents" => Some(Self::PotionContents),
-            "minecraft:potion_duration_scale" | "potion_duration_scale" => {
-                Some(Self::PotionDurationScale)
-            }
-            "minecraft:suspicious_stew_effects" | "suspicious_stew_effects" => {
-                Some(Self::SuspiciousStewEffects)
-            }
-            "minecraft:writable_book_content" | "writable_book_content" => {
-                Some(Self::WritableBookContent)
-            }
-            "minecraft:written_book_content" | "written_book_content" => {
-                Some(Self::WrittenBookContent)
-            }
+            "minecraft:potion_duration_scale" | "potion_duration_scale" => Some(Self::PotionDurationScale),
+            "minecraft:suspicious_stew_effects" | "suspicious_stew_effects" => Some(Self::SuspiciousStewEffects),
+            "minecraft:writable_book_content" | "writable_book_content" => Some(Self::WritableBookContent),
+            "minecraft:written_book_content" | "written_book_content" => Some(Self::WrittenBookContent),
             "minecraft:trim" | "trim" => Some(Self::Trim),
             "minecraft:debug_stick_state" | "debug_stick_state" => Some(Self::DebugStickState),
             "minecraft:entity_data" | "entity_data" => Some(Self::EntityData),
             "minecraft:bucket_entity_data" | "bucket_entity_data" => Some(Self::BucketEntityData),
             "minecraft:block_entity_data" | "block_entity_data" => Some(Self::BlockEntityData),
             "minecraft:instrument" | "instrument" => Some(Self::Instrument),
-            "minecraft:provides_trim_material" | "provides_trim_material" => {
-                Some(Self::ProvidesTrimMaterial)
-            }
-            "minecraft:ominous_bottle_amplifier" | "ominous_bottle_amplifier" => {
-                Some(Self::OminousBottleAmplifier)
-            }
+            "minecraft:provides_trim_material" | "provides_trim_material" => Some(Self::ProvidesTrimMaterial),
+            "minecraft:ominous_bottle_amplifier" | "ominous_bottle_amplifier" => Some(Self::OminousBottleAmplifier),
             "minecraft:jukebox_playable" | "jukebox_playable" => Some(Self::JukeboxPlayable),
-            "minecraft:provides_banner_patterns" | "provides_banner_patterns" => {
-                Some(Self::ProvidesBannerPatterns)
-            }
+            "minecraft:provides_banner_patterns" | "provides_banner_patterns" => Some(Self::ProvidesBannerPatterns),
             "minecraft:recipes" | "recipes" => Some(Self::Recipes),
             "minecraft:lodestone_tracker" | "lodestone_tracker" => Some(Self::LodestoneTracker),
             "minecraft:firework_explosion" | "firework_explosion" => Some(Self::FireworkExplosion),
@@ -350,9 +346,7 @@ impl DataComponent {
             "minecraft:container" | "container" => Some(Self::Container),
             "minecraft:block_state" | "block_state" => Some(Self::BlockState),
             "minecraft:bees" | "bees" => Some(Self::Bees),
-            "minecraft:sulfur_cube_content" | "sulfur_cube_content" => {
-                Some(Self::SulfurCubeContent)
-            }
+            "minecraft:sulfur_cube_content" | "sulfur_cube_content" => Some(Self::SulfurCubeContent),
             "minecraft:lock" | "lock" => Some(Self::Lock),
             "minecraft:container_loot" | "container_loot" => Some(Self::ContainerLoot),
             "minecraft:break_sound" | "break_sound" => Some(Self::BreakSound),
@@ -363,15 +357,9 @@ impl DataComponent {
             "minecraft:fox/variant" | "fox_variant" => Some(Self::FoxVariant),
             "minecraft:salmon/size" | "salmon_size" => Some(Self::SalmonSize),
             "minecraft:parrot/variant" | "parrot_variant" => Some(Self::ParrotVariant),
-            "minecraft:tropical_fish/pattern" | "tropical_fish_pattern" => {
-                Some(Self::TropicalFishPattern)
-            }
-            "minecraft:tropical_fish/base_color" | "tropical_fish_base_color" => {
-                Some(Self::TropicalFishBaseColor)
-            }
-            "minecraft:tropical_fish/pattern_color" | "tropical_fish_pattern_color" => {
-                Some(Self::TropicalFishPatternColor)
-            }
+            "minecraft:tropical_fish/pattern" | "tropical_fish_pattern" => Some(Self::TropicalFishPattern),
+            "minecraft:tropical_fish/base_color" | "tropical_fish_base_color" => Some(Self::TropicalFishBaseColor),
+            "minecraft:tropical_fish/pattern_color" | "tropical_fish_pattern_color" => Some(Self::TropicalFishPatternColor),
             "minecraft:mooshroom/variant" | "mooshroom_variant" => Some(Self::MooshroomVariant),
             "minecraft:rabbit/variant" | "rabbit_variant" => Some(Self::RabbitVariant),
             "minecraft:pig/variant" | "pig_variant" => Some(Self::PigVariant),
@@ -379,12 +367,8 @@ impl DataComponent {
             "minecraft:cow/variant" | "cow_variant" => Some(Self::CowVariant),
             "minecraft:cow/sound_variant" | "cow_sound_variant" => Some(Self::CowSoundVariant),
             "minecraft:chicken/variant" | "chicken_variant" => Some(Self::ChickenVariant),
-            "minecraft:chicken/sound_variant" | "chicken_sound_variant" => {
-                Some(Self::ChickenSoundVariant)
-            }
-            "minecraft:zombie_nautilus/variant" | "zombie_nautilus_variant" => {
-                Some(Self::ZombieNautilusVariant)
-            }
+            "minecraft:chicken/sound_variant" | "chicken_sound_variant" => Some(Self::ChickenSoundVariant),
+            "minecraft:zombie_nautilus/variant" | "zombie_nautilus_variant" => Some(Self::ZombieNautilusVariant),
             "minecraft:frog/variant" | "frog_variant" => Some(Self::FrogVariant),
             "minecraft:horse/variant" | "horse_variant" => Some(Self::HorseVariant),
             "minecraft:painting/variant" | "painting_variant" => Some(Self::PaintingVariant),
@@ -395,6 +379,19 @@ impl DataComponent {
             "minecraft:cat/collar" | "cat_collar" => Some(Self::CatCollar),
             "minecraft:sheep/color" | "sheep_color" => Some(Self::SheepColor),
             "minecraft:shulker/color" | "shulker_color" => Some(Self::ShulkerColor),
+            "minecraft:compostable" | "compostable" => Some(Self::Compostable),
+            "minecraft:cooking_fuel" | "cooking_fuel" => Some(Self::CookingFuel),
+            "minecraft:brewing_fuel" | "brewing_fuel" => Some(Self::BrewingFuel),
+            "minecraft:mob_visibility" | "mob_visibility" => Some(Self::MobVisibility),
+            "minecraft:attack_animation" | "attack_animation" => Some(Self::AttackAnimation),
+            "minecraft:interact_animation" | "interact_animation" => Some(Self::InteractAnimation),
+            "minecraft:block_transformer" | "block_transformer" => Some(Self::BlockTransformer),
+            "minecraft:villager_food" | "villager_food" => Some(Self::VillagerFood),
+            "minecraft:provides_pottery_pattern" | "provides_pottery_pattern" => Some(Self::ProvidesPotteryPattern),
+            "minecraft:sign_text_front" | "sign_text_front" => Some(Self::SignTextFront),
+            "minecraft:sign_text_back" | "sign_text_back" => Some(Self::SignTextBack),
+            "minecraft:waxed" | "waxed" => Some(Self::Waxed),
+            "minecraft:cushion/color" | "cushion_color" => Some(Self::CushionColor),
             _ => None,
         }
     }
@@ -513,6 +510,19 @@ impl DataComponent {
             Self::CatCollar => "minecraft:cat/collar",
             Self::SheepColor => "minecraft:sheep/color",
             Self::ShulkerColor => "minecraft:shulker/color",
+            Self::Compostable => "minecraft:compostable",
+            Self::CookingFuel => "minecraft:cooking_fuel",
+            Self::BrewingFuel => "minecraft:brewing_fuel",
+            Self::MobVisibility => "minecraft:mob_visibility",
+            Self::AttackAnimation => "minecraft:attack_animation",
+            Self::InteractAnimation => "minecraft:interact_animation",
+            Self::BlockTransformer => "minecraft:block_transformer",
+            Self::VillagerFood => "minecraft:villager_food",
+            Self::ProvidesPotteryPattern => "minecraft:provides_pottery_pattern",
+            Self::SignTextFront => "minecraft:sign_text_front",
+            Self::SignTextBack => "minecraft:sign_text_back",
+            Self::Waxed => "minecraft:waxed",
+            Self::CushionColor => "minecraft:cushion/color",
         }
     }
 }

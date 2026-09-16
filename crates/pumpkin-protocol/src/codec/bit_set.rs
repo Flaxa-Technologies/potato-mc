@@ -3,8 +3,10 @@ use std::io::Write;
 
 use crate::ReadingError;
 use crate::WritingError;
+use crate::codec::var_int::VarInt;
 use crate::ser::NetworkReadExt;
 use crate::ser::NetworkWriteExt;
+use pumpkin_util::version::JavaMinecraftVersion;
 
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct BitSet(pub Box<[i64]>);
@@ -62,6 +64,48 @@ impl BitSet {
     #[must_use]
     pub fn count_ones(&self) -> u32 {
         self.0.iter().map(|&w| (w as u64).count_ones()).sum()
+    }
+
+    #[must_use]
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut words_in_use = self.0.len();
+        while words_in_use > 0 && self.0[words_in_use - 1] == 0 {
+            words_in_use -= 1;
+        }
+        if words_in_use == 0 {
+            return Vec::new();
+        }
+
+        let mut byte_len = 8 * (words_in_use - 1);
+        let mut x = self.0[words_in_use - 1] as u64;
+        while x != 0 {
+            byte_len += 1;
+            x >>= 8;
+        }
+
+        let mut bytes = Vec::with_capacity(byte_len);
+        for i in 0..byte_len {
+            let word_idx = i / 8;
+            let byte_in_word = i % 8;
+            let val = ((self.0[word_idx] as u64) >> (byte_in_word * 8)) as u8;
+            bytes.push(val);
+        }
+        bytes
+    }
+
+    pub fn encode_for_version(
+        &self,
+        write: &mut impl Write,
+        version: &JavaMinecraftVersion,
+    ) -> Result<(), WritingError> {
+        if *version >= JavaMinecraftVersion::V_1_20_5 {
+            let bytes = self.to_bytes();
+            write.write_var_int(&VarInt(bytes.len() as i32))?;
+            write.write_slice(&bytes)?;
+            Ok(())
+        } else {
+            self.encode(write)
+        }
     }
 
     pub fn encode(&self, write: &mut impl Write) -> Result<(), WritingError> {

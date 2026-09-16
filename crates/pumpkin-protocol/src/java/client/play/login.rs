@@ -227,6 +227,7 @@ impl ClientPacket for CLogin<'_> {
         let v1_20_2 = *version >= JavaMinecraftVersion::V_1_20_2;
         let v1_20_5 = *version >= JavaMinecraftVersion::V_1_20_5;
         let v1_21_2 = *version >= JavaMinecraftVersion::V_1_21_2;
+        let v1_26_1 = *version >= JavaMinecraftVersion::V_26_1;
         let v1_26_2 = *version >= JavaMinecraftVersion::V_26_2;
         let v1_19 = *version >= JavaMinecraftVersion::V_1_19;
         let v1_18 = *version >= JavaMinecraftVersion::V_1_18;
@@ -316,8 +317,17 @@ impl ClientPacket for CLogin<'_> {
                 }
                 write.write_string(self.spawn_data.dimension.minecraft_name)?;
                 write.write_i64_be(self.spawn_data.hashed_seed)?;
-                write.write_u8(self.spawn_data.game_mode)?;
-                write.write_i8(self.spawn_data.previous_gamemode)?;
+                if v1_26_1 {
+                    write.write_var_int(&VarInt(self.spawn_data.game_mode as i32))?;
+                    if self.spawn_data.previous_gamemode >= 0 {
+                        write.write_var_int(&VarInt(self.spawn_data.previous_gamemode as i32 + 1))?;
+                    } else {
+                        write.write_var_int(&VarInt(0))?;
+                    }
+                } else {
+                    write.write_u8(self.spawn_data.game_mode)?;
+                    write.write_i8(self.spawn_data.previous_gamemode)?;
+                }
             }
             write.write_bool(self.spawn_data.debug)?;
             write.write_bool(self.spawn_data.is_flat)?;

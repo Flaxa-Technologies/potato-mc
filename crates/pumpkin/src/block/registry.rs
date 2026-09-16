@@ -146,8 +146,12 @@ use crate::block::blocks::sculk::sculk_catalyst::SculkCatalystBlock;
 use crate::block::blocks::sculk::sculk_shrieker::SculkShriekerBlock;
 use crate::block::blocks::sculk::sculk_vein::MultifaceBlock;
 use crate::block::blocks::shelf::ShelfBlock;
+use crate::block::blocks::shelf_mushroom::ShelfMushroomBlock;
+use crate::block::blocks::straw_bed::StrawBedBlock;
+use crate::block::blocks::red_shrub::RedShrubBlock;
 use crate::block::blocks::signs::SignBlock;
 use crate::block::blocks::slabs::SlabBlock;
+
 use crate::block::blocks::slime::SlimeBlock;
 use crate::block::blocks::smithing_table::SmithingTableBlock;
 use crate::block::blocks::sniffer_egg::SnifferEggBlock;
@@ -414,8 +418,14 @@ pub fn default_registry() -> Arc<BlockRegistry> {
 
     manager.register(FallingBlock);
 
+    // 26.3 new blocks
+    manager.register(RedShrubBlock);
+    manager.register(ShelfMushroomBlock);
+    manager.register(StrawBedBlock);
+
     // Fire
     manager.register(SoulFireBlock);
+
     manager.register(FireBlock);
     manager.register(MagmaBlock);
 

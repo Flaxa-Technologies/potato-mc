@@ -21,7 +21,9 @@ use ser::{ReadingError, WritingError};
 use thiserror::Error;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
-pub use crate::packet::{MultiVersionJavaPacket, Packet};
+pub use crate::packet::{
+    MultiVersionJavaPacket, Packet, ServerboundPlayPacketKind, resolve_play_packet_kind,
+};
 
 pub mod bedrock;
 pub mod codec;

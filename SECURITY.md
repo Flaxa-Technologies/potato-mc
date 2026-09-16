@@ -4,7 +4,8 @@
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, please Join <a href="https://discord.com/invite/UUaNzfZyc6"><img src="https://img.shields.io/badge/Discord-Join%20Flaxa%20Studios-5865F2?style=for-the-badge&amp;logo=discord&amp;logoColor=white" alt="Discord"/></a> and create a Ticket
+Instead, please Join 
+<a href="https://discord.com/invite/UUaNzfZyc6"><img src="https://img.shields.io/badge/Discord-Join%20Flaxa%20Studios-5865F2?style=for-the-badge&amp;logo=discord&amp;logoColor=white" alt="Discord"/></a> and create a Ticket
 
 You should receive a response within 48 hours.
 

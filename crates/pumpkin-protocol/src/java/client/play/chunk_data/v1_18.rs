@@ -71,7 +71,7 @@ pub fn write_chunk_data(
     }
     drop(heightmaps);
 
-    let blocks_and_biomes_len = {
+    let _blocks_and_biomes_len = {
         let mut blocks_and_biomes_buf = Vec::new();
         let block_sections = chunk
             .section

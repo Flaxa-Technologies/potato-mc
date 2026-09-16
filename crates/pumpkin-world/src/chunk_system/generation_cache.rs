@@ -140,6 +140,7 @@ impl SurfaceBiomeNeighborhood {
         true
     }
 
+    #[allow(dead_code)]
     pub(crate) fn push_proto_biome(&mut self, chunk: &ProtoChunk) -> bool {
         self.push_palette(&SurfaceBiomePalette {
             chunk_x: chunk.x,

@@ -785,9 +785,11 @@ impl ProtoChunk {
     #[inline(always)]
     #[must_use]
     pub fn get_biome_id(&self, x: i32, y: i32, z: i32) -> u8 {
+        let local_y = (y - biome_coords::from_block(self.bottom_y() as i32))
+            .clamp(0, self.biome_height as i32 - 1);
         let index = self.local_biome_pos_to_biome_index(
             x & 3,
-            y - biome_coords::from_block(self.bottom_y() as i32),
+            local_y,
             z & 3,
         );
         self.flat_biome_map[index]
@@ -1371,7 +1373,9 @@ impl ProtoChunk {
             return Some(self.get_biome_id(biome_pos.x, biome_pos.y, biome_pos.z));
         }
 
-        surface_biomes.get_biome_id(biome_pos.x, biome_pos.y, biome_pos.z)
+        surface_biomes
+            .get_biome_id(biome_pos.x, biome_pos.y, biome_pos.z)
+            .or_else(|| Some(self.get_biome_id(biome_pos.x, biome_pos.y, biome_pos.z)))
     }
 
     #[must_use]
@@ -1443,11 +1447,11 @@ impl ProtoChunk {
                     top_block
                 };
 
-                let Some(this_biome) =
-                    self.get_terrain_gen_biome_id_from_neighborhood(surface_biomes, x, biome_y, z)
-                else {
-                    panic!("surface biome neighborhood must cover fuzzy biome lookup");
-                };
+                let this_biome = self
+                    .get_terrain_gen_biome_id_from_neighborhood(surface_biomes, x, biome_y, z)
+                    .unwrap_or_else(|| {
+                        self.get_biome_id(x >> 2, biome_y >> 2, z >> 2)
+                    });
                 if this_biome == Biome::ERODED_BADLANDS {
                     terrain_cache
                         .terrain_builder
@@ -1520,14 +1524,20 @@ impl ProtoChunk {
                         context.init_vertical(stone_depth_above, stone_depth_below, y, fluid_height);
 
                         if state.id == default_state_id {
-                            let Some(biome_id) = self.get_terrain_gen_biome_id_from_neighborhood(
-                                surface_biomes,
-                                context.block_pos_x,
-                                context.block_pos_y,
-                                context.block_pos_z,
-                            ) else {
-                                panic!("surface biome neighborhood must cover fuzzy biome lookup");
-                            };
+                            let biome_id = self
+                                .get_terrain_gen_biome_id_from_neighborhood(
+                                    surface_biomes,
+                                    context.block_pos_x,
+                                    context.block_pos_y,
+                                    context.block_pos_z,
+                                )
+                                .unwrap_or_else(|| {
+                                    self.get_biome_id(
+                                        context.block_pos_x >> 2,
+                                        context.block_pos_y >> 2,
+                                        context.block_pos_z >> 2,
+                                    )
+                                });
                             context.biome = Biome::from_id(biome_id).unwrap_or(&Biome::PLAINS);
                             let new_state = try_apply_material_rule(
                                 generator.surface_rule,
@@ -1631,14 +1641,20 @@ impl ProtoChunk {
                             if is_overworld && !has_sulfur_caves && (8..surface_estimate).contains(&y) {
                                 continue;
                             }
-                            let Some(biome_id) = self.get_terrain_gen_biome_id_from_neighborhood(
-                                surface_biomes,
-                                context.block_pos_x,
-                                context.block_pos_y,
-                                context.block_pos_z,
-                            ) else {
-                                panic!("surface biome neighborhood must cover fuzzy biome lookup");
-                            };
+                            let biome_id = self
+                                .get_terrain_gen_biome_id_from_neighborhood(
+                                    surface_biomes,
+                                    context.block_pos_x,
+                                    context.block_pos_y,
+                                    context.block_pos_z,
+                                )
+                                .unwrap_or_else(|| {
+                                    self.get_biome_id(
+                                        context.block_pos_x >> 2,
+                                        context.block_pos_y >> 2,
+                                        context.block_pos_z >> 2,
+                                    )
+                                });
                             context.biome = Biome::from_id(biome_id).unwrap_or(&Biome::PLAINS);
                             let new_state = try_apply_material_rule(
                                 generator.surface_rule,
@@ -2424,7 +2440,7 @@ impl GenerationCache for ProtoChunk {
     }
     #[inline]
     fn get_biome_for_terrain_gen(&self, x: i32, y: i32, z: i32) -> &'static Biome {
-        Self::get_biome(self, x, y, z)
+        Self::get_terrain_gen_biome(self, x, y, z)
     }
     fn get_blending_data(
         &self,

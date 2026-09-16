@@ -71,7 +71,7 @@ pub fn write_chunk_data(
     }
     drop(heightmaps);
 
-    {
+    let blocks_and_biomes_len = {
         let mut blocks_and_biomes_buf = Vec::new();
         let block_sections = chunk
             .section
@@ -249,6 +249,7 @@ pub fn write_chunk_data(
             ))
         })?)?;
         write.write_slice(&blocks_and_biomes_buf)?;
+        blocks_and_biomes_buf.len()
     };
 
     let block_entities = chunk
@@ -360,7 +361,7 @@ pub fn write_chunk_data(
                 write.write_slice(data.as_ref())?;
             }
         }
-    }
+        }
 
     Ok(())
 }

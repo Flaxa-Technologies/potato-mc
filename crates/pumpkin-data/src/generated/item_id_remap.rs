@@ -1,5 +1,6 @@
 /* This file is generated. Do not edit manually. */
 use pumpkin_util::version::JavaMinecraftVersion;
+include!("../item_id_remap_26_3.rs");
 const ITEM_ID_REMAP_V_26_2_TO_V_1_7_6: &[u16] = &[
     0, 16, 17, 18, 19, 20, 21, 22, 1792, 3440, 3440, 20, 64, 707, 1072, 2224, 64, 64, 707, 1072,
     2224, 64, 708, 1728, 2224, 1571, 384, 1936, 705, 2048, 2224, 384, 705, 2048, 2224, 3296, 705,
@@ -37634,6 +37635,10 @@ pub fn remap_item_id_for_version(item_id: u16, version: JavaMinecraftVersion) ->
             .get(usize::from(item_id))
             .copied()
             .unwrap_or(item_id),
+        pumpkin_util::version::JavaMinecraftVersion::V_26_3 => ITEM_ID_REMAP_V_26_2_TO_V_26_3
+            .get(usize::from(item_id))
+            .copied()
+            .unwrap_or(item_id),
         _ => item_id,
     }
 }
@@ -37777,6 +37782,10 @@ pub fn remap_item_id_from_version(item_id: u16, version: JavaMinecraftVersion) -
             .copied()
             .unwrap_or(item_id),
         pumpkin_util::version::JavaMinecraftVersion::V_26_1 => ITEM_ID_REMAP_V_26_1_TO_V_26_2
+            .get(usize::from(item_id))
+            .copied()
+            .unwrap_or(item_id),
+        pumpkin_util::version::JavaMinecraftVersion::V_26_3 => ITEM_ID_REMAP_V_26_3_TO_V_26_2
             .get(usize::from(item_id))
             .copied()
             .unwrap_or(item_id),

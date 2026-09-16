@@ -4,7 +4,6 @@ use crate::WritingError;
 use crate::codec::bit_set::BitSet;
 use crate::ser::NetworkWriteExt;
 use pumpkin_data::block_state_remap::remap_block_state_for_version;
-use pumpkin_data::packet::CURRENT_MC_VERSION;
 use pumpkin_util::math::position::get_local_cord;
 use pumpkin_util::version::JavaMinecraftVersion;
 use pumpkin_world::chunk::ChunkData;
@@ -96,7 +95,7 @@ pub fn write_chunk_data(
             }
 
             let mut block_network = block_palette.convert_network();
-            if version < &CURRENT_MC_VERSION {
+            if version != &JavaMinecraftVersion::V_26_2 {
                 match &mut block_network.palette {
                     NetworkPalette::Single(registry_id) => {
                         *registry_id = remap_block_state_for_version(*registry_id, *version);
@@ -158,7 +157,7 @@ pub fn write_chunk_data(
             }
 
             let mut biome_network = biome_palette.convert_network();
-            if version < &CURRENT_MC_VERSION {
+            if version < &JavaMinecraftVersion::V_26_2 {
                 match &mut biome_network.palette {
                     NetworkPalette::Single(registry_id) => {
                         *registry_id = pumpkin_data::biome_remap::remap_biome_for_version(

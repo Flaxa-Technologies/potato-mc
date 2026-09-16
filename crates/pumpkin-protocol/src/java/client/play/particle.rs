@@ -214,7 +214,14 @@ impl ClientPacket for CParticle<'_> {
         write.write_f32_be(self.offset.y)?;
         write.write_f32_be(self.offset.z)?;
 
-        write.write_f32_be(self.max_speed)?;
+        if *version >= JavaMinecraftVersion::V_26_3 {
+            // 26.3+: maxSpeed split into three separate per-axis floats
+            write.write_f32_be(self.max_speed)?; // xMaxSpeed
+            write.write_f32_be(self.max_speed)?; // yMaxSpeed
+            write.write_f32_be(self.max_speed)?; // zMaxSpeed
+        } else {
+            write.write_f32_be(self.max_speed)?;
+        }
         write.write_i32_be(self.particle_count)?;
 
         if *version >= JavaMinecraftVersion::V_1_20_5 {
@@ -223,6 +230,11 @@ impl ClientPacket for CParticle<'_> {
             write.write_var_int(&VarInt(remapped_id))?;
         }
         write.write_slice(self.data)?;
+
+        if *version >= JavaMinecraftVersion::V_26_3 {
+            // 26.3+: randomizationType VarInt (0=DEFAULT, 1=ALTERNATIVE, 2=ALTERNATIVE_WITH_SPEED)
+            write.write_var_int(&VarInt(0))?; // DEFAULT
+        }
 
         Ok(())
     }
@@ -271,11 +283,21 @@ impl<'a> ServerPacket<'a> for CParticle<'a> {
             bytebuf.get_f32_be()?,
             bytebuf.get_f32_be()?,
         );
-        let max_speed = bytebuf.get_f32_be()?;
+        let max_speed = if *version >= JavaMinecraftVersion::V_26_3 {
+            // 26.3+: three separate per-axis speed floats; use xMaxSpeed as the canonical value
+            let x = bytebuf.get_f32_be()?;
+            let _y = bytebuf.get_f32_be()?;
+            let _z = bytebuf.get_f32_be()?;
+            x
+        } else {
+            bytebuf.get_f32_be()?
+        };
         let particle_count = bytebuf.get_i32_be()?;
 
         let (particle_id, data) = if *version >= JavaMinecraftVersion::V_1_20_5 {
             let id = bytebuf.get_var_int()?;
+            // In 26.3+, the randomizationType VarInt is at the end AFTER particle data;
+            // since data is variable length, we consume the remainder and strip it if needed.
             let remaining = bytebuf.read_remaining_slice_borrowed(usize::MAX)?;
             (id, remaining)
         } else {

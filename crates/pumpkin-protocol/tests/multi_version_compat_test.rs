@@ -1437,6 +1437,36 @@ mod tier4_real_world_simulation {
     }
 
     #[test]
+    fn test_full_pipeline_simulation_v26_3() {
+        simulate_connection_lifecycle(JavaMinecraftVersion::V_26_3);
+    }
+
+    #[test]
+    fn test_particle_26_3_speed_split() {
+        // For 26.3, after offset (3xf32=12 bytes), we expect 3 speed floats (12 bytes) not 1 (4 bytes).
+        let particle = CParticle::new(
+            false,
+            false,
+            Vector3::new(0.0, 64.0, 0.0),
+            Vector3::new(0.1, 0.1, 0.1),
+            2.5, // max_speed
+            5,
+            VarInt(1),
+            &[],
+        );
+        let mut buf_26_2 = Vec::new();
+        particle.write_packet_data(&mut buf_26_2, &JavaMinecraftVersion::V_26_2).unwrap();
+        let mut buf_26_3 = Vec::new();
+        particle.write_packet_data(&mut buf_26_3, &JavaMinecraftVersion::V_26_3).unwrap();
+        // 26.3 should be 8 bytes longer: 2 extra floats (8 bytes) + randomizationType VarInt (1 byte) - nothing removed = +9 bytes net
+        // Actually: +2 floats (8 bytes) for speed split, +1 varint byte for randomizationType = +9
+        assert_eq!(
+            buf_26_3.len(),
+            buf_26_2.len() + 9,
+            "26.3 particle packet must be 9 bytes longer than 26.2 (2 extra speed floats + randomizationType VarInt)"
+        );
+    }
+    #[test]
     fn test_fox_metadata_indices_across_versions() {
         use pumpkin_data::tracked_data::fox;
         use pumpkin_protocol::java::client::play::Metadata;

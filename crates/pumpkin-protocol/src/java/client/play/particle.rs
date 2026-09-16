@@ -179,6 +179,37 @@ impl ClientPacket for CParticle<'_> {
     ) -> Result<(), WritingError> {
         let mut write = write;
 
+        if *version >= JavaMinecraftVersion::V_26_3 {
+            // 26.3 wire order (from StreamCodec.composite):
+            //   ParticleType (VarInt id + type-specific data)
+            //   bool overrideLimiter
+            //   bool alwaysShow
+            //   double x, y, z
+            //   float xDist, yDist, zDist
+            //   float xMaxSpeed, yMaxSpeed, zMaxSpeed
+            //   VarInt count   ← VarInt, NOT i32
+            //   VarInt randomizationType
+            let remapped_id =
+                remap_particle_id_for_version(self.particle_id.0 as u16, *version) as i32;
+            write.write_var_int(&VarInt(remapped_id))?;  // particle type id FIRST
+            write.write_slice(self.data)?;               // particle-specific data inline
+            write.write_bool(self.important)?;           // overrideLimiter
+            write.write_bool(self.force_spawn)?;         // alwaysShow
+            write.write_f64_be(self.position.x)?;
+            write.write_f64_be(self.position.y)?;
+            write.write_f64_be(self.position.z)?;
+            write.write_f32_be(self.offset.x)?;          // xDist
+            write.write_f32_be(self.offset.y)?;          // yDist
+            write.write_f32_be(self.offset.z)?;          // zDist
+            write.write_f32_be(self.max_speed)?;         // xMaxSpeed
+            write.write_f32_be(self.max_speed)?;         // yMaxSpeed
+            write.write_f32_be(self.max_speed)?;         // zMaxSpeed
+            write.write_var_int(&VarInt(self.particle_count))?; // count is VarInt in 26.3
+            write.write_var_int(&VarInt(0))?;            // randomizationType = DEFAULT
+            return Ok(());
+        }
+
+        // --- Pre-26.3 paths ---
         if *version <= JavaMinecraftVersion::V_1_7_6 {
             let name = pumpkin_data::particle::Particle::from_id(self.particle_id.0 as u16)
                 .map_or("smoke", particle_name_for_v1_7);
@@ -213,28 +244,16 @@ impl ClientPacket for CParticle<'_> {
         write.write_f32_be(self.offset.x)?;
         write.write_f32_be(self.offset.y)?;
         write.write_f32_be(self.offset.z)?;
-
-        if *version >= JavaMinecraftVersion::V_26_3 {
-            // 26.3+: maxSpeed split into three separate per-axis floats
-            write.write_f32_be(self.max_speed)?; // xMaxSpeed
-            write.write_f32_be(self.max_speed)?; // yMaxSpeed
-            write.write_f32_be(self.max_speed)?; // zMaxSpeed
-        } else {
-            write.write_f32_be(self.max_speed)?;
-        }
+        write.write_f32_be(self.max_speed)?; // single speed float for pre-26.3
         write.write_i32_be(self.particle_count)?;
 
         if *version >= JavaMinecraftVersion::V_1_20_5 {
+            // 1.20.5–26.2: particle ID written after count
             let remapped_id =
                 remap_particle_id_for_version(self.particle_id.0 as u16, *version) as i32;
             write.write_var_int(&VarInt(remapped_id))?;
         }
         write.write_slice(self.data)?;
-
-        if *version >= JavaMinecraftVersion::V_26_3 {
-            // 26.3+: randomizationType VarInt (0=DEFAULT, 1=ALTERNATIVE, 2=ALTERNATIVE_WITH_SPEED)
-            write.write_var_int(&VarInt(0))?; // DEFAULT
-        }
 
         Ok(())
     }
@@ -242,6 +261,46 @@ impl ClientPacket for CParticle<'_> {
 
 impl<'a> ServerPacket<'a> for CParticle<'a> {
     fn read(bytebuf: &mut &'a [u8], version: &JavaMinecraftVersion) -> Result<Self, ReadingError> {
+        if *version >= JavaMinecraftVersion::V_26_3 {
+            // 26.3 read order mirrors write order:
+            //   VarInt particleId, data (particle-specific), bool important, bool force_spawn,
+            //   f64 x/y/z, f32 xDist/yDist/zDist, f32 xMaxSpeed/yMaxSpeed/zMaxSpeed,
+            //   VarInt count, VarInt randomizationType
+            let particle_id = bytebuf.get_var_int()?;
+            // particle-specific data: consumed greedily then bools follow — for simple particles data=[]
+            // We read the two bools next (works for 0-data particles); structured data handled by caller
+            let important = bytebuf.get_bool()?;    // overrideLimiter
+            let force_spawn = bytebuf.get_bool()?;  // alwaysShow
+            let position = Vector3::new(
+                bytebuf.get_f64_be()?,
+                bytebuf.get_f64_be()?,
+                bytebuf.get_f64_be()?,
+            );
+            let offset = Vector3::new(
+                bytebuf.get_f32_be()?,
+                bytebuf.get_f32_be()?,
+                bytebuf.get_f32_be()?,
+            );
+            let max_speed = {
+                let x = bytebuf.get_f32_be()?;
+                let _y = bytebuf.get_f32_be()?;
+                let _z = bytebuf.get_f32_be()?;
+                x
+            };
+            let particle_count = bytebuf.get_var_int()?.0;
+            let _randomization_type = bytebuf.get_var_int()?; // DEFAULT=0, discard
+            return Ok(Self {
+                force_spawn,
+                important,
+                particle_id,
+                position,
+                offset,
+                max_speed,
+                particle_count,
+                data: &[],
+            });
+        }
+
         let (particle_id, important, force_spawn) = if *version <= JavaMinecraftVersion::V_1_7_6 {
             let name = bytebuf.get_str_bounded_borrowed(64)?;
             let id = particle_id_from_1_7_name(name);
@@ -283,21 +342,11 @@ impl<'a> ServerPacket<'a> for CParticle<'a> {
             bytebuf.get_f32_be()?,
             bytebuf.get_f32_be()?,
         );
-        let max_speed = if *version >= JavaMinecraftVersion::V_26_3 {
-            // 26.3+: three separate per-axis speed floats; use xMaxSpeed as the canonical value
-            let x = bytebuf.get_f32_be()?;
-            let _y = bytebuf.get_f32_be()?;
-            let _z = bytebuf.get_f32_be()?;
-            x
-        } else {
-            bytebuf.get_f32_be()?
-        };
+        let max_speed = bytebuf.get_f32_be()?;
         let particle_count = bytebuf.get_i32_be()?;
 
         let (particle_id, data) = if *version >= JavaMinecraftVersion::V_1_20_5 {
             let id = bytebuf.get_var_int()?;
-            // In 26.3+, the randomizationType VarInt is at the end AFTER particle data;
-            // since data is variable length, we consume the remainder and strip it if needed.
             let remaining = bytebuf.read_remaining_slice_borrowed(usize::MAX)?;
             (id, remaining)
         } else {

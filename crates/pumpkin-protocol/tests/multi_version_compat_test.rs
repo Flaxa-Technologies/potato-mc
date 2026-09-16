@@ -1442,15 +1442,23 @@ mod tier4_real_world_simulation {
     }
 
     #[test]
-    fn test_particle_26_3_speed_split() {
-        // For 26.3, after offset (3xf32=12 bytes), we expect 3 speed floats (12 bytes) not 1 (4 bytes).
+    fn test_particle_26_3_format() {
+        // Verifies the 26.3 wire format:
+        //   VarInt particleId   ← FIRST (before bools)
+        //   bool overrideLimiter
+        //   bool alwaysShow
+        //   f64 x, y, z
+        //   f32 xDist, yDist, zDist
+        //   f32 xMaxSpeed, yMaxSpeed, zMaxSpeed   ← 3 floats (vs 1 pre-26.3)
+        //   VarInt count                           ← VarInt (vs i32 pre-26.3)
+        //   VarInt randomizationType
         let particle = CParticle::new(
-            false,
-            false,
+            false,  // important (overrideLimiter)
+            false,  // force_spawn (alwaysShow)
             Vector3::new(0.0, 64.0, 0.0),
             Vector3::new(0.1, 0.1, 0.1),
-            2.5, // max_speed
-            5,
+            2.5,    // max_speed
+            5,      // count
             VarInt(1),
             &[],
         );
@@ -1458,13 +1466,27 @@ mod tier4_real_world_simulation {
         particle.write_packet_data(&mut buf_26_2, &JavaMinecraftVersion::V_26_2).unwrap();
         let mut buf_26_3 = Vec::new();
         particle.write_packet_data(&mut buf_26_3, &JavaMinecraftVersion::V_26_3).unwrap();
-        // 26.3 should be 8 bytes longer: 2 extra floats (8 bytes) + randomizationType VarInt (1 byte) - nothing removed = +9 bytes net
-        // Actually: +2 floats (8 bytes) for speed split, +1 varint byte for randomizationType = +9
+
+        // 26.2 layout for this packet (data=[]):
+        //   bool important=1, bool force_spawn=1, f64*3=24, f32*3=12, f32 speed=4, i32 count=4, VarInt id=1
+        //   total = 47 bytes
+        // 26.3 layout:
+        //   VarInt id=1, bool*2=2, f64*3=24, f32*3=12, f32*3(speed)=12, VarInt count(5)=1, VarInt rand=1
+        //   total = 53 bytes
+        // Net difference = +6
         assert_eq!(
             buf_26_3.len(),
-            buf_26_2.len() + 9,
-            "26.3 particle packet must be 9 bytes longer than 26.2 (2 extra speed floats + randomizationType VarInt)"
+            buf_26_2.len() + 6,
+            "26.3 particle packet must be 6 bytes longer than 26.2 (ID moved first, count VarInt vs i32, +2 speed floats, +randomizationType)"
         );
+
+        // Structural check: first byte of 26.3 is the particle ID VarInt (=1), not a bool
+        assert_eq!(buf_26_3[0], 1u8, "26.3 packet must start with particle ID VarInt, not important bool");
+        // Next two bytes must be the two bools (false=0, false=0)
+        assert_eq!(buf_26_3[1], 0u8, "byte 1 of 26.3 must be overrideLimiter bool");
+        assert_eq!(buf_26_3[2], 0u8, "byte 2 of 26.3 must be alwaysShow bool");
+        // Last byte must be randomizationType VarInt = 0
+        assert_eq!(*buf_26_3.last().unwrap(), 0u8, "last byte of 26.3 particle must be randomizationType=DEFAULT");
     }
     #[test]
     fn test_entity_pos_rot_26_3_properties_varint() {

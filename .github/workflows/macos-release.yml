@@ -37,6 +37,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Remove local toolchain override
+        run: rm -f rust-toolchain.toml rust-toolchain
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:

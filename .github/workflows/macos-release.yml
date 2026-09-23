@@ -1,0 +1,79 @@
+name: Build & Upload macOS Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag to attach binaries to (e.g. beta.3.0)"
+        required: true
+        default: "beta.3.0"
+        type: string
+  push:
+    tags:
+      - "beta.*"
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    name: Build macOS (${{ matrix.target.name }})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - name: "arm64"
+            rust_target: "aarch64-apple-darwin"
+            artifact_name: "potato-macos-arm64"
+          - name: "x86_64"
+            rust_target: "x86_64-apple-darwin"
+            artifact_name: "potato-macos-x86_64"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target.rust_target }}
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target.rust_target }}
+
+      - name: Build Release Binary
+        run: |
+          cargo build --release -j 4 -p pumpkin --bin pumpkin --target ${{ matrix.target.rust_target }}
+
+      - name: Prepare Artifact
+        run: |
+          mkdir -p dist
+          cp "target/${{ matrix.target.rust_target }}/release/pumpkin" "dist/${{ matrix.target.artifact_name }}"
+          chmod +x "dist/${{ matrix.target.artifact_name }}"
+          ls -la dist/
+
+      - name: Determine Release Tag
+        id: determine_tag
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.tag_name }}" ]; then
+            TAG="${{ inputs.tag_name }}"
+          elif [ "${{ github.ref_type }}" == "tag" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="beta.3.0"
+          fi
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "Target Release Tag: ${TAG}"
+
+      - name: Upload Binary to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ steps.determine_tag.outputs.tag }}" "dist/${{ matrix.target.artifact_name }}" --clobber

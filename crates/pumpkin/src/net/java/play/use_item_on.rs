@@ -150,9 +150,20 @@ impl JavaClient {
             return Ok(());
         }
 
-        // Check if the item is a block, because not every item can be placed :D
+        // Check if the item has custom behavior or is a block
         let item_id = item.item.id;
-        if let Some(block) = Block::from_item_id(item_id) {
+        if server.item_registry.get_pumpkin_item(item_id).is_some() {
+            let used_on_block = server
+                .item_registry
+                .use_on_block(&mut item, player, position, face, cursor_pos, block, server);
+
+            if !used_on_block {
+                let stack_for_use = item.clone();
+                Self::prepare_hand_item_for_use(player, hand, &mut item);
+                server.item_registry.on_use(&stack_for_use, player);
+                item = inventory.get_stack_in_hand(hand);
+            }
+        } else if let Some(block) = Block::from_item_id(item_id) {
             should_try_decrement =
                 Self::run_is_block_place(player, block, server, use_item_on, position, face)?;
         } else {

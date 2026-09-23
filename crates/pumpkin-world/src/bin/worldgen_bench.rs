@@ -87,7 +87,7 @@ fn benchmark_dimension(
 
     let overall_start = Instant::now();
 
-    let chunk_times_us = Arc::new(std::sync::Mutex::new(Vec::with_capacity(total_chunks)));
+    let chunk_times_us: Arc<Vec<AtomicU64>> = Arc::new((0..total_chunks).map(|_| AtomicU64::new(0)).collect());
     let stage_cache = Arc::new(StageCache::new());
 
     pool.scope(|s| {
@@ -127,7 +127,8 @@ fn benchmark_dimension(
                     worst.fetch_max(elapsed_us, Ordering::Relaxed);
                     best.fetch_min(elapsed_us, Ordering::Relaxed);
                     sum.fetch_add(elapsed_us, Ordering::Relaxed);
-                    times.lock().unwrap().push(elapsed_us);
+                    let idx = (cx * grid_size + cz) as usize;
+                    times[idx].store(elapsed_us, Ordering::Relaxed);
                 });
             }
         }
@@ -140,7 +141,7 @@ fn benchmark_dimension(
     let worst_chunk_ms = (worst_time_us.load(Ordering::Relaxed) as f64) / 1000.0;
     let best_chunk_ms = (best_time_us.load(Ordering::Relaxed) as f64) / 1000.0;
 
-    let mut times = chunk_times_us.lock().unwrap().clone();
+    let mut times: Vec<u64> = chunk_times_us.iter().map(|a| a.load(Ordering::Relaxed)).collect();
     times.sort_unstable();
     let median_chunk_ms = if times.is_empty() { 0.0 } else { times[times.len() / 2] as f64 / 1000.0 };
 

@@ -47,6 +47,7 @@ pub mod spear;
 pub mod spyglass;
 pub mod swords;
 pub mod trident;
+pub mod cushion;
 pub mod wind_charge;
 pub mod writable_book;
 
@@ -57,6 +58,7 @@ use crate::item::items::brush::BrushItem;
 use crate::item::items::bundle::BundleItem;
 use crate::item::items::clock::ClockItem;
 use crate::item::items::compass::CompassItem;
+use crate::item::items::cushion::CushionItem;
 use crate::item::items::debug_stick::DebugStickItem;
 use crate::item::items::end_crystal::EndCrystalItem;
 use crate::item::items::experience_bottle::ExperienceBottleItem;
@@ -167,6 +169,7 @@ pub fn default_registry() -> Arc<ItemRegistry> {
     manager.register(DiscFragmentItem);
     manager.register(ShieldItem);
     manager.register(DebugStickItem);
+    manager.register(CushionItem);
 
     Arc::new(manager)
 }

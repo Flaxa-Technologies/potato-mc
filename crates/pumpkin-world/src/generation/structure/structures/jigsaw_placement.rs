@@ -11,7 +11,7 @@ use pumpkin_util::random::{RandomGenerator, RandomImpl};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, VecDeque};
 use std::rc::Rc;
-use std::sync::Arc;
+
 
 use super::jigsaw::{
     JigsawBlock, JigsawJointType, JigsawJunction, JigsawProjection, PoolElementStructurePiece,
@@ -392,7 +392,7 @@ impl Placer {
                                 pool_alias_lookup.lookup(&target_jigsaw_x.pool, random);
                             let child_pool = TemplatePool::discover(child_pool_name);
                             let child_pool_size =
-                                child_pool.as_ref().map_or(0, TemplatePool::get_max_size);
+                                child_pool.as_ref().map_or(0, |p| p.get_max_size());
                             let child_fallback_size = child_pool
                                 .as_ref()
                                 .and_then(|p| {
@@ -625,8 +625,8 @@ impl JigsawPlacement {
                         | pumpkin_data::structures::StructureKeys::PillagerOutpost
                 );
                 if is_surface_land_structure {
-                    // Surface land structures cannot generate submerged in water or at/below sea level
-                    if bottom_y <= context.sea_level {
+                    // Surface land structures cannot generate submerged in water or below sea level
+                    if bottom_y < context.sea_level {
                         return None;
                     }
                     if let Some(sampler) = context.height_sampler.as_mut() {
@@ -727,10 +727,10 @@ impl JigsawPlacement {
             collector.add_piece(center_piece);
         }
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(center_x, center_y, center_z),
-            collector: Arc::new(std::sync::Mutex::new(collector)),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(center_x, center_y, center_z),
+            collector,
+        ))
     }
 }
 

@@ -29,6 +29,8 @@ use crate::generation::noise::perlin::DoublePerlinNoiseSampler;
 
 pub struct NetherAotContext<'a> {
     pub interpolated_noise: &'a InterpolatedNoiseSampler,
+    pub cache_pos: [Vector3<i32>; 32],
+    pub cache_val: [f32; 32],
 }
 
 impl<'a> NoiseEvaluationContext for NetherAotContext<'a> {
@@ -108,12 +110,22 @@ impl<'a> NoiseEvaluationContext for NetherAotContext<'a> {
     #[inline(always)]
     fn sample_wrapper(
         &mut self,
-        _wrapper_index: usize,
+        wrapper_index: usize,
         _wrapper_type: WrapperType,
         pos: &Vector3<i32>,
         eval_input: &dyn Fn(&Vector3<i32>, &mut Self) -> f32,
     ) -> f32 {
-        eval_input(pos, self)
+        if wrapper_index < 32 {
+            if self.cache_pos[wrapper_index] == *pos {
+                return self.cache_val[wrapper_index];
+            }
+            let val = eval_input(pos, self);
+            self.cache_pos[wrapper_index] = *pos;
+            self.cache_val[wrapper_index] = val;
+            val
+        } else {
+            eval_input(pos, self)
+        }
     }
 
     #[inline(always)]
@@ -156,6 +168,8 @@ pub fn evaluate_nether_final_density_volume(
     let mut corners = DensityBuffer::acquire(&cell_volume);
     let mut ctx = NetherAotContext {
         interpolated_noise,
+        cache_pos: [Vector3::new(i32::MIN, i32::MIN, i32::MIN); 32],
+        cache_val: [0.0; 32],
     };
 
     // Evaluate eval_nether_8 directly at every cell corner with zero AST dispatch
@@ -243,10 +257,8 @@ pub struct OverworldAotContext<'a> {
     pub val_19: f32,
     pub val_22: f32,
     pub val_27: f32,
-    pub cache_tags: [u32; 222],
-    pub cache_pos: [Vector3<i32>; 222],
-    pub cache_vals: [f32; 222],
-    pub current_tag: u32,
+    pub cache_pos: [Vector3<i32>; 256],
+    pub cache_val: [f32; 256],
 }
 
 impl<'a> OverworldAotContext<'a> {
@@ -317,10 +329,8 @@ impl<'a> OverworldAotContext<'a> {
             val_19: 0.0,
             val_22: 0.0,
             val_27: 0.0,
-            cache_tags: [0; 222],
-            cache_pos: [Vector3::new(i32::MIN, i32::MIN, i32::MIN); 222],
-            cache_vals: [0.0; 222],
-            current_tag: 1,
+            cache_pos: [Vector3::new(i32::MIN, i32::MIN, i32::MIN); 256],
+            cache_val: [0.0; 256],
         }
     }
 
@@ -337,11 +347,6 @@ impl<'a> OverworldAotContext<'a> {
     #[inline(always)]
     pub fn update_corner(&mut self, pos: Vector3<i32>) {
         self.current_pos = pos;
-        self.current_tag = self.current_tag.wrapping_add(1);
-        if self.current_tag == 0 {
-            self.cache_tags = [0; 222];
-            self.current_tag = 1;
-        }
     }
 }
 
@@ -455,26 +460,20 @@ impl<'a> NoiseEvaluationContext for OverworldAotContext<'a> {
     fn sample_wrapper(
         &mut self,
         wrapper_index: usize,
-        wrapper_type: WrapperType,
+        _wrapper_type: WrapperType,
         pos: &Vector3<i32>,
         eval_input: &dyn Fn(&Vector3<i32>, &mut Self) -> f32,
     ) -> f32 {
-        match wrapper_type {
-            WrapperType::Cache => {
-                if wrapper_index < 222 {
-                    if self.cache_tags[wrapper_index] == self.current_tag && self.cache_pos[wrapper_index] == *pos {
-                        return self.cache_vals[wrapper_index];
-                    }
-                    let val = eval_input(pos, self);
-                    self.cache_tags[wrapper_index] = self.current_tag;
-                    self.cache_pos[wrapper_index] = *pos;
-                    self.cache_vals[wrapper_index] = val;
-                    val
-                } else {
-                    eval_input(pos, self)
-                }
+        if wrapper_index < 256 {
+            if self.cache_pos[wrapper_index] == *pos {
+                return self.cache_val[wrapper_index];
             }
-            _ => eval_input(pos, self),
+            let val = eval_input(pos, self);
+            self.cache_pos[wrapper_index] = *pos;
+            self.cache_val[wrapper_index] = val;
+            val
+        } else {
+            eval_input(pos, self)
         }
     }
 
@@ -549,9 +548,12 @@ pub fn evaluate_overworld_final_density_volume(
             // Precompute column 2D slices (continentalness, erosion, ridges, weirdness)
             ctx.update_column(block_x, block_z);
 
+            let min_block_y = cell_volume.min_block_y;
+            let step_block_y = cell_volume.step_block_y;
+            let mut pos = Vector3::new(block_x, min_block_y, block_z);
+
             for y in 0..size_y {
-                let block_y = cell_volume.block_y(y);
-                let pos = Vector3::new(block_x, block_y, block_z);
+                pos.y = min_block_y + y as i32 * step_block_y;
                 ctx.update_corner(pos);
 
                 corners_167[index] = eval_overworld_167(&pos, &mut ctx);
@@ -564,8 +566,23 @@ pub fn evaluate_overworld_final_density_volume(
     // Pass 2: Mark cells and propagate to corners.
     // If all 8 corners of a cell have noodle_toggle in [-1000000.0, 0.0),
     // noodle caves are provably inactive across the entire cell (convex combination).
-    let mut cell_needs_noodle = vec![false; n_cells];
-    let mut corner_needed = vec![false; n_corners];
+    let mut stack_cells = [false; 768];
+    let mut heap_cells;
+    let cell_needs_noodle: &mut [bool] = if n_cells == 768 {
+        &mut stack_cells[..]
+    } else {
+        heap_cells = vec![false; n_cells];
+        &mut heap_cells[..]
+    };
+
+    let mut stack_corners = [false; 1225];
+    let mut heap_corners;
+    let corner_needed: &mut [bool] = if n_corners == 1225 {
+        &mut stack_corners[..]
+    } else {
+        heap_corners = vec![false; n_corners];
+        &mut heap_corners[..]
+    };
     let mut any_cell_needs_noodle = false;
 
     for cell_z in 0..cell_count_z {
@@ -640,11 +657,14 @@ pub fn evaluate_overworld_final_density_volume(
                 let block_x = cell_volume.block_x(x);
                 ctx.update_column(block_x, block_z);
 
+                let min_block_y = cell_volume.min_block_y;
+                let step_block_y = cell_volume.step_block_y;
+                let mut pos = Vector3::new(block_x, min_block_y, block_z);
+
                 for y in 0..size_y {
                     let idx = col_idx + y;
                     if corner_needed[idx] {
-                        let block_y = cell_volume.block_y(y);
-                        let pos = Vector3::new(block_x, block_y, block_z);
+                        pos.y = min_block_y + y as i32 * step_block_y;
                         ctx.update_corner(pos);
 
                         corners_179[idx] = eval_overworld_179(&pos, &mut ctx);
@@ -664,7 +684,7 @@ pub fn evaluate_overworld_final_density_volume(
         &corners_167,
         &corners_173,
         noodle_corners.as_ref(),
-        &cell_needs_noodle,
+        cell_needs_noodle,
         buffer,
         volume,
         &cell_volume,
@@ -810,10 +830,18 @@ fn fused_interpolate_overworld(
 
                             let start = y_start + (out_x * volume.size_y) + z_offset;
 
-                            for dy in 0..y_count {
-                                let dy_f = dy as f32;
-                                let raw_167 = val_167_start + step_167 * dy_f;
-                                buffer[start + dy] = caves_from_167(raw_167);
+                            if y_count == 8 {
+                                for dy in 0..8 {
+                                    let dy_f = dy as f32;
+                                    let raw_167 = val_167_start + step_167 * dy_f;
+                                    buffer[start + dy] = caves_from_167(raw_167);
+                                }
+                            } else {
+                                for dy in 0..y_count {
+                                    let dy_f = dy as f32;
+                                    let raw_167 = val_167_start + step_167 * dy_f;
+                                    buffer[start + dy] = caves_from_167(raw_167);
+                                }
                             }
                         }
                     }
@@ -925,26 +953,44 @@ fn fused_interpolate_overworld(
 
                         let start = y_start + (out_x * volume.size_y) + z_offset;
 
-                        for dy in 0..y_count {
-                            let dy_f = dy as f32;
-                            let raw_167 = val_167_start + step_167 * dy_f;
-                            let caves = caves_from_167(raw_167);
+                        if y_count == 8 {
+                            for dy in 0..8 {
+                                let dy_f = dy as f32;
+                                let raw_167 = val_167_start + step_167 * dy_f;
+                                let caves = caves_from_167(raw_167);
 
-                            let noodle_toggle = val_173_start + step_173 * dy_f;
-                            let is_toggled = noodle_toggle >= -1000000.0 && noodle_toggle < 0.0;
+                                let noodle_toggle = val_173_start + step_173 * dy_f;
+                                let is_toggled = noodle_toggle >= -1000000.0 && noodle_toggle < 0.0;
 
-                            // Skip computing the noodle value entirely when the toggle
-                            // already selects `caves` — ridge_a/ridge_b/abs/max cost real
-                            // cycles and their result would be discarded anyway.
-                            buffer[start + dy] = if is_toggled {
-                                caves
-                            } else {
-                                let thickness = val_179_start + step_179 * dy_f;
-                                let ridge_a = (val_182_start + step_182 * dy_f).abs();
-                                let ridge_b = (val_186_start + step_186 * dy_f).abs();
-                                let noodle = thickness + ridge_a.max(ridge_b) * 1.5;
-                                caves.min(noodle)
-                            };
+                                buffer[start + dy] = if is_toggled {
+                                    caves
+                                } else {
+                                    let thickness = val_179_start + step_179 * dy_f;
+                                    let ridge_a = (val_182_start + step_182 * dy_f).abs();
+                                    let ridge_b = (val_186_start + step_186 * dy_f).abs();
+                                    let noodle = thickness + ridge_a.max(ridge_b) * 1.5;
+                                    caves.min(noodle)
+                                };
+                            }
+                        } else {
+                            for dy in 0..y_count {
+                                let dy_f = dy as f32;
+                                let raw_167 = val_167_start + step_167 * dy_f;
+                                let caves = caves_from_167(raw_167);
+
+                                let noodle_toggle = val_173_start + step_173 * dy_f;
+                                let is_toggled = noodle_toggle >= -1000000.0 && noodle_toggle < 0.0;
+
+                                buffer[start + dy] = if is_toggled {
+                                    caves
+                                } else {
+                                    let thickness = val_179_start + step_179 * dy_f;
+                                    let ridge_a = (val_182_start + step_182 * dy_f).abs();
+                                    let ridge_b = (val_186_start + step_186 * dy_f).abs();
+                                    let noodle = thickness + ridge_a.max(ridge_b) * 1.5;
+                                    caves.min(noodle)
+                                };
+                            }
                         }
                     }
                 }
@@ -953,14 +999,12 @@ fn fused_interpolate_overworld(
     }
 }
 
-pub fn evaluate_overworld_veins_volume(
+pub fn evaluate_overworld_veins_volume_opt(
     stack: &[ChunkNoiseFunctionComponent],
-    toggle_buffer: &mut [f32],
-    ridged_buffer: &mut [f32],
     volume: &DensityVolume,
-) -> bool {
+) -> Option<Option<[DensityBuffer; 2]>> {
     if stack.len() < 218 {
-        return false;
+        return None;
     }
     let (sampler_veininess, sampler_a, sampler_b) = match (&stack[200], &stack[205], &stack[210]) {
         (
@@ -968,7 +1012,7 @@ pub fn evaluate_overworld_veins_volume(
             ChunkNoiseFunctionComponent::Independent(IndependentProtoNoiseFunctionComponent::Noise(n_a)),
             ChunkNoiseFunctionComponent::Independent(IndependentProtoNoiseFunctionComponent::Noise(n_b)),
         ) => (&n_v.sampler, &n_a.sampler, &n_b.sampler),
-        _ => return false,
+        _ => return None,
     };
 
     const CELL_SIZE_XZ: i32 = 4;
@@ -979,7 +1023,15 @@ pub fn evaluate_overworld_veins_volume(
     let (cell_volume, cell_count_x, cell_count_y, cell_count_z) =
         compute_cell_volume(volume, CELL_SIZE_XZ, CELL_SIZE_Y);
 
-    let mut corners_veininess = DensityBuffer::acquire(&cell_volume);
+    let total_corners = cell_volume.size_x * cell_volume.size_y * cell_volume.size_z;
+    let mut corners_veininess_stack = [0.0f32; 1225];
+    let mut corners_veininess_heap;
+    let corners_veininess: &mut [f32] = if total_corners <= 1225 {
+        &mut corners_veininess_stack[..total_corners]
+    } else {
+        corners_veininess_heap = DensityBuffer::acquire(&cell_volume);
+        &mut corners_veininess_heap
+    };
 
     // Sample veininess corners
     // Note: for block_y outside [-64, 57), eval_overworld_201 returns 0.0.
@@ -1014,48 +1066,17 @@ pub fn evaluate_overworld_veins_volume(
     }
 
     // If no corner has |veininess| >= 0.4, then in EVERY cell, all corners are in (-0.4, 0.4).
-    // Throughout the entire chunk, vein_toggle is strictly in (-0.4, 0.4), so vein_ridged is -1.0 everywhere.
+    // Throughout the entire chunk, vein_toggle is strictly in (-0.4, 0.4), so OreVeinSampler::sample
+    // will NEVER trigger. Returning None completely eliminates allocating 786 KB of buffers
+    // and doing 98,304 interpolations per chunk!
     if !any_vein_cells {
-        ridged_buffer.fill(-1.0);
-        for cell_z in 0..cell_count_z {
-            let next_z = (cell_z + 1).min(cell_volume.size_z - 1);
-            let z0_offset = cell_z * cell_volume.size_x;
-            let z1_offset = next_z * cell_volume.size_x;
-            for cell_x in 0..cell_count_x {
-                let next_x = (cell_x + 1).min(cell_volume.size_x - 1);
-                let idx_00 = (cell_x + z0_offset) * cell_volume.size_y;
-                let idx_10 = (next_x + z0_offset) * cell_volume.size_y;
-                let idx_01 = (cell_x + z1_offset) * cell_volume.size_y;
-                let idx_11 = (next_x + z1_offset) * cell_volume.size_y;
-                for cell_y in 0..cell_count_y {
-                    let next_y = (cell_y + 1).min(cell_volume.size_y - 1);
-                    super::chunk_density_function::fill_single_cell(
-                        toggle_buffer,
-                        volume,
-                        &cell_volume,
-                        [cell_x, cell_y, cell_z],
-                        [
-                            corners_veininess[idx_00 + cell_y],
-                            corners_veininess[idx_10 + cell_y],
-                            corners_veininess[idx_00 + next_y],
-                            corners_veininess[idx_10 + next_y],
-                            corners_veininess[idx_01 + cell_y],
-                            corners_veininess[idx_11 + cell_y],
-                            corners_veininess[idx_01 + next_y],
-                            corners_veininess[idx_11 + next_y],
-                        ],
-                        CELL_SIZE_XZ,
-                        CELL_SIZE_Y,
-                        CELL_SIZE_XZ_INV,
-                        CELL_SIZE_Y_INV,
-                    );
-                }
-            }
-        }
-        return true;
+        return Some(None);
     }
 
     // Rare case: an ore vein exists in this chunk.
+    let mut toggle_buffer = DensityBuffer::acquire(volume);
+    let mut ridged_buffer = DensityBuffer::acquire(volume);
+
     let mut corners_a = DensityBuffer::acquire(&cell_volume);
     let mut corners_b = DensityBuffer::acquire(&cell_volume);
     for z in 0..cell_volume.size_z {
@@ -1110,7 +1131,7 @@ pub fn evaluate_overworld_veins_volume(
                 ];
 
                 super::chunk_density_function::fill_single_cell(
-                    toggle_buffer,
+                    &mut toggle_buffer,
                     volume,
                     &cell_volume,
                     [cell_x, cell_y, cell_z],
@@ -1124,7 +1145,7 @@ pub fn evaluate_overworld_veins_volume(
                 let cell_has_vein = c_t.iter().any(|&v| v <= -0.4 || v >= 0.4);
                 if !cell_has_vein {
                     fill_cell_constant(
-                        ridged_buffer,
+                        &mut ridged_buffer,
                         volume,
                         &cell_volume,
                         [cell_x, cell_y, cell_z],
@@ -1155,8 +1176,8 @@ pub fn evaluate_overworld_veins_volume(
                     ];
 
                     fill_vein_cell(
-                        toggle_buffer,
-                        ridged_buffer,
+                        &mut toggle_buffer,
+                        &mut ridged_buffer,
                         volume,
                         &cell_volume,
                         [cell_x, cell_y, cell_z],
@@ -1172,7 +1193,26 @@ pub fn evaluate_overworld_veins_volume(
         }
     }
 
-    true
+    Some(Some([toggle_buffer, ridged_buffer]))
+}
+
+pub fn evaluate_overworld_veins_volume(
+    stack: &[ChunkNoiseFunctionComponent],
+    toggle_buffer: &mut [f32],
+    ridged_buffer: &mut [f32],
+    volume: &DensityVolume,
+) -> bool {
+    if let Some(opt_veins) = evaluate_overworld_veins_volume_opt(stack, volume) {
+        if let Some([t, r]) = opt_veins {
+            toggle_buffer.copy_from_slice(&t);
+            ridged_buffer.copy_from_slice(&r);
+        } else {
+            toggle_buffer.fill(0.0);
+            ridged_buffer.fill(-1.0);
+        }
+        return true;
+    }
+    false
 }
 
 fn fill_cell_constant(

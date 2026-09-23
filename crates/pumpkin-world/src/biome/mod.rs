@@ -142,11 +142,13 @@ mod test {
             for (biome_x, biome_y, biome_z, biome_id) in data.data {
                 let calculated_biome = chunk.get_biome(biome_x, biome_y, biome_z);
 
+                let expected_id =
+                    pumpkin_data::biome_remap::remap_biome_from_v26_2_to_v26_3(biome_id);
                 assert_eq!(
-                    biome_id,
+                    expected_id,
                     calculated_biome.id,
                     "Expected {:?} was {:?} at {},{},{} ({},{})",
-                    Biome::from_id(biome_id),
+                    Biome::from_id(expected_id),
                     calculated_biome,
                     biome_x,
                     biome_y,

@@ -1,7 +1,8 @@
 mod grid;
 mod placer;
 
-use std::sync::{Arc, Mutex};
+
+use std::sync::Arc;
 
 use pumpkin_data::{Block, Mirror, Rotation};
 use pumpkin_nbt::{compound::NbtCompound, tag::NbtTag};
@@ -80,10 +81,10 @@ impl StructureGenerator for MansionGenerator {
         }
         collector.add_piece(Box::new(MansionFoundationPiece::new(piece_boxes)?));
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(x, y, z),
-            collector: Arc::new(Mutex::new(collector)),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(x, y, z),
+            collector,
+        ))
     }
 }
 

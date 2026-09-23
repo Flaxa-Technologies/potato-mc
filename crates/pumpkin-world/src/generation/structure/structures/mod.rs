@@ -817,16 +817,25 @@ impl StructurePiecesCollector {
 #[derive(Clone)]
 pub struct StructurePosition {
     pub start_pos: BlockPos,
+    pub bounding_box: BlockBox,
     pub collector: Arc<Mutex<StructurePiecesCollector>>,
 }
 
 impl StructurePosition {
     #[must_use]
+    pub fn new(start_pos: BlockPos, mut collector: StructurePiecesCollector) -> Self {
+        let bounding_box = collector.get_bounding_box();
+        Self {
+            start_pos,
+            bounding_box,
+            collector: Arc::new(Mutex::new(collector)),
+        }
+    }
+
+    #[inline]
+    #[must_use]
     pub fn get_bounding_box(&self) -> BlockBox {
-        self.collector
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .get_bounding_box()
+        self.bounding_box
     }
 }
 
@@ -880,8 +889,7 @@ pub enum StructureInstance {
     /// This chunk is the "owner" of the structure.
     Start(StructurePosition),
     /// This chunk just contains a piece of a structure starting elsewhere.
-    /// Stores the `BlockPos` of the 'Start' so you can look it up.
-    Reference(Arc<Mutex<StructurePiecesCollector>>),
+    Reference(BlockBox, Arc<Mutex<StructurePiecesCollector>>),
 }
 
 #[cfg(test)]

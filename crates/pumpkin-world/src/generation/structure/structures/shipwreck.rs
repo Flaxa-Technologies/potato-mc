@@ -140,10 +140,10 @@ impl StructureGenerator for ShipwreckGenerator {
         let mut collector = StructurePiecesCollector::default();
         collector.add_piece(Box::new(piece));
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(center_x, center_y, center_z),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(center_x, center_y, center_z),
+            collector,
+        ))
     }
 }
 

@@ -143,13 +143,49 @@ pub(crate) fn build() -> TokenStream {
             }));
         }
 
+        // Mirror 26.3 visual attributes to effects for client color rendering compatibility
+        if let Some(biomes) = data.get_mut("worldgen/biome") {
+            for biome in biomes.values_mut() {
+                if let Some(obj) = biome.as_object_mut() {
+                    let mut sky_color = None;
+                    let mut fog_color = None;
+                    let mut water_fog_color = None;
+                    if let Some(attrs) = obj.get("attributes").and_then(|a| a.as_object()) {
+                        if let Some(sc) = attrs.get("minecraft:visual/sky_color") {
+                            sky_color = Some(sc.clone());
+                        }
+                        if let Some(fc) = attrs.get("minecraft:visual/fog_color") {
+                            fog_color = Some(fc.clone());
+                        }
+                        if let Some(wfc) = attrs.get("minecraft:visual/water_fog_color") {
+                            water_fog_color = Some(wfc.clone());
+                        }
+                    }
+                    if let Some(effects) = obj.get_mut("effects").and_then(|e| e.as_object_mut()) {
+                        if !effects.contains_key("sky_color") {
+                            effects.insert("sky_color".to_string(), sky_color.unwrap_or_else(|| serde_json::json!("#78a7ff")));
+                        }
+                        if !effects.contains_key("fog_color") {
+                            effects.insert("fog_color".to_string(), fog_color.unwrap_or_else(|| serde_json::json!("#c0d8ff")));
+                        }
+                        if !effects.contains_key("water_fog_color") {
+                            effects.insert("water_fog_color".to_string(), water_fog_color.unwrap_or_else(|| serde_json::json!("#050533")));
+                        }
+                        if !effects.contains_key("water_color") {
+                            effects.insert("water_color".to_string(), serde_json::json!("#3f76e4"));
+                        }
+                    }
+                }
+            }
+        }
+
         let reg_tokens: Vec<TokenStream> = data
             .iter()
             .map(|(reg_name, entries)| {
                 let entry_tokens: Vec<TokenStream> = entries
                     .iter()
                     .map(|(entry_name, entry_data)| {
-                        fn json_to_nbt_tag(v: &Value) -> pumpkin_nbt::tag::NbtTag {
+                        fn json_to_nbt_tag(reg_name: &str, parent: Option<&str>, key: Option<&str>, v: &Value) -> pumpkin_nbt::tag::NbtTag {
                             match v {
                                 Value::Null => pumpkin_nbt::tag::NbtTag::End,
                                 Value::Bool(b) => {
@@ -169,22 +205,36 @@ pub(crate) fn build() -> TokenStream {
                                     }
                                 }
                                 Value::String(s) => {
+                                    let is_color = if reg_name.ends_with("trim_material") {
+                                        false
+                                    } else {
+                                        parent == Some("effects")
+                                            || key.is_some_and(|k| k.ends_with("_color") || k.starts_with("minecraft:visual/"))
+                                    };
+                                    if is_color
+                                        && s.starts_with('#')
+                                        && (s.len() == 7 || s.len() == 9)
+                                    {
+                                        if let Ok(color) = u32::from_str_radix(&s[1..], 16) {
+                                            return pumpkin_nbt::tag::NbtTag::Int(color as i32);
+                                        }
+                                    }
                                     pumpkin_nbt::tag::NbtTag::String(s.clone().into())
                                 }
                                 Value::Array(arr) => pumpkin_nbt::tag::NbtTag::List(
-                                    arr.iter().map(json_to_nbt_tag).collect(),
+                                    arr.iter().map(|item| json_to_nbt_tag(reg_name, key, None, item)).collect(),
                                 ),
                                 Value::Object(obj) => {
                                     let mut compound = pumpkin_nbt::compound::NbtCompound::new();
                                     for (k, val) in obj {
-                                        compound.put(k, json_to_nbt_tag(val));
+                                        compound.put(k, json_to_nbt_tag(reg_name, key, Some(k), val));
                                     }
                                     pumpkin_nbt::tag::NbtTag::Compound(compound)
                                 }
                             }
                         }
 
-                        let nbt_tag = json_to_nbt_tag(entry_data);
+                        let nbt_tag = json_to_nbt_tag(reg_name, None, None, entry_data);
                         let mut bytes = Vec::new();
                         let mut writer =
                             pumpkin_nbt::serializer::NbtWriteHelperJava::new(&mut bytes);

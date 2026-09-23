@@ -12,8 +12,22 @@ struct GeyserBiomeMapping {
     bedrock_id: u8,
 }
 
-/// Raw deserialization shape for a single biome entry from `biome.json`.
 #[derive(Deserialize)]
+struct RawBiome {
+    has_precipitation: bool,
+    temperature: f32,
+    downfall: f32,
+    temperature_modifier: Option<TemperatureModifier>,
+    features: Vec<Vec<String>>,
+    creature_spawn_probability: Option<f32>,
+    spawners: Option<SpawnGroups>,
+    #[serde(default)]
+    spawn_costs: BTreeMap<String, SpawnCosts>,
+    #[serde(default)]
+    attributes: BTreeMap<String, serde_json::Value>,
+}
+
+/// Raw deserialization shape for a single biome entry from `biome.json`.
 pub struct Biome {
     /// Whether this biome has precipitation (rain or snow).
     has_precipitation: bool,
@@ -23,7 +37,6 @@ pub struct Biome {
     downfall: f32,
     /// Optional modifier that changes how temperature is applied.
     temperature_modifier: Option<TemperatureModifier>,
-    //carvers: Vec<String>,
     /// Nested lists of feature resource-location strings applied during world generation.
     features: Vec<Vec<String>>,
     /// Probability per chunk tick that a creature spawns, if not overridden per-biome.
@@ -33,8 +46,78 @@ pub struct Biome {
     /// Per-entity spawn cost budget entries, keyed by namespaced entity ID.
     spawn_costs: BTreeMap<String, SpawnCosts>,
     /// Numeric registry ID assigned to this biome.
-    #[serde(default)]
     pub id: u8,
+}
+
+fn parse_spawners_from_attributes(attrs: &BTreeMap<String, serde_json::Value>) -> SpawnGroups {
+    let cat_map = attrs
+        .get("minecraft:gameplay/natural_mob_spawns")
+        .and_then(|v| v.get("argument"))
+        .and_then(|v| v.get("spawns_by_category"))
+        .and_then(|v| v.as_object());
+
+    let parse_cat = |cat_name: &str| -> Vec<Spawner> {
+        let Some(arr) = cat_map.and_then(|m| m.get(cat_name)).and_then(|v| v.as_array()) else {
+            return Vec::new();
+        };
+        arr.iter()
+            .filter_map(|item| {
+                let r#type = item.get("type")?.as_str()?.to_string();
+                let (min_count, max_count) = if let Some(cnt) = item.get("count") {
+                    if let Some(n) = cnt.as_i64() {
+                        (n as i32, n as i32)
+                    } else if let Some(obj) = cnt.as_object() {
+                        let min_c = obj.get("min_inclusive").and_then(|v| v.as_i64()).unwrap_or(1) as i32;
+                        let max_c = obj.get("max_inclusive").and_then(|v| v.as_i64()).unwrap_or(1) as i32;
+                        (min_c, max_c)
+                    } else {
+                        (1, 1)
+                    }
+                } else {
+                    let min_c = item.get("minCount").and_then(|v| v.as_i64()).unwrap_or(1) as i32;
+                    let max_c = item.get("maxCount").and_then(|v| v.as_i64()).unwrap_or(1) as i32;
+                    (min_c, max_c)
+                };
+                Some(Spawner {
+                    r#type,
+                    min_count,
+                    max_count,
+                })
+            })
+            .collect()
+    };
+
+    SpawnGroups {
+        monster: parse_cat("monster"),
+        ambient: parse_cat("ambient"),
+        axolotls: parse_cat("axolotls"),
+        creature: parse_cat("creature"),
+        misc: parse_cat("misc"),
+        underground_water_creature: parse_cat("underground_water_creature"),
+        water_ambient: parse_cat("water_ambient"),
+        water_creature: parse_cat("water_creature"),
+    }
+}
+
+fn parse_spawn_costs_from_attributes(attrs: &BTreeMap<String, serde_json::Value>) -> BTreeMap<String, SpawnCosts> {
+    let mut costs = BTreeMap::new();
+    let Some(sc_obj) = attrs
+        .get("minecraft:gameplay/natural_mob_spawns")
+        .and_then(|v| v.get("argument"))
+        .and_then(|v| v.get("spawn_costs"))
+        .and_then(|v| v.as_object())
+    else {
+        return costs;
+    };
+
+    for (k, v) in sc_obj {
+        if let Some(obj) = v.as_object() {
+            let energy_budget = obj.get("energy_budget").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let charge = obj.get("charge").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            costs.insert(k.clone(), SpawnCosts { energy_budget, charge });
+        }
+    }
+    costs
 }
 
 /// Spawn group data for all entity categories within a biome.
@@ -214,7 +297,7 @@ struct MultiNoiseBiomeSuppliers {
 /// Generates the `TokenStream` for the `Biome` struct, its constants, lookup methods,
 /// the multi-noise biome source trees, and the `BiomeTree` search implementation.
 pub fn build() -> TokenStream {
-    let dir = std::path::Path::new("../../assets/datapacks/26_2/data/minecraft/worldgen/biome");
+    let dir = std::path::Path::new("../../assets/datapacks/26_3/data/minecraft/worldgen/biome");
     let mut biomes: BTreeMap<String, Biome> = BTreeMap::new();
     let mut entries: Vec<_> = fs::read_dir(dir)
         .expect("Missing worldgen/biome directory")
@@ -231,8 +314,33 @@ pub fn build() -> TokenStream {
             .to_string_lossy()
             .into_owned();
         let content = fs::read_to_string(entry.path()).expect("Failed to read biome file");
-        let mut biome: Biome = serde_json::from_str(&content).expect("Failed to parse biome JSON");
-        biome.id = i as u8;
+        let raw: RawBiome = serde_json::from_str(&content).expect("Failed to parse biome JSON");
+        let creature_spawn_probability = raw.creature_spawn_probability.or_else(|| {
+            raw.attributes
+                .get("minecraft:gameplay/creature_world_gen_spawn_probability")
+                .and_then(|v| v.as_f64())
+                .map(|v| v as f32)
+        });
+        let spawners = raw
+            .spawners
+            .unwrap_or_else(|| parse_spawners_from_attributes(&raw.attributes));
+        let spawn_costs = if !raw.spawn_costs.is_empty() {
+            raw.spawn_costs
+        } else {
+            parse_spawn_costs_from_attributes(&raw.attributes)
+        };
+
+        let biome = Biome {
+            has_precipitation: raw.has_precipitation,
+            temperature: raw.temperature,
+            downfall: raw.downfall,
+            temperature_modifier: raw.temperature_modifier,
+            features: raw.features,
+            creature_spawn_probability,
+            spawners,
+            spawn_costs,
+            id: i as u8,
+        };
         biomes.insert(stem, biome);
     }
 

@@ -475,3 +475,261 @@ pub mod block_transformer;
 #[rustfmt::skip]
 #[path = "generated/trial_spawner.rs"]
 pub mod trial_spawner;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pumpkin_util::version::JavaMinecraftVersion;
+    use std::io::Cursor;
+
+    #[test]
+    fn test_26_3_trim_material_and_biome_effects() {
+        let registries = registry::Registry::get_synced(JavaMinecraftVersion::V_26_3);
+
+        // 1. Verify trim_material description color is a String (e.g. "#9A5CC6"), NOT an Int!
+        let trim_mat = registries
+            .iter()
+            .find(|r| r.registry_id == "minecraft:trim_material")
+            .expect("trim_material registry must exist in 26.3");
+        let amethyst = trim_mat
+            .registry_entries
+            .iter()
+            .find(|e| e.entry_id == "minecraft:amethyst")
+            .expect("amethyst entry must exist");
+        let data = amethyst.data.as_ref().expect("amethyst data must exist");
+
+        let mut cursor = Cursor::new(&data[..]);
+        let mut reader = pumpkin_nbt::deserializer::NbtReadHelperJava::new(&mut cursor);
+        let nbt = pumpkin_nbt::Nbt::read_unnamed(&mut reader).expect("valid amethyst NBT");
+        let desc = nbt
+            .root_tag
+            .get_compound("description")
+            .expect("description compound in amethyst");
+        let color = desc
+            .get_string("color")
+            .expect("color must be string in trim_material description");
+        assert_eq!(color, "#9A5CC6");
+
+        // 2. Verify biome effects colors are Ints
+        let biomes = registries
+            .iter()
+            .find(|r| r.registry_id == "minecraft:worldgen/biome")
+            .expect("worldgen/biome registry must exist in 26.3");
+        let plains = biomes
+            .registry_entries
+            .iter()
+            .find(|e| e.entry_id == "minecraft:plains")
+            .expect("plains entry must exist");
+        let p_data = plains.data.as_ref().expect("plains data must exist");
+
+        let mut p_cursor = Cursor::new(&p_data[..]);
+        let mut p_reader = pumpkin_nbt::deserializer::NbtReadHelperJava::new(&mut p_cursor);
+        let p_nbt = pumpkin_nbt::Nbt::read_unnamed(&mut p_reader).expect("valid plains NBT");
+        let effects = p_nbt
+            .root_tag
+            .get_compound("effects")
+            .expect("effects compound in plains");
+        let water_color = effects
+            .get_int("water_color")
+            .expect("water_color must be int in biome effects");
+        assert_eq!(water_color, 4159204); // 0x3f76e4 = 4159204
+
+        // 3. Verify 26.3 dappled_forest visual attributes colors are Ints
+        let dappled = biomes
+            .registry_entries
+            .iter()
+            .find(|e| e.entry_id == "minecraft:dappled_forest")
+            .expect("dappled_forest entry must exist");
+        let d_data = dappled.data.as_ref().expect("dappled_forest data must exist");
+
+        let mut d_cursor = Cursor::new(&d_data[..]);
+        let mut d_reader = pumpkin_nbt::deserializer::NbtReadHelperJava::new(&mut d_cursor);
+        let d_nbt = pumpkin_nbt::Nbt::read_unnamed(&mut d_reader).expect("valid dappled_forest NBT");
+        let attributes = d_nbt
+            .root_tag
+            .get_compound("attributes")
+            .expect("attributes compound in dappled_forest");
+        let sky_color = attributes
+            .get_int("minecraft:visual/sky_color")
+            .expect("minecraft:visual/sky_color must be int in dappled_forest attributes");
+        assert_eq!(sky_color, 8168447); // #7ca3ff = 0x7ca3ff = 8168447
+
+        let fog_color = attributes
+            .get_int("minecraft:visual/fog_color")
+            .expect("minecraft:visual/fog_color must be int in dappled_forest attributes");
+        assert_eq!(fog_color, 13424866); // #ccd8e2 = 0xccd8e2 = 13424866
+    }
+
+    #[test]
+    fn test_26_3_wool_slabs_and_stairs_remapping_and_blocks() {
+        use crate::block_state_remap::remap_block_state_for_version;
+        use crate::item::Item;
+        use crate::tag::Taggable;
+        use crate::Block;
+        use pumpkin_util::version::JavaMinecraftVersion;
+
+        // 1. Verify block lookup from item id
+        let lime_slab_block = Block::from_item_id(Item::LIME_WOOL_SLAB.id)
+            .expect("Lime wool slab item must map to a block");
+        assert_eq!(lime_slab_block.name, "lime_wool_slab");
+        assert_eq!(lime_slab_block.id, Block::LIME_WOOL_SLAB.id);
+
+        let lime_stairs_block = Block::from_item_id(Item::LIME_WOOL_STAIRS.id)
+            .expect("Lime wool stairs item must map to a block");
+        assert_eq!(lime_stairs_block.name, "lime_wool_stairs");
+        assert_eq!(lime_stairs_block.id, Block::LIME_WOOL_STAIRS.id);
+
+        // 2. Verify tag membership
+        assert_eq!(
+            lime_slab_block.is_tagged_with("minecraft:slabs"),
+            Some(true),
+            "Lime wool slab must be in minecraft:slabs tag"
+        );
+        assert_eq!(
+            lime_stairs_block.is_tagged_with("minecraft:stairs"),
+            Some(true),
+            "Lime wool stairs must be in minecraft:stairs tag"
+        );
+
+        // 3. Verify 26.3 block state remapping matches vanilla 26.3 reports
+        let remapped_slab = remap_block_state_for_version(
+            lime_slab_block.default_state.id.as_u16(),
+            JavaMinecraftVersion::V_26_3,
+        );
+        assert_eq!(
+            remapped_slab, 3738,
+            "Lime wool slab default state must remap to 26.3 vanilla state 3738"
+        );
+
+        let remapped_stairs = remap_block_state_for_version(
+            lime_stairs_block.default_state.id.as_u16(),
+            JavaMinecraftVersion::V_26_3,
+        );
+        assert_eq!(
+            remapped_stairs, 2836,
+            "Lime wool stairs default state must remap to 26.3 vanilla state 2836"
+        );
+
+        // 4. Verify vanilla fire internal state 3738 is remapped via 26.2->26.3 table (NOT returning 3738)
+        let fire_state = 3738u16;
+        let remapped_fire = remap_block_state_for_version(fire_state, JavaMinecraftVersion::V_26_3);
+        assert_ne!(
+            remapped_fire, 3738,
+            "Internal fire state 3738 must not be bypassed or confused with 26.3 wool slab"
+        );
+
+        // 5. Verify fallback for older clients
+        let old_client_state = remap_block_state_for_version(
+            lime_slab_block.default_state.id.as_u16(),
+            JavaMinecraftVersion::V_1_21_4,
+        );
+        assert_eq!(
+            old_client_state, 1,
+            "Older clients must fallback to solid block (1) for 26.3 wool slabs"
+        );
+    }
+
+    #[test]
+    fn test_26_3_additional_features_blocks_items_tags() {
+        use crate::block_state_remap::remap_block_state_for_version;
+        use crate::item::Item;
+        use crate::tag::Taggable;
+        use pumpkin_util::version::JavaMinecraftVersion;
+
+        // 1. Straw Bed
+        let straw_bed = Block::STRAW_BED;
+        assert_eq!(straw_bed.id.as_u16(), 1228);
+        assert_eq!(Item::STRAW_BED.id, 1569);
+        assert_eq!(Block::from_item_id(1569), Some(&straw_bed));
+        assert_eq!(
+            remap_block_state_for_version(straw_bed.default_state.id.as_u16(), JavaMinecraftVersion::V_26_3),
+            2289
+        );
+        assert_eq!(
+            remap_block_state_for_version(straw_bed.default_state.id.as_u16(), JavaMinecraftVersion::V_26_2),
+            1
+        );
+
+        // 2. Shelf Mushroom & Red Shrub
+        let shelf_mushroom = Block::SHELF_MUSHROOM;
+        assert_eq!(shelf_mushroom.id.as_u16(), 1230);
+        assert_eq!(Item::SHELF_MUSHROOM.id, 1571);
+        assert_eq!(Block::from_item_id(1571), Some(&shelf_mushroom));
+        assert_eq!(
+            remap_block_state_for_version(shelf_mushroom.default_state.id.as_u16(), JavaMinecraftVersion::V_26_3),
+            11227
+        );
+        assert_eq!(
+            remap_block_state_for_version(shelf_mushroom.default_state.id.as_u16(), JavaMinecraftVersion::V_26_2),
+            1
+        );
+
+        let red_shrub = Block::RED_SHRUB;
+        assert_eq!(red_shrub.id.as_u16(), 1229);
+        assert_eq!(Item::RED_SHRUB.id, 1570);
+        assert_eq!(Block::from_item_id(1570), Some(&red_shrub));
+        assert_eq!(
+            remap_block_state_for_version(red_shrub.default_state.id.as_u16(), JavaMinecraftVersion::V_26_3),
+            2367
+        );
+        assert_eq!(
+            remap_block_state_for_version(red_shrub.default_state.id.as_u16(), JavaMinecraftVersion::V_26_2),
+            1
+        );
+
+        // 3. Concrete Stairs & Slabs
+        let white_concrete_stairs = Block::WHITE_CONCRETE_STAIRS;
+        assert_eq!(white_concrete_stairs.id.as_u16(), 1231);
+        assert_eq!(Item::WHITE_CONCRETE_STAIRS.id, 1572);
+        assert_eq!(Block::from_item_id(1572), Some(&white_concrete_stairs));
+        assert_eq!(white_concrete_stairs.is_tagged_with("minecraft:stairs"), Some(true));
+
+        let white_concrete_slab = Block::WHITE_CONCRETE_SLAB;
+        assert_eq!(white_concrete_slab.id.as_u16(), 1247);
+        assert_eq!(Item::WHITE_CONCRETE_SLAB.id, 1588);
+        assert_eq!(Block::from_item_id(1588), Some(&white_concrete_slab));
+        assert_eq!(white_concrete_slab.is_tagged_with("minecraft:slabs"), Some(true));
+
+        // 4. Poplar Wood Set
+        let poplar_planks = Block::POPLAR_PLANKS;
+        assert_eq!(poplar_planks.id.as_u16(), 1263);
+        assert_eq!(Item::POPLAR_PLANKS.id, 1604);
+        assert_eq!(Block::from_item_id(1604), Some(&poplar_planks));
+        assert_eq!(poplar_planks.is_tagged_with("minecraft:planks"), Some(true));
+
+        let poplar_stairs = Block::POPLAR_STAIRS;
+        assert_eq!(poplar_stairs.id.as_u16(), 1281);
+        assert_eq!(Item::POPLAR_STAIRS.id, 1619);
+        assert_eq!(Block::from_item_id(1619), Some(&poplar_stairs));
+        assert_eq!(poplar_stairs.is_tagged_with("minecraft:stairs"), Some(true));
+        assert_eq!(poplar_stairs.is_tagged_with("minecraft:wooden_stairs"), Some(true));
+
+        let poplar_slab = Block::POPLAR_SLAB;
+        assert_eq!(poplar_slab.id.as_u16(), 1282);
+        assert_eq!(Item::POPLAR_SLAB.id, 1620);
+        assert_eq!(Block::from_item_id(1620), Some(&poplar_slab));
+        assert_eq!(poplar_slab.is_tagged_with("minecraft:slabs"), Some(true));
+        assert_eq!(poplar_slab.is_tagged_with("minecraft:wooden_slabs"), Some(true));
+
+        let poplar_door = Block::POPLAR_DOOR;
+        assert_eq!(poplar_door.id.as_u16(), 1285);
+        assert_eq!(Item::POPLAR_DOOR.id, 1623);
+        assert_eq!(Block::from_item_id(1623), Some(&poplar_door));
+        assert_eq!(poplar_door.is_tagged_with("minecraft:doors"), Some(true));
+
+        // Boats
+        assert_eq!(Item::POPLAR_BOAT.id, 1624);
+        assert_eq!(Item::POPLAR_CHEST_BOAT.id, 1625);
+
+        // 5. Cushions
+        assert_eq!(Item::WHITE_CUSHION.id, 1626);
+        assert_eq!(Item::BLACK_CUSHION.id, 1641);
+
+        // 6. Explorer Maps (16 items: 1642..=1657) & extendable_maps restriction
+        assert_eq!(Item::ABANDONED_CAMP_MAP.id, 1642);
+        assert_eq!(Item::WOODLAND_MANSION_MAP.id, 1657);
+        assert_eq!(Item::FILLED_MAP.is_tagged_with("minecraft:extendable_maps"), Some(true));
+        assert_eq!(Item::ABANDONED_CAMP_MAP.is_tagged_with("minecraft:extendable_maps"), Some(false));
+    }
+}
+

@@ -108,6 +108,7 @@ impl ItemRegistry {
             }
         }
         was_used
+
     }
 
     pub fn use_on_entity(

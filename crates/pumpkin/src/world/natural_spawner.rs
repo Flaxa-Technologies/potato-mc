@@ -675,31 +675,48 @@ pub fn spawn_mobs_for_chunk_generation(
             let mut success = false;
 
             for _ in 0..4 {
-                let pos = get_top_non_colliding_pos(world, cache, entity_type, x, z);
+                let width = f64::from(entity_type.dimension[0]);
+                let fx = (f64::from(x) + 0.5)
+                    .clamp(f64::from(xo) + width, f64::from(xo) + 16.0 - width);
+                let fz = (f64::from(z) + 0.5)
+                    .clamp(f64::from(zo) + width, f64::from(zo) + 16.0 - width);
+                let check_x = fx.floor() as i32;
+                let check_z = fz.floor() as i32;
 
-                if entity_type.summonable && is_spawn_position_ok_cache(cache, &pos, entity_type) {
-                    let width = f64::from(entity_type.dimension[0]);
-                    let fx = (f64::from(x) + 0.5)
-                        .clamp(f64::from(xo) + width, f64::from(xo) + 16.0 - width);
-                    let fz = (f64::from(z) + 0.5)
-                        .clamp(f64::from(zo) + width, f64::from(zo) + 16.0 - width);
-                    let spawn_pos_f64 = Vector3::new(fx, f64::from(pos.0.y), fz);
-                    let check_pos = BlockPos::new(fx.floor() as i32, pos.0.y, fz.floor() as i32);
+                let top_pos = get_top_non_colliding_pos(world, cache, entity_type, check_x, check_z);
 
-                    let below_pos = check_pos.down().0;
-                    let below_state =
-                        GenerationCache::get_block_state(cache, &below_pos).to_state();
-                    let valid_block = Block::from_state_id(below_state.id)
-                        .has_tag(&pumpkin_data::tag::Block::MINECRAFT_ANIMALS_SPAWNABLE_ON);
-
-                    if valid_block {
-                        let entity = from_type(entity_type, spawn_pos_f64, world, Uuid::new_v4());
-                        entity
-                            .get_entity()
-                            .set_rotation(rand::random::<f32>() * 360.0, 0.0);
-                        spawned_entities.push(entity);
-                        success = true;
+                let mut ground_pos = top_pos;
+                while ground_pos.0.y > world.min_y {
+                    let below_pos = ground_pos.down().0;
+                    let below_state = GenerationCache::get_block_state(cache, &below_pos).to_state();
+                    let block = Block::from_state_id(below_state.id);
+                    if block.has_tag(&pumpkin_data::tag::Block::MINECRAFT_ANIMALS_SPAWNABLE_ON) {
+                        break;
                     }
+                    if below_state.is_air() || (!below_state.is_solid() && !below_state.is_liquid()) {
+                        ground_pos = ground_pos.down();
+                    } else {
+                        break;
+                    }
+                }
+
+                let below_pos = ground_pos.down().0;
+                let below_state =
+                    GenerationCache::get_block_state(cache, &below_pos).to_state();
+                let valid_block = Block::from_state_id(below_state.id)
+                    .has_tag(&pumpkin_data::tag::Block::MINECRAFT_ANIMALS_SPAWNABLE_ON);
+
+                if valid_block
+                    && entity_type.summonable
+                    && is_spawn_position_ok_cache(cache, &ground_pos, entity_type)
+                {
+                    let spawn_pos_f64 = Vector3::new(fx, f64::from(ground_pos.0.y), fz);
+                    let entity = from_type(entity_type, spawn_pos_f64, world, Uuid::new_v4());
+                    entity
+                        .get_entity()
+                        .set_rotation(rand::random::<f32>() * 360.0, 0.0);
+                    spawned_entities.push(entity);
+                    success = true;
                 }
 
                 x += rand::random_range(0..5) - rand::random_range(0..5);

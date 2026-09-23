@@ -131,10 +131,10 @@ impl StructureGenerator for IglooGenerator {
         let mut collector = StructurePiecesCollector::default();
         add_pieces(&mut collector, block_pos, rotation, &mut context.random);
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(block_pos.x, block_pos.y, block_pos.z),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(block_pos.x, block_pos.y, block_pos.z),
+            collector,
+        ))
     }
 }
 

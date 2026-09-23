@@ -1,7 +1,6 @@
 use pumpkin_data::block_properties::is_air;
 use pumpkin_data::{Block, BlockDirection, BlockStateId};
 use pumpkin_util::HeightMap;
-use std::collections::HashMap;
 use std::iter;
 use std::sync::LazyLock;
 
@@ -18,9 +17,32 @@ use crate::world::WorldPortalExt;
 
 use super::configured_features::{CONFIGURED_FEATURES, ConfiguredFeature};
 
-pub static PLACED_FEATURES: LazyLock<
-    HashMap<pumpkin_data::placed_feature::PlacedFeature, PlacedFeature>,
-> = LazyLock::new(build_placed_features);
+pub struct PlacedFeaturesTable {
+    features: Box<[Option<PlacedFeature>]>,
+}
+
+impl PlacedFeaturesTable {
+    #[inline(always)]
+    #[must_use]
+    pub fn get(&self, feature: &pumpkin_data::placed_feature::PlacedFeature) -> Option<&PlacedFeature> {
+        self.features.get(*feature as usize).and_then(Option::as_ref)
+    }
+}
+
+pub static PLACED_FEATURES: LazyLock<PlacedFeaturesTable> = LazyLock::new(|| {
+    let map = build_placed_features();
+    let mut vec: Vec<Option<PlacedFeature>> = Vec::new();
+    for (k, v) in map {
+        let idx = k as usize;
+        if idx >= vec.len() {
+            vec.resize_with(idx + 1, || None);
+        }
+        vec[idx] = Some(v);
+    }
+    PlacedFeaturesTable {
+        features: vec.into_boxed_slice(),
+    }
+});
 
 pub enum PlacedFeatureWrapper {
     Direct(PlacedFeature),

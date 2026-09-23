@@ -725,11 +725,33 @@ struct RawRule {
 }
 
 #[derive(Deserialize, Debug)]
-struct RawOutputState {
-    #[serde(rename = "Name")]
-    name: String,
-    #[serde(rename = "Properties", default)]
-    properties: HashMap<String, String>,
+#[serde(untagged)]
+enum RawOutputState {
+    Name(String),
+    Structured {
+        #[serde(alias = "Name", alias = "id")]
+        name: String,
+        #[serde(alias = "Properties", alias = "properties", default)]
+        properties: HashMap<String, String>,
+    },
+}
+
+impl RawOutputState {
+    fn name(&self) -> &str {
+        match self {
+            Self::Name(name) => name.as_str(),
+            Self::Structured { name, .. } => name.as_str(),
+        }
+    }
+
+    fn properties(&self) -> Vec<(String, String)> {
+        match self {
+            Self::Name(_) => Vec::new(),
+            Self::Structured { properties, .. } => {
+                properties.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+            }
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -815,13 +837,14 @@ enum RawBlockEntityModifier {
 }
 
 fn resolve_output_state(raw: &RawOutputState) -> Option<&'static BlockState> {
-    let name = raw.name.strip_prefix("minecraft:").unwrap_or(&raw.name);
+    let raw_name = raw.name();
+    let name = raw_name.strip_prefix("minecraft:").unwrap_or(raw_name);
     let block = Block::from_name(name).or_else(|| Block::from_registry_key(name))?;
-    if raw.properties.is_empty() {
+    let properties = raw.properties();
+    if properties.is_empty() {
         Some(block.default_state)
     } else {
-        let props_vec: Vec<(&str, &str)> = raw
-            .properties
+        let props_vec: Vec<(&str, &str)> = properties
             .iter()
             .map(|(k, v)| (k.as_str(), v.as_str()))
             .collect();
@@ -864,15 +887,15 @@ fn convert_raw_rule_test(raw: RawRuleTest) -> Option<RuleTest> {
         }
         RawRuleTest::BlockStateMatch { block, block_state } => {
             if let Some(raw_state) = block_state {
-                let name = raw_state
-                    .name
+                let raw_name = raw_state.name();
+                let name = raw_name
                     .strip_prefix("minecraft:")
-                    .unwrap_or(&raw_state.name);
+                    .unwrap_or(raw_name);
                 let block_obj =
                     Block::from_name(name).or_else(|| Block::from_registry_key(name))?;
                 Some(RuleTest::BlockStateMatch(BlockStateMatch {
                     block_id: block_obj.id,
-                    properties: raw_state.properties.into_iter().collect(),
+                    properties: raw_state.properties(),
                 }))
             } else if let Some(b) = block {
                 let block_name = b.strip_prefix("minecraft:").unwrap_or(&b);
@@ -898,16 +921,16 @@ fn convert_raw_rule_test(raw: RawRuleTest) -> Option<RuleTest> {
             probability,
         } => {
             if let Some(raw_state) = block_state {
-                let name = raw_state
-                    .name
+                let raw_name = raw_state.name();
+                let name = raw_name
                     .strip_prefix("minecraft:")
-                    .unwrap_or(&raw_state.name);
+                    .unwrap_or(raw_name);
                 let block_obj =
                     Block::from_name(name).or_else(|| Block::from_registry_key(name))?;
                 Some(RuleTest::RandomBlockStateMatch {
                     match_state: BlockStateMatch {
                         block_id: block_obj.id,
-                        properties: raw_state.properties.into_iter().collect(),
+                        properties: raw_state.properties(),
                     },
                     probability,
                 })
@@ -1007,18 +1030,19 @@ fn convert_raw_processor(raw: RawProcessor) -> Option<StructureProcessor> {
                 .into_iter()
                 .filter_map(|b| match b {
                     RawBlockStateOrName::State(raw_state) => {
-                        let name = raw_state
-                            .name
+                        let raw_name = raw_state.name();
+                        let name = raw_name
                             .strip_prefix("minecraft:")
-                            .unwrap_or(&raw_state.name);
+                            .unwrap_or(raw_name);
                         let block =
                             Block::from_name(name).or_else(|| Block::from_registry_key(name))?;
+                        let props = raw_state.properties();
                         Some(IgnoredBlock {
                             block_id: block.id,
-                            properties: if raw_state.properties.is_empty() {
+                            properties: if props.is_empty() {
                                 None
                             } else {
-                                Some(raw_state.properties.into_iter().collect())
+                                Some(props.into_iter().collect())
                             },
                         })
                     }

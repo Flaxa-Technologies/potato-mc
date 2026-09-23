@@ -72,10 +72,17 @@ mod test {
 
     #[test]
     fn proper_network_bits_per_entry() {
-        let id_to_test = 1 << BLOCK_NETWORK_MAX_BITS;
-        assert!(
-            BlockStateId::new_or_air(id_to_test) == BlockStateId::AIR,
-            "We need to update our constants!"
-        );
+        if BLOCK_NETWORK_MAX_BITS < 16 {
+            let id_to_test = 1u16 << BLOCK_NETWORK_MAX_BITS;
+            assert!(
+                BlockStateId::new_or_air(id_to_test) == BlockStateId::AIR,
+                "We need to update our constants!"
+            );
+        } else {
+            assert!(
+                BLOCK_NETWORK_MAX_BITS == 16,
+                "We need to update our constants!"
+            );
+        }
     }
 }

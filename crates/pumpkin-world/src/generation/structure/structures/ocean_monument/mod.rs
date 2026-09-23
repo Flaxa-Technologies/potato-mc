@@ -2,7 +2,7 @@ mod building;
 mod graph;
 mod rooms;
 
-use std::sync::{Arc, Mutex};
+
 
 use pumpkin_data::{Block, BlockState};
 use pumpkin_nbt::{compound::NbtCompound, tag::NbtTag};
@@ -108,10 +108,10 @@ impl StructureGenerator for OceanMonumentGenerator {
         let mut collector = StructurePiecesCollector::default();
         collector.add_piece(Box::new(building));
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(center_x, start_y, center_z),
-            collector: Arc::new(Mutex::new(collector)),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(center_x, start_y, center_z),
+            collector,
+        ))
     }
 }
 

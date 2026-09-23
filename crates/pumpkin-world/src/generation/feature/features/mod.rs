@@ -56,3 +56,4 @@ pub mod void_start_platform;
 pub mod waterlogged_vegetation_patch;
 pub mod weeping_vines;
 pub mod sulfur;
+pub mod weighted_random_selector;

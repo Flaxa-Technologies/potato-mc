@@ -241,22 +241,42 @@ impl LightData {
             for section_index in 0..num_sections {
                 let bit_index = section_index + 1;
 
-                if let LightContainer::Full(data) = &light_engine.sky_light[section_index] {
-                    sky_light_mask |= 1 << bit_index;
-                    sky_light_arrays.push(data.to_vec());
-                } else {
-                    sky_light_empty_mask |= 1 << bit_index;
+                match &light_engine.sky_light[section_index] {
+                    LightContainer::Full(data) => {
+                        sky_light_mask |= 1 << bit_index;
+                        sky_light_arrays.push(data.to_vec());
+                    }
+                    LightContainer::Empty(val) if *val > 0 => {
+                        sky_light_mask |= 1 << bit_index;
+                        sky_light_arrays.push(vec![*val << 4 | *val; 2048]);
+                    }
+                    LightContainer::Empty(_) => {
+                        sky_light_empty_mask |= 1 << bit_index;
+                    }
                 }
 
-                if let LightContainer::Full(data) = &light_engine.block_light[section_index] {
-                    block_light_mask |= 1 << bit_index;
-                    block_light_arrays.push(data.to_vec());
-                } else {
-                    block_light_empty_mask |= 1 << bit_index;
+                match &light_engine.block_light[section_index] {
+                    LightContainer::Full(data) => {
+                        block_light_mask |= 1 << bit_index;
+                        block_light_arrays.push(data.to_vec());
+                    }
+                    LightContainer::Empty(val) if *val > 0 => {
+                        block_light_mask |= 1 << bit_index;
+                        block_light_arrays.push(vec![*val << 4 | *val; 2048]);
+                    }
+                    LightContainer::Empty(_) => {
+                        block_light_empty_mask |= 1 << bit_index;
+                    }
                 }
             }
 
-            sky_light_empty_mask |= 1 << (num_sections + 1);
+            let has_sky_light = sky_light_mask > 0;
+            if has_sky_light {
+                sky_light_mask |= 1 << (num_sections + 1);
+                sky_light_arrays.push(vec![0xFF; 2048]);
+            } else {
+                sky_light_empty_mask |= 1 << (num_sections + 1);
+            }
             block_light_empty_mask |= 1 << (num_sections + 1);
 
             Ok(Self {

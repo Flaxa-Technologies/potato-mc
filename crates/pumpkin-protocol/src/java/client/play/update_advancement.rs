@@ -1,4 +1,4 @@
-use crate::codec::item_stack_seralizer::ItemStackTemplateSerializer;
+use crate::codec::item_stack_seralizer::ItemStackSerializer;
 use crate::codec::var_int::VarInt;
 use pumpkin_data::Advancement;
 use pumpkin_data::advancement_data::AdvancementProgressData;
@@ -65,7 +65,7 @@ impl ClientPacket for CUpdateAdvancements {
                 write.write_component(&display.get_description(), version)?;
 
                 // Item icon
-                ItemStackTemplateSerializer::from(display.item_icon.clone())
+                ItemStackSerializer::from(display.item_icon.clone())
                     .write_with_version(&mut write, version)?;
 
                 write.write_var_int(&VarInt(display.frame_type as i32))?;

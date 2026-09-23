@@ -36,28 +36,14 @@ impl ItemBehaviour for BoneMealItem {
             .block_registry
             .bone_meal(block, &world, &location, state_id)
         {
+            // WorldEvent 1505 (ParticlesAndSoundPlantGrowth) handles both the
+            // green growth particles AND the bone-meal use sound on all clients.
             world.sync_world_event(WorldEvent::ParticlesAndSoundPlantGrowth, location, 15);
-            let center = Vector3::new(
-                f64::from(location.0.x) + 0.5,
-                f64::from(location.0.y) + 0.5,
-                f64::from(location.0.z) + 0.5,
-            );
-            world.spawn_particle(
-                center,
-                Vector3::new(0.5, 0.5, 0.5),
-                1.0,
-                15,
-                pumpkin_data::particle::Particle::HappyVillager,
-            );
-            world.play_sound(
-                pumpkin_data::sound::Sound::ItemBoneMealUse,
-                pumpkin_data::sound::SoundCategory::Blocks,
-                &center,
-            );
             player.swing_hand(pumpkin_util::Hand::Right, true);
             item.decrement_unless_creative(player.gamemode.load(), 1);
         }
     }
+
 
     fn as_any(&self) -> &dyn Any {
         self

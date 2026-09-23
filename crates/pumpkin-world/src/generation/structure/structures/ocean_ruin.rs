@@ -122,10 +122,10 @@ impl StructureGenerator for OceanRuinGenerator {
             0.7,
         );
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(start_x + 8, 64, start_z + 8),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(start_x + 8, 64, start_z + 8),
+            collector,
+        ))
     }
 }
 

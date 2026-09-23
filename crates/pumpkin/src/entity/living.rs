@@ -1314,10 +1314,6 @@ impl LivingEntity {
         let world = self.entity.world.load();
         let entity_id = self.entity_id();
 
-        let je_packet = pumpkin_protocol::java::client::play::CEntityAnimation::new(
-            entity_id.into(),
-            pumpkin_protocol::java::client::play::Animation::SwingMainArm,
-        );
         let be_packet = pumpkin_protocol::bedrock::server::animate::SAnimate {
             action: pumpkin_protocol::bedrock::server::animate::AnimateAction::SwingArm,
             target_actor_runtime_id: pumpkin_protocol::codec::var_ulong::VarULong(entity_id as u64),
@@ -1325,7 +1321,23 @@ impl LivingEntity {
             swing_source: None,
         };
 
-        world.broadcast_editioned(&je_packet, &be_packet);
+        if self.entity.entity_type == &EntityType::PLAYER {
+            let je_packet = pumpkin_protocol::java::client::play::CEntityAnimation::new(
+                entity_id.into(),
+                pumpkin_protocol::java::client::play::Animation::SwingMainArm,
+            );
+            world.broadcast_editioned(&je_packet, &be_packet);
+        } else if self.entity.entity_type == &EntityType::IRON_GOLEM
+            || self.entity.entity_type == &EntityType::RAVAGER
+        {
+            let je_packet = pumpkin_protocol::java::client::play::CEntityStatus::new(
+                entity_id,
+                EntityStatus::StartAttacking as i8,
+            );
+            world.broadcast_editioned(&je_packet, &be_packet);
+        } else {
+            world.broadcast_bedrock_all(&be_packet);
+        }
     }
 
     fn tick_movement(&self, caller: &dyn EntityBase) {

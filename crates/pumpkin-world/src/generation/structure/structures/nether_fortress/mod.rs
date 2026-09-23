@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+
 
 use pumpkin_util::{
     BlockDirection,
@@ -85,14 +85,14 @@ impl StructureGenerator for NetherFortressGenerator {
 
         collector.move_inside_heights(&mut random, 48, 70);
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(
+        Some(StructurePosition::new(
+            BlockPos::new(
                 section_coords::section_to_block(context.chunk_x),
                 64,
                 section_coords::section_to_block(context.chunk_z),
             ),
-            collector: Arc::new(Mutex::new(collector)),
-        })
+            collector,
+        ))
     }
 }
 

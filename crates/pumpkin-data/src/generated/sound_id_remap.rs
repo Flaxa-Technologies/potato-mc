@@ -1,5 +1,6 @@
 /* This file is generated. Do not edit manually. */
 use pumpkin_util::version::JavaMinecraftVersion;
+include!("../sound_id_remap_26_3.rs");
 const SOUND_ID_REMAP_V_26_2_TO_V_1_7_6: &[u16] = &[
     0, 0, 64, 64, 213, 213, 213, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 40, 0, 40, 56,
     56, 215, 0, 215, 215, 20, 215, 215, 215, 215, 215, 20, 215, 20, 235, 20, 235, 235, 20, 190,
@@ -3299,6 +3300,10 @@ pub fn remap_sound_id_for_version(sound_id: u16, version: JavaMinecraftVersion) 
                 .unwrap_or(sound_id)
         }
         pumpkin_util::version::JavaMinecraftVersion::V_26_1 => SOUND_ID_REMAP_V_26_2_TO_V_26_1
+            .get(usize::from(sound_id))
+            .copied()
+            .unwrap_or(sound_id),
+        pumpkin_util::version::JavaMinecraftVersion::V_26_3 => SOUND_ID_REMAP_V_26_2_TO_V_26_3
             .get(usize::from(sound_id))
             .copied()
             .unwrap_or(sound_id),

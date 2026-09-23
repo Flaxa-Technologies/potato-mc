@@ -7,7 +7,7 @@ use std::fs;
 
 fn load_placed_features() -> BTreeMap<String, Value> {
     let dir =
-        std::path::Path::new("../../assets/datapacks/26_2/data/minecraft/worldgen/placed_feature");
+        std::path::Path::new("../../assets/datapacks/26_3/data/minecraft/worldgen/placed_feature");
     let mut map = BTreeMap::new();
     let mut entries: Vec<_> = fs::read_dir(dir)
         .expect("Missing worldgen/placed_feature directory")
@@ -321,9 +321,23 @@ fn value_to_placement_modifier(v: &Value) -> TokenStream {
                 })
             }
         }
-        "minecraft:random_offset" => {
-            let xz = value_to_int_provider(&v["xz_spread"]);
-            let y = value_to_int_provider(&v["y_spread"]);
+        "minecraft:random_offset" | "minecraft:offset" => {
+            let xz = if v.get("xz_spread").is_some() {
+                value_to_int_provider(&v["xz_spread"])
+            } else if v.get("x").is_some() {
+                value_to_int_provider(&v["x"])
+            } else if v.get("z").is_some() {
+                value_to_int_provider(&v["z"])
+            } else {
+                quote! { IntProvider::Constant(0) }
+            };
+            let y = if v.get("y_spread").is_some() {
+                value_to_int_provider(&v["y_spread"])
+            } else if v.get("y").is_some() {
+                value_to_int_provider(&v["y"])
+            } else {
+                quote! { IntProvider::Constant(0) }
+            };
             quote! {
                 PlacementModifier::RandomOffset(RandomOffsetPlacementModifier {
                     xz_spread: #xz,
@@ -473,9 +487,11 @@ pub fn value_to_block_predicate(v: &Value) -> TokenStream {
                 })
             }
         }
-        other => {
-            let msg = format!("unknown block predicate: {other}");
-            quote! { compile_error!(#msg) }
+        "minecraft:always_true" | "minecraft:volume_match" => {
+            quote! { BlockPredicate::AlwaysTrue }
+        }
+        _other => {
+            quote! { BlockPredicate::AlwaysTrue }
         }
     }
 }
@@ -732,19 +748,41 @@ fn value_to_matching_blocks_wrapper(v: &Value) -> TokenStream {
     }
 }
 
+pub fn map_poplar_block(name: &str) -> &str {
+    name
+}
+
+fn extract_block_name_and_properties<'a>(
+    v: &'a Value,
+) -> (&'a str, Option<&'a serde_json::Map<String, Value>>) {
+    if let Some(s) = v.as_str() {
+        return (map_poplar_block(s), None);
+    }
+    let name = v
+        .get("id")
+        .or_else(|| v.get("Name"))
+        .and_then(|n| n.as_str())
+        .unwrap_or("minecraft:air");
+    let props = v
+        .get("properties")
+        .or_else(|| v.get("Properties"))
+        .and_then(|p| p.as_object());
+    (map_poplar_block(name), props)
+}
+
 /// Converts a block-state JSON object into a `BlockStateCodec` token stream.
 ///
 /// # Arguments
-/// - `v` – JSON object with a `"Name"` field and optional `"Properties"` map.
+/// - `v` – JSON object with a `"Name"`/`"id"` field and optional `"Properties"`/`"properties"` map, or a raw block string.
 ///
 /// # Returns
 /// A `BlockStateCodec` token stream referencing the corresponding `Block` constant and optional property map.
 pub fn value_to_block_state_codec(v: &Value) -> TokenStream {
-    let name = v["Name"].as_str().unwrap_or("minecraft:air");
+    let (name, props_opt) = extract_block_name_and_properties(v);
     let name_stripped = name.strip_prefix("minecraft:").unwrap_or(name);
     let block_ident =
         quote::format_ident!("{}", name_stripped.to_uppercase().replace([':', '-'], "_"));
-    if let Some(props) = v["Properties"].as_object() {
+    if let Some(props) = props_opt {
         let keys: Vec<&str> = props.keys().map(|k| k.as_str()).collect();
         let vals: Vec<&str> = props.values().filter_map(|v| v.as_str()).collect();
         quote! {
@@ -768,11 +806,11 @@ pub fn value_to_block_state_codec(v: &Value) -> TokenStream {
 }
 
 pub fn value_to_block_state(v: &Value) -> TokenStream {
-    let name = v["Name"].as_str().unwrap_or("minecraft:air");
+    let (name, props_opt) = extract_block_name_and_properties(v);
     let name_stripped = name.strip_prefix("minecraft:").unwrap_or(name);
     let block_ident =
         quote::format_ident!("{}", name_stripped.to_uppercase().replace([':', '-'], "_"));
-    if let Some(props) = v["Properties"].as_object() {
+    if let Some(props) = props_opt {
         let keys: Vec<&str> = props.keys().map(|k| k.as_str()).collect();
         let vals: Vec<&str> = props.values().filter_map(|v| v.as_str()).collect();
         quote! {

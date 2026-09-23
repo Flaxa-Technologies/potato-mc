@@ -2100,7 +2100,32 @@ impl Player {
 
         self.sleeping_pos.store(Some(bed_head_pos));
         self.get_entity().set_pose(EntityPose::Sleeping);
-        let sleep_pos = bed_head_pos.to_f64().add_raw(0.5, 0.6875, 0.5);
+
+        // Determine Y offset based on bed type:
+        // Straw bed pillow height = 0.3125, sleep height = 0.3125 + 0.125 = 0.4375
+        // Normal bed pillow height = 0.5625, sleep height = 0.5625 + 0.125 = 0.6875
+        let world = self.world();
+        let (bed_y_offset, sleep_yaw) = {
+            let bed_state_id = world.get_block_state_id(&bed_head_pos);
+            let bed_props =
+                pumpkin_data::block_properties::WhiteBedLikeProperties::from_state_id(bed_state_id);
+            let y_offset = if world.get_block(&bed_head_pos).id == pumpkin_data::BlockId::STRAW_BED {
+                0.4375_f64
+            } else {
+                0.6875_f64
+            };
+            // Player's yaw while sleeping: face from head toward foot (= facing stored in the head
+            // block, which is the direction the foot block lies in from the head block).
+            let yaw = match bed_props.facing {
+                pumpkin_data::block_properties::HorizontalFacing::South => 0.0_f32,
+                pumpkin_data::block_properties::HorizontalFacing::West => 90.0_f32,
+                pumpkin_data::block_properties::HorizontalFacing::North => 180.0_f32,
+                pumpkin_data::block_properties::HorizontalFacing::East => 270.0_f32,
+            };
+            (y_offset, yaw)
+        };
+
+        let sleep_pos = bed_head_pos.to_f64().add_raw(0.5, bed_y_offset, 0.5);
         self.living_entity.entity.set_pos(sleep_pos);
         self.get_entity().set_synced_data(
             pumpkin_data::tracked_data::player::SLEEPING_POS_ID,
@@ -2108,8 +2133,7 @@ impl Player {
         );
         self.get_entity().set_velocity(Vector3::default());
 
-        let yaw = self.living_entity.entity.yaw.load();
-        self.request_teleport(sleep_pos, yaw, 0.0);
+        self.request_teleport(sleep_pos, sleep_yaw, 0.0);
 
         self.sleeping_since.store(Some(0));
         self.set_stat(
@@ -2265,7 +2289,11 @@ impl Player {
             }
 
             let (bed, bed_state) = world.get_block_and_state_id(&bed_pos);
-            BedBlock::set_occupied(false, &world, bed, &bed_pos, bed_state);
+            if bed.id == pumpkin_data::BlockId::STRAW_BED {
+                crate::block::blocks::straw_bed::StrawBedBlock::destroy_bed(&world, bed_pos);
+            } else {
+                BedBlock::set_occupied(false, &world, bed, &bed_pos, bed_state);
+            }
         }
 
         self.living_entity.entity.set_pose(EntityPose::Standing);

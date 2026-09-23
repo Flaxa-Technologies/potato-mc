@@ -41,6 +41,8 @@ impl BoatItem {
             val if val == Item::PALE_OAK_CHEST_BOAT.id => &EntityType::PALE_OAK_CHEST_BOAT,
             val if val == Item::BAMBOO_RAFT.id => &EntityType::BAMBOO_RAFT,
             val if val == Item::BAMBOO_CHEST_RAFT.id => &EntityType::BAMBOO_CHEST_RAFT,
+            val if val == Item::POPLAR_BOAT.id => &EntityType::POPLAR_BOAT,
+            val if val == Item::POPLAR_CHEST_BOAT.id => &EntityType::POPLAR_CHEST_BOAT,
             _ => {
                 tracing::error!("Unknown boat item ID: {}", item.id);
                 &EntityType::OAK_BOAT
@@ -81,6 +83,8 @@ impl ItemMetadata for BoatItem {
             Item::PALE_OAK_CHEST_BOAT.id,
             Item::BAMBOO_RAFT.id,
             Item::BAMBOO_CHEST_RAFT.id,
+            Item::POPLAR_BOAT.id,
+            Item::POPLAR_CHEST_BOAT.id,
         ]
         .into()
     }

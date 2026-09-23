@@ -9,7 +9,7 @@ use super::{
         NoiseFunctionComponentRange, PassThrough, StaticIndependentChunkNoiseFunctionComponentImpl,
         beardifier::Beardifier,
     },
-    density_volume::DensityVolume,
+    density_volume::{DensityBuffer, DensityVolume},
     proto_noise_router::{
         DependentProtoNoiseFunctionComponent, IndependentProtoNoiseFunctionComponent,
         ProtoNoiseFunctionComponent, ProtoNoiseRouter,
@@ -275,6 +275,23 @@ impl ChunkNoiseRouter<'_> {
         }
         self.vein_toggle_volume(toggle, volume);
         self.vein_ridged_volume(ridged, volume);
+    }
+
+    #[inline]
+    pub fn sample_veins(&mut self, volume: &DensityVolume) -> Option<[DensityBuffer; 2]> {
+        if self.vein_toggle == 203 && self.vein_ridged == 217 && self.component_stack.len() == 222 {
+            if let Some(res) = super::aot_noise_router::evaluate_overworld_veins_volume_opt(
+                &self.component_stack,
+                volume,
+            ) {
+                return res;
+            }
+        }
+        let mut toggle = DensityBuffer::acquire(volume);
+        let mut ridged = DensityBuffer::acquire(volume);
+        self.vein_toggle_volume(&mut toggle, volume);
+        self.vein_ridged_volume(&mut ridged, volume);
+        Some([toggle, ridged])
     }
 }
 

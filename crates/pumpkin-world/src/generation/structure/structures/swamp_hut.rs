@@ -1,4 +1,4 @@
-use std::sync::Arc;
+
 
 use pumpkin_data::{
     Block, BlockState,
@@ -58,10 +58,10 @@ impl StructureGenerator for SwampHutGenerator {
             spawned_cat: false,
         }));
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(x, 64, z),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(x, 64, z),
+            collector,
+        ))
     }
 }
 

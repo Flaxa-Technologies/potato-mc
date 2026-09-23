@@ -30,9 +30,9 @@ pub struct TreeFeature {
 }
 
 pub struct TreeNode {
-    center: BlockPos,
-    foliage_radius: i32,
-    giant_trunk: bool,
+    pub center: BlockPos,
+    pub foliage_radius: i32,
+    pub giant_trunk: bool,
 }
 
 impl TreeFeature {

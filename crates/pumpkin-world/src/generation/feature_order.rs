@@ -35,6 +35,7 @@ const OVERWORLD_BIOMES: &[&Biome] = &[
     &Biome::OLD_GROWTH_SPRUCE_TAIGA,
     &Biome::FLOWER_FOREST,
     &Biome::BIRCH_FOREST,
+    &Biome::DAPPLED_FOREST,
     &Biome::DARK_FOREST,
     &Biome::PALE_GARDEN,
     &Biome::SAVANNA_PLATEAU,
@@ -105,7 +106,7 @@ fn is_overworld_biome(id: u8) -> bool {
 
 #[derive(Clone, Copy, Default)]
 struct PlacedFeatureSet {
-    bits: [u64; 5],
+    bits: [u64; 8],
 }
 
 impl PlacedFeatureSet {
@@ -262,12 +263,12 @@ mod tests {
         assert_eq!(
             step.iter()
                 .position(|feature| *feature == PlacedFeature::PatchDryGrassDesert),
-            Some(69)
+            Some(72)
         );
         assert_eq!(
             step.iter()
                 .position(|feature| *feature == PlacedFeature::PatchDryGrassBadlands),
-            Some(71)
+            Some(74)
         );
     }
 
@@ -275,7 +276,7 @@ mod tests {
     fn biome_selection_keeps_global_indices_and_order() {
         let selected = select_features(&[Biome::SAVANNA.id, Biome::DESERT.id], 9);
         assert!(selected.windows(2).all(|pair| pair[0].0 < pair[1].0));
-        assert!(selected.contains(&(69, PlacedFeature::PatchDryGrassDesert)));
+        assert!(selected.contains(&(72, PlacedFeature::PatchDryGrassDesert)));
         assert!(
             !selected
                 .iter()

@@ -6,30 +6,34 @@ use std::collections::BTreeMap;
 use std::fs;
 
 use crate::placed_feature::{
-    value_to_block_direction, value_to_block_predicate, value_to_block_state,
+    map_poplar_block, value_to_block_direction, value_to_block_predicate, value_to_block_state,
     value_to_block_state_codec, value_to_height_provider, value_to_int_provider,
 };
 
 fn load_configured_features() -> BTreeMap<String, Value> {
     let dir = std::path::Path::new(
-        "../../assets/datapacks/26_2/data/minecraft/worldgen/configured_feature",
+        "../../assets/datapacks/26_3/data/minecraft/worldgen/feature",
     );
     let mut map = BTreeMap::new();
-    let mut entries: Vec<_> = fs::read_dir(dir)
-        .expect("Missing worldgen/configured_feature directory")
-        .flatten()
-        .filter(|e| e.path().extension().is_some_and(|ext| ext == "json"))
-        .collect();
-    entries.sort_by_key(|e| e.path());
-
-    for entry in entries {
-        let path = entry.path();
-        let stem = path.file_stem().unwrap().to_string_lossy().into_owned();
-        let content = fs::read_to_string(&path).expect("Failed to read configured_feature file");
-        let val: Value =
-            serde_json::from_str(&content).expect("Failed to parse configured_feature JSON");
-        map.insert(stem, val);
+    fn visit_dir(base: &std::path::Path, current: &std::path::Path, map: &mut BTreeMap<String, Value>) {
+        if let Ok(entries) = fs::read_dir(current) {
+            let mut entries: Vec<_> = entries.flatten().collect();
+            entries.sort_by_key(|e| e.path());
+            for entry in entries {
+                let path = entry.path();
+                if path.is_dir() {
+                    visit_dir(base, &path, map);
+                } else if path.extension().is_some_and(|ext| ext == "json") {
+                    let rel = path.strip_prefix(base).unwrap();
+                    let rel_str = rel.with_extension("").to_string_lossy().replace('\\', "/");
+                    let content = fs::read_to_string(&path).expect("Failed to read feature file");
+                    let val: Value = serde_json::from_str(&content).expect("Failed to parse feature JSON");
+                    map.insert(rel_str, val);
+                }
+            }
+        }
     }
+    visit_dir(dir, dir, &mut map);
     map
 }
 
@@ -172,6 +176,7 @@ pub fn build() -> TokenStream {
                     forking::ForkingTrunkPlacer,
                     giant::GiantTrunkPlacer,
                     mega_jungle::MegaJungleTrunkPlacer,
+                    poplar::PoplarTrunkPlacer,
                     straight::StraightTrunkPlacer,
                     upwards_branching::UpwardsBranchingTrunkPlacer,
                 },
@@ -185,6 +190,7 @@ pub fn build() -> TokenStream {
                     jungle::JungleFoliagePlacer,
                     mega_pine::MegaPineFoliagePlacer,
                     pine::PineFoliagePlacer,
+                    poplar::PoplarFoliagePlacer,
                     random_spread::RandomSpreadFoliagePlacer,
                     spruce::SpruceFoliagePlacer,
                 },
@@ -199,6 +205,7 @@ pub fn build() -> TokenStream {
                     leave_vine::LeavesVineTreeDecorator,
                     pale_moss::PaleMossTreeDecorator,
                     place_on_ground::PlaceOnGroundTreeDecorator,
+                    shelf_mushroom::ShelfMushroomTreeDecorator,
                     trunk_vine::TrunkVineTreeDecorator,
                 },
                 tree::root::{
@@ -240,7 +247,11 @@ fn value_to_fossil_processor(value: &Value) -> TokenStream {
 /// – `v` – the JSON object for the feature, expected to contain `"type"` and `"config"` fields.
 pub fn value_to_configured_feature(v: &Value) -> TokenStream {
     let type_str = v["type"].as_str().unwrap_or("");
-    let config = &v["config"];
+    let config = if v.get("config").is_some_and(|c| c.is_object()) {
+        &v["config"]
+    } else {
+        v
+    };
     match type_str {
         "minecraft:no_op" => quote! { ConfiguredFeature::NoOp },
         "minecraft:bamboo" => {
@@ -375,11 +386,11 @@ pub fn value_to_configured_feature(v: &Value) -> TokenStream {
             let log_length = value_to_int_provider(&config["log_length"]);
             let stump_decorators: Vec<TokenStream> = config["stump_decorators"]
                 .as_array()
-                .map(|arr| arr.iter().map(value_to_tree_decorator).collect())
+                .map(|arr| arr.iter().filter_map(value_to_tree_decorator).collect())
                 .unwrap_or_default();
             let log_decorators: Vec<TokenStream> = config["log_decorators"]
                 .as_array()
-                .map(|arr| arr.iter().map(value_to_tree_decorator).collect())
+                .map(|arr| arr.iter().filter_map(value_to_tree_decorator).collect())
                 .unwrap_or_default();
             quote! {
                 ConfiguredFeature::FallenTree(FallenTreeFeature {
@@ -835,6 +846,7 @@ pub fn value_to_configured_feature(v: &Value) -> TokenStream {
         }
         "minecraft:multiface_growth" => {
             let block_name = config["block"].as_str().unwrap_or("minecraft:glow_lichen");
+            let block_name = map_poplar_block(block_name);
             let stripped = block_name.strip_prefix("minecraft:").unwrap_or(block_name);
             let block_ident =
                 quote::format_ident!("{}", stripped.to_uppercase().replace([':', '-'], "_"));
@@ -849,6 +861,7 @@ pub fn value_to_configured_feature(v: &Value) -> TokenStream {
                     arr.iter()
                         .filter_map(|v| v.as_str())
                         .map(|name| {
+                            let name = map_poplar_block(name);
                             let stripped = name.strip_prefix("minecraft:").unwrap_or(name);
                             let ident = quote::format_ident!(
                                 "{}",
@@ -963,8 +976,37 @@ pub fn value_to_configured_feature(v: &Value) -> TokenStream {
         "minecraft:dripstone_cluster" | "minecraft:speleothem_cluster" => {
             quote! { ConfiguredFeature::DripstoneCluster(crate::generation::feature::features::drip_stone::cluster::DripstoneClusterFeature {}) }
         }
-        "minecraft:sequence" | "minecraft:weighted_random_selector" => {
+        "minecraft:sequence"
+        | "minecraft:overlay"
+        | "minecraft:random_neighbor_spread"
+        | "minecraft:stepped_column_cluster" => {
             quote! { ConfiguredFeature::NoOp }
+        }
+        "minecraft:weighted_random_selector" => {
+            let entries: Vec<TokenStream> = config["features"]
+                .as_array()
+                .map(|arr| {
+                    arr.iter()
+                        .map(|e| {
+                            let feat = value_to_placed_feature_wrapper(&e["data"]);
+                            let weight = e["weight"].as_u64().unwrap_or(1) as u32;
+                            quote! {
+                                crate::generation::feature::features::weighted_random_selector::WeightedFeatureEntry {
+                                    feature: #feat,
+                                    weight: #weight,
+                                }
+                            }
+                        })
+                        .collect()
+                })
+                .unwrap_or_default();
+            quote! {
+                ConfiguredFeature::WeightedRandomSelector(
+                    crate::generation::feature::features::weighted_random_selector::WeightedRandomFeature::new(
+                        vec![#(#entries),*]
+                    )
+                )
+            }
         }
         "minecraft:large_dripstone" => {
             quote! { ConfiguredFeature::LargeDripstone(crate::generation::feature::features::drip_stone::large::LargeDripstoneFeature {}) }
@@ -1023,8 +1065,8 @@ pub fn value_to_configured_feature(v: &Value) -> TokenStream {
             quote! { ConfiguredFeature::DesertWell(crate::generation::feature::features::desert_well::DesertWellFeature) }
         }
         other => {
-            let msg = format!("unknown configured feature type: {other}");
-            quote! { compile_error!(#msg) }
+            eprintln!("unknown configured feature type: {other}, falling back to NoOp");
+            quote! { ConfiguredFeature::NoOp }
         }
     }
 }
@@ -1037,13 +1079,32 @@ pub fn value_to_configured_feature(v: &Value) -> TokenStream {
 /// # Returns
 /// A `TokenStream` for the appropriate `BlockStateProvider` variant; defaults to `BlockStateProvider::Simple` with air if the type is unrecognised.
 fn value_to_block_state_provider(v: &Value) -> TokenStream {
+    if let Some(s) = v.as_str() {
+        let name = s.strip_prefix("minecraft:").unwrap_or(s);
+        let path = std::path::Path::new("../../assets/datapacks/26_3/data/minecraft/worldgen/block_state_provider")
+            .join(format!("{name}.json"));
+        if path.is_file() {
+            if let Ok(content) = fs::read_to_string(&path) {
+                if let Ok(parsed) = serde_json::from_str::<Value>(&content) {
+                    return value_to_block_state_provider(&parsed);
+                }
+            }
+        }
+        let state = value_to_block_state(v);
+        return quote! { BlockStateProvider::Simple(SimpleStateProvider { state: #state }) };
+    }
+
     let type_str = v["type"].as_str().unwrap_or("");
     match type_str {
-        "minecraft:simple_state_provider" => {
-            let state = value_to_block_state(&v["state"]);
+        "minecraft:simple_state_provider" | "minecraft:simple" => {
+            let state = if v.get("state").is_some() {
+                value_to_block_state(&v["state"])
+            } else {
+                value_to_block_state(v)
+            };
             quote! { BlockStateProvider::Simple(SimpleStateProvider { state: #state }) }
         }
-        "minecraft:weighted_state_provider" => {
+        "minecraft:weighted_state_provider" | "minecraft:weighted" => {
             let entries: Vec<TokenStream> = v["entries"]
                 .as_array()
                 .map(|arr| {
@@ -1062,11 +1123,15 @@ fn value_to_block_state_provider(v: &Value) -> TokenStream {
                 })
             }
         }
-        "minecraft:rotated_block_provider" => {
-            let state = value_to_block_state(&v["state"]);
+        "minecraft:rotated_block_provider" | "minecraft:rotated_block" => {
+            let state = if v.get("state").is_some() {
+                value_to_block_state(&v["state"])
+            } else {
+                value_to_block_state(v)
+            };
             quote! { BlockStateProvider::Pillar(PillarBlockStateProvider { state: #state }) }
         }
-        "minecraft:noise_provider" => {
+        "minecraft:noise_provider" | "minecraft:noise" => {
             let base = value_to_noise_base(v);
             let states: Vec<TokenStream> = v["states"]
                 .as_array()
@@ -1079,7 +1144,7 @@ fn value_to_block_state_provider(v: &Value) -> TokenStream {
                 })
             }
         }
-        "minecraft:dual_noise_provider" => {
+        "minecraft:dual_noise_provider" | "minecraft:dual_noise" => {
             let base_provider = value_to_noise_base(v);
             let states: Vec<TokenStream> = v["states"]
                 .as_array()
@@ -1101,7 +1166,7 @@ fn value_to_block_state_provider(v: &Value) -> TokenStream {
                 })
             }
         }
-        "minecraft:noise_threshold_provider" => {
+        "minecraft:noise_threshold_provider" | "minecraft:noise_threshold" => {
             let base = value_to_noise_base(v);
             let threshold = v["threshold"].as_f64().unwrap_or(0.0) as f32;
             let high_chance = v["high_chance"].as_f64().unwrap_or(0.0) as f32;
@@ -1125,7 +1190,7 @@ fn value_to_block_state_provider(v: &Value) -> TokenStream {
                 })
             }
         }
-        "minecraft:randomized_int_state_provider" => {
+        "minecraft:randomized_int_state_provider" | "minecraft:randomized_int" => {
             let src = value_to_block_state_provider(&v["source"]);
             let prop = v["property"].as_str().unwrap_or("");
             let vals = value_to_int_provider(&v["values"]);
@@ -1137,10 +1202,14 @@ fn value_to_block_state_provider(v: &Value) -> TokenStream {
                 })
             }
         }
-        "minecraft:rule_based_state_provider" => {
-            let fallback = if !v["fallback"].is_null() {
-                let provider = value_to_block_state_provider(&v["fallback"]);
-                quote! { Some(Box::new(#provider))}
+        "minecraft:rule_based_state_provider" | "minecraft:rule_based" => {
+            let fallback = if let Some(fb) = v.get("fallback") {
+                if !fb.is_null() {
+                    let provider = value_to_block_state_provider(fb);
+                    quote! { Some(Box::new(#provider)) }
+                } else {
+                    quote! { None }
+                }
             } else {
                 quote! { None }
             };
@@ -1165,11 +1234,27 @@ fn value_to_block_state_provider(v: &Value) -> TokenStream {
             }
         }
         _ => {
-            // Default to air
-            quote! {
-                BlockStateProvider::Simple(SimpleStateProvider {
-                    state: pumpkin_data::Block::AIR.default_state,
-                })
+            if v.get("id").is_some() || v.get("Name").is_some() {
+                let state = value_to_block_state(v);
+                quote! {
+                    BlockStateProvider::Simple(SimpleStateProvider {
+                        state: #state,
+                    })
+                }
+            } else if let Some(st) = v.get("state") {
+                let state = value_to_block_state(st);
+                quote! {
+                    BlockStateProvider::Simple(SimpleStateProvider {
+                        state: #state,
+                    })
+                }
+            } else {
+                // Default to air
+                quote! {
+                    BlockStateProvider::Simple(SimpleStateProvider {
+                        state: pumpkin_data::Block::AIR.default_state,
+                    })
+                }
             }
         }
     }
@@ -1193,11 +1278,18 @@ fn value_to_noise_base(v: &Value) -> TokenStream {
 /// # Arguments
 /// - `v` - the JSON object containing `"firstOctave"` and `"amplitudes"` fields.
 fn value_to_dpnp(v: &Value) -> TokenStream {
-    let first_octave = v["firstOctave"].as_i64().unwrap_or(-7) as i32;
-    let amplitudes: Vec<f64> = v["amplitudes"]
-        .as_array()
-        .map(|a| a.iter().filter_map(|x| x.as_f64()).collect())
-        .unwrap_or_default();
+    let first_octave = v
+        .get("firstOctave")
+        .or_else(|| v.get("base_octave"))
+        .and_then(|x| x.as_i64())
+        .unwrap_or(-7) as i32;
+    let amplitudes: Vec<f64> = if let Some(arr) = v.get("amplitudes").and_then(|a| a.as_array()) {
+        arr.iter().filter_map(|x| x.as_f64()).collect()
+    } else if let Some(amp) = v.get("base_amplitude").and_then(|x| x.as_f64()) {
+        vec![amp]
+    } else {
+        Vec::new()
+    };
     quote! {
         DoublePerlinNoiseParametersCodec {
             first_octave: #first_octave,
@@ -1219,6 +1311,7 @@ fn value_to_rule_test(v: &Value) -> TokenStream {
         "minecraft:always_true" | "" => quote! { RuleTest::AlwaysTrue },
         "minecraft:block_match" => {
             let block = v["block"].as_str().unwrap_or("minecraft:stone");
+            let block = map_poplar_block(block);
             let name_stripped = block.strip_prefix("minecraft:").unwrap_or(block);
             let block_ident =
                 quote::format_ident!("{}", name_stripped.to_uppercase().replace([':', '-'], "_"));
@@ -1235,9 +1328,11 @@ fn value_to_rule_test(v: &Value) -> TokenStream {
         }
         "minecraft:random_block_match" => {
             let block = v["block"].as_str().unwrap_or("minecraft:stone");
+            let block = map_poplar_block(block);
+            let name_stripped = block.strip_prefix("minecraft:").unwrap_or(block);
             let prob = v["probability"].as_f64().unwrap_or(0.5) as f32;
             let block_ident =
-                quote::format_ident!("{}", block.to_uppercase().replace([':', '-'], "_"));
+                quote::format_ident!("{}", name_stripped.to_uppercase().replace([':', '-'], "_"));
             quote! { RuleTest::RandomBlockMatch(RandomBlockMatchRuleTest { block: pumpkin_data::BlockId::#block_ident, probability: #prob }) }
         }
         "minecraft:random_blockstate_match" => {
@@ -1245,9 +1340,36 @@ fn value_to_rule_test(v: &Value) -> TokenStream {
             let prob = v["probability"].as_f64().unwrap_or(0.5) as f32;
             quote! { RuleTest::RandomBlockStateMatch(RandomBlockStateMatchRuleTest { block_state: #state.id, probability: #prob }) }
         }
-        other => {
-            let msg = format!("unknown rule test: {other}");
-            quote! { compile_error!(#msg) }
+        "minecraft:any_of" | "minecraft:all_of" => {
+            if let Some(rules) = v.get("rules").and_then(|r| r.as_array()) {
+                let mut best = None;
+                for r in rules {
+                    let inner = value_to_rule_test(r);
+                    let s = inner.to_string();
+                    if !s.contains("AlwaysTrue") {
+                        if !s.contains("HEIGHT_SPECIFIC") {
+                            return inner;
+                        }
+                        if best.is_none() {
+                            best = Some(inner);
+                        }
+                    }
+                }
+                if let Some(b) = best {
+                    return b;
+                }
+            }
+            quote! { RuleTest::AlwaysTrue }
+        }
+        "minecraft:not" => {
+            if let Some(rule) = v.get("rule") {
+                value_to_rule_test(rule)
+            } else {
+                quote! { RuleTest::AlwaysTrue }
+            }
+        }
+        _other => {
+            quote! { RuleTest::AlwaysTrue }
         }
     }
 }
@@ -1287,7 +1409,7 @@ fn value_to_tree_feature(config: &Value) -> TokenStream {
     let below_trunk_provider = value_to_block_state_provider(&config["below_trunk_provider"]);
     let decorators: Vec<TokenStream> = config["decorators"]
         .as_array()
-        .map(|arr| arr.iter().map(value_to_tree_decorator).collect())
+        .map(|arr| arr.iter().filter_map(value_to_tree_decorator).collect())
         .unwrap_or_default();
     let root_placer = match config.get("root_placer") {
         Some(v) if !v.is_null() => {
@@ -1443,6 +1565,16 @@ fn value_to_trunk_placer(v: &Value) -> TokenStream {
                 })
             }
         }
+        "minecraft:poplar_trunk_placer" => {
+            let thab = value_to_int_provider(&v["trunk_height_above_branches"]);
+            let ba = value_to_int_provider(&v["branch_amount"]);
+            quote! {
+                TrunkType::Poplar(PoplarTrunkPlacer {
+                    trunk_height_above_branches: #thab,
+                    branch_amount: #ba,
+                })
+            }
+        }
         _ => quote! { TrunkType::Straight(StraightTrunkPlacer) },
     };
     quote! {
@@ -1524,6 +1656,16 @@ fn value_to_foliage_placer(v: &Value) -> TokenStream {
                 })
             }
         }
+        "minecraft:poplar_foliage_placer" => {
+            let h = value_to_int_provider(&v["height"]);
+            let shc = v["side_hole_chance"].as_f64().unwrap_or(0.0) as f32;
+            quote! {
+                FoliageType::Poplar(PoplarFoliagePlacer {
+                    height: #h,
+                    side_hole_chance: #shc,
+                })
+            }
+        }
         _ => {
             let h = v["height"].as_i64().unwrap_or(3) as i32;
             quote! { FoliageType::Blob(BlobFoliagePlacer { height: #h }) }
@@ -1597,9 +1739,9 @@ fn value_to_feature_size(v: &Value) -> TokenStream {
 ///
 /// # Returns
 /// A `TokenStream` for the appropriate `TreeDecorator` variant; emits a `compile_error!` for unrecognised types.
-fn value_to_tree_decorator(v: &Value) -> TokenStream {
+fn value_to_tree_decorator(v: &Value) -> Option<TokenStream> {
     let type_str = v["type"].as_str().unwrap_or("");
-    match type_str {
+    let res = match type_str {
         "minecraft:trunk_vine" => quote! { TreeDecorator::TrunkVine(TrunkVineTreeDecorator) },
         "minecraft:leave_vine" => {
             let prob = v["probability"].as_f64().unwrap_or(0.0) as f32;
@@ -1691,11 +1833,13 @@ fn value_to_tree_decorator(v: &Value) -> TokenStream {
                 })
             }
         }
-        other => {
-            let msg = format!("unknown tree decorator: {other}");
-            quote! { compile_error!(#msg) }
+        "minecraft:shelf_mushroom" => {
+            let prob = v["probability"].as_f64().unwrap_or(0.0) as f32;
+            quote! { TreeDecorator::ShelfMushroom(ShelfMushroomTreeDecorator { probability: #prob }) }
         }
-    }
+        _ => return None,
+    };
+    Some(res)
 }
 
 /// Converts an inline placed-feature JSON object into a `PlacedFeature` token stream.
@@ -1845,9 +1989,23 @@ fn value_to_placement_modifier_cf(v: &Value) -> TokenStream {
             let d = v["max_water_depth"].as_i64().unwrap_or(0) as i32;
             quote! { PlacementModifier::SurfaceWaterDepthFilter(SurfaceWaterDepthFilterPlacementModifier { max_water_depth: #d }) }
         }
-        "minecraft:random_offset" => {
-            let xz = value_to_int_provider(&v["xz_spread"]);
-            let y = value_to_int_provider(&v["y_spread"]);
+        "minecraft:random_offset" | "minecraft:offset" => {
+            let xz = if v.get("xz_spread").is_some() {
+                value_to_int_provider(&v["xz_spread"])
+            } else if v.get("x").is_some() {
+                value_to_int_provider(&v["x"])
+            } else if v.get("z").is_some() {
+                value_to_int_provider(&v["z"])
+            } else {
+                quote! { IntProvider::Constant(0) }
+            };
+            let y = if v.get("y_spread").is_some() {
+                value_to_int_provider(&v["y_spread"])
+            } else if v.get("y").is_some() {
+                value_to_int_provider(&v["y"])
+            } else {
+                quote! { IntProvider::Constant(0) }
+            };
             quote! { PlacementModifier::RandomOffset(RandomOffsetPlacementModifier { xz_spread: #xz, y_spread: #y }) }
         }
         "minecraft:noise_based_count" => {

@@ -44,16 +44,16 @@ use pumpkin_util::math::vector3::Vector3;
 /// exactly once by `set_structure_starts` and then only read. The `FxHashMap`
 /// iteration order is fixed at write time, not re-ordered by caching.
 pub struct StageCache {
-    biomes: DashMap<(i32, i32), Arc<OnceLock<Arc<ProtoChunk>>>>,
-    structure_start: DashMap<(i32, i32), Arc<OnceLock<Arc<ProtoChunk>>>>,
+    biomes: DashMap<(i32, i32), Arc<OnceLock<Arc<ProtoChunk>>>, rustc_hash::FxBuildHasher>,
+    structure_start: DashMap<(i32, i32), Arc<OnceLock<Arc<ProtoChunk>>>, rustc_hash::FxBuildHasher>,
 }
 
 impl StageCache {
     #[must_use]
     pub fn new() -> Self {
         Self {
-            biomes: DashMap::new(),
-            structure_start: DashMap::new(),
+            biomes: DashMap::with_hasher(rustc_hash::FxBuildHasher),
+            structure_start: DashMap::with_hasher(rustc_hash::FxBuildHasher),
         }
     }
 
@@ -65,11 +65,14 @@ impl StageCache {
         cz: i32,
         generator: &WorldGenerator,
     ) -> Arc<ProtoChunk> {
-        let slot_arc = self
-            .biomes
-            .entry((cx, cz))
-            .or_insert_with(|| Arc::new(OnceLock::new()))
-            .clone();
+        let slot_arc = if let Some(slot) = self.biomes.get(&(cx, cz)) {
+            slot.clone()
+        } else {
+            self.biomes
+                .entry((cx, cz))
+                .or_insert_with(|| Arc::new(OnceLock::new()))
+                .clone()
+        };
 
         let result = slot_arc.get_or_init(|| {
             let mut chunk = ProtoChunk::new(cx, cz, generator);
@@ -84,29 +87,36 @@ impl StageCache {
     }
 
     /// Get-or-compute a ProtoChunk at `(cx, cz)` advanced through StructureStart.
-    /// Internally calls `get_or_compute_biomes` to ensure the biome stage is done first.
+    /// Computes both Biomes and StructureStart directly on a single chunk to avoid
+    /// allocating an intermediate chunk copy.
     pub fn get_or_compute_structure_start(
         &self,
         cx: i32,
         cz: i32,
         generator: &WorldGenerator,
     ) -> Arc<ProtoChunk> {
-        let slot_arc = self
-            .structure_start
-            .entry((cx, cz))
-            .or_insert_with(|| Arc::new(OnceLock::new()))
-            .clone();
+        let slot_arc = if let Some(slot) = self.structure_start.get(&(cx, cz)) {
+            slot.clone()
+        } else {
+            self.structure_start
+                .entry((cx, cz))
+                .or_insert_with(|| Arc::new(OnceLock::new()))
+                .clone()
+        };
 
         let result = slot_arc.get_or_init(|| {
-            let biome_arc = self.get_or_compute_biomes(cx, cz, generator);
-            let mut chunk = clone_at_biome_stage(&biome_arc);
-
+            let mut chunk = ProtoChunk::new(cx, cz, generator);
             match generator {
-                WorldGenerator::Noise(noise_gen) => chunk.set_structure_starts(noise_gen),
-                WorldGenerator::Flat(_) => {
+                WorldGenerator::Noise(noise_gen) => {
+                    chunk.step_to_biomes(noise_gen);
+                    chunk.set_structure_starts(noise_gen);
+                }
+                WorldGenerator::Flat(flat_gen) => {
+                    flat_gen.step_to_biomes(&mut chunk);
                     chunk.stage = StagedChunkEnum::StructureStart;
                 }
                 WorldGenerator::Custom(custom_gen) => {
+                    custom_gen.step_to_biomes(&mut chunk);
                     custom_gen.set_structure_starts(&mut chunk);
                 }
             }

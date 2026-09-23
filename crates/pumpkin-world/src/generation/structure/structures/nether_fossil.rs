@@ -100,10 +100,10 @@ impl StructureGenerator for NetherFossilGenerator {
 
         collector.add_piece(Box::new(piece));
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(x, initial_y, z),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(x, initial_y, z),
+            collector,
+        ))
     }
 }
 

@@ -1,4 +1,4 @@
-use std::sync::Arc;
+
 
 use pumpkin_data::{
     Block, BlockState,
@@ -57,10 +57,10 @@ impl StructureGenerator for DesertPyramidGenerator {
             has_placed_chest: [false; 4],
         }));
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(x + (WIDTH / 2), 64, z + (DEPTH / 2)),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(x + (WIDTH / 2), 64, z + (DEPTH / 2)),
+            collector,
+        ))
     }
 }
 

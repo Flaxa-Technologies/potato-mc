@@ -25,6 +25,7 @@ pub struct TemplatePool {
     pub id: String,
     pub fallback: String,
     pub elements: Vec<PoolElement>,
+    pub max_size: i32,
 }
 
 #[derive(Clone)]
@@ -389,13 +390,10 @@ impl PoolElement {
 }
 
 impl TemplatePool {
+    #[inline]
     #[must_use]
     pub fn get_max_size(&self) -> i32 {
-        self.elements
-            .iter()
-            .filter_map(PoolElement::get_y_size)
-            .max()
-            .unwrap_or(0)
+        self.max_size
     }
     pub fn get_random_element(
         &self,
@@ -417,8 +415,8 @@ impl TemplatePool {
 
     /// Discovers a pool from the filesystem/embedded assets.
     #[must_use]
-    pub fn discover(id: &str) -> Option<Self> {
-        static CACHE: std::sync::LazyLock<dashmap::DashMap<String, TemplatePool>> =
+    pub fn discover(id: &str) -> Option<Arc<Self>> {
+        static CACHE: std::sync::LazyLock<dashmap::DashMap<String, Arc<TemplatePool>>> =
             std::sync::LazyLock::new(dashmap::DashMap::new);
 
         if let Some(pool) = CACHE.get(id) {
@@ -426,11 +424,12 @@ impl TemplatePool {
         }
 
         let pool = if id == "minecraft:empty" || id == "empty" {
-            Self {
+            Arc::new(Self {
                 id: "minecraft:empty".to_string(),
                 fallback: "minecraft:empty".to_string(),
                 elements: Vec::new(),
-            }
+                max_size: 0,
+            })
         } else if let Some(json) =
             crate::generation::structure::template::get_template_pool_json(id)
         {
@@ -441,7 +440,7 @@ impl TemplatePool {
                     return None;
                 }
             };
-            let elements = raw
+            let elements: Vec<PoolElement> = raw
                 .elements
                 .into_iter()
                 .filter_map(|weighted| {
@@ -455,11 +454,17 @@ impl TemplatePool {
                         })
                 })
                 .collect();
-            Self {
+            let max_size = elements
+                .iter()
+                .filter_map(PoolElement::get_y_size)
+                .max()
+                .unwrap_or(0);
+            Arc::new(Self {
                 id: id.to_string(),
                 fallback: raw.fallback,
                 elements,
-            }
+                max_size,
+            })
         } else {
             let elements = crate::generation::structure::template::get_pool_elements(id)?;
             let projection = if id.contains("streets") {
@@ -468,22 +473,30 @@ impl TemplatePool {
                 JigsawProjection::Rigid
             };
 
-            Self {
+            let elements: Vec<PoolElement> = elements
+                .iter()
+                .map(|e| PoolElement {
+                    weight: 1,
+                    projection,
+                    kind: PoolElementKind::Single {
+                        template: (*e).to_string(),
+                        processors: ProcessorListRef::Empty,
+                        legacy: false,
+                    },
+                })
+                .collect();
+            let max_size = elements
+                .iter()
+                .filter_map(PoolElement::get_y_size)
+                .max()
+                .unwrap_or(0);
+
+            Arc::new(Self {
                 id: id.to_string(),
                 fallback: "minecraft:empty".to_string(),
-                elements: elements
-                    .iter()
-                    .map(|e| PoolElement {
-                        weight: 1,
-                        projection,
-                        kind: PoolElementKind::Single {
-                            template: (*e).to_string(),
-                            processors: ProcessorListRef::Empty,
-                            legacy: false,
-                        },
-                    })
-                    .collect(),
-            }
+                elements,
+                max_size,
+            })
         };
         CACHE.insert(id.to_owned(), pool.clone());
         Some(pool)
@@ -962,7 +975,7 @@ mod tests {
     #[test]
     fn ancient_city_start_templates_and_anchor_exist() {
         let pool = TemplatePool::discover("minecraft:ancient_city/city_center").unwrap();
-        for element in pool.elements {
+        for element in &pool.elements {
             let template = element.first_template().expect("missing start template");
             assert!(
                 template.blocks.iter().any(|block| {
@@ -1007,7 +1020,7 @@ mod tests {
             "minecraft:ancient_city/city_center/walls",
             "minecraft:ancient_city/walls/no_corners",
         ] {
-            for element in TemplatePool::discover(id).unwrap().elements {
+            for element in &TemplatePool::discover(id).unwrap().elements {
                 check(&element.kind);
             }
         }

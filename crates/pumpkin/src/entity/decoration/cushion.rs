@@ -2,6 +2,8 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicU8, Ordering};
 
 use pumpkin_data::damage::DamageType;
+use pumpkin_data::item::Item;
+use pumpkin_data::item_stack::ItemStack;
 use pumpkin_data::sound::{Sound, SoundCategory};
 use pumpkin_protocol::codec::var_int::VarInt;
 use pumpkin_util::math::position::BlockPos;
@@ -83,6 +85,12 @@ impl CushionEntity {
         let world = self.entity.world.load();
         let pos = self.entity.pos.load();
         world.play_sound(Sound::EntityCushionBreak, SoundCategory::Neutral, &pos);
+        let color_idx = (self.get_color() as usize).min(15) as u16;
+        let item_id = 1626 + color_idx;
+        if let Some(item) = Item::from_id(item_id) {
+            let block_pos = BlockPos(Vector3::new(pos.x.floor() as i32, pos.y.floor() as i32, pos.z.floor() as i32));
+            world.drop_stack(&block_pos, ItemStack::new(1, item));
+        }
     }
 }
 
@@ -93,6 +101,10 @@ impl EntityBase for CushionEntity {
 
     fn get_living_entity(&self) -> Option<&LivingEntity> {
         None
+    }
+
+    fn interact(&self, player: &Arc<Player>, _item_stack: &mut ItemStack) -> bool {
+        self.on_interact(player)
     }
 
     fn damage_with_context(

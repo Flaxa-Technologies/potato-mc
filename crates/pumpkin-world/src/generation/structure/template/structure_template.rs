@@ -301,11 +301,14 @@ impl PaletteEntry {
     pub fn from_nbt_compound(entry_compound: &NbtCompound) -> Result<Self, TemplateError> {
         let name = entry_compound
             .get_string("Name")
+            .or_else(|| entry_compound.get_string("id"))
+            .or_else(|| entry_compound.get_string("name"))
             .ok_or(TemplateError::MissingField("palette.Name"))?
             .to_string();
 
         let properties: Vec<(String, String)> = entry_compound
             .get_compound("Properties")
+            .or_else(|| entry_compound.get_compound("properties"))
             .map_or_else(Vec::new, |props_compound| {
                 props_compound
                     .child_tags

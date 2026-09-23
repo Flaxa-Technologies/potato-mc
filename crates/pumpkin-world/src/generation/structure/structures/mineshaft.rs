@@ -1,4 +1,4 @@
-use std::sync::Arc;
+
 
 use pumpkin_data::{
     Block, BlockState,
@@ -120,10 +120,10 @@ impl StructureGenerator for MineshaftGenerator {
             let bbox = collector.get_bounding_box();
             i32::midpoint(bbox.min.y, bbox.max.y)
         };
-        Some(StructurePosition {
-            start_pos: BlockPos::new(start_x + 8, start_y, start_z),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(start_x + 8, start_y, start_z),
+            collector,
+        ))
     }
 }
 

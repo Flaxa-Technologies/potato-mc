@@ -1,4 +1,5 @@
 pub struct CarvingMask {
+    height: i32,
     min_y: i32,
     mask: Vec<u64>,
 }
@@ -10,8 +11,18 @@ impl CarvingMask {
         let total_bits = 16 * 16 * height;
         let num_u64s = (total_bits as usize).div_ceil(64);
         Self {
+            height,
             min_y,
             mask: vec![0; num_u64s],
+        }
+    }
+
+    #[must_use]
+    pub const fn new_empty(height: i32, min_y: i32) -> Self {
+        Self {
+            height,
+            min_y,
+            mask: Vec::new(),
         }
     }
 
@@ -24,6 +35,11 @@ impl CarvingMask {
     }
 
     pub fn set(&mut self, x: i32, y: i32, z: i32) {
+        if self.mask.is_empty() {
+            let total_bits = 16 * 16 * self.height;
+            let num_u64s = (total_bits as usize).div_ceil(64);
+            self.mask = vec![0; num_u64s];
+        }
         let bit_index = self.get_bit_index(x, y, z);
         let u64_idx = bit_index / 64;
         let bit_in_u64 = bit_index % 64;
@@ -32,6 +48,9 @@ impl CarvingMask {
 
     #[must_use]
     pub fn get(&self, x: i32, y: i32, z: i32) -> bool {
+        if self.mask.is_empty() {
+            return false;
+        }
         let bit_index = self.get_bit_index(x, y, z);
         let u64_idx = bit_index / 64;
         let bit_in_u64 = bit_index % 64;

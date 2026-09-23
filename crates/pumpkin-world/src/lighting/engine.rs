@@ -67,6 +67,7 @@ impl LightProvider for BlockLightProvider {
         lz: usize,
         level: u8,
     ) {
+        chunk.ensure_light();
         if let Some(c) = chunk.light.block_light.get_mut(section_idx) {
             c.set(lx, ly, lz, level);
         }
@@ -95,6 +96,13 @@ impl LightProvider for SkyLightProvider {
         ly: usize,
         lz: usize,
     ) -> u8 {
+        if chunk.light.sky_light.is_empty() {
+            let ny = chunk.bottom_y() as i32 + (section_idx as i32 * 16) + ly as i32;
+            if ny >= chunk.top_block_height_exclusive(lx as i32, lz as i32) {
+                return 15;
+            }
+            return 0;
+        }
         if let Some(c) = chunk.light.sky_light.get(section_idx) {
             match c {
                 LightContainer::Full(data) => {
@@ -124,6 +132,7 @@ impl LightProvider for SkyLightProvider {
         lz: usize,
         level: u8,
     ) {
+        chunk.ensure_light();
         if let Some(c) = chunk.light.sky_light.get_mut(section_idx) {
             c.set(lx, ly, lz, level);
         }
@@ -231,6 +240,15 @@ impl VisitedBitSet {
         }
     }
 
+    #[inline(always)]
+    pub fn set_idx(&mut self, idx: usize) {
+        let word = idx >> 6;
+        let mask = 1u64 << (idx & 63);
+        unsafe {
+            *self.bits.get_unchecked_mut(word) |= mask;
+        }
+    }
+
     #[inline]
     pub fn test_and_set(&mut self, x: i32, y: i32, z: i32) -> bool {
         let lx = x - self.min_x;
@@ -314,11 +332,16 @@ impl<P: LightProvider> LightPropagator<P> {
         }
     }
 
-    pub fn clear(&mut self) {
+    #[inline]
+    pub fn reset_queue(&mut self) {
         self.queue.clear();
         self.head = 0;
-        self.visited.clear();
         self.decrease_queue.clear();
+    }
+
+    pub fn clear(&mut self) {
+        self.reset_queue();
+        self.visited.clear();
     }
 
     #[inline]
@@ -631,7 +654,7 @@ impl<P: LightProvider> LightPropagator<P> {
                 };
 
                 if opacity >= 15 {
-                    self.visited.test_and_set_idx(n_idx);
+                    self.visited.set_idx(n_idx);
                     continue;
                 }
 
@@ -658,7 +681,8 @@ impl<P: LightProvider> LightPropagator<P> {
                         }
                     }
 
-                    if new_level > 1 && self.visited.test_and_set_idx(n_idx) {
+                    if new_level > 1 {
+                        self.visited.set_idx(n_idx);
                         self.queue.push(PropagationEntry {
                             lx: nlx as u8,
                             ly: nly as u16,
@@ -747,8 +771,6 @@ impl<P: LightProvider> Default for LightPropagator<P> {
 
 impl BlockLightPropagator {
     pub fn propagate_light(&mut self, cache: &mut Cache) {
-        self.clear();
-
         let min_y = cache.bottom_y() as i32;
         let max_y = min_y + cache.height() as i32;
         let center_x = cache.x + (cache.size / 2);
@@ -800,6 +822,7 @@ impl BlockLightPropagator {
             return;
         }
 
+        self.reset_queue();
         self.visited
             .ensure_capacity(min_x, min_y, min_z, size_x, size_y, size_z);
 
@@ -910,7 +933,7 @@ impl BlockLightPropagator {
 impl SkyLightPropagator {
     #[expect(clippy::too_many_lines)]
     pub fn convert_light(&mut self, cache: &mut Cache) {
-        self.clear();
+        self.reset_queue();
 
         let center_x = cache.x + (cache.size / 2);
         let center_z = cache.z + (cache.size / 2);
@@ -930,23 +953,52 @@ impl SkyLightPropagator {
         self.visited
             .ensure_capacity(min_x, bottom_y, min_z, size_x, size_y, size_z);
 
+        let center_rel = cache.size / 2;
+        let center_chunk_idx = (center_rel * cache.size + center_rel) as usize;
+
         let mut surface_heights = [0i32; 18 * 18];
         let mut max_center_top_y = bottom_y;
 
-        for z in start_z..end_z {
-            let lz = (z - start_z) as usize;
-            for x in start_x..end_x {
-                let lx = (x - start_x) as usize;
-                let top_y = cache.get_top_y(&HeightMap::WorldSurface, x, z);
-                surface_heights[lx * 18 + lz] = top_y;
-                if (1..=16).contains(&lx) && (1..=16).contains(&lz) {
+        // Fast path: if center chunk is ProtoChunk, directly read flat_surface_height_map
+        if let Chunk::Proto(center_proto) = &cache.chunks[center_chunk_idx] {
+            let center_map = &center_proto.flat_surface_height_map;
+            for local_x in 0..16usize {
+                let lx = local_x + 1;
+                for local_z in 0..16usize {
+                    let lz = local_z + 1;
+                    let top_y = center_map[local_x * 16 + local_z] as i32;
+                    surface_heights[lx * 18 + lz] = top_y;
                     max_center_top_y = max_center_top_y.max(top_y);
                 }
             }
+            // Border lookups (x == start_x, x == end_x - 1, z == start_z, z == end_z - 1)
+            for z in start_z..end_z {
+                let lz = (z - start_z) as usize;
+                let top_y_left = cache.get_top_y(&HeightMap::WorldSurface, start_x, z);
+                surface_heights[0 * 18 + lz] = top_y_left;
+                let top_y_right = cache.get_top_y(&HeightMap::WorldSurface, end_x - 1, z);
+                surface_heights[17 * 18 + lz] = top_y_right;
+            }
+            for x in (start_x + 1)..(end_x - 1) {
+                let lx = (x - start_x) as usize;
+                let top_y_bottom = cache.get_top_y(&HeightMap::WorldSurface, x, start_z);
+                surface_heights[lx * 18 + 0] = top_y_bottom;
+                let top_y_top = cache.get_top_y(&HeightMap::WorldSurface, x, end_z - 1);
+                surface_heights[lx * 18 + 17] = top_y_top;
+            }
+        } else {
+            for z in start_z..end_z {
+                let lz = (z - start_z) as usize;
+                for x in start_x..end_x {
+                    let lx = (x - start_x) as usize;
+                    let top_y = cache.get_top_y(&HeightMap::WorldSurface, x, z);
+                    surface_heights[lx * 18 + lz] = top_y;
+                    if (1..=16).contains(&lx) && (1..=16).contains(&lz) {
+                        max_center_top_y = max_center_top_y.max(top_y);
+                    }
+                }
+            }
         }
-
-        let center_rel = cache.size / 2;
-        let center_chunk_idx = (center_rel * cache.size + center_rel) as usize;
         let max_center_top_local_y = (max_center_top_y + 1 - bottom_y).max(0) as usize;
         let max_center_sec = max_center_top_local_y >> 4;
 
@@ -1105,10 +1157,12 @@ impl SkyLightPropagator {
                 // For all blocks above top_y in this column, sky light is always 15.
                 let start_y = (top_y + 1).max(bottom_y);
                 let end_y = max_neighbor_top.min(max_y);
+                let stride_y = size_z * size_x;
+                let base_xz = lz_cache * size_x + lx_cache;
                 if end_y > start_y {
+                    let mut idx = (start_y - bottom_y) as usize * stride_y + base_xz;
                     for y in start_y..end_y {
                         let ly_cache = (y - bottom_y) as usize;
-                        let idx = (ly_cache * size_z + lz_cache) * size_x + lx_cache;
                         if (y < north_top || y < south_top || y < west_top || y < east_top)
                             && self.visited.test_and_set_idx(idx)
                         {
@@ -1120,6 +1174,7 @@ impl SkyLightPropagator {
                                 skip_dir: BlockDirection::Up as u8,
                             });
                         }
+                        idx += stride_y;
                     }
                 }
 
@@ -1134,6 +1189,7 @@ impl SkyLightPropagator {
                     let chunk_idx = (rel_x * cache.size + rel_z) as usize;
                     match &cache.chunks[chunk_idx] {
                         Chunk::Proto(c) => {
+                            let mut idx = (check_top_y - bottom_y) as usize * stride_y + base_xz;
                             for y in (bottom_y..=check_top_y).rev() {
                                 let section_idx = ((y - bottom_y) >> 4) as usize;
                                 let local_y = (y & 15) as usize;
@@ -1153,7 +1209,6 @@ impl SkyLightPropagator {
                                     y < north_top || y < south_top || y < west_top || y < east_top;
 
                                 let ly_cache = (y - bottom_y) as usize;
-                                let idx = (ly_cache * size_z + lz_cache) * size_x + lx_cache;
 
                                 if (is_at_surface || below_neighbor)
                                     && self.visited.test_and_set_idx(idx)
@@ -1168,9 +1223,11 @@ impl SkyLightPropagator {
                                         skip_dir,
                                     });
                                 }
+                                idx -= stride_y;
                             }
                         }
                         Chunk::Level(_) => {
+                            let mut idx = (check_top_y - bottom_y) as usize * stride_y + base_xz;
                             for y in (bottom_y..=check_top_y).rev() {
                                 let pos = BlockPos(Vector3::new(x, y, z));
                                 let light = get_sky_light(cache, pos);
@@ -1183,7 +1240,6 @@ impl SkyLightPropagator {
                                     y < north_top || y < south_top || y < west_top || y < east_top;
 
                                 let ly_cache = (y - bottom_y) as usize;
-                                let idx = (ly_cache * size_z + lz_cache) * size_x + lx_cache;
 
                                 if (is_at_surface || below_neighbor)
                                     && self.visited.test_and_set_idx(idx)
@@ -1198,6 +1254,7 @@ impl SkyLightPropagator {
                                         skip_dir,
                                     });
                                 }
+                                idx -= stride_y;
                             }
                         }
                     }
@@ -1238,7 +1295,8 @@ impl LightEngine {
         }
 
         let should_skip = {
-            let center_chunk = cache.get_center_chunk();
+            let center_chunk = cache.get_center_chunk_mut();
+            center_chunk.ensure_light();
             center_chunk.stage >= crate::chunk_system::chunk_state::StagedChunkEnum::Lighting
         };
         if should_skip {
@@ -1250,8 +1308,8 @@ impl LightEngine {
         }
         self.block_light.propagate_light(cache);
 
-        self.block_light.clear();
-        self.sky_light.clear();
+        self.block_light.reset_queue();
+        self.sky_light.reset_queue();
     }
 
     pub fn update_block_light(

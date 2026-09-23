@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     sync::LazyLock,
 };
 
@@ -74,13 +74,24 @@ use super::features::{
     waterlogged_vegetation_patch,
     waterlogged_vegetation_patch::WaterloggedVegetationPatchFeature,
     weeping_vines::WeepingVinesFeature,
+    weighted_random_selector::WeightedRandomFeature,
 };
 use crate::generation::proto_chunk::GenerationCache;
 use crate::world::WorldPortalExt;
 
-pub static CONFIGURED_FEATURES: LazyLock<
-    HashMap<pumpkin_data::configured_feature::ConfiguredFeature, ConfiguredFeature>,
-> = LazyLock::new(|| {
+pub struct ConfiguredFeaturesTable {
+    features: Box<[Option<ConfiguredFeature>]>,
+}
+
+impl ConfiguredFeaturesTable {
+    #[inline(always)]
+    #[must_use]
+    pub fn get(&self, feature: &pumpkin_data::configured_feature::ConfiguredFeature) -> Option<&ConfiguredFeature> {
+        self.features.get(*feature as usize).and_then(Option::as_ref)
+    }
+}
+
+pub static CONFIGURED_FEATURES: LazyLock<ConfiguredFeaturesTable> = LazyLock::new(|| {
     let mut map = build_configured_features();
     map.insert(
         pumpkin_data::configured_feature::ConfiguredFeature::SulfurSpring,
@@ -98,7 +109,17 @@ pub static CONFIGURED_FEATURES: LazyLock<
         pumpkin_data::configured_feature::ConfiguredFeature::SulfurSpikeCluster,
         ConfiguredFeature::SulfurSpikeCluster(SulfurSpikeClusterFeature),
     );
-    map
+    let mut vec: Vec<Option<ConfiguredFeature>> = Vec::new();
+    for (k, v) in map {
+        let idx = k as usize;
+        if idx >= vec.len() {
+            vec.resize_with(idx + 1, || None);
+        }
+        vec[idx] = Some(v);
+    }
+    ConfiguredFeaturesTable {
+        features: vec.into_boxed_slice(),
+    }
 });
 
 pub static BONE_MEAL_FEATURES: LazyLock<
@@ -174,6 +195,7 @@ pub enum ConfiguredFeature {
     RandomSelector(RandomFeature),
     SimpleRandomSelector(SimpleRandomFeature),
     RandomBooleanSelector(RandomBooleanFeature),
+    WeightedRandomSelector(WeightedRandomFeature),
     Geode(Box<GeodeFeature>),
     DripstoneCluster(DripstoneClusterFeature),
     LargeDripstone(LargeDripstoneFeature),
@@ -333,6 +355,15 @@ impl ConfiguredFeature {
                 pos,
             ),
             Self::SimpleRandomSelector(feature) => feature.generate(
+                chunk,
+                block_registry,
+                min_y,
+                height,
+                feature_name,
+                random,
+                pos,
+            ),
+            Self::WeightedRandomSelector(feature) => feature.generate(
                 chunk,
                 block_registry,
                 min_y,

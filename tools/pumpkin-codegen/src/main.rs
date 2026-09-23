@@ -185,6 +185,12 @@ pub fn main() {
         sdk::main();
         build_functions
     } else {
+        if filters.iter().any(|f| f == "wit") {
+            wit::main();
+        }
+        if filters.iter().any(|f| f == "sdk") {
+            sdk::main();
+        }
         build_functions
             .into_iter()
             .filter(|(_, file)| {

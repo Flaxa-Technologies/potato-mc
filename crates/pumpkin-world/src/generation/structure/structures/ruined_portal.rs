@@ -232,10 +232,10 @@ impl StructureGenerator for RuinedPortalGenerator {
         let mut collector = StructurePiecesCollector::default();
         collector.add_piece(Box::new(piece));
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(chunk_center_x, y, chunk_center_z),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(chunk_center_x, y, chunk_center_z),
+            collector,
+        ))
     }
 }
 

@@ -7,6 +7,7 @@ use fancy::LargeOakFoliagePlacer;
 use jungle::JungleFoliagePlacer;
 use mega_pine::MegaPineFoliagePlacer;
 use pine::PineFoliagePlacer;
+use poplar::PoplarFoliagePlacer;
 use pumpkin_data::BlockDirection;
 use pumpkin_data::BlockState;
 use pumpkin_util::{
@@ -16,6 +17,7 @@ use pumpkin_util::{
 use random_spread::RandomSpreadFoliagePlacer;
 
 use spruce::SpruceFoliagePlacer;
+
 
 use super::{TreeFeature, TreeNode};
 use crate::generation::proto_chunk::GenerationCache;
@@ -29,6 +31,7 @@ pub mod fancy;
 pub mod jungle;
 pub mod mega_pine;
 pub mod pine;
+pub mod poplar;
 pub mod random_spread;
 pub mod spruce;
 
@@ -260,6 +263,7 @@ pub enum FoliageType {
     DarkOak(DarkOakFoliagePlacer),
     RandomSpread(RandomSpreadFoliagePlacer),
     Cherry(CherryFoliagePlacer),
+    Poplar(PoplarFoliagePlacer),
 }
 
 impl FoliageType {
@@ -375,6 +379,15 @@ impl FoliageType {
                 offset,
                 foliage_provider,
             ),
+            Self::Poplar(poplar) => poplar.generate(
+                chunk,
+                random,
+                node,
+                foliage_height,
+                radius,
+                offset,
+                foliage_provider,
+            ),
         }
     }
 
@@ -391,6 +404,7 @@ impl FoliageType {
             Self::DarkOak(_dark_oak) => DarkOakFoliagePlacer::get_random_height(),
             Self::RandomSpread(random_spread) => random_spread.get_random_height(random),
             Self::Cherry(cherry) => cherry.get_random_height(random),
+            Self::Poplar(poplar) => poplar.get_random_height(random),
         }
     }
 }

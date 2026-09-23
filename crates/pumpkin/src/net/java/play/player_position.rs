@@ -69,10 +69,6 @@ impl JavaClient {
             return;
         }
         if player.is_sleeping() {
-            let current_pos = player.get_entity().pos.load();
-            if current_pos.squared_distance_to_vec(&packet.position) > 4.0 {
-                player.wake_up();
-            }
             return;
         }
         // y = feet Y
@@ -217,10 +213,6 @@ impl JavaClient {
             return;
         }
         if player.is_sleeping() {
-            let current_pos = player.get_entity().pos.load();
-            if current_pos.squared_distance_to_vec(&packet.position) > 4.0 {
-                player.wake_up();
-            }
             return;
         }
         // y = feet Y

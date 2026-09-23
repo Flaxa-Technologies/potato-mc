@@ -87,6 +87,55 @@ impl PartialEq for JavaToBedrockItemMapping {
     }
 }
 impl Item {
+    pub const ABANDONED_CAMP_MAP: Self = Self {
+        id: 1642,
+        registry_key: "abandoned_camp_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.abandoned_camp_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:abandoned_camp_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const ACACIA_BOAT: Self = Self {
         id: 899,
         registry_key: "acacia_boat",
@@ -5332,6 +5381,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const BLACK_CONCRETE_SLAB: Self = Self {
+        id: 1603,
+        registry_key: "black_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.black_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:black_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BLACK_CONCRETE_STAIRS: Self = Self {
+        id: 1587,
+        registry_key: "black_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.black_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:black_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BLACK_CUSHION: Self = Self {
+        id: 1641,
+        registry_key: "black_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.black_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:black_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const BLACK_DYE: Self = Self {
         id: 1110,
         registry_key: "black_dye",
@@ -5721,6 +5917,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:black_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BLACK_WOOL_SLAB: Self = Self {
+        id: 1568,
+        registry_key: "black_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.black_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:black_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BLACK_WOOL_STAIRS: Self = Self {
+        id: 1552,
+        registry_key: "black_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.black_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:black_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -6549,6 +6843,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const BLUE_CONCRETE_SLAB: Self = Self {
+        id: 1599,
+        registry_key: "blue_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.blue_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:blue_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BLUE_CONCRETE_STAIRS: Self = Self {
+        id: 1583,
+        registry_key: "blue_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.blue_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:blue_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BLUE_CUSHION: Self = Self {
+        id: 1637,
+        registry_key: "blue_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.blue_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:blue_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const BLUE_DYE: Self = Self {
         id: 1106,
         registry_key: "blue_dye",
@@ -7091,6 +7532,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:blue_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BLUE_WOOL_SLAB: Self = Self {
+        id: 1564,
+        registry_key: "blue_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.blue_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:blue_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BLUE_WOOL_STAIRS: Self = Self {
+        id: 1548,
+        registry_key: "blue_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.blue_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:blue_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -8629,6 +9168,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const BROWN_CONCRETE_SLAB: Self = Self {
+        id: 1600,
+        registry_key: "brown_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.brown_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:brown_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BROWN_CONCRETE_STAIRS: Self = Self {
+        id: 1584,
+        registry_key: "brown_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.brown_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:brown_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BROWN_CUSHION: Self = Self {
+        id: 1638,
+        registry_key: "brown_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.brown_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:brown_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const BROWN_DYE: Self = Self {
         id: 1107,
         registry_key: "brown_dye",
@@ -9192,6 +9878,104 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const BROWN_WOOL_SLAB: Self = Self {
+        id: 1565,
+        registry_key: "brown_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.brown_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:brown_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BROWN_WOOL_STAIRS: Self = Self {
+        id: 1549,
+        registry_key: "brown_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.brown_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:brown_wool_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const BRUSH: Self = Self {
         id: 1457,
         registry_key: "brush",
@@ -9524,6 +10308,202 @@ impl Item {
                 Rarity,
                 &RarityImpl {
                     rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BURIED_ANCIENT_CITY_MAP: Self = Self {
+        id: 1643,
+        registry_key: "buried_ancient_city_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.buried_ancient_city_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:buried_ancient_city_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BURIED_MINESHAFT_MAP: Self = Self {
+        id: 1644,
+        registry_key: "buried_mineshaft_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.buried_mineshaft_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:buried_mineshaft_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BURIED_TREASURE_MAP: Self = Self {
+        id: 1645,
+        registry_key: "buried_treasure_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.buried_treasure_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:buried_treasure_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const BURIED_TRIAL_CHAMBERS_MAP: Self = Self {
+        id: 1646,
+        registry_key: "buried_trial_chambers_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.buried_trial_chambers_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:buried_trial_chambers_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
                 },
             ),
             (RepairCost, &RepairCostImpl { cost: 0i32 }),
@@ -19524,6 +20504,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const CYAN_CONCRETE_SLAB: Self = Self {
+        id: 1597,
+        registry_key: "cyan_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.cyan_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:cyan_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const CYAN_CONCRETE_STAIRS: Self = Self {
+        id: 1581,
+        registry_key: "cyan_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.cyan_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:cyan_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const CYAN_CUSHION: Self = Self {
+        id: 1635,
+        registry_key: "cyan_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.cyan_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:cyan_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const CYAN_DYE: Self = Self {
         id: 1104,
         registry_key: "cyan_dye",
@@ -19913,6 +21040,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:cyan_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const CYAN_WOOL_SLAB: Self = Self {
+        id: 1562,
+        registry_key: "cyan_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.cyan_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:cyan_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const CYAN_WOOL_STAIRS: Self = Self {
+        id: 1546,
+        registry_key: "cyan_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.cyan_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:cyan_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -22865,6 +24090,104 @@ impl Item {
                 Rarity,
                 &RarityImpl {
                     rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const DESERT_PYRAMID_MAP: Self = Self {
+        id: 1647,
+        registry_key: "desert_pyramid_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.desert_pyramid_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:desert_pyramid_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const DESERT_VILLAGE_MAP: Self = Self {
+        id: 1648,
+        registry_key: "desert_village_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.desert_village_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:desert_village_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
                 },
             ),
             (RepairCost, &RepairCostImpl { cost: 0i32 }),
@@ -32031,6 +33354,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const GRAY_CONCRETE_SLAB: Self = Self {
+        id: 1595,
+        registry_key: "gray_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.gray_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:gray_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const GRAY_CONCRETE_STAIRS: Self = Self {
+        id: 1579,
+        registry_key: "gray_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.gray_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:gray_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const GRAY_CUSHION: Self = Self {
+        id: 1633,
+        registry_key: "gray_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.gray_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:gray_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const GRAY_DYE: Self = Self {
         id: 1102,
         registry_key: "gray_dye",
@@ -32441,6 +33911,104 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const GRAY_WOOL_SLAB: Self = Self {
+        id: 1560,
+        registry_key: "gray_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.gray_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:gray_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const GRAY_WOOL_STAIRS: Self = Self {
+        id: 1544,
+        registry_key: "gray_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.gray_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:gray_wool_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const GREEN_BANNER: Self = Self {
         id: 1309,
         registry_key: "green_banner",
@@ -32784,6 +34352,153 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:green_concrete_powder"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const GREEN_CONCRETE_SLAB: Self = Self {
+        id: 1601,
+        registry_key: "green_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.green_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:green_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const GREEN_CONCRETE_STAIRS: Self = Self {
+        id: 1585,
+        registry_key: "green_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.green_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:green_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const GREEN_CUSHION: Self = Self {
+        id: 1639,
+        registry_key: "green_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.green_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:green_cushion"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -33194,6 +34909,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:green_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const GREEN_WOOL_SLAB: Self = Self {
+        id: 1566,
+        registry_key: "green_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.green_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:green_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const GREEN_WOOL_STAIRS: Self = Self {
+        id: 1550,
+        registry_key: "green_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.green_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:green_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -37336,6 +39149,55 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const JUNGLE_PYRAMID_MAP: Self = Self {
+        id: 1649,
+        registry_key: "jungle_pyramid_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.jungle_pyramid_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:jungle_pyramid_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const JUNGLE_SAPLING: Self = Self {
         id: 79,
         registry_key: "jungle_sapling",
@@ -39272,6 +41134,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const LIGHT_BLUE_CONCRETE_SLAB: Self = Self {
+        id: 1591,
+        registry_key: "light_blue_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.light_blue_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_blue_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIGHT_BLUE_CONCRETE_STAIRS: Self = Self {
+        id: 1575,
+        registry_key: "light_blue_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.light_blue_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_blue_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIGHT_BLUE_CUSHION: Self = Self {
+        id: 1629,
+        registry_key: "light_blue_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.light_blue_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_blue_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const LIGHT_BLUE_DYE: Self = Self {
         id: 1098,
         registry_key: "light_blue_dye",
@@ -39682,6 +41691,104 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const LIGHT_BLUE_WOOL_SLAB: Self = Self {
+        id: 1556,
+        registry_key: "light_blue_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.light_blue_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_blue_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIGHT_BLUE_WOOL_STAIRS: Self = Self {
+        id: 1540,
+        registry_key: "light_blue_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.light_blue_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_blue_wool_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const LIGHT_GRAY_BANNER: Self = Self {
         id: 1304,
         registry_key: "light_gray_banner",
@@ -40025,6 +42132,153 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:light_gray_concrete_powder"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIGHT_GRAY_CONCRETE_SLAB: Self = Self {
+        id: 1596,
+        registry_key: "light_gray_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.light_gray_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_gray_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIGHT_GRAY_CONCRETE_STAIRS: Self = Self {
+        id: 1580,
+        registry_key: "light_gray_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.light_gray_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_gray_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIGHT_GRAY_CUSHION: Self = Self {
+        id: 1634,
+        registry_key: "light_gray_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.light_gray_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_gray_cushion"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -40435,6 +42689,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:light_gray_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIGHT_GRAY_WOOL_SLAB: Self = Self {
+        id: 1561,
+        registry_key: "light_gray_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.light_gray_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_gray_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIGHT_GRAY_WOOL_STAIRS: Self = Self {
+        id: 1545,
+        registry_key: "light_gray_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.light_gray_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:light_gray_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -41065,6 +43417,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const LIME_CONCRETE_SLAB: Self = Self {
+        id: 1593,
+        registry_key: "lime_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.lime_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:lime_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIME_CONCRETE_STAIRS: Self = Self {
+        id: 1577,
+        registry_key: "lime_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.lime_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:lime_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIME_CUSHION: Self = Self {
+        id: 1631,
+        registry_key: "lime_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.lime_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:lime_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const LIME_DYE: Self = Self {
         id: 1100,
         registry_key: "lime_dye",
@@ -41454,6 +43953,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:lime_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIME_WOOL_SLAB: Self = Self {
+        id: 1558,
+        registry_key: "lime_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.lime_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:lime_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const LIME_WOOL_STAIRS: Self = Self {
+        id: 1542,
+        registry_key: "lime_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.lime_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:lime_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -42137,6 +44734,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const MAGENTA_CONCRETE_SLAB: Self = Self {
+        id: 1590,
+        registry_key: "magenta_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.magenta_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:magenta_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const MAGENTA_CONCRETE_STAIRS: Self = Self {
+        id: 1574,
+        registry_key: "magenta_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.magenta_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:magenta_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const MAGENTA_CUSHION: Self = Self {
+        id: 1628,
+        registry_key: "magenta_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.magenta_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:magenta_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const MAGENTA_DYE: Self = Self {
         id: 1097,
         registry_key: "magenta_dye",
@@ -42526,6 +45270,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:magenta_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const MAGENTA_WOOL_SLAB: Self = Self {
+        id: 1555,
+        registry_key: "magenta_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.magenta_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:magenta_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const MAGENTA_WOOL_STAIRS: Self = Self {
+        id: 1539,
+        registry_key: "magenta_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.magenta_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:magenta_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -49776,6 +52618,55 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const OCEAN_MONUMENT_MAP: Self = Self {
+        id: 1650,
+        registry_key: "ocean_monument_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.ocean_monument_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:ocean_monument_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const OCELOT_SPAWN_EGG: Self = Self {
         id: 1176,
         registry_key: "ocelot_spawn_egg",
@@ -50402,6 +53293,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const ORANGE_CONCRETE_SLAB: Self = Self {
+        id: 1589,
+        registry_key: "orange_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.orange_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:orange_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const ORANGE_CONCRETE_STAIRS: Self = Self {
+        id: 1573,
+        registry_key: "orange_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.orange_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:orange_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const ORANGE_CUSHION: Self = Self {
+        id: 1627,
+        registry_key: "orange_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.orange_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:orange_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const ORANGE_DYE: Self = Self {
         id: 1096,
         registry_key: "orange_dye",
@@ -50545,6 +53583,55 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:orange_harness"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const ORANGE_POPLAR_LEAVES: Self = Self {
+        id: 1611,
+        registry_key: "orange_poplar_leaves",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.orange_poplar_leaves"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:orange_poplar_leaves"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -50840,6 +53927,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:orange_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const ORANGE_WOOL_SLAB: Self = Self {
+        id: 1554,
+        registry_key: "orange_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.orange_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:orange_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const ORANGE_WOOL_STAIRS: Self = Self {
+        id: 1538,
+        registry_key: "orange_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.orange_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:orange_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -53961,6 +57146,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const PINK_CONCRETE_SLAB: Self = Self {
+        id: 1594,
+        registry_key: "pink_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.pink_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:pink_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const PINK_CONCRETE_STAIRS: Self = Self {
+        id: 1578,
+        registry_key: "pink_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.pink_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:pink_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const PINK_CUSHION: Self = Self {
+        id: 1632,
+        registry_key: "pink_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.pink_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:pink_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const PINK_DYE: Self = Self {
         id: 1101,
         registry_key: "pink_dye",
@@ -54469,6 +57801,104 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const PINK_WOOL_SLAB: Self = Self {
+        id: 1559,
+        registry_key: "pink_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.pink_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:pink_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const PINK_WOOL_STAIRS: Self = Self {
+        id: 1543,
+        registry_key: "pink_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.pink_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:pink_wool_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const PISTON: Self = Self {
         id: 750,
         registry_key: "piston",
@@ -54602,6 +58032,55 @@ impl Item {
                 Rarity,
                 &RarityImpl {
                     rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const PLAINS_VILLAGE_MAP: Self = Self {
+        id: 1651,
+        registry_key: "plains_village_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.plains_village_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:plains_village_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
                 },
             ),
             (RepairCost, &RepairCostImpl { cost: 0i32 }),
@@ -56725,6 +60204,839 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const POPLAR_BOAT: Self = Self {
+        id: 1624,
+        registry_key: "poplar_boat",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 1 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.poplar_boat"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_boat"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_BUTTON: Self = Self {
+        id: 1618,
+        registry_key: "poplar_button",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_button"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_button"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_CHEST_BOAT: Self = Self {
+        id: 1625,
+        registry_key: "poplar_chest_boat",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 1 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.poplar_chest_boat"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_chest_boat"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_DOOR: Self = Self {
+        id: 1623,
+        registry_key: "poplar_door",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_door"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_door"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_FENCE: Self = Self {
+        id: 1622,
+        registry_key: "poplar_fence",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_fence"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_fence"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_FENCE_GATE: Self = Self {
+        id: 1621,
+        registry_key: "poplar_fence_gate",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_fence_gate"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_fence_gate"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_HANGING_SIGN: Self = Self {
+        id: 1615,
+        registry_key: "poplar_hanging_sign",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_hanging_sign"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_hanging_sign"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_LOG: Self = Self {
+        id: 1606,
+        registry_key: "poplar_log",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_log"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_log"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_PLANKS: Self = Self {
+        id: 1604,
+        registry_key: "poplar_planks",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_planks"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_planks"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_PRESSURE_PLATE: Self = Self {
+        id: 1616,
+        registry_key: "poplar_pressure_plate",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_pressure_plate"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_pressure_plate"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_SAPLING: Self = Self {
+        id: 1605,
+        registry_key: "poplar_sapling",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_sapling"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_sapling"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_SHELF: Self = Self {
+        id: 1613,
+        registry_key: "poplar_shelf",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_shelf"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_shelf"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_SIGN: Self = Self {
+        id: 1614,
+        registry_key: "poplar_sign",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_sign"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_sign"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_SLAB: Self = Self {
+        id: 1620,
+        registry_key: "poplar_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_STAIRS: Self = Self {
+        id: 1619,
+        registry_key: "poplar_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_TRAPDOOR: Self = Self {
+        id: 1617,
+        registry_key: "poplar_trapdoor",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_trapdoor"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_trapdoor"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const POPLAR_WOOD: Self = Self {
+        id: 1609,
+        registry_key: "poplar_wood",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.poplar_wood"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:poplar_wood"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const POPPED_CHORUS_FRUIT: Self = Self {
         id: 1314,
         registry_key: "popped_chorus_fruit",
@@ -58395,6 +62707,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const PURPLE_CONCRETE_SLAB: Self = Self {
+        id: 1598,
+        registry_key: "purple_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.purple_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:purple_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const PURPLE_CONCRETE_STAIRS: Self = Self {
+        id: 1582,
+        registry_key: "purple_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.purple_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:purple_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const PURPLE_CUSHION: Self = Self {
+        id: 1636,
+        registry_key: "purple_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.purple_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:purple_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const PURPLE_DYE: Self = Self {
         id: 1105,
         registry_key: "purple_dye",
@@ -58784,6 +63243,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:purple_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const PURPLE_WOOL_SLAB: Self = Self {
+        id: 1563,
+        registry_key: "purple_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.purple_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:purple_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const PURPLE_WOOL_STAIRS: Self = Self {
+        id: 1547,
+        registry_key: "purple_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.purple_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:purple_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -60434,6 +64991,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const RED_CONCRETE_SLAB: Self = Self {
+        id: 1602,
+        registry_key: "red_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.red_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:red_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const RED_CONCRETE_STAIRS: Self = Self {
+        id: 1586,
+        registry_key: "red_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.red_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:red_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const RED_CUSHION: Self = Self {
+        id: 1640,
+        registry_key: "red_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.red_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:red_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const RED_DYE: Self = Self {
         id: 1109,
         registry_key: "red_dye",
@@ -60892,6 +65596,55 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const RED_POPLAR_LEAVES: Self = Self {
+        id: 1610,
+        registry_key: "red_poplar_leaves",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.red_poplar_leaves"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:red_poplar_leaves"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const RED_SAND: Self = Self {
         id: 89,
         registry_key: "red_sand",
@@ -61116,6 +65869,55 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:red_sandstone_wall"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const RED_SHRUB: Self = Self {
+        id: 1570,
+        registry_key: "red_shrub",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.red_shrub"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:red_shrub"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -61411,6 +66213,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:red_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const RED_WOOL_SLAB: Self = Self {
+        id: 1567,
+        registry_key: "red_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.red_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:red_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const RED_WOOL_STAIRS: Self = Self {
+        id: 1551,
+        registry_key: "red_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.red_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:red_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -62927,6 +67827,55 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const SAVANNA_VILLAGE_MAP: Self = Self {
+        id: 1652,
+        registry_key: "savanna_village_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.savanna_village_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:savanna_village_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const SCAFFOLDING: Self = Self {
         id: 744,
         registry_key: "scaffolding",
@@ -63674,6 +68623,55 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:sheep_spawn_egg"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const SHELF_MUSHROOM: Self = Self {
+        id: 1571,
+        registry_key: "shelf_mushroom",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.shelf_mushroom"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:shelf_mushroom"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -65797,6 +70795,55 @@ impl Item {
                 Rarity,
                 &RarityImpl {
                     rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const SNOWY_VILLAGE_MAP: Self = Self {
+        id: 1653,
+        registry_key: "snowy_village_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.snowy_village_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:snowy_village_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
                 },
             ),
             (RepairCost, &RepairCostImpl { cost: 0i32 }),
@@ -68692,6 +73739,55 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const STRAW_BED: Self = Self {
+        id: 1569,
+        registry_key: "straw_bed",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.straw_bed"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:straw_bed"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const STRAY_SPAWN_EGG: Self = Self {
         id: 1209,
         registry_key: "stray_spawn_egg",
@@ -69751,6 +74847,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:stripped_pale_oak_wood"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const STRIPPED_POPLAR_LOG: Self = Self {
+        id: 1607,
+        registry_key: "stripped_poplar_log",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.stripped_poplar_log"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:stripped_poplar_log"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const STRIPPED_POPLAR_WOOD: Self = Self {
+        id: 1608,
+        registry_key: "stripped_poplar_wood",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.stripped_poplar_wood"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:stripped_poplar_wood"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -70921,6 +76115,55 @@ impl Item {
             (UseRemainder, &UseRemainderImpl),
         ],
     };
+    pub const SWAMP_HUT_MAP: Self = Self {
+        id: 1654,
+        registry_key: "swamp_hut_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.swamp_hut_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:swamp_hut_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const SWEET_BERRIES: Self = Self {
         id: 1404,
         registry_key: "sweet_berries",
@@ -71074,6 +76317,55 @@ impl Item {
                 Rarity,
                 &RarityImpl {
                     rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const TAIGA_VILLAGE_MAP: Self = Self {
+        id: 1655,
+        registry_key: "taiga_village_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.taiga_village_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:taiga_village_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
                 },
             ),
             (RepairCost, &RepairCostImpl { cost: 0i32 }),
@@ -73653,6 +78945,55 @@ impl Item {
                 Rarity,
                 &RarityImpl {
                     rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const WARM_OCEAN_RUINS_MAP: Self = Self {
+        id: 1656,
+        registry_key: "warm_ocean_ruins_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.warm_ocean_ruins_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:warm_ocean_ruins_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
                 },
             ),
             (RepairCost, &RepairCostImpl { cost: 0i32 }),
@@ -78979,6 +84320,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const WHITE_CONCRETE_SLAB: Self = Self {
+        id: 1588,
+        registry_key: "white_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.white_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:white_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const WHITE_CONCRETE_STAIRS: Self = Self {
+        id: 1572,
+        registry_key: "white_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.white_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:white_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const WHITE_CUSHION: Self = Self {
+        id: 1626,
+        registry_key: "white_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.white_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:white_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const WHITE_DYE: Self = Self {
         id: 1095,
         registry_key: "white_dye",
@@ -79417,6 +84905,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:white_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const WHITE_WOOL_SLAB: Self = Self {
+        id: 1553,
+        registry_key: "white_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.white_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:white_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const WHITE_WOOL_STAIRS: Self = Self {
+        id: 1537,
+        registry_key: "white_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.white_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:white_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -80637,6 +86223,55 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const WOODLAND_MANSION_MAP: Self = Self {
+        id: 1657,
+        registry_key: "woodland_mansion_map",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("item.minecraft.woodland_mansion_map"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:woodland_mansion_map"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Uncommon,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const WRITABLE_BOOK: Self = Self {
         id: 1250,
         registry_key: "writable_book",
@@ -81104,6 +86739,153 @@ impl Item {
             (UseEffects, &UseEffectsImpl),
         ],
     };
+    pub const YELLOW_CONCRETE_SLAB: Self = Self {
+        id: 1592,
+        registry_key: "yellow_concrete_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.yellow_concrete_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:yellow_concrete_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const YELLOW_CONCRETE_STAIRS: Self = Self {
+        id: 1576,
+        registry_key: "yellow_concrete_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.yellow_concrete_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:yellow_concrete_stairs"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const YELLOW_CUSHION: Self = Self {
+        id: 1630,
+        registry_key: "yellow_cushion",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 16 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("entity.minecraft.yellow_cushion"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:yellow_cushion"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
     pub const YELLOW_DYE: Self = Self {
         id: 1099,
         registry_key: "yellow_dye",
@@ -81247,6 +87029,55 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:yellow_harness"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const YELLOW_POPLAR_LEAVES: Self = Self {
+        id: 1612,
+        registry_key: "yellow_poplar_leaves",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.yellow_poplar_leaves"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:yellow_poplar_leaves"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -81493,6 +87324,104 @@ impl Item {
                 ItemModel,
                 &ItemModelImpl {
                     id: Cow::Borrowed("minecraft:yellow_wool"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const YELLOW_WOOL_SLAB: Self = Self {
+        id: 1557,
+        registry_key: "yellow_wool_slab",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.yellow_wool_slab"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:yellow_wool_slab"),
+                },
+            ),
+            (Lore, &LoreImpl { lines: Vec::new() }),
+            (
+                Rarity,
+                &RarityImpl {
+                    rarity: crate::data_component_impl::Rarity::Common,
+                },
+            ),
+            (RepairCost, &RepairCostImpl { cost: 0i32 }),
+            (
+                SwingAnimation,
+                &SwingAnimationImpl {
+                    animation_type: SwingAnimationType::Whack,
+                    duration: 6i32,
+                },
+            ),
+            (TooltipDisplay, &TooltipDisplayImpl),
+            (UseEffects, &UseEffectsImpl),
+        ],
+    };
+    pub const YELLOW_WOOL_STAIRS: Self = Self {
+        id: 1541,
+        registry_key: "yellow_wool_stairs",
+        components: &[
+            (MaxStackSize, &MaxStackSizeImpl { size: 64 }),
+            (
+                ItemName,
+                &ItemNameImpl {
+                    name: Cow::Borrowed("block.minecraft.yellow_wool_stairs"),
+                },
+            ),
+            (
+                AttributeModifiers,
+                &AttributeModifiersImpl {
+                    attribute_modifiers: Cow::Borrowed(&[]),
+                },
+            ),
+            (BreakSound, &BreakSoundImpl),
+            (
+                Enchantments,
+                &EnchantmentsImpl {
+                    enchantment: Cow::Borrowed(&[]),
+                },
+            ),
+            (
+                ItemModel,
+                &ItemModelImpl {
+                    id: Cow::Borrowed("minecraft:yellow_wool_stairs"),
                 },
             ),
             (Lore, &LoreImpl { lines: Vec::new() }),
@@ -81908,6 +87837,7 @@ impl Item {
     pub fn from_registry_key(name: &str) -> Option<&'static Self> {
         let name = name.strip_prefix("minecraft:").unwrap_or(name);
         match name {
+            "abandoned_camp_map" => Some(&Self::ABANDONED_CAMP_MAP),
             "acacia_boat" => Some(&Self::ACACIA_BOAT),
             "acacia_button" => Some(&Self::ACACIA_BUTTON),
             "acacia_chest_boat" => Some(&Self::ACACIA_CHEST_BOAT),
@@ -82012,6 +87942,9 @@ impl Item {
             "black_carpet" => Some(&Self::BLACK_CARPET),
             "black_concrete" => Some(&Self::BLACK_CONCRETE),
             "black_concrete_powder" => Some(&Self::BLACK_CONCRETE_POWDER),
+            "black_concrete_slab" => Some(&Self::BLACK_CONCRETE_SLAB),
+            "black_concrete_stairs" => Some(&Self::BLACK_CONCRETE_STAIRS),
+            "black_cushion" => Some(&Self::BLACK_CUSHION),
             "black_dye" => Some(&Self::BLACK_DYE),
             "black_glazed_terracotta" => Some(&Self::BLACK_GLAZED_TERRACOTTA),
             "black_harness" => Some(&Self::BLACK_HARNESS),
@@ -82020,6 +87953,8 @@ impl Item {
             "black_stained_glass_pane" => Some(&Self::BLACK_STAINED_GLASS_PANE),
             "black_terracotta" => Some(&Self::BLACK_TERRACOTTA),
             "black_wool" => Some(&Self::BLACK_WOOL),
+            "black_wool_slab" => Some(&Self::BLACK_WOOL_SLAB),
+            "black_wool_stairs" => Some(&Self::BLACK_WOOL_STAIRS),
             "blackstone" => Some(&Self::BLACKSTONE),
             "blackstone_slab" => Some(&Self::BLACKSTONE_SLAB),
             "blackstone_stairs" => Some(&Self::BLACKSTONE_STAIRS),
@@ -82036,6 +87971,9 @@ impl Item {
             "blue_carpet" => Some(&Self::BLUE_CARPET),
             "blue_concrete" => Some(&Self::BLUE_CONCRETE),
             "blue_concrete_powder" => Some(&Self::BLUE_CONCRETE_POWDER),
+            "blue_concrete_slab" => Some(&Self::BLUE_CONCRETE_SLAB),
+            "blue_concrete_stairs" => Some(&Self::BLUE_CONCRETE_STAIRS),
+            "blue_cushion" => Some(&Self::BLUE_CUSHION),
             "blue_dye" => Some(&Self::BLUE_DYE),
             "blue_egg" => Some(&Self::BLUE_EGG),
             "blue_glazed_terracotta" => Some(&Self::BLUE_GLAZED_TERRACOTTA),
@@ -82047,6 +87985,8 @@ impl Item {
             "blue_stained_glass_pane" => Some(&Self::BLUE_STAINED_GLASS_PANE),
             "blue_terracotta" => Some(&Self::BLUE_TERRACOTTA),
             "blue_wool" => Some(&Self::BLUE_WOOL),
+            "blue_wool_slab" => Some(&Self::BLUE_WOOL_SLAB),
+            "blue_wool_stairs" => Some(&Self::BLUE_WOOL_STAIRS),
             "bogged_spawn_egg" => Some(&Self::BOGGED_SPAWN_EGG),
             "bolt_armor_trim_smithing_template" => Some(&Self::BOLT_ARMOR_TRIM_SMITHING_TEMPLATE),
             "bone" => Some(&Self::BONE),
@@ -82077,6 +88017,9 @@ impl Item {
             "brown_carpet" => Some(&Self::BROWN_CARPET),
             "brown_concrete" => Some(&Self::BROWN_CONCRETE),
             "brown_concrete_powder" => Some(&Self::BROWN_CONCRETE_POWDER),
+            "brown_concrete_slab" => Some(&Self::BROWN_CONCRETE_SLAB),
+            "brown_concrete_stairs" => Some(&Self::BROWN_CONCRETE_STAIRS),
+            "brown_cushion" => Some(&Self::BROWN_CUSHION),
             "brown_dye" => Some(&Self::BROWN_DYE),
             "brown_egg" => Some(&Self::BROWN_EGG),
             "brown_glazed_terracotta" => Some(&Self::BROWN_GLAZED_TERRACOTTA),
@@ -82088,6 +88031,8 @@ impl Item {
             "brown_stained_glass_pane" => Some(&Self::BROWN_STAINED_GLASS_PANE),
             "brown_terracotta" => Some(&Self::BROWN_TERRACOTTA),
             "brown_wool" => Some(&Self::BROWN_WOOL),
+            "brown_wool_slab" => Some(&Self::BROWN_WOOL_SLAB),
+            "brown_wool_stairs" => Some(&Self::BROWN_WOOL_STAIRS),
             "brush" => Some(&Self::BRUSH),
             "bubble_coral" => Some(&Self::BUBBLE_CORAL),
             "bubble_coral_block" => Some(&Self::BUBBLE_CORAL_BLOCK),
@@ -82095,6 +88040,10 @@ impl Item {
             "bucket" => Some(&Self::BUCKET),
             "budding_amethyst" => Some(&Self::BUDDING_AMETHYST),
             "bundle" => Some(&Self::BUNDLE),
+            "buried_ancient_city_map" => Some(&Self::BURIED_ANCIENT_CITY_MAP),
+            "buried_mineshaft_map" => Some(&Self::BURIED_MINESHAFT_MAP),
+            "buried_treasure_map" => Some(&Self::BURIED_TREASURE_MAP),
+            "buried_trial_chambers_map" => Some(&Self::BURIED_TRIAL_CHAMBERS_MAP),
             "burn_pottery_sherd" => Some(&Self::BURN_POTTERY_SHERD),
             "bush" => Some(&Self::BUSH),
             "cactus" => Some(&Self::CACTUS),
@@ -82277,6 +88226,9 @@ impl Item {
             "cyan_carpet" => Some(&Self::CYAN_CARPET),
             "cyan_concrete" => Some(&Self::CYAN_CONCRETE),
             "cyan_concrete_powder" => Some(&Self::CYAN_CONCRETE_POWDER),
+            "cyan_concrete_slab" => Some(&Self::CYAN_CONCRETE_SLAB),
+            "cyan_concrete_stairs" => Some(&Self::CYAN_CONCRETE_STAIRS),
+            "cyan_cushion" => Some(&Self::CYAN_CUSHION),
             "cyan_dye" => Some(&Self::CYAN_DYE),
             "cyan_glazed_terracotta" => Some(&Self::CYAN_GLAZED_TERRACOTTA),
             "cyan_harness" => Some(&Self::CYAN_HARNESS),
@@ -82285,6 +88237,8 @@ impl Item {
             "cyan_stained_glass_pane" => Some(&Self::CYAN_STAINED_GLASS_PANE),
             "cyan_terracotta" => Some(&Self::CYAN_TERRACOTTA),
             "cyan_wool" => Some(&Self::CYAN_WOOL),
+            "cyan_wool_slab" => Some(&Self::CYAN_WOOL_SLAB),
+            "cyan_wool_stairs" => Some(&Self::CYAN_WOOL_STAIRS),
             "damaged_anvil" => Some(&Self::DAMAGED_ANVIL),
             "dandelion" => Some(&Self::DANDELION),
             "danger_pottery_sherd" => Some(&Self::DANGER_POTTERY_SHERD),
@@ -82345,6 +88299,8 @@ impl Item {
             "deepslate_tile_stairs" => Some(&Self::DEEPSLATE_TILE_STAIRS),
             "deepslate_tile_wall" => Some(&Self::DEEPSLATE_TILE_WALL),
             "deepslate_tiles" => Some(&Self::DEEPSLATE_TILES),
+            "desert_pyramid_map" => Some(&Self::DESERT_PYRAMID_MAP),
+            "desert_village_map" => Some(&Self::DESERT_VILLAGE_MAP),
             "detector_rail" => Some(&Self::DETECTOR_RAIL),
             "diamond" => Some(&Self::DIAMOND),
             "diamond_axe" => Some(&Self::DIAMOND_AXE),
@@ -82503,6 +88459,9 @@ impl Item {
             "gray_carpet" => Some(&Self::GRAY_CARPET),
             "gray_concrete" => Some(&Self::GRAY_CONCRETE),
             "gray_concrete_powder" => Some(&Self::GRAY_CONCRETE_POWDER),
+            "gray_concrete_slab" => Some(&Self::GRAY_CONCRETE_SLAB),
+            "gray_concrete_stairs" => Some(&Self::GRAY_CONCRETE_STAIRS),
+            "gray_cushion" => Some(&Self::GRAY_CUSHION),
             "gray_dye" => Some(&Self::GRAY_DYE),
             "gray_glazed_terracotta" => Some(&Self::GRAY_GLAZED_TERRACOTTA),
             "gray_harness" => Some(&Self::GRAY_HARNESS),
@@ -82511,6 +88470,8 @@ impl Item {
             "gray_stained_glass_pane" => Some(&Self::GRAY_STAINED_GLASS_PANE),
             "gray_terracotta" => Some(&Self::GRAY_TERRACOTTA),
             "gray_wool" => Some(&Self::GRAY_WOOL),
+            "gray_wool_slab" => Some(&Self::GRAY_WOOL_SLAB),
+            "gray_wool_stairs" => Some(&Self::GRAY_WOOL_STAIRS),
             "green_banner" => Some(&Self::GREEN_BANNER),
             "green_bed" => Some(&Self::GREEN_BED),
             "green_bundle" => Some(&Self::GREEN_BUNDLE),
@@ -82518,6 +88479,9 @@ impl Item {
             "green_carpet" => Some(&Self::GREEN_CARPET),
             "green_concrete" => Some(&Self::GREEN_CONCRETE),
             "green_concrete_powder" => Some(&Self::GREEN_CONCRETE_POWDER),
+            "green_concrete_slab" => Some(&Self::GREEN_CONCRETE_SLAB),
+            "green_concrete_stairs" => Some(&Self::GREEN_CONCRETE_STAIRS),
+            "green_cushion" => Some(&Self::GREEN_CUSHION),
             "green_dye" => Some(&Self::GREEN_DYE),
             "green_glazed_terracotta" => Some(&Self::GREEN_GLAZED_TERRACOTTA),
             "green_harness" => Some(&Self::GREEN_HARNESS),
@@ -82526,6 +88490,8 @@ impl Item {
             "green_stained_glass_pane" => Some(&Self::GREEN_STAINED_GLASS_PANE),
             "green_terracotta" => Some(&Self::GREEN_TERRACOTTA),
             "green_wool" => Some(&Self::GREEN_WOOL),
+            "green_wool_slab" => Some(&Self::GREEN_WOOL_SLAB),
+            "green_wool_stairs" => Some(&Self::GREEN_WOOL_STAIRS),
             "grindstone" => Some(&Self::GRINDSTONE),
             "guardian_spawn_egg" => Some(&Self::GUARDIAN_SPAWN_EGG),
             "gunpowder" => Some(&Self::GUNPOWDER),
@@ -82598,6 +88564,7 @@ impl Item {
             "jungle_log" => Some(&Self::JUNGLE_LOG),
             "jungle_planks" => Some(&Self::JUNGLE_PLANKS),
             "jungle_pressure_plate" => Some(&Self::JUNGLE_PRESSURE_PLATE),
+            "jungle_pyramid_map" => Some(&Self::JUNGLE_PYRAMID_MAP),
             "jungle_sapling" => Some(&Self::JUNGLE_SAPLING),
             "jungle_shelf" => Some(&Self::JUNGLE_SHELF),
             "jungle_sign" => Some(&Self::JUNGLE_SIGN),
@@ -82633,6 +88600,9 @@ impl Item {
             "light_blue_carpet" => Some(&Self::LIGHT_BLUE_CARPET),
             "light_blue_concrete" => Some(&Self::LIGHT_BLUE_CONCRETE),
             "light_blue_concrete_powder" => Some(&Self::LIGHT_BLUE_CONCRETE_POWDER),
+            "light_blue_concrete_slab" => Some(&Self::LIGHT_BLUE_CONCRETE_SLAB),
+            "light_blue_concrete_stairs" => Some(&Self::LIGHT_BLUE_CONCRETE_STAIRS),
+            "light_blue_cushion" => Some(&Self::LIGHT_BLUE_CUSHION),
             "light_blue_dye" => Some(&Self::LIGHT_BLUE_DYE),
             "light_blue_glazed_terracotta" => Some(&Self::LIGHT_BLUE_GLAZED_TERRACOTTA),
             "light_blue_harness" => Some(&Self::LIGHT_BLUE_HARNESS),
@@ -82641,6 +88611,8 @@ impl Item {
             "light_blue_stained_glass_pane" => Some(&Self::LIGHT_BLUE_STAINED_GLASS_PANE),
             "light_blue_terracotta" => Some(&Self::LIGHT_BLUE_TERRACOTTA),
             "light_blue_wool" => Some(&Self::LIGHT_BLUE_WOOL),
+            "light_blue_wool_slab" => Some(&Self::LIGHT_BLUE_WOOL_SLAB),
+            "light_blue_wool_stairs" => Some(&Self::LIGHT_BLUE_WOOL_STAIRS),
             "light_gray_banner" => Some(&Self::LIGHT_GRAY_BANNER),
             "light_gray_bed" => Some(&Self::LIGHT_GRAY_BED),
             "light_gray_bundle" => Some(&Self::LIGHT_GRAY_BUNDLE),
@@ -82648,6 +88620,9 @@ impl Item {
             "light_gray_carpet" => Some(&Self::LIGHT_GRAY_CARPET),
             "light_gray_concrete" => Some(&Self::LIGHT_GRAY_CONCRETE),
             "light_gray_concrete_powder" => Some(&Self::LIGHT_GRAY_CONCRETE_POWDER),
+            "light_gray_concrete_slab" => Some(&Self::LIGHT_GRAY_CONCRETE_SLAB),
+            "light_gray_concrete_stairs" => Some(&Self::LIGHT_GRAY_CONCRETE_STAIRS),
+            "light_gray_cushion" => Some(&Self::LIGHT_GRAY_CUSHION),
             "light_gray_dye" => Some(&Self::LIGHT_GRAY_DYE),
             "light_gray_glazed_terracotta" => Some(&Self::LIGHT_GRAY_GLAZED_TERRACOTTA),
             "light_gray_harness" => Some(&Self::LIGHT_GRAY_HARNESS),
@@ -82656,6 +88631,8 @@ impl Item {
             "light_gray_stained_glass_pane" => Some(&Self::LIGHT_GRAY_STAINED_GLASS_PANE),
             "light_gray_terracotta" => Some(&Self::LIGHT_GRAY_TERRACOTTA),
             "light_gray_wool" => Some(&Self::LIGHT_GRAY_WOOL),
+            "light_gray_wool_slab" => Some(&Self::LIGHT_GRAY_WOOL_SLAB),
+            "light_gray_wool_stairs" => Some(&Self::LIGHT_GRAY_WOOL_STAIRS),
             "light_weighted_pressure_plate" => Some(&Self::LIGHT_WEIGHTED_PRESSURE_PLATE),
             "lightning_rod" => Some(&Self::LIGHTNING_ROD),
             "lilac" => Some(&Self::LILAC),
@@ -82668,6 +88645,9 @@ impl Item {
             "lime_carpet" => Some(&Self::LIME_CARPET),
             "lime_concrete" => Some(&Self::LIME_CONCRETE),
             "lime_concrete_powder" => Some(&Self::LIME_CONCRETE_POWDER),
+            "lime_concrete_slab" => Some(&Self::LIME_CONCRETE_SLAB),
+            "lime_concrete_stairs" => Some(&Self::LIME_CONCRETE_STAIRS),
+            "lime_cushion" => Some(&Self::LIME_CUSHION),
             "lime_dye" => Some(&Self::LIME_DYE),
             "lime_glazed_terracotta" => Some(&Self::LIME_GLAZED_TERRACOTTA),
             "lime_harness" => Some(&Self::LIME_HARNESS),
@@ -82676,6 +88656,8 @@ impl Item {
             "lime_stained_glass_pane" => Some(&Self::LIME_STAINED_GLASS_PANE),
             "lime_terracotta" => Some(&Self::LIME_TERRACOTTA),
             "lime_wool" => Some(&Self::LIME_WOOL),
+            "lime_wool_slab" => Some(&Self::LIME_WOOL_SLAB),
+            "lime_wool_stairs" => Some(&Self::LIME_WOOL_STAIRS),
             "lingering_potion" => Some(&Self::LINGERING_POTION),
             "llama_spawn_egg" => Some(&Self::LLAMA_SPAWN_EGG),
             "lodestone" => Some(&Self::LODESTONE),
@@ -82688,6 +88670,9 @@ impl Item {
             "magenta_carpet" => Some(&Self::MAGENTA_CARPET),
             "magenta_concrete" => Some(&Self::MAGENTA_CONCRETE),
             "magenta_concrete_powder" => Some(&Self::MAGENTA_CONCRETE_POWDER),
+            "magenta_concrete_slab" => Some(&Self::MAGENTA_CONCRETE_SLAB),
+            "magenta_concrete_stairs" => Some(&Self::MAGENTA_CONCRETE_STAIRS),
+            "magenta_cushion" => Some(&Self::MAGENTA_CUSHION),
             "magenta_dye" => Some(&Self::MAGENTA_DYE),
             "magenta_glazed_terracotta" => Some(&Self::MAGENTA_GLAZED_TERRACOTTA),
             "magenta_harness" => Some(&Self::MAGENTA_HARNESS),
@@ -82696,6 +88681,8 @@ impl Item {
             "magenta_stained_glass_pane" => Some(&Self::MAGENTA_STAINED_GLASS_PANE),
             "magenta_terracotta" => Some(&Self::MAGENTA_TERRACOTTA),
             "magenta_wool" => Some(&Self::MAGENTA_WOOL),
+            "magenta_wool_slab" => Some(&Self::MAGENTA_WOOL_SLAB),
+            "magenta_wool_stairs" => Some(&Self::MAGENTA_WOOL_STAIRS),
             "magma_block" => Some(&Self::MAGMA_BLOCK),
             "magma_cream" => Some(&Self::MAGMA_CREAM),
             "magma_cube_spawn_egg" => Some(&Self::MAGMA_CUBE_SPAWN_EGG),
@@ -82827,6 +88814,7 @@ impl Item {
             "oak_wood" => Some(&Self::OAK_WOOD),
             "observer" => Some(&Self::OBSERVER),
             "obsidian" => Some(&Self::OBSIDIAN),
+            "ocean_monument_map" => Some(&Self::OCEAN_MONUMENT_MAP),
             "ocelot_spawn_egg" => Some(&Self::OCELOT_SPAWN_EGG),
             "ochre_froglight" => Some(&Self::OCHRE_FROGLIGHT),
             "ominous_bottle" => Some(&Self::OMINOUS_BOTTLE),
@@ -82839,15 +88827,21 @@ impl Item {
             "orange_carpet" => Some(&Self::ORANGE_CARPET),
             "orange_concrete" => Some(&Self::ORANGE_CONCRETE),
             "orange_concrete_powder" => Some(&Self::ORANGE_CONCRETE_POWDER),
+            "orange_concrete_slab" => Some(&Self::ORANGE_CONCRETE_SLAB),
+            "orange_concrete_stairs" => Some(&Self::ORANGE_CONCRETE_STAIRS),
+            "orange_cushion" => Some(&Self::ORANGE_CUSHION),
             "orange_dye" => Some(&Self::ORANGE_DYE),
             "orange_glazed_terracotta" => Some(&Self::ORANGE_GLAZED_TERRACOTTA),
             "orange_harness" => Some(&Self::ORANGE_HARNESS),
+            "orange_poplar_leaves" => Some(&Self::ORANGE_POPLAR_LEAVES),
             "orange_shulker_box" => Some(&Self::ORANGE_SHULKER_BOX),
             "orange_stained_glass" => Some(&Self::ORANGE_STAINED_GLASS),
             "orange_stained_glass_pane" => Some(&Self::ORANGE_STAINED_GLASS_PANE),
             "orange_terracotta" => Some(&Self::ORANGE_TERRACOTTA),
             "orange_tulip" => Some(&Self::ORANGE_TULIP),
             "orange_wool" => Some(&Self::ORANGE_WOOL),
+            "orange_wool_slab" => Some(&Self::ORANGE_WOOL_SLAB),
+            "orange_wool_stairs" => Some(&Self::ORANGE_WOOL_STAIRS),
             "oxeye_daisy" => Some(&Self::OXEYE_DAISY),
             "oxidized_chiseled_copper" => Some(&Self::OXIDIZED_CHISELED_COPPER),
             "oxidized_copper" => Some(&Self::OXIDIZED_COPPER),
@@ -82910,6 +88904,9 @@ impl Item {
             "pink_carpet" => Some(&Self::PINK_CARPET),
             "pink_concrete" => Some(&Self::PINK_CONCRETE),
             "pink_concrete_powder" => Some(&Self::PINK_CONCRETE_POWDER),
+            "pink_concrete_slab" => Some(&Self::PINK_CONCRETE_SLAB),
+            "pink_concrete_stairs" => Some(&Self::PINK_CONCRETE_STAIRS),
+            "pink_cushion" => Some(&Self::PINK_CUSHION),
             "pink_dye" => Some(&Self::PINK_DYE),
             "pink_glazed_terracotta" => Some(&Self::PINK_GLAZED_TERRACOTTA),
             "pink_harness" => Some(&Self::PINK_HARNESS),
@@ -82920,9 +88917,12 @@ impl Item {
             "pink_terracotta" => Some(&Self::PINK_TERRACOTTA),
             "pink_tulip" => Some(&Self::PINK_TULIP),
             "pink_wool" => Some(&Self::PINK_WOOL),
+            "pink_wool_slab" => Some(&Self::PINK_WOOL_SLAB),
+            "pink_wool_stairs" => Some(&Self::PINK_WOOL_STAIRS),
             "piston" => Some(&Self::PISTON),
             "pitcher_plant" => Some(&Self::PITCHER_PLANT),
             "pitcher_pod" => Some(&Self::PITCHER_POD),
+            "plains_village_map" => Some(&Self::PLAINS_VILLAGE_MAP),
             "player_head" => Some(&Self::PLAYER_HEAD),
             "plenty_pottery_sherd" => Some(&Self::PLENTY_POTTERY_SHERD),
             "podzol" => Some(&Self::PODZOL),
@@ -82965,6 +88965,23 @@ impl Item {
             "polished_tuff_slab" => Some(&Self::POLISHED_TUFF_SLAB),
             "polished_tuff_stairs" => Some(&Self::POLISHED_TUFF_STAIRS),
             "polished_tuff_wall" => Some(&Self::POLISHED_TUFF_WALL),
+            "poplar_boat" => Some(&Self::POPLAR_BOAT),
+            "poplar_button" => Some(&Self::POPLAR_BUTTON),
+            "poplar_chest_boat" => Some(&Self::POPLAR_CHEST_BOAT),
+            "poplar_door" => Some(&Self::POPLAR_DOOR),
+            "poplar_fence" => Some(&Self::POPLAR_FENCE),
+            "poplar_fence_gate" => Some(&Self::POPLAR_FENCE_GATE),
+            "poplar_hanging_sign" => Some(&Self::POPLAR_HANGING_SIGN),
+            "poplar_log" => Some(&Self::POPLAR_LOG),
+            "poplar_planks" => Some(&Self::POPLAR_PLANKS),
+            "poplar_pressure_plate" => Some(&Self::POPLAR_PRESSURE_PLATE),
+            "poplar_sapling" => Some(&Self::POPLAR_SAPLING),
+            "poplar_shelf" => Some(&Self::POPLAR_SHELF),
+            "poplar_sign" => Some(&Self::POPLAR_SIGN),
+            "poplar_slab" => Some(&Self::POPLAR_SLAB),
+            "poplar_stairs" => Some(&Self::POPLAR_STAIRS),
+            "poplar_trapdoor" => Some(&Self::POPLAR_TRAPDOOR),
+            "poplar_wood" => Some(&Self::POPLAR_WOOD),
             "popped_chorus_fruit" => Some(&Self::POPPED_CHORUS_FRUIT),
             "poppy" => Some(&Self::POPPY),
             "porkchop" => Some(&Self::PORKCHOP),
@@ -82996,6 +89013,9 @@ impl Item {
             "purple_carpet" => Some(&Self::PURPLE_CARPET),
             "purple_concrete" => Some(&Self::PURPLE_CONCRETE),
             "purple_concrete_powder" => Some(&Self::PURPLE_CONCRETE_POWDER),
+            "purple_concrete_slab" => Some(&Self::PURPLE_CONCRETE_SLAB),
+            "purple_concrete_stairs" => Some(&Self::PURPLE_CONCRETE_STAIRS),
+            "purple_cushion" => Some(&Self::PURPLE_CUSHION),
             "purple_dye" => Some(&Self::PURPLE_DYE),
             "purple_glazed_terracotta" => Some(&Self::PURPLE_GLAZED_TERRACOTTA),
             "purple_harness" => Some(&Self::PURPLE_HARNESS),
@@ -83004,6 +89024,8 @@ impl Item {
             "purple_stained_glass_pane" => Some(&Self::PURPLE_STAINED_GLASS_PANE),
             "purple_terracotta" => Some(&Self::PURPLE_TERRACOTTA),
             "purple_wool" => Some(&Self::PURPLE_WOOL),
+            "purple_wool_slab" => Some(&Self::PURPLE_WOOL_SLAB),
+            "purple_wool_stairs" => Some(&Self::PURPLE_WOOL_STAIRS),
             "purpur_block" => Some(&Self::PURPUR_BLOCK),
             "purpur_pillar" => Some(&Self::PURPUR_PILLAR),
             "purpur_slab" => Some(&Self::PURPUR_SLAB),
@@ -83038,6 +89060,9 @@ impl Item {
             "red_carpet" => Some(&Self::RED_CARPET),
             "red_concrete" => Some(&Self::RED_CONCRETE),
             "red_concrete_powder" => Some(&Self::RED_CONCRETE_POWDER),
+            "red_concrete_slab" => Some(&Self::RED_CONCRETE_SLAB),
+            "red_concrete_stairs" => Some(&Self::RED_CONCRETE_STAIRS),
+            "red_cushion" => Some(&Self::RED_CUSHION),
             "red_dye" => Some(&Self::RED_DYE),
             "red_glazed_terracotta" => Some(&Self::RED_GLAZED_TERRACOTTA),
             "red_harness" => Some(&Self::RED_HARNESS),
@@ -83047,17 +89072,21 @@ impl Item {
             "red_nether_brick_stairs" => Some(&Self::RED_NETHER_BRICK_STAIRS),
             "red_nether_brick_wall" => Some(&Self::RED_NETHER_BRICK_WALL),
             "red_nether_bricks" => Some(&Self::RED_NETHER_BRICKS),
+            "red_poplar_leaves" => Some(&Self::RED_POPLAR_LEAVES),
             "red_sand" => Some(&Self::RED_SAND),
             "red_sandstone" => Some(&Self::RED_SANDSTONE),
             "red_sandstone_slab" => Some(&Self::RED_SANDSTONE_SLAB),
             "red_sandstone_stairs" => Some(&Self::RED_SANDSTONE_STAIRS),
             "red_sandstone_wall" => Some(&Self::RED_SANDSTONE_WALL),
+            "red_shrub" => Some(&Self::RED_SHRUB),
             "red_shulker_box" => Some(&Self::RED_SHULKER_BOX),
             "red_stained_glass" => Some(&Self::RED_STAINED_GLASS),
             "red_stained_glass_pane" => Some(&Self::RED_STAINED_GLASS_PANE),
             "red_terracotta" => Some(&Self::RED_TERRACOTTA),
             "red_tulip" => Some(&Self::RED_TULIP),
             "red_wool" => Some(&Self::RED_WOOL),
+            "red_wool_slab" => Some(&Self::RED_WOOL_SLAB),
+            "red_wool_stairs" => Some(&Self::RED_WOOL_STAIRS),
             "redstone" => Some(&Self::REDSTONE),
             "redstone_block" => Some(&Self::REDSTONE_BLOCK),
             "redstone_lamp" => Some(&Self::REDSTONE_LAMP),
@@ -83087,6 +89116,7 @@ impl Item {
             "sandstone_slab" => Some(&Self::SANDSTONE_SLAB),
             "sandstone_stairs" => Some(&Self::SANDSTONE_STAIRS),
             "sandstone_wall" => Some(&Self::SANDSTONE_WALL),
+            "savanna_village_map" => Some(&Self::SAVANNA_VILLAGE_MAP),
             "scaffolding" => Some(&Self::SCAFFOLDING),
             "scrape_pottery_sherd" => Some(&Self::SCRAPE_POTTERY_SHERD),
             "sculk" => Some(&Self::SCULK),
@@ -83106,6 +89136,7 @@ impl Item {
             "sheaf_pottery_sherd" => Some(&Self::SHEAF_POTTERY_SHERD),
             "shears" => Some(&Self::SHEARS),
             "sheep_spawn_egg" => Some(&Self::SHEEP_SPAWN_EGG),
+            "shelf_mushroom" => Some(&Self::SHELF_MUSHROOM),
             "shelter_pottery_sherd" => Some(&Self::SHELTER_POTTERY_SHERD),
             "shield" => Some(&Self::SHIELD),
             "short_dry_grass" => Some(&Self::SHORT_DRY_GRASS),
@@ -83150,6 +89181,7 @@ impl Item {
             "snow_block" => Some(&Self::SNOW_BLOCK),
             "snow_golem_spawn_egg" => Some(&Self::SNOW_GOLEM_SPAWN_EGG),
             "snowball" => Some(&Self::SNOWBALL),
+            "snowy_village_map" => Some(&Self::SNOWY_VILLAGE_MAP),
             "soul_campfire" => Some(&Self::SOUL_CAMPFIRE),
             "soul_lantern" => Some(&Self::SOUL_LANTERN),
             "soul_sand" => Some(&Self::SOUL_SAND),
@@ -83201,6 +89233,7 @@ impl Item {
             "stone_stairs" => Some(&Self::STONE_STAIRS),
             "stone_sword" => Some(&Self::STONE_SWORD),
             "stonecutter" => Some(&Self::STONECUTTER),
+            "straw_bed" => Some(&Self::STRAW_BED),
             "stray_spawn_egg" => Some(&Self::STRAY_SPAWN_EGG),
             "strider_spawn_egg" => Some(&Self::STRIDER_SPAWN_EGG),
             "string" => Some(&Self::STRING),
@@ -83223,6 +89256,8 @@ impl Item {
             "stripped_oak_wood" => Some(&Self::STRIPPED_OAK_WOOD),
             "stripped_pale_oak_log" => Some(&Self::STRIPPED_PALE_OAK_LOG),
             "stripped_pale_oak_wood" => Some(&Self::STRIPPED_PALE_OAK_WOOD),
+            "stripped_poplar_log" => Some(&Self::STRIPPED_POPLAR_LOG),
+            "stripped_poplar_wood" => Some(&Self::STRIPPED_POPLAR_WOOD),
             "stripped_spruce_log" => Some(&Self::STRIPPED_SPRUCE_LOG),
             "stripped_spruce_wood" => Some(&Self::STRIPPED_SPRUCE_WOOD),
             "stripped_warped_hyphae" => Some(&Self::STRIPPED_WARPED_HYPHAE),
@@ -83246,9 +89281,11 @@ impl Item {
             "suspicious_gravel" => Some(&Self::SUSPICIOUS_GRAVEL),
             "suspicious_sand" => Some(&Self::SUSPICIOUS_SAND),
             "suspicious_stew" => Some(&Self::SUSPICIOUS_STEW),
+            "swamp_hut_map" => Some(&Self::SWAMP_HUT_MAP),
             "sweet_berries" => Some(&Self::SWEET_BERRIES),
             "tadpole_bucket" => Some(&Self::TADPOLE_BUCKET),
             "tadpole_spawn_egg" => Some(&Self::TADPOLE_SPAWN_EGG),
+            "taiga_village_map" => Some(&Self::TAIGA_VILLAGE_MAP),
             "tall_dry_grass" => Some(&Self::TALL_DRY_GRASS),
             "tall_grass" => Some(&Self::TALL_GRASS),
             "target" => Some(&Self::TARGET),
@@ -83299,6 +89336,7 @@ impl Item {
             "wandering_trader_spawn_egg" => Some(&Self::WANDERING_TRADER_SPAWN_EGG),
             "ward_armor_trim_smithing_template" => Some(&Self::WARD_ARMOR_TRIM_SMITHING_TEMPLATE),
             "warden_spawn_egg" => Some(&Self::WARDEN_SPAWN_EGG),
+            "warm_ocean_ruins_map" => Some(&Self::WARM_OCEAN_RUINS_MAP),
             "warped_button" => Some(&Self::WARPED_BUTTON),
             "warped_door" => Some(&Self::WARPED_DOOR),
             "warped_fence" => Some(&Self::WARPED_FENCE),
@@ -83410,6 +89448,9 @@ impl Item {
             "white_carpet" => Some(&Self::WHITE_CARPET),
             "white_concrete" => Some(&Self::WHITE_CONCRETE),
             "white_concrete_powder" => Some(&Self::WHITE_CONCRETE_POWDER),
+            "white_concrete_slab" => Some(&Self::WHITE_CONCRETE_SLAB),
+            "white_concrete_stairs" => Some(&Self::WHITE_CONCRETE_STAIRS),
+            "white_cushion" => Some(&Self::WHITE_CUSHION),
             "white_dye" => Some(&Self::WHITE_DYE),
             "white_glazed_terracotta" => Some(&Self::WHITE_GLAZED_TERRACOTTA),
             "white_harness" => Some(&Self::WHITE_HARNESS),
@@ -83419,6 +89460,8 @@ impl Item {
             "white_terracotta" => Some(&Self::WHITE_TERRACOTTA),
             "white_tulip" => Some(&Self::WHITE_TULIP),
             "white_wool" => Some(&Self::WHITE_WOOL),
+            "white_wool_slab" => Some(&Self::WHITE_WOOL_SLAB),
+            "white_wool_stairs" => Some(&Self::WHITE_WOOL_STAIRS),
             "wild_armor_trim_smithing_template" => Some(&Self::WILD_ARMOR_TRIM_SMITHING_TEMPLATE),
             "wildflowers" => Some(&Self::WILDFLOWERS),
             "wind_charge" => Some(&Self::WIND_CHARGE),
@@ -83435,6 +89478,7 @@ impl Item {
             "wooden_shovel" => Some(&Self::WOODEN_SHOVEL),
             "wooden_spear" => Some(&Self::WOODEN_SPEAR),
             "wooden_sword" => Some(&Self::WOODEN_SWORD),
+            "woodland_mansion_map" => Some(&Self::WOODLAND_MANSION_MAP),
             "writable_book" => Some(&Self::WRITABLE_BOOK),
             "written_book" => Some(&Self::WRITTEN_BOOK),
             "yellow_banner" => Some(&Self::YELLOW_BANNER),
@@ -83444,14 +89488,20 @@ impl Item {
             "yellow_carpet" => Some(&Self::YELLOW_CARPET),
             "yellow_concrete" => Some(&Self::YELLOW_CONCRETE),
             "yellow_concrete_powder" => Some(&Self::YELLOW_CONCRETE_POWDER),
+            "yellow_concrete_slab" => Some(&Self::YELLOW_CONCRETE_SLAB),
+            "yellow_concrete_stairs" => Some(&Self::YELLOW_CONCRETE_STAIRS),
+            "yellow_cushion" => Some(&Self::YELLOW_CUSHION),
             "yellow_dye" => Some(&Self::YELLOW_DYE),
             "yellow_glazed_terracotta" => Some(&Self::YELLOW_GLAZED_TERRACOTTA),
             "yellow_harness" => Some(&Self::YELLOW_HARNESS),
+            "yellow_poplar_leaves" => Some(&Self::YELLOW_POPLAR_LEAVES),
             "yellow_shulker_box" => Some(&Self::YELLOW_SHULKER_BOX),
             "yellow_stained_glass" => Some(&Self::YELLOW_STAINED_GLASS),
             "yellow_stained_glass_pane" => Some(&Self::YELLOW_STAINED_GLASS_PANE),
             "yellow_terracotta" => Some(&Self::YELLOW_TERRACOTTA),
             "yellow_wool" => Some(&Self::YELLOW_WOOL),
+            "yellow_wool_slab" => Some(&Self::YELLOW_WOOL_SLAB),
+            "yellow_wool_stairs" => Some(&Self::YELLOW_WOOL_STAIRS),
             "zoglin_spawn_egg" => Some(&Self::ZOGLIN_SPAWN_EGG),
             "zombie_head" => Some(&Self::ZOMBIE_HEAD),
             "zombie_horse_spawn_egg" => Some(&Self::ZOMBIE_HORSE_SPAWN_EGG),
@@ -83466,6 +89516,7 @@ impl Item {
     #[must_use]
     pub const fn from_id(id: u16) -> Option<&'static Self> {
         match id {
+            1642 => Some(&Self::ABANDONED_CAMP_MAP),
             899 => Some(&Self::ACACIA_BOAT),
             783 => Some(&Self::ACACIA_BUTTON),
             900 => Some(&Self::ACACIA_CHEST_BOAT),
@@ -83570,6 +89621,9 @@ impl Item {
             548 => Some(&Self::BLACK_CARPET),
             657 => Some(&Self::BLACK_CONCRETE),
             673 => Some(&Self::BLACK_CONCRETE_POWDER),
+            1603 => Some(&Self::BLACK_CONCRETE_SLAB),
+            1587 => Some(&Self::BLACK_CONCRETE_STAIRS),
+            1641 => Some(&Self::BLACK_CUSHION),
             1110 => Some(&Self::BLACK_DYE),
             641 => Some(&Self::BLACK_GLAZED_TERRACOTTA),
             881 => Some(&Self::BLACK_HARNESS),
@@ -83578,6 +89632,8 @@ impl Item {
             589 => Some(&Self::BLACK_STAINED_GLASS_PANE),
             529 => Some(&Self::BLACK_TERRACOTTA),
             255 => Some(&Self::BLACK_WOOL),
+            1568 => Some(&Self::BLACK_WOOL_SLAB),
+            1552 => Some(&Self::BLACK_WOOL_STAIRS),
             1416 => Some(&Self::BLACKSTONE),
             1417 => Some(&Self::BLACKSTONE_SLAB),
             1418 => Some(&Self::BLACKSTONE_STAIRS),
@@ -83594,6 +89650,9 @@ impl Item {
             544 => Some(&Self::BLUE_CARPET),
             653 => Some(&Self::BLUE_CONCRETE),
             669 => Some(&Self::BLUE_CONCRETE_POWDER),
+            1599 => Some(&Self::BLUE_CONCRETE_SLAB),
+            1583 => Some(&Self::BLUE_CONCRETE_STAIRS),
+            1637 => Some(&Self::BLUE_CUSHION),
             1106 => Some(&Self::BLUE_DYE),
             1061 => Some(&Self::BLUE_EGG),
             637 => Some(&Self::BLUE_GLAZED_TERRACOTTA),
@@ -83605,6 +89664,8 @@ impl Item {
             585 => Some(&Self::BLUE_STAINED_GLASS_PANE),
             525 => Some(&Self::BLUE_TERRACOTTA),
             251 => Some(&Self::BLUE_WOOL),
+            1564 => Some(&Self::BLUE_WOOL_SLAB),
+            1548 => Some(&Self::BLUE_WOOL_STAIRS),
             1202 => Some(&Self::BOGGED_SPAWN_EGG),
             1476 => Some(&Self::BOLT_ARMOR_TRIM_SMITHING_TEMPLATE),
             1112 => Some(&Self::BONE),
@@ -83635,6 +89696,9 @@ impl Item {
             545 => Some(&Self::BROWN_CARPET),
             654 => Some(&Self::BROWN_CONCRETE),
             670 => Some(&Self::BROWN_CONCRETE_POWDER),
+            1600 => Some(&Self::BROWN_CONCRETE_SLAB),
+            1584 => Some(&Self::BROWN_CONCRETE_STAIRS),
+            1638 => Some(&Self::BROWN_CUSHION),
             1107 => Some(&Self::BROWN_DYE),
             1062 => Some(&Self::BROWN_EGG),
             638 => Some(&Self::BROWN_GLAZED_TERRACOTTA),
@@ -83646,6 +89710,8 @@ impl Item {
             586 => Some(&Self::BROWN_STAINED_GLASS_PANE),
             526 => Some(&Self::BROWN_TERRACOTTA),
             252 => Some(&Self::BROWN_WOOL),
+            1565 => Some(&Self::BROWN_WOOL_SLAB),
+            1549 => Some(&Self::BROWN_WOOL_STAIRS),
             1457 => Some(&Self::BRUSH),
             689 => Some(&Self::BUBBLE_CORAL),
             684 => Some(&Self::BUBBLE_CORAL_BLOCK),
@@ -83653,6 +89719,10 @@ impl Item {
             1040 => Some(&Self::BUCKET),
             116 => Some(&Self::BUDDING_AMETHYST),
             1065 => Some(&Self::BUNDLE),
+            1643 => Some(&Self::BURIED_ANCIENT_CITY_MAP),
+            1644 => Some(&Self::BURIED_MINESHAFT_MAP),
+            1645 => Some(&Self::BURIED_TREASURE_MAP),
+            1646 => Some(&Self::BURIED_TRIAL_CHAMBERS_MAP),
             1482 => Some(&Self::BURN_POTTERY_SHERD),
             231 => Some(&Self::BUSH),
             368 => Some(&Self::CACTUS),
@@ -83835,6 +89905,9 @@ impl Item {
             542 => Some(&Self::CYAN_CARPET),
             651 => Some(&Self::CYAN_CONCRETE),
             667 => Some(&Self::CYAN_CONCRETE_POWDER),
+            1597 => Some(&Self::CYAN_CONCRETE_SLAB),
+            1581 => Some(&Self::CYAN_CONCRETE_STAIRS),
+            1635 => Some(&Self::CYAN_CUSHION),
             1104 => Some(&Self::CYAN_DYE),
             635 => Some(&Self::CYAN_GLAZED_TERRACOTTA),
             875 => Some(&Self::CYAN_HARNESS),
@@ -83843,6 +89916,8 @@ impl Item {
             583 => Some(&Self::CYAN_STAINED_GLASS_PANE),
             523 => Some(&Self::CYAN_TERRACOTTA),
             249 => Some(&Self::CYAN_WOOL),
+            1562 => Some(&Self::CYAN_WOOL_SLAB),
+            1546 => Some(&Self::CYAN_WOOL_STAIRS),
             508 => Some(&Self::DAMAGED_ANVIL),
             256 => Some(&Self::DANDELION),
             1483 => Some(&Self::DANGER_POTTERY_SHERD),
@@ -83903,6 +89978,8 @@ impl Item {
             726 => Some(&Self::DEEPSLATE_TILE_STAIRS),
             505 => Some(&Self::DEEPSLATE_TILE_WALL),
             411 => Some(&Self::DEEPSLATE_TILES),
+            1647 => Some(&Self::DESERT_PYRAMID_MAP),
+            1648 => Some(&Self::DESERT_VILLAGE_MAP),
             862 => Some(&Self::DETECTOR_RAIL),
             926 => Some(&Self::DIAMOND),
             967 => Some(&Self::DIAMOND_AXE),
@@ -84061,6 +90138,9 @@ impl Item {
             540 => Some(&Self::GRAY_CARPET),
             649 => Some(&Self::GRAY_CONCRETE),
             665 => Some(&Self::GRAY_CONCRETE_POWDER),
+            1595 => Some(&Self::GRAY_CONCRETE_SLAB),
+            1579 => Some(&Self::GRAY_CONCRETE_STAIRS),
+            1633 => Some(&Self::GRAY_CUSHION),
             1102 => Some(&Self::GRAY_DYE),
             633 => Some(&Self::GRAY_GLAZED_TERRACOTTA),
             873 => Some(&Self::GRAY_HARNESS),
@@ -84069,6 +90149,8 @@ impl Item {
             581 => Some(&Self::GRAY_STAINED_GLASS_PANE),
             521 => Some(&Self::GRAY_TERRACOTTA),
             247 => Some(&Self::GRAY_WOOL),
+            1560 => Some(&Self::GRAY_WOOL_SLAB),
+            1544 => Some(&Self::GRAY_WOOL_STAIRS),
             1309 => Some(&Self::GREEN_BANNER),
             1128 => Some(&Self::GREEN_BED),
             1079 => Some(&Self::GREEN_BUNDLE),
@@ -84076,6 +90158,9 @@ impl Item {
             546 => Some(&Self::GREEN_CARPET),
             655 => Some(&Self::GREEN_CONCRETE),
             671 => Some(&Self::GREEN_CONCRETE_POWDER),
+            1601 => Some(&Self::GREEN_CONCRETE_SLAB),
+            1585 => Some(&Self::GREEN_CONCRETE_STAIRS),
+            1639 => Some(&Self::GREEN_CUSHION),
             1108 => Some(&Self::GREEN_DYE),
             639 => Some(&Self::GREEN_GLAZED_TERRACOTTA),
             879 => Some(&Self::GREEN_HARNESS),
@@ -84084,6 +90169,8 @@ impl Item {
             587 => Some(&Self::GREEN_STAINED_GLASS_PANE),
             527 => Some(&Self::GREEN_TERRACOTTA),
             253 => Some(&Self::GREEN_WOOL),
+            1566 => Some(&Self::GREEN_WOOL_SLAB),
+            1550 => Some(&Self::GREEN_WOOL_STAIRS),
             1390 => Some(&Self::GRINDSTONE),
             1222 => Some(&Self::GUARDIAN_SPAWN_EGG),
             978 => Some(&Self::GUNPOWDER),
@@ -84156,6 +90243,7 @@ impl Item {
             164 => Some(&Self::JUNGLE_LOG),
             66 => Some(&Self::JUNGLE_PLANKS),
             798 => Some(&Self::JUNGLE_PRESSURE_PLATE),
+            1649 => Some(&Self::JUNGLE_PYRAMID_MAP),
             79 => Some(&Self::JUNGLE_SAPLING),
             339 => Some(&Self::JUNGLE_SHELF),
             1019 => Some(&Self::JUNGLE_SIGN),
@@ -84191,6 +90279,9 @@ impl Item {
             536 => Some(&Self::LIGHT_BLUE_CARPET),
             645 => Some(&Self::LIGHT_BLUE_CONCRETE),
             661 => Some(&Self::LIGHT_BLUE_CONCRETE_POWDER),
+            1591 => Some(&Self::LIGHT_BLUE_CONCRETE_SLAB),
+            1575 => Some(&Self::LIGHT_BLUE_CONCRETE_STAIRS),
+            1629 => Some(&Self::LIGHT_BLUE_CUSHION),
             1098 => Some(&Self::LIGHT_BLUE_DYE),
             629 => Some(&Self::LIGHT_BLUE_GLAZED_TERRACOTTA),
             869 => Some(&Self::LIGHT_BLUE_HARNESS),
@@ -84199,6 +90290,8 @@ impl Item {
             577 => Some(&Self::LIGHT_BLUE_STAINED_GLASS_PANE),
             517 => Some(&Self::LIGHT_BLUE_TERRACOTTA),
             243 => Some(&Self::LIGHT_BLUE_WOOL),
+            1556 => Some(&Self::LIGHT_BLUE_WOOL_SLAB),
+            1540 => Some(&Self::LIGHT_BLUE_WOOL_STAIRS),
             1304 => Some(&Self::LIGHT_GRAY_BANNER),
             1123 => Some(&Self::LIGHT_GRAY_BED),
             1074 => Some(&Self::LIGHT_GRAY_BUNDLE),
@@ -84206,6 +90299,9 @@ impl Item {
             541 => Some(&Self::LIGHT_GRAY_CARPET),
             650 => Some(&Self::LIGHT_GRAY_CONCRETE),
             666 => Some(&Self::LIGHT_GRAY_CONCRETE_POWDER),
+            1596 => Some(&Self::LIGHT_GRAY_CONCRETE_SLAB),
+            1580 => Some(&Self::LIGHT_GRAY_CONCRETE_STAIRS),
+            1634 => Some(&Self::LIGHT_GRAY_CUSHION),
             1103 => Some(&Self::LIGHT_GRAY_DYE),
             634 => Some(&Self::LIGHT_GRAY_GLAZED_TERRACOTTA),
             874 => Some(&Self::LIGHT_GRAY_HARNESS),
@@ -84214,6 +90310,8 @@ impl Item {
             582 => Some(&Self::LIGHT_GRAY_STAINED_GLASS_PANE),
             522 => Some(&Self::LIGHT_GRAY_TERRACOTTA),
             248 => Some(&Self::LIGHT_GRAY_WOOL),
+            1561 => Some(&Self::LIGHT_GRAY_WOOL_SLAB),
+            1545 => Some(&Self::LIGHT_GRAY_WOOL_STAIRS),
             793 => Some(&Self::LIGHT_WEIGHTED_PRESSURE_PLATE),
             761 => Some(&Self::LIGHTNING_ROD),
             553 => Some(&Self::LILAC),
@@ -84226,6 +90324,9 @@ impl Item {
             538 => Some(&Self::LIME_CARPET),
             647 => Some(&Self::LIME_CONCRETE),
             663 => Some(&Self::LIME_CONCRETE_POWDER),
+            1593 => Some(&Self::LIME_CONCRETE_SLAB),
+            1577 => Some(&Self::LIME_CONCRETE_STAIRS),
+            1631 => Some(&Self::LIME_CUSHION),
             1100 => Some(&Self::LIME_DYE),
             631 => Some(&Self::LIME_GLAZED_TERRACOTTA),
             871 => Some(&Self::LIME_HARNESS),
@@ -84234,6 +90335,8 @@ impl Item {
             579 => Some(&Self::LIME_STAINED_GLASS_PANE),
             519 => Some(&Self::LIME_TERRACOTTA),
             245 => Some(&Self::LIME_WOOL),
+            1558 => Some(&Self::LIME_WOOL_SLAB),
+            1542 => Some(&Self::LIME_WOOL_STAIRS),
             1324 => Some(&Self::LINGERING_POTION),
             1175 => Some(&Self::LLAMA_SPAWN_EGG),
             1414 => Some(&Self::LODESTONE),
@@ -84246,6 +90349,9 @@ impl Item {
             535 => Some(&Self::MAGENTA_CARPET),
             644 => Some(&Self::MAGENTA_CONCRETE),
             660 => Some(&Self::MAGENTA_CONCRETE_POWDER),
+            1590 => Some(&Self::MAGENTA_CONCRETE_SLAB),
+            1574 => Some(&Self::MAGENTA_CONCRETE_STAIRS),
+            1628 => Some(&Self::MAGENTA_CUSHION),
             1097 => Some(&Self::MAGENTA_DYE),
             628 => Some(&Self::MAGENTA_GLAZED_TERRACOTTA),
             868 => Some(&Self::MAGENTA_HARNESS),
@@ -84254,6 +90360,8 @@ impl Item {
             576 => Some(&Self::MAGENTA_STAINED_GLASS_PANE),
             516 => Some(&Self::MAGENTA_TERRACOTTA),
             242 => Some(&Self::MAGENTA_WOOL),
+            1555 => Some(&Self::MAGENTA_WOOL_SLAB),
+            1539 => Some(&Self::MAGENTA_WOOL_STAIRS),
             603 => Some(&Self::MAGMA_BLOCK),
             1154 => Some(&Self::MAGMA_CREAM),
             1237 => Some(&Self::MAGMA_CUBE_SPAWN_EGG),
@@ -84383,6 +90491,7 @@ impl Item {
             198 => Some(&Self::OAK_WOOD),
             754 => Some(&Self::OBSERVER),
             349 => Some(&Self::OBSIDIAN),
+            1650 => Some(&Self::OCEAN_MONUMENT_MAP),
             1176 => Some(&Self::OCELOT_SPAWN_EGG),
             1452 => Some(&Self::OCHRE_FROGLIGHT),
             1536 => Some(&Self::OMINOUS_BOTTLE),
@@ -84395,15 +90504,21 @@ impl Item {
             534 => Some(&Self::ORANGE_CARPET),
             643 => Some(&Self::ORANGE_CONCRETE),
             659 => Some(&Self::ORANGE_CONCRETE_POWDER),
+            1589 => Some(&Self::ORANGE_CONCRETE_SLAB),
+            1573 => Some(&Self::ORANGE_CONCRETE_STAIRS),
+            1627 => Some(&Self::ORANGE_CUSHION),
             1096 => Some(&Self::ORANGE_DYE),
             627 => Some(&Self::ORANGE_GLAZED_TERRACOTTA),
             867 => Some(&Self::ORANGE_HARNESS),
+            1611 => Some(&Self::ORANGE_POPLAR_LEAVES),
             611 => Some(&Self::ORANGE_SHULKER_BOX),
             559 => Some(&Self::ORANGE_STAINED_GLASS),
             575 => Some(&Self::ORANGE_STAINED_GLASS_PANE),
             515 => Some(&Self::ORANGE_TERRACOTTA),
             265 => Some(&Self::ORANGE_TULIP),
             241 => Some(&Self::ORANGE_WOOL),
+            1554 => Some(&Self::ORANGE_WOOL_SLAB),
+            1538 => Some(&Self::ORANGE_WOOL_STAIRS),
             268 => Some(&Self::OXEYE_DAISY),
             132 => Some(&Self::OXIDIZED_CHISELED_COPPER),
             121 => Some(&Self::OXIDIZED_COPPER),
@@ -84466,6 +90581,9 @@ impl Item {
             539 => Some(&Self::PINK_CARPET),
             648 => Some(&Self::PINK_CONCRETE),
             664 => Some(&Self::PINK_CONCRETE_POWDER),
+            1594 => Some(&Self::PINK_CONCRETE_SLAB),
+            1578 => Some(&Self::PINK_CONCRETE_STAIRS),
+            1632 => Some(&Self::PINK_CUSHION),
             1101 => Some(&Self::PINK_DYE),
             632 => Some(&Self::PINK_GLAZED_TERRACOTTA),
             872 => Some(&Self::PINK_HARNESS),
@@ -84476,9 +90594,12 @@ impl Item {
             520 => Some(&Self::PINK_TERRACOTTA),
             267 => Some(&Self::PINK_TULIP),
             246 => Some(&Self::PINK_WOOL),
+            1559 => Some(&Self::PINK_WOOL_SLAB),
+            1543 => Some(&Self::PINK_WOOL_STAIRS),
             750 => Some(&Self::PISTON),
             273 => Some(&Self::PITCHER_PLANT),
             1316 => Some(&Self::PITCHER_POD),
+            1651 => Some(&Self::PLAINS_VILLAGE_MAP),
             1265 => Some(&Self::PLAYER_HEAD),
             1493 => Some(&Self::PLENTY_POTTERY_SHERD),
             57 => Some(&Self::PODZOL),
@@ -84521,6 +90642,23 @@ impl Item {
             18 => Some(&Self::POLISHED_TUFF_SLAB),
             19 => Some(&Self::POLISHED_TUFF_STAIRS),
             20 => Some(&Self::POLISHED_TUFF_WALL),
+            1624 => Some(&Self::POPLAR_BOAT),
+            1618 => Some(&Self::POPLAR_BUTTON),
+            1625 => Some(&Self::POPLAR_CHEST_BOAT),
+            1623 => Some(&Self::POPLAR_DOOR),
+            1622 => Some(&Self::POPLAR_FENCE),
+            1621 => Some(&Self::POPLAR_FENCE_GATE),
+            1615 => Some(&Self::POPLAR_HANGING_SIGN),
+            1606 => Some(&Self::POPLAR_LOG),
+            1604 => Some(&Self::POPLAR_PLANKS),
+            1616 => Some(&Self::POPLAR_PRESSURE_PLATE),
+            1605 => Some(&Self::POPLAR_SAPLING),
+            1613 => Some(&Self::POPLAR_SHELF),
+            1614 => Some(&Self::POPLAR_SIGN),
+            1620 => Some(&Self::POPLAR_SLAB),
+            1619 => Some(&Self::POPLAR_STAIRS),
+            1617 => Some(&Self::POPLAR_TRAPDOOR),
+            1609 => Some(&Self::POPLAR_WOOD),
             1314 => Some(&Self::POPPED_CHORUS_FRUIT),
             260 => Some(&Self::POPPY),
             1011 => Some(&Self::PORKCHOP),
@@ -84552,6 +90690,9 @@ impl Item {
             543 => Some(&Self::PURPLE_CARPET),
             652 => Some(&Self::PURPLE_CONCRETE),
             668 => Some(&Self::PURPLE_CONCRETE_POWDER),
+            1598 => Some(&Self::PURPLE_CONCRETE_SLAB),
+            1582 => Some(&Self::PURPLE_CONCRETE_STAIRS),
+            1636 => Some(&Self::PURPLE_CUSHION),
             1105 => Some(&Self::PURPLE_DYE),
             636 => Some(&Self::PURPLE_GLAZED_TERRACOTTA),
             876 => Some(&Self::PURPLE_HARNESS),
@@ -84560,6 +90701,8 @@ impl Item {
             584 => Some(&Self::PURPLE_STAINED_GLASS_PANE),
             524 => Some(&Self::PURPLE_TERRACOTTA),
             250 => Some(&Self::PURPLE_WOOL),
+            1563 => Some(&Self::PURPLE_WOOL_SLAB),
+            1547 => Some(&Self::PURPLE_WOOL_STAIRS),
             354 => Some(&Self::PURPUR_BLOCK),
             355 => Some(&Self::PURPUR_PILLAR),
             324 => Some(&Self::PURPUR_SLAB),
@@ -84592,6 +90735,9 @@ impl Item {
             547 => Some(&Self::RED_CARPET),
             656 => Some(&Self::RED_CONCRETE),
             672 => Some(&Self::RED_CONCRETE_POWDER),
+            1602 => Some(&Self::RED_CONCRETE_SLAB),
+            1586 => Some(&Self::RED_CONCRETE_STAIRS),
+            1640 => Some(&Self::RED_CUSHION),
             1109 => Some(&Self::RED_DYE),
             640 => Some(&Self::RED_GLAZED_TERRACOTTA),
             880 => Some(&Self::RED_HARNESS),
@@ -84601,17 +90747,21 @@ impl Item {
             720 => Some(&Self::RED_NETHER_BRICK_STAIRS),
             495 => Some(&Self::RED_NETHER_BRICK_WALL),
             606 => Some(&Self::RED_NETHER_BRICKS),
+            1610 => Some(&Self::RED_POPLAR_LEAVES),
             89 => Some(&Self::RED_SAND),
             597 => Some(&Self::RED_SANDSTONE),
             322 => Some(&Self::RED_SANDSTONE_SLAB),
             600 => Some(&Self::RED_SANDSTONE_STAIRS),
             488 => Some(&Self::RED_SANDSTONE_WALL),
+            1570 => Some(&Self::RED_SHRUB),
             624 => Some(&Self::RED_SHULKER_BOX),
             572 => Some(&Self::RED_STAINED_GLASS),
             588 => Some(&Self::RED_STAINED_GLASS_PANE),
             528 => Some(&Self::RED_TERRACOTTA),
             264 => Some(&Self::RED_TULIP),
             254 => Some(&Self::RED_WOOL),
+            1567 => Some(&Self::RED_WOOL_SLAB),
+            1551 => Some(&Self::RED_WOOL_STAIRS),
             745 => Some(&Self::REDSTONE),
             747 => Some(&Self::REDSTONE_BLOCK),
             775 => Some(&Self::REDSTONE_LAMP),
@@ -84641,6 +90791,7 @@ impl Item {
             313 => Some(&Self::SANDSTONE_SLAB),
             466 => Some(&Self::SANDSTONE_STAIRS),
             496 => Some(&Self::SANDSTONE_WALL),
+            1652 => Some(&Self::SAVANNA_VILLAGE_MAP),
             744 => Some(&Self::SCAFFOLDING),
             1495 => Some(&Self::SCRAPE_POTTERY_SHERD),
             457 => Some(&Self::SCULK),
@@ -84656,6 +90807,7 @@ impl Item {
             1496 => Some(&Self::SHEAF_POTTERY_SHERD),
             1134 => Some(&Self::SHEARS),
             1162 => Some(&Self::SHEEP_SPAWN_EGG),
+            1571 => Some(&Self::SHELF_MUSHROOM),
             1497 => Some(&Self::SHELTER_POTTERY_SHERD),
             1325 => Some(&Self::SHIELD),
             236 => Some(&Self::SHORT_DRY_GRASS),
@@ -84698,6 +90850,7 @@ impl Item {
             367 => Some(&Self::SNOW_BLOCK),
             1198 => Some(&Self::SNOW_GOLEM_SPAWN_EGG),
             1044 => Some(&Self::SNOWBALL),
+            1653 => Some(&Self::SNOWY_VILLAGE_MAP),
             1407 => Some(&Self::SOUL_CAMPFIRE),
             1395 => Some(&Self::SOUL_LANTERN),
             388 => Some(&Self::SOUL_SAND),
@@ -84749,6 +90902,7 @@ impl Item {
             715 => Some(&Self::STONE_STAIRS),
             949 => Some(&Self::STONE_SWORD),
             1392 => Some(&Self::STONECUTTER),
+            1569 => Some(&Self::STRAW_BED),
             1209 => Some(&Self::STRAY_SPAWN_EGG),
             1240 => Some(&Self::STRIDER_SPAWN_EGG),
             976 => Some(&Self::STRING),
@@ -84771,6 +90925,8 @@ impl Item {
             186 => Some(&Self::STRIPPED_OAK_WOOD),
             182 => Some(&Self::STRIPPED_PALE_OAK_LOG),
             193 => Some(&Self::STRIPPED_PALE_OAK_WOOD),
+            1607 => Some(&Self::STRIPPED_POPLAR_LOG),
+            1608 => Some(&Self::STRIPPED_POPLAR_WOOD),
             176 => Some(&Self::STRIPPED_SPRUCE_LOG),
             187 => Some(&Self::STRIPPED_SPRUCE_WOOD),
             196 => Some(&Self::STRIPPED_WARPED_HYPHAE),
@@ -84794,9 +90950,11 @@ impl Item {
             88 => Some(&Self::SUSPICIOUS_GRAVEL),
             87 => Some(&Self::SUSPICIOUS_SAND),
             1371 => Some(&Self::SUSPICIOUS_STEW),
+            1654 => Some(&Self::SWAMP_HUT_MAP),
             1404 => Some(&Self::SWEET_BERRIES),
             1053 => Some(&Self::TADPOLE_BUCKET),
             1189 => Some(&Self::TADPOLE_SPAWN_EGG),
+            1655 => Some(&Self::TAIGA_VILLAGE_MAP),
             237 => Some(&Self::TALL_DRY_GRASS),
             556 => Some(&Self::TALL_GRASS),
             759 => Some(&Self::TARGET),
@@ -84847,6 +91005,7 @@ impl Item {
             1201 => Some(&Self::WANDERING_TRADER_SPAWN_EGG),
             1463 => Some(&Self::WARD_ARMOR_TRIM_SMITHING_TEMPLATE),
             1226 => Some(&Self::WARDEN_SPAWN_EGG),
+            1656 => Some(&Self::WARM_OCEAN_RUINS_MAP),
             790 => Some(&Self::WARPED_BUTTON),
             819 => Some(&Self::WARPED_DOOR),
             383 => Some(&Self::WARPED_FENCE),
@@ -84954,6 +91113,9 @@ impl Item {
             533 => Some(&Self::WHITE_CARPET),
             642 => Some(&Self::WHITE_CONCRETE),
             658 => Some(&Self::WHITE_CONCRETE_POWDER),
+            1588 => Some(&Self::WHITE_CONCRETE_SLAB),
+            1572 => Some(&Self::WHITE_CONCRETE_STAIRS),
+            1626 => Some(&Self::WHITE_CUSHION),
             1095 => Some(&Self::WHITE_DYE),
             626 => Some(&Self::WHITE_GLAZED_TERRACOTTA),
             866 => Some(&Self::WHITE_HARNESS),
@@ -84963,6 +91125,8 @@ impl Item {
             514 => Some(&Self::WHITE_TERRACOTTA),
             266 => Some(&Self::WHITE_TULIP),
             240 => Some(&Self::WHITE_WOOL),
+            1553 => Some(&Self::WHITE_WOOL_SLAB),
+            1537 => Some(&Self::WHITE_WOOL_STAIRS),
             1462 => Some(&Self::WILD_ARMOR_TRIM_SMITHING_TEMPLATE),
             287 => Some(&Self::WILDFLOWERS),
             1249 => Some(&Self::WIND_CHARGE),
@@ -84979,6 +91143,7 @@ impl Item {
             940 => Some(&Self::WOODEN_SHOVEL),
             1326 => Some(&Self::WOODEN_SPEAR),
             939 => Some(&Self::WOODEN_SWORD),
+            1657 => Some(&Self::WOODLAND_MANSION_MAP),
             1250 => Some(&Self::WRITABLE_BOOK),
             1251 => Some(&Self::WRITTEN_BOOK),
             1300 => Some(&Self::YELLOW_BANNER),
@@ -84988,14 +91153,20 @@ impl Item {
             537 => Some(&Self::YELLOW_CARPET),
             646 => Some(&Self::YELLOW_CONCRETE),
             662 => Some(&Self::YELLOW_CONCRETE_POWDER),
+            1592 => Some(&Self::YELLOW_CONCRETE_SLAB),
+            1576 => Some(&Self::YELLOW_CONCRETE_STAIRS),
+            1630 => Some(&Self::YELLOW_CUSHION),
             1099 => Some(&Self::YELLOW_DYE),
             630 => Some(&Self::YELLOW_GLAZED_TERRACOTTA),
             870 => Some(&Self::YELLOW_HARNESS),
+            1612 => Some(&Self::YELLOW_POPLAR_LEAVES),
             614 => Some(&Self::YELLOW_SHULKER_BOX),
             562 => Some(&Self::YELLOW_STAINED_GLASS),
             578 => Some(&Self::YELLOW_STAINED_GLASS_PANE),
             518 => Some(&Self::YELLOW_TERRACOTTA),
             244 => Some(&Self::YELLOW_WOOL),
+            1557 => Some(&Self::YELLOW_WOOL_SLAB),
+            1541 => Some(&Self::YELLOW_WOOL_STAIRS),
             1241 => Some(&Self::ZOGLIN_SPAWN_EGG),
             1266 => Some(&Self::ZOMBIE_HEAD),
             1213 => Some(&Self::ZOMBIE_HORSE_SPAWN_EGG),
@@ -85288,7 +91459,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const APPLE : Self = Self { id : 878 , registry_key : "minecraft:apple" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Fitem_properties\x03\x06damage\0\x05\x0Cmining_speed\0\0\x80?\x03\ruse_animation\x02\x01\rhand_equipped\0\x03\x11enchantable_value\0\x03\x11creative_category\x04\x01\x0Eshould_despawn\x01\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x05apple\0\0\x08\x0Ecreative_group\0\x01\x0Eliquid_clipped\0\x01\x17can_destroy_in_creative\x01\x03\x0Bframe_count\x02\x01\x0Fstacked_by_data\0\x08\x10enchantable_slot\x04none\x01\x12hidden_in_commands\x02\x03\x0Emax_stack_size\x80\x01\x01\x0Eallow_off_hand\0\x01\x04foil\0\x03\x0Cuse_duration@\0\n\x0Eminecraft:food\x05\x13saturation_modifier\x9A\x99\x99>\n\x11using_converts_to\0\x01\x0Ecan_always_eat\0\x03\tnutrition\x08\0\t\titem_tags\x08\x02\x11minecraft:is_food\n\x17minecraft:use_modifiers\x01\x0Femit_vibrations\x01\x05\x0Cuse_duration\xCD\xCC\xCC?\x08\x0Bstart_using\x06always\x05\x11movement_modifier33\xB3>\0\n\x17minecraft:use_animation\x08\x05value\x03eat\0\n\x0Eminecraft:tags\t\x04tags\x08\x02\x11minecraft:is_food\0\n\x16minecraft:display_name\x08\x05value\x0Fitem.apple.name\0\0\0" } ;
+    pub const APPLE : Self = Self { id : 878 , registry_key : "minecraft:apple" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x17minecraft:use_animation\x08\x05value\x03eat\0\n\x17minecraft:use_modifiers\x01\x0Femit_vibrations\x01\x05\x0Cuse_duration\xCD\xCC\xCC?\x05\x11movement_modifier33\xB3>\x08\x0Bstart_using\x06always\0\n\x16minecraft:display_name\x08\x05value\x0Fitem.apple.name\0\n\x0Fitem_properties\x03\x11creative_category\x04\x08\x0Ecreative_group\0\x01\x17can_destroy_in_creative\x01\x03\x06damage\0\x01\rhand_equipped\0\x03\x0Cuse_duration@\x01\x0Eshould_despawn\x01\x03\x0Bframe_count\x02\x01\x0Fstacked_by_data\0\x03\x11enchantable_value\0\x03\ruse_animation\x02\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x05apple\0\0\x03\x0Emax_stack_size\x80\x01\x05\x0Cmining_speed\0\0\x80?\x01\x0Eallow_off_hand\0\x01\x04foil\0\x08\x10enchantable_slot\x04none\x01\x0Eliquid_clipped\0\x01\x12hidden_in_commands\x02\0\t\titem_tags\x08\x02\x11minecraft:is_food\n\x0Eminecraft:tags\t\x04tags\x08\x02\x11minecraft:is_food\0\n\x0Eminecraft:food\x05\x13saturation_modifier\x9A\x99\x99>\n\x11using_converts_to\0\x03\tnutrition\x08\x01\x0Ecan_always_eat\0\0\0\0" } ;
     pub const ARCHER_POTTERY_SHERD: Self = Self {
         id: 671,
         registry_key: "minecraft:archer_pottery_sherd",
@@ -85373,7 +91544,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const BAKED_POTATO : Self = Self { id : 281 , registry_key : "minecraft:baked_potato" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\x11using_converts_to\0\x03\ron_use_action\x01\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\rcooldown_type\0\x05\x13saturation_modifier\x9A\x99\x19?\x03\rcooldown_time\0\x03\tnutrition\n\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const BAKED_POTATO : Self = Self { id : 281 , registry_key : "minecraft:baked_potato" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\rcooldown_time\0\x08\rcooldown_type\0\x03\tnutrition\n\x03\ron_use_action\x01\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\x9A\x99\x19?\x08\x11using_converts_to\0\0\x03\x16minecraft:use_duration@\0\0" } ;
     pub const BALLOON: Self = Self {
         id: 612,
         registry_key: "minecraft:balloon",
@@ -85626,7 +91797,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const BEEF : Self = Self { id : 273 , registry_key : "minecraft:beef" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\x11using_converts_to\0\x03\ron_use_action\x01\x05\x13saturation_modifier\x9A\x99\x99>\x03\tnutrition\x06\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x01\x0Ecan_always_eat\0\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const BEEF : Self = Self { id : 273 , registry_key : "minecraft:beef" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x08\rcooldown_type\0\x03\tnutrition\x06\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x99>\x01\x0Ecan_always_eat\0\0\0\0" } ;
     pub const BEEHIVE: Self = Self {
         id: -219,
         registry_key: "minecraft:beehive",
@@ -85634,9 +91805,9 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const BEETROOT : Self = Self { id : 285 , registry_key : "minecraft:beetroot" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\rcooldown_type\0\x08\x11using_converts_to\0\x03\tnutrition\x02\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\ron_use_action\x01\x05\x13saturation_modifier\x9A\x99\x19?\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\0\x03\x16minecraft:use_duration@\0\0" } ;
-    pub const BEETROOT_SEEDS : Self = Self { id : 295 , registry_key : "minecraft:beetroot_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\x01\x1Aplant_at_any_solid_surface\0\x08\x0Bcrop_result\x12minecraft:beetroot\x08\rplant_at_face\x02up\t\x08plant_at\x08\x02\x12minecraft:farmland\0\0\0" } ;
-    pub const BEETROOT_SOUP : Self = Self { id : 286 , registry_key : "minecraft:beetroot_soup" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x01\x0Ecan_always_eat\0\x03\tnutrition\x0C\x08\rcooldown_type\0\x05\x13saturation_modifier\x9A\x99\x19?\x08\x11using_converts_to\x04bowl\0\x03\x16minecraft:use_duration@\x03\x18minecraft:max_stack_size\x02\0\0" } ;
+    pub const BEETROOT : Self = Self { id : 285 , registry_key : "minecraft:beetroot" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\rcooldown_type\0\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x19?\x03\tnutrition\x02\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\x08\x11using_converts_to\0\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const BEETROOT_SEEDS : Self = Self { id : 295 , registry_key : "minecraft:beetroot_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\x08\rplant_at_face\x02up\t\x08plant_at\x08\x02\x12minecraft:farmland\x08\x0Bcrop_result\x12minecraft:beetroot\x01\x1Aplant_at_any_solid_surface\0\0\0\0" } ;
+    pub const BEETROOT_SOUP : Self = Self { id : 286 , registry_key : "minecraft:beetroot_soup" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\x03\x18minecraft:max_stack_size\x02\n\x0Eminecraft:food\x03\tnutrition\x0C\x05\x13saturation_modifier\x9A\x99\x19?\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\x03\ron_use_action\x01\x08\x11using_converts_to\x04bowl\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\0\0\0" } ;
     pub const BELL: Self = Self {
         id: -206,
         registry_key: "minecraft:bell",
@@ -85798,7 +91969,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const BLACK_BUNDLE : Self = Self { id : 857 , registry_key : "minecraft:black_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x0Fitem_properties\x05\x0Cmining_speed\0\0\x80?\x01\x0Eliquid_clipped\0\x01\x0Fstacked_by_data\0\x01\x04foil\0\x01\x12hidden_in_commands\x02\x03\x11creative_category\x06\x03\x11enchantable_value\0\x01\rhand_equipped\0\x03\x06damage\0\x03\x0Emax_stack_size\x02\x03\ruse_animation\0\n\x0Eminecraft:icon\n\x08textures\x08\x11bundle_open_front\x17bundle_black_open_front\x08\x07default\x0Cbundle_black\x08\x10bundle_open_back\x16bundle_black_open_back\0\0\x01\x0Eshould_despawn\x01\x03\x0Bframe_count\x02\x01\x0Eallow_off_hand\0\x03\x0Cuse_duration\0\x08\x10enchantable_slot\x04none\x01\x17can_destroy_in_creative\x01\x08\x0Ecreative_group\0\0\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\0\t\titem_tags\0\0\0\0" } ;
+    pub const BLACK_BUNDLE : Self = Self { id : 857 , registry_key : "minecraft:black_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\t\titem_tags\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\t\rallowed_items\0\0\x03\tmax_slots\x80\x01\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n\x0Fitem_properties\x08\x0Ecreative_group\0\x03\x11creative_category\x06\x01\x0Eliquid_clipped\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Eallow_off_hand\0\x03\ruse_animation\0\x01\x17can_destroy_in_creative\x01\x08\x10enchantable_slot\x04none\x01\x12hidden_in_commands\x02\x01\x0Eshould_despawn\x01\x03\x06damage\0\x03\x11enchantable_value\0\x03\x0Emax_stack_size\x02\x01\rhand_equipped\0\x03\x0Bframe_count\x02\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x16bundle_black_open_back\x08\x07default\x0Cbundle_black\x08\x11bundle_open_front\x17bundle_black_open_front\0\0\x03\x0Cuse_duration\0\x01\x04foil\0\x01\x0Fstacked_by_data\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\0\0" } ;
     pub const BLACK_CANDLE: Self = Self {
         id: -428,
         registry_key: "minecraft:black_candle",
@@ -85974,7 +92145,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const BLUE_BUNDLE : Self = Self { id : 858 , registry_key : "minecraft:blue_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\t\titem_tags\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x0Fitem_properties\x01\x0Eshould_despawn\x01\x03\x06damage\0\x01\x0Eallow_off_hand\0\x03\x11enchantable_value\0\x01\x0Eliquid_clipped\0\x03\ruse_animation\0\x03\x11creative_category\x06\x01\x0Fstacked_by_data\0\x03\x0Emax_stack_size\x02\x01\x17can_destroy_in_creative\x01\x01\x04foil\0\x03\x0Bframe_count\x02\x01\rhand_equipped\0\x08\x10enchantable_slot\x04none\x01\x12hidden_in_commands\x02\x05\x0Cmining_speed\0\0\x80?\x03\x0Cuse_duration\0\x08\x0Ecreative_group\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Bbundle_blue\x08\x10bundle_open_back\x15bundle_blue_open_back\x08\x11bundle_open_front\x16bundle_blue_open_front\0\0\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
+    pub const BLUE_BUNDLE : Self = Self { id : 858 , registry_key : "minecraft:blue_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\t\titem_tags\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\0\n\x0Fitem_properties\x03\x11enchantable_value\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Eliquid_clipped\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x15bundle_blue_open_back\x08\x07default\x0Bbundle_blue\x08\x11bundle_open_front\x16bundle_blue_open_front\0\0\x01\x0Eallow_off_hand\0\x03\x06damage\0\x08\x0Ecreative_group\0\x01\x0Eshould_despawn\x01\x01\x0Fstacked_by_data\0\x01\rhand_equipped\0\x03\x11creative_category\x06\x03\x0Cuse_duration\0\x03\x0Emax_stack_size\x02\x08\x10enchantable_slot\x04none\x01\x17can_destroy_in_creative\x01\x01\x04foil\0\x01\x12hidden_in_commands\x02\x03\ruse_animation\0\x03\x0Bframe_count\x02\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
     pub const BLUE_CANDLE: Self = Self {
         id: -424,
         registry_key: "minecraft:blue_candle",
@@ -86213,8 +92384,8 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const BREAD : Self = Self { id : 261 , registry_key : "minecraft:bread" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x01\x0Ecan_always_eat\0\x03\tnutrition\n\x03\ron_use_action\x01\x08\rcooldown_type\0\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x19?\0\x03\x16minecraft:use_duration@\0\0" } ;
-    pub const BREEZE_ROD : Self = Self { id : 874 , registry_key : "minecraft:breeze_rod" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x17minecraft:hand_equipped\x01\x05value\x01\0\t\titem_tags\0\0\n\x0Fitem_properties\x08\x10enchantable_slot\x04none\x03\x11enchantable_value\0\x01\x0Eallow_off_hand\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Fstacked_by_data\0\x03\ruse_animation\0\x01\x04foil\0\x01\x12hidden_in_commands\x02\x01\rhand_equipped\x01\x03\x0Bframe_count\x02\x03\x11creative_category\x08\x01\x0Eshould_despawn\x01\x03\x0Cuse_duration\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\nbreeze_rod\0\0\x03\x0Emax_stack_size\x80\x01\x01\x17can_destroy_in_creative\x01\x01\x0Eliquid_clipped\0\x03\x06damage\0\x08\x0Ecreative_group\0\0\n\x16minecraft:display_name\x08\x05value\x14item.breeze_rod.name\0\0\0" } ;
+    pub const BREAD : Self = Self { id : 261 , registry_key : "minecraft:bread" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\tnutrition\n\x03\ron_use_action\x01\x08\x11using_converts_to\0\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\x9A\x99\x19?\x08\rcooldown_type\0\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const BREEZE_ROD : Self = Self { id : 874 , registry_key : "minecraft:breeze_rod" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Fitem_properties\x01\x0Fstacked_by_data\0\x03\x11creative_category\x08\x01\x12hidden_in_commands\x02\x05\x0Cmining_speed\0\0\x80?\x01\x0Eallow_off_hand\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\nbreeze_rod\0\0\x03\ruse_animation\0\x03\x0Bframe_count\x02\x01\x04foil\0\x01\rhand_equipped\x01\x03\x11enchantable_value\0\x01\x0Eshould_despawn\x01\x03\x0Cuse_duration\0\x03\x0Emax_stack_size\x80\x01\x01\x17can_destroy_in_creative\x01\x08\x10enchantable_slot\x04none\x01\x0Eliquid_clipped\0\x08\x0Ecreative_group\0\x03\x06damage\0\0\t\titem_tags\0\0\n\x16minecraft:display_name\x08\x05value\x14item.breeze_rod.name\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\0\0" } ;
     pub const BREEZE_SPAWN_EGG: Self = Self {
         id: 506,
         registry_key: "minecraft:breeze_spawn_egg",
@@ -86278,7 +92449,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const BROWN_BUNDLE : Self = Self { id : 859 , registry_key : "minecraft:brown_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Fitem_properties\x01\x0Fstacked_by_data\0\x03\x06damage\0\x01\x04foil\0\x03\x0Bframe_count\x02\x01\x0Eliquid_clipped\0\x01\x12hidden_in_commands\x02\x01\rhand_equipped\0\x03\x0Cuse_duration\0\x01\x17can_destroy_in_creative\x01\x01\x0Eshould_despawn\x01\x05\x0Cmining_speed\0\0\x80?\x01\x0Eallow_off_hand\0\x03\ruse_animation\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x16bundle_brown_open_back\x08\x11bundle_open_front\x17bundle_brown_open_front\x08\x07default\x0Cbundle_brown\0\0\x03\x11creative_category\x06\x08\x10enchantable_slot\x04none\x03\x11enchantable_value\0\x03\x0Emax_stack_size\x02\x08\x0Ecreative_group\0\0\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\t\titem_tags\0\0\0\0" } ;
+    pub const BROWN_BUNDLE : Self = Self { id : 859 , registry_key : "minecraft:brown_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\t\titem_tags\0\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x0Fitem_properties\x01\x12hidden_in_commands\x02\x03\x11creative_category\x06\x01\x04foil\0\x03\x0Bframe_count\x02\x05\x0Cmining_speed\0\0\x80?\x01\x0Eshould_despawn\x01\x03\x06damage\0\x01\x0Eliquid_clipped\0\x03\x0Emax_stack_size\x02\x03\x11enchantable_value\0\x01\rhand_equipped\0\x01\x17can_destroy_in_creative\x01\x08\x10enchantable_slot\x04none\x01\x0Fstacked_by_data\0\x03\ruse_animation\0\x01\x0Eallow_off_hand\0\x08\x0Ecreative_group\0\x03\x0Cuse_duration\0\n\x0Eminecraft:icon\n\x08textures\x08\x11bundle_open_front\x17bundle_brown_open_front\x08\x10bundle_open_back\x16bundle_brown_open_back\x08\x07default\x0Cbundle_brown\0\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\0\0" } ;
     pub const BROWN_CANDLE: Self = Self {
         id: -425,
         registry_key: "minecraft:brown_candle",
@@ -86454,7 +92625,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const BUNDLE : Self = Self { id : 860 , registry_key : "minecraft:bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\t\titem_tags\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x0Fitem_properties\n\x0Eminecraft:icon\n\x08textures\x08\x11bundle_open_front\x11bundle_open_front\x08\x10bundle_open_back\x10bundle_open_back\x08\x07default\x06bundle\0\0\x03\ruse_animation\0\x08\x0Ecreative_group\0\x03\x06damage\0\x03\x0Bframe_count\x02\x03\x0Emax_stack_size\x02\x03\x0Cuse_duration\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Fstacked_by_data\0\x01\x0Eshould_despawn\x01\x01\x12hidden_in_commands\x02\x01\x0Eallow_off_hand\0\x08\x10enchantable_slot\x04none\x01\x17can_destroy_in_creative\x01\x03\x11creative_category\x06\x01\x04foil\0\x01\rhand_equipped\0\x03\x11enchantable_value\0\x01\x0Eliquid_clipped\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\0\0\0" } ;
+    pub const BUNDLE : Self = Self { id : 860 , registry_key : "minecraft:bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Fitem_properties\x01\x04foil\0\x01\rhand_equipped\0\x01\x0Eliquid_clipped\0\x01\x0Eallow_off_hand\0\x03\x11enchantable_value\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Eshould_despawn\x01\x01\x0Fstacked_by_data\0\x03\x0Cuse_duration\0\x08\x10enchantable_slot\x04none\x01\x17can_destroy_in_creative\x01\x03\x06damage\0\x03\ruse_animation\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x10bundle_open_back\x08\x07default\x06bundle\x08\x11bundle_open_front\x11bundle_open_front\0\0\x03\x0Emax_stack_size\x02\x01\x12hidden_in_commands\x02\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x03\x0Bframe_count\x02\0\t\titem_tags\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
     pub const BURN_POTTERY_SHERD: Self = Self {
         id: 675,
         registry_key: "minecraft:burn_pottery_sherd",
@@ -86518,7 +92689,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const CAMERA : Self = Self { id : 607 , registry_key : "minecraft:camera" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x10minecraft:camera\x05\x10picture_duration\0\0\x80?\x05\x10shutter_duration\xCD\xCCL>\x05\x17black_bars_screen_ratio\n\xD7\xA3=\x05\x13slide_away_duration\xCD\xCCL>\x05\x13black_bars_duration\xCD\xCCL>\x05\x14shutter_screen_ratio\0\0\0?\0\x03\x16minecraft:use_duration\xC0\x9A\x0C\x08\x0Fminecraft:block\x10minecraft:camera\0\0" } ;
+    pub const CAMERA : Self = Self { id : 607 , registry_key : "minecraft:camera" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x08\x0Fminecraft:block\x10minecraft:camera\n\x10minecraft:camera\x05\x13black_bars_duration\xCD\xCCL>\x05\x17black_bars_screen_ratio\n\xD7\xA3=\x05\x10picture_duration\0\0\x80?\x05\x10shutter_duration\xCD\xCCL>\x05\x14shutter_screen_ratio\0\0\0?\x05\x13slide_away_duration\xCD\xCCL>\0\x03\x16minecraft:use_duration\xC0\x9A\x0C\0\0" } ;
     pub const CAMPFIRE: Self = Self {
         id: 601,
         registry_key: "minecraft:campfire",
@@ -86547,7 +92718,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const CARROT : Self = Self { id : 279 , registry_key : "minecraft:carrot" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:seed\x01\x1Aplant_at_any_solid_surface\0\x08\x0Bcrop_result\x11minecraft:carrots\x08\rplant_at_face\x02up\t\x08plant_at\x08\x02\x12minecraft:farmland\0\n\x0Eminecraft:food\x05\x13saturation_modifier\x9A\x99\x19?\x03\tnutrition\x06\x08\x11using_converts_to\0\x03\rcooldown_time\0\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\rcooldown_type\0\x03\ron_use_action\x01\0\0\0" } ;
+    pub const CARROT : Self = Self { id : 279 , registry_key : "minecraft:carrot" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\t\x08plant_at\x08\x02\x12minecraft:farmland\x01\x1Aplant_at_any_solid_surface\0\x08\x0Bcrop_result\x11minecraft:carrots\x08\rplant_at_face\x02up\0\n\x0Eminecraft:food\x03\ron_use_action\x01\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x19?\x08\rcooldown_type\0\x03\tnutrition\x06\0\x03\x16minecraft:use_duration@\0\0" } ;
     pub const CARROT_ON_A_STICK: Self = Self {
         id: 527,
         registry_key: "minecraft:carrot_on_a_stick",
@@ -86849,7 +93020,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const CHICKEN : Self = Self { id : 275 , registry_key : "minecraft:chicken" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\x03\tnutrition\x04\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x99>\x08\x11using_converts_to\0\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\t\x07effects\n\x02\x03\x08duration<\x03\x02id\"\x05\x06chance\x9A\x99\x99>\x03\tamplifier\0\x08\x04name\x06hunger\x08\rdescriptionId\rpotion.hunger\0\x08\rcooldown_type\0\0\0\0" } ;
+    pub const CHICKEN : Self = Self { id : 275 , registry_key : "minecraft:chicken" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\rcooldown_time\0\t\x07effects\n\x02\x08\x04name\x06hunger\x05\x06chance\x9A\x99\x99>\x03\tamplifier\0\x03\x08duration<\x08\rdescriptionId\rpotion.hunger\x03\x02id\"\0\x08\x11using_converts_to\0\x05\x13saturation_modifier\x9A\x99\x99>\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\rcooldown_type\0\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\x03\tnutrition\x04\0\0\0" } ;
     pub const CHICKEN_SPAWN_EGG: Self = Self {
         id: 439,
         registry_key: "minecraft:chicken_spawn_egg",
@@ -86969,7 +93140,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const CHORUS_FRUIT : Self = Self { id : 568 , registry_key : "minecraft:chorus_fruit" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\tnutrition\x08\x08\rcooldown_type\x0Bchorusfruit\x03\ron_use_action\0\x08\x11using_converts_to\0\x03\rcooldown_time(\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\x9A\x99\x99>\x01\x0Ecan_always_eat\x01\0\0\0" } ;
+    pub const CHORUS_FRUIT : Self = Self { id : 568 , registry_key : "minecraft:chorus_fruit" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\ron_use_action\0\x08\rcooldown_type\x0Bchorusfruit\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x03\rcooldown_time(\x01\x0Ecan_always_eat\x01\x05\x13saturation_modifier\x9A\x99\x99>\x03\tnutrition\x08\0\x03\x16minecraft:use_duration@\0\0" } ;
     pub const CHORUS_PLANT: Self = Self {
         id: 240,
         registry_key: "minecraft:chorus_plant",
@@ -87194,7 +93365,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const COD : Self = Self { id : 264 , registry_key : "minecraft:cod" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\ron_use_action\x01\x08\rcooldown_type\0\x08\x11using_converts_to\0\x05\x13saturation_modifier\xCD\xCC\xCC=\x03\rcooldown_time\0\x03\tnutrition\x04\0\x01\x19minecraft:stacked_by_data\x01\0\0" } ;
+    pub const COD : Self = Self { id : 264 , registry_key : "minecraft:cod" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\x08\x11using_converts_to\0\x05\x13saturation_modifier\xCD\xCC\xCC=\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\rcooldown_type\0\x03\tnutrition\x04\x03\rcooldown_time\0\x03\ron_use_action\x01\0\x01\x19minecraft:stacked_by_data\x01\0\0" } ;
     pub const COD_BUCKET: Self = Self {
         id: 367,
         registry_key: "minecraft:cod_bucket",
@@ -87321,14 +93492,14 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const COOKED_BEEF : Self = Self { id : 274 , registry_key : "minecraft:cooked_beef" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\x08\x11using_converts_to\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\ron_use_action\x01\x03\tnutrition\x10\x03\rcooldown_time\0\x08\rcooldown_type\0\x05\x13saturation_modifier\xCD\xCCL?\0\x03\x16minecraft:use_duration@\0\0" } ;
-    pub const COOKED_CHICKEN : Self = Self { id : 276 , registry_key : "minecraft:cooked_chicken" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\rcooldown_type\0\x03\tnutrition\x0C\x05\x13saturation_modifier\x9A\x99\x19?\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x01\x0Ecan_always_eat\0\x08\x11using_converts_to\0\x03\ron_use_action\x01\0\x03\x16minecraft:use_duration@\0\0" } ;
-    pub const COOKED_COD : Self = Self { id : 268 , registry_key : "minecraft:cooked_cod" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\tnutrition\n\x03\ron_use_action\x01\x08\x11using_converts_to\0\x08\rcooldown_type\0\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x19?\0\x01\x19minecraft:stacked_by_data\x01\0\0" } ;
-    pub const COOKED_MUTTON : Self = Self { id : 561 , registry_key : "minecraft:cooked_mutton" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\ron_use_action\x01\x05\x13saturation_modifier\xCD\xCCL?\x08\x11using_converts_to\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\x03\rcooldown_time\0\x03\tnutrition\x0C\0\x03\x16minecraft:use_duration@\0\0" } ;
-    pub const COOKED_PORKCHOP : Self = Self { id : 263 , registry_key : "minecraft:cooked_porkchop" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\rcooldown_time\0\x08\x11using_converts_to\0\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\xCD\xCCL?\x03\tnutrition\x10\x03\ron_use_action\x01\0\0\0" } ;
-    pub const COOKED_RABBIT : Self = Self { id : 289 , registry_key : "minecraft:cooked_rabbit" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x08\x11using_converts_to\0\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\x9A\x99\x19?\x03\rcooldown_time\0\x03\tnutrition\n\0\0\0" } ;
-    pub const COOKED_SALMON : Self = Self { id : 269 , registry_key : "minecraft:cooked_salmon" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\x08\x11using_converts_to\0\x05\x13saturation_modifier\xCD\xCCL?\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x03\tnutrition\x0C\x03\ron_use_action\x01\0\x01\x19minecraft:stacked_by_data\x01\x03\x16minecraft:use_duration@\0\0" } ;
-    pub const COOKIE : Self = Self { id : 271 , registry_key : "minecraft:cookie" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\rcooldown_time\0\x08\rcooldown_type\0\x05\x13saturation_modifier\xCD\xCC\xCC=\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x03\tnutrition\x04\x01\x0Ecan_always_eat\0\0\0\0" } ;
+    pub const COOKED_BEEF : Self = Self { id : 274 , registry_key : "minecraft:cooked_beef" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\rcooldown_type\0\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\x03\tnutrition\x10\x03\ron_use_action\x01\x05\x13saturation_modifier\xCD\xCCL?\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const COOKED_CHICKEN : Self = Self { id : 276 , registry_key : "minecraft:cooked_chicken" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x08\x11using_converts_to\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x03\tnutrition\x0C\x08\rcooldown_type\0\x03\ron_use_action\x01\x05\x13saturation_modifier\x9A\x99\x19?\x01\x0Ecan_always_eat\0\0\0\0" } ;
+    pub const COOKED_COD : Self = Self { id : 268 , registry_key : "minecraft:cooked_cod" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\rcooldown_time\0\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\tnutrition\n\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\x08\x11using_converts_to\0\x05\x13saturation_modifier\x9A\x99\x19?\0\x01\x19minecraft:stacked_by_data\x01\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const COOKED_MUTTON : Self = Self { id : 561 , registry_key : "minecraft:cooked_mutton" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\tnutrition\x0C\x08\x11using_converts_to\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\x05\x13saturation_modifier\xCD\xCCL?\x03\ron_use_action\x01\x03\rcooldown_time\0\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const COOKED_PORKCHOP : Self = Self { id : 263 , registry_key : "minecraft:cooked_porkchop" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x08\rcooldown_type\0\x03\ron_use_action\x01\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x03\tnutrition\x10\x05\x13saturation_modifier\xCD\xCCL?\x03\rcooldown_time\0\0\0\0" } ;
+    pub const COOKED_RABBIT : Self = Self { id : 289 , registry_key : "minecraft:cooked_rabbit" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\x08\x11using_converts_to\0\x05\x13saturation_modifier\x9A\x99\x19?\x03\rcooldown_time\0\x03\ron_use_action\x01\x03\tnutrition\n\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const COOKED_SALMON : Self = Self { id : 269 , registry_key : "minecraft:cooked_salmon" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x05\x13saturation_modifier\xCD\xCCL?\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\tnutrition\x0C\x08\rcooldown_type\0\x03\ron_use_action\x01\x08\x11using_converts_to\0\0\x01\x19minecraft:stacked_by_data\x01\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const COOKIE : Self = Self { id : 271 , registry_key : "minecraft:cookie" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\rcooldown_time\0\x03\tnutrition\x04\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\xCD\xCC\xCC=\x03\ron_use_action\x01\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\x08\x11using_converts_to\0\0\x03\x16minecraft:use_duration@\0\0" } ;
     pub const COPPER_AXE: Self = Self {
         id: 750,
         registry_key: "minecraft:copper_axe",
@@ -87490,7 +93661,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const COPPER_SPEAR : Self = Self { id : 850 , registry_key : "minecraft:copper_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x16minecraft:display_name\x08\x05value\x16item.copper_spear.name\0\n\x10minecraft:damage\x02\x05value\x02\0\0\n\x17minecraft:use_modifiers\x08\x0Bstart_using\x06always\x08\x0Bstart_sound\x15item.copper_spear.use\x05\x0Cuse_duration\0\xA0\x8CG\x05\x11movement_modifier\0\0\x80?\x01\x0Femit_vibrations\0\0\n\x15minecraft:enchantable\x01\x05value\r\x08\x04slot\x0Bmelee_spear\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x19minecraft:piercing_weapon\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\x05\rhitbox_margin\0\0\x80>\0\n\x0Fitem_properties\x03\x11creative_category\x06\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Ccopper_spear\0\0\x01\x04foil\0\x01\x0Eshould_despawn\x01\x03\x11enchantable_value\x1A\x01\x17can_destroy_in_creative\x01\x03\x0Cuse_duration\x80\xE4\xAF\x01\x01\x0Fstacked_by_data\0\x03\x0Bframe_count\x02\x01\x0Eallow_off_hand\0\x03\x06damage\x04\x03\x0Emax_stack_size\x02\x01\rhand_equipped\x01\x01\x12hidden_in_commands\x02\x08\x10enchantable_slot\x0Bmelee_spear\x01\x0Eliquid_clipped\0\x03\ruse_animation\0\x08\x0Ecreative_group\0\x05\x0Cmining_speed\0\0\x80?\0\n\x12minecraft:cooldown\x08\x08category\x05spear\x05\x08duration\x9A\x99Y?\x08\x04type\x06attack\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\x05\x0Fdamage_modifier\0\0\0\0\n\x13dismount_conditions\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed\0\0@A\x02\x0Cmax_durationP\0\0\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\x05\rhitbox_margin\0\0\x80>\n\x11damage_conditions\x05\tmin_speed\0\0\0\0\x05\x12min_relative_speed33\x93@\x02\x0Cmax_duration\xFA\0\0\x05\x11damage_multiplier\x85\xEBQ?\x02\x05delay\r\0\n\x14knockback_conditions\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_duration\xA5\0\x05\tmin_speed33\xA3@\0\0\0\n\x16minecraft:swing_sounds\x08\nattack_hit\x1Citem.copper_spear.attack_hit\x08\x0Battack_miss\x1Ditem.copper_spear.attack_miss\0\n\x14minecraft:durability\x03\x0Emax_durability\xFC\x02\n\rdamage_chance\x03\x03max\xC8\x01\x03\x03min\0\0\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\t\x05items\n\x02\x08\x04name\x16minecraft:copper_spear\0\x08\rrepair_amount)context.other->query.remaining_durability\0\t\x05items\n\x02\x08\x04name\x16minecraft:copper_ingot\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\0\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x15minecraft:copper_tier\x12minecraft:is_spear\0\t\titem_tags\x08\x04\x15minecraft:copper_tier\x12minecraft:is_spear\n\x18minecraft:swing_duration\x05\x05value\x9A\x99Y?\0\0\0" } ;
+    pub const COPPER_SPEAR : Self = Self { id : 850 , registry_key : "minecraft:copper_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x18minecraft:swing_duration\x05\x05value\x9A\x99Y?\0\n\x10minecraft:damage\x02\x05value\x02\0\0\t\titem_tags\x08\x04\x15minecraft:copper_tier\x12minecraft:is_spear\n\x16minecraft:swing_sounds\x08\nattack_hit\x1Citem.copper_spear.attack_hit\x08\x0Battack_miss\x1Ditem.copper_spear.attack_miss\0\n\x14minecraft:durability\x03\x0Emax_durability\xFC\x02\n\rdamage_chance\x03\x03max\xC8\x01\x03\x03min\0\0\0\n\x15minecraft:enchantable\x01\x05value\r\x08\x04slot\x0Bmelee_spear\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\x05\x11damage_multiplier\x85\xEBQ?\x02\x05delay\r\0\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\n\x11damage_conditions\x02\x0Cmax_duration\xFA\0\x05\x12min_relative_speed33\x93@\x05\tmin_speed\0\0\0\0\0\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\x05\rhitbox_margin\0\0\x80>\n\x13dismount_conditions\x05\tmin_speed\0\0@A\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_durationP\0\0\n\x14knockback_conditions\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed33\xA3@\x02\x0Cmax_duration\xA5\0\0\x05\x0Fdamage_modifier\0\0\0\0\0\0\n\x16minecraft:display_name\x08\x05value\x16item.copper_spear.name\0\n\x17minecraft:use_modifiers\x05\x11movement_modifier\0\0\x80?\x08\x0Bstart_using\x06always\x08\x0Bstart_sound\x15item.copper_spear.use\x05\x0Cuse_duration\0\xA0\x8CG\x01\x0Femit_vibrations\0\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\x08\rrepair_amount)context.other->query.remaining_durability\t\x05items\n\x02\x08\x04name\x16minecraft:copper_spear\0\0\t\x05items\n\x02\x08\x04name\x16minecraft:copper_ingot\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\0\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x15minecraft:copper_tier\x12minecraft:is_spear\0\n\x19minecraft:piercing_weapon\x05\rhitbox_margin\0\0\x80>\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x0Fitem_properties\x08\x10enchantable_slot\x0Bmelee_spear\x03\x0Cuse_duration\x80\xE4\xAF\x01\x03\x11creative_category\x06\x03\ruse_animation\0\x01\rhand_equipped\x01\x01\x0Fstacked_by_data\0\x01\x0Eallow_off_hand\0\x03\x06damage\x04\x03\x0Bframe_count\x02\x01\x0Eliquid_clipped\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Ccopper_spear\0\0\x01\x04foil\0\x08\x0Ecreative_group\0\x03\x11enchantable_value\x1A\x01\x17can_destroy_in_creative\x01\x03\x0Emax_stack_size\x02\x01\x12hidden_in_commands\x02\x05\x0Cmining_speed\0\0\x80?\x01\x0Eshould_despawn\x01\0\n\x12minecraft:cooldown\x05\x08duration\x9A\x99Y?\x08\x08category\x05spear\x08\x04type\x06attack\0\0\0" } ;
     pub const COPPER_SWORD: Self = Self {
         id: 747,
         registry_key: "minecraft:copper_sword",
@@ -87855,7 +94026,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const CYAN_BUNDLE : Self = Self { id : 861 , registry_key : "minecraft:cyan_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x0Fitem_properties\x08\x10enchantable_slot\x04none\x03\x11enchantable_value\0\x01\x0Eallow_off_hand\0\x01\x04foil\0\x01\x0Eshould_despawn\x01\x01\x0Fstacked_by_data\0\x03\x0Emax_stack_size\x02\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x01\x17can_destroy_in_creative\x01\x05\x0Cmining_speed\0\0\x80?\x01\x12hidden_in_commands\x02\x03\x06damage\0\x03\ruse_animation\0\x03\x0Cuse_duration\0\x01\x0Eliquid_clipped\0\n\x0Eminecraft:icon\n\x08textures\x08\x11bundle_open_front\x16bundle_cyan_open_front\x08\x10bundle_open_back\x15bundle_cyan_open_back\x08\x07default\x0Bbundle_cyan\0\0\x01\rhand_equipped\0\x03\x0Bframe_count\x02\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\t\titem_tags\0\0\0\0" } ;
+    pub const CYAN_BUNDLE : Self = Self { id : 861 , registry_key : "minecraft:cyan_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Fitem_properties\x01\x04foil\0\x01\x12hidden_in_commands\x02\x05\x0Cmining_speed\0\0\x80?\x03\x11creative_category\x06\x03\x11enchantable_value\0\x01\x0Fstacked_by_data\0\x01\x17can_destroy_in_creative\x01\x01\x0Eshould_despawn\x01\x03\x0Bframe_count\x02\x01\x0Eallow_off_hand\0\x03\ruse_animation\0\x03\x0Emax_stack_size\x02\x08\x0Ecreative_group\0\x03\x06damage\0\x01\rhand_equipped\0\n\x0Eminecraft:icon\n\x08textures\x08\x11bundle_open_front\x16bundle_cyan_open_front\x08\x07default\x0Bbundle_cyan\x08\x10bundle_open_back\x15bundle_cyan_open_back\0\0\x03\x0Cuse_duration\0\x08\x10enchantable_slot\x04none\x01\x0Eliquid_clipped\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\t\titem_tags\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\t\rallowed_items\0\0\0\0\0" } ;
     pub const CYAN_CANDLE: Self = Self {
         id: -422,
         registry_key: "minecraft:cyan_candle",
@@ -88577,7 +94748,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const DIAMOND_SPEAR : Self = Self { id : 851 , registry_key : "minecraft:diamond_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x14minecraft:durability\n\rdamage_chance\x03\x03min\0\x03\x03max\xC8\x01\0\x03\x0Emax_durability\xB0\x18\0\n\x18minecraft:swing_duration\x05\x05valueff\x86?\0\n\x19minecraft:piercing_weapon\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\x05\rhitbox_margin\0\0\x80>\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\0\n\x12minecraft:cooldown\x08\x08category\x05spear\x05\x08durationff\x86?\x08\x04type\x06attack\0\n\x16minecraft:swing_sounds\x08\x0Battack_miss\x1Eitem.diamond_spear.attack_miss\x08\nattack_hit\x1Ditem.diamond_spear.attack_hit\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\x08\rrepair_amount)context.other->query.remaining_durability\t\x05items\n\x02\x08\x04name\x17minecraft:diamond_spear\0\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\t\x05items\n\x02\x08\x04name\x11minecraft:diamond\0\0\0\n\x10minecraft:damage\x02\x05value\x04\0\0\n\x0Eminecraft:tags\t\x04tags\x08\x06\x16minecraft:diamond_tier\x1Dminecraft:transformable_items\x12minecraft:is_spear\0\n\x0Fitem_properties\x03\x0Bframe_count\x02\x01\x0Eshould_despawn\x01\n\x0Eminecraft:icon\n\x08textures\x08\x07default\rdiamond_spear\0\0\x03\x11enchantable_value\x14\x03\x0Cuse_duration\x80\xE4\xAF\x01\x01\x0Eallow_off_hand\0\x03\x06damage\x08\x01\x04foil\0\x01\rhand_equipped\x01\x01\x0Eliquid_clipped\0\x01\x0Fstacked_by_data\0\x03\x11creative_category\x06\x01\x12hidden_in_commands\x02\x03\ruse_animation\0\x01\x17can_destroy_in_creative\x01\x08\x10enchantable_slot\x0Bmelee_spear\x08\x0Ecreative_group\0\x05\x0Cmining_speed\0\0\x80?\x03\x0Emax_stack_size\x02\0\t\titem_tags\x08\x06\x16minecraft:diamond_tier\x1Dminecraft:transformable_items\x12minecraft:is_spear\n\x17minecraft:use_modifiers\x08\x0Bstart_sound\x16item.diamond_spear.use\x08\x0Bstart_using\x06always\x05\x11movement_modifier\0\0\x80?\x05\x0Cuse_duration\0\xA0\x8CG\x01\x0Femit_vibrations\0\0\n\x15minecraft:enchantable\x08\x04slot\x0Bmelee_spear\x01\x05value\n\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\n\x11damage_conditions\x05\x12min_relative_speed33\x93@\x02\x0Cmax_duration\xC8\0\x05\tmin_speed\0\0\0\0\0\x05\x11damage_multiplier\x9A\x99\x89?\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\n\x13dismount_conditions\x05\tmin_speed\0\0 A\x02\x0Cmax_duration<\0\x05\x12min_relative_speed\0\0\0\0\0\x05\x0Fdamage_modifier\0\0\0\0\n\x14knockback_conditions\x02\x0Cmax_duration\x82\0\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed33\xA3@\0\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\x02\x05delay\n\0\x05\rhitbox_margin\0\0\x80>\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:display_name\x08\x05value\x17item.diamond_spear.name\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\0\0" } ;
+    pub const DIAMOND_SPEAR : Self = Self { id : 851 , registry_key : "minecraft:diamond_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x15minecraft:enchantable\x08\x04slot\x0Bmelee_spear\x01\x05value\n\0\n\x19minecraft:piercing_weapon\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\x05\rhitbox_margin\0\0\x80>\0\n\x0Eminecraft:tags\t\x04tags\x08\x06\x16minecraft:diamond_tier\x1Dminecraft:transformable_items\x12minecraft:is_spear\0\n\x14minecraft:durability\x03\x0Emax_durability\xB0\x18\n\rdamage_chance\x03\x03max\xC8\x01\x03\x03min\0\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x0Fitem_properties\x08\x10enchantable_slot\x0Bmelee_spear\x01\x17can_destroy_in_creative\x01\x03\x06damage\x08\x05\x0Cmining_speed\0\0\x80?\x01\x0Eliquid_clipped\0\x01\x0Eshould_despawn\x01\n\x0Eminecraft:icon\n\x08textures\x08\x07default\rdiamond_spear\0\0\x08\x0Ecreative_group\0\x03\x11creative_category\x06\x01\x04foil\0\x01\rhand_equipped\x01\x01\x12hidden_in_commands\x02\x03\ruse_animation\0\x01\x0Eallow_off_hand\0\x03\x11enchantable_value\x14\x03\x0Bframe_count\x02\x03\x0Cuse_duration\x80\xE4\xAF\x01\x01\x0Fstacked_by_data\0\x03\x0Emax_stack_size\x02\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\x05\rhitbox_margin\0\0\x80>\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\x05\x11damage_multiplier\x9A\x99\x89?\n\x11damage_conditions\x02\x0Cmax_duration\xC8\0\x05\tmin_speed\0\0\0\0\x05\x12min_relative_speed33\x93@\0\x02\x05delay\n\0\n\x14knockback_conditions\x02\x0Cmax_duration\x82\0\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed33\xA3@\0\x05\x0Fdamage_modifier\0\0\0\0\n\x13dismount_conditions\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_duration<\0\x05\tmin_speed\0\0 A\0\0\0\n\x18minecraft:swing_duration\x05\x05valueff\x86?\0\n\x16minecraft:swing_sounds\x08\nattack_hit\x1Ditem.diamond_spear.attack_hit\x08\x0Battack_miss\x1Eitem.diamond_spear.attack_miss\0\n\x12minecraft:cooldown\x08\x08category\x05spear\x05\x08durationff\x86?\x08\x04type\x06attack\0\n\x10minecraft:damage\x02\x05value\x04\0\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x17minecraft:use_modifiers\x08\x0Bstart_using\x06always\x05\x0Cuse_duration\0\xA0\x8CG\x05\x11movement_modifier\0\0\x80?\x01\x0Femit_vibrations\0\x08\x0Bstart_sound\x16item.diamond_spear.use\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\t\x05items\n\x02\x08\x04name\x17minecraft:diamond_spear\0\x08\rrepair_amount)context.other->query.remaining_durability\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\t\x05items\n\x02\x08\x04name\x11minecraft:diamond\0\0\0\n\x16minecraft:display_name\x08\x05value\x17item.diamond_spear.name\0\t\titem_tags\x08\x06\x16minecraft:diamond_tier\x1Dminecraft:transformable_items\x12minecraft:is_spear\0\0" } ;
     pub const DIAMOND_SWORD: Self = Self {
         id: 318,
         registry_key: "minecraft:diamond_sword",
@@ -88732,7 +94903,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const DRIED_KELP : Self = Self { id : 270 , registry_key : "minecraft:dried_kelp" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\rcooldown_time\0\x05\x13saturation_modifier\xCD\xCC\xCC=\x08\x11using_converts_to\0\x08\rcooldown_type\0\x01\x0Ecan_always_eat\0\x03\tnutrition\x02\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\0\x03\x16minecraft:use_duration \0\0" } ;
+    pub const DRIED_KELP : Self = Self { id : 270 , registry_key : "minecraft:dried_kelp" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration \n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\x05\x13saturation_modifier\xCD\xCC\xCC=\x08\rcooldown_type\0\x03\tnutrition\x02\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x03\rcooldown_time\0\0\0\0" } ;
     pub const DRIED_KELP_BLOCK: Self = Self {
         id: -139,
         registry_key: "minecraft:dried_kelp_block",
@@ -89678,7 +95849,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const ENCHANTED_GOLDEN_APPLE : Self = Self { id : 259 , registry_key : "minecraft:enchanted_golden_apple" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x01\x0Eminecraft:foil\x01\x01\x19minecraft:stacked_by_data\x01\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\rcooldown_time\0\x08\x11using_converts_to\0\t\x07effects\n\x08\x05\x06chance\0\0\x80?\x03\tamplifier\x02\x03\x08duration<\x03\x02id\x14\x08\x04name\x0Cregeneration\x08\rdescriptionId\x13potion.regeneration\0\x08\rdescriptionId\x11potion.absorption\x03\x02id,\x03\tamplifier\x06\x08\x04name\nabsorption\x05\x06chance\0\0\x80?\x03\x08duration\xF0\x01\0\x08\x04name\nresistance\x03\tamplifier\0\x03\x08duration\xD8\x04\x05\x06chance\0\0\x80?\x03\x02id\x16\x08\rdescriptionId\x11potion.resistance\0\x08\x04name\x0Ffire_resistance\x03\tamplifier\0\x03\x08duration\xD8\x04\x08\rdescriptionId\x15potion.fireResistance\x03\x02id\x18\x05\x06chance\0\0\x80?\0\x01\x0Ecan_always_eat\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\rcooldown_type\0\x03\ron_use_action\x01\x03\tnutrition\x08\x05\x13saturation_modifier\x9A\x99\x99?\0\0\0" } ;
+    pub const ENCHANTED_GOLDEN_APPLE : Self = Self { id : 259 , registry_key : "minecraft:enchanted_golden_apple" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\x01\x0Eminecraft:foil\x01\n\x0Eminecraft:food\x03\rcooldown_time\0\x08\rcooldown_type\0\x01\x0Ecan_always_eat\x01\x03\tnutrition\x08\x05\x13saturation_modifier\x9A\x99\x99?\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\t\x07effects\n\x08\x08\x04name\x0Cregeneration\x05\x06chance\0\0\x80?\x03\tamplifier\x02\x03\x08duration<\x08\rdescriptionId\x13potion.regeneration\x03\x02id\x14\0\x05\x06chance\0\0\x80?\x03\x08duration\xF0\x01\x03\tamplifier\x06\x08\x04name\nabsorption\x03\x02id,\x08\rdescriptionId\x11potion.absorption\0\x03\x08duration\xD8\x04\x05\x06chance\0\0\x80?\x03\tamplifier\0\x08\x04name\nresistance\x08\rdescriptionId\x11potion.resistance\x03\x02id\x16\0\x03\tamplifier\0\x08\rdescriptionId\x15potion.fireResistance\x03\x02id\x18\x05\x06chance\0\0\x80?\x08\x04name\x0Ffire_resistance\x03\x08duration\xD8\x04\0\x08\x11using_converts_to\0\0\x01\x19minecraft:stacked_by_data\x01\0\0" } ;
     pub const ENCHANTING_TABLE: Self = Self {
         id: 116,
         registry_key: "minecraft:enchanting_table",
@@ -90253,7 +96424,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const GLOW_BERRIES : Self = Self { id : 879 , registry_key : "minecraft:glow_berries" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\x11using_converts_to\0\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\ron_use_action\x01\x03\tnutrition\x04\x05\x13saturation_modifier\x9A\x99\x99>\0\n\x0Eminecraft:seed\t\x08plant_at\x08\x04\ncave_vines\x1Ccave_vines_head_with_berries\x01\x1Aplant_at_any_solid_surface\x01\x08\x0Bcrop_result\x14minecraft:cave_vines\x08\rplant_at_face\x04down\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const GLOW_BERRIES : Self = Self { id : 879 , registry_key : "minecraft:glow_berries" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:seed\t\x08plant_at\x08\x04\ncave_vines\x1Ccave_vines_head_with_berries\x08\x0Bcrop_result\x14minecraft:cave_vines\x01\x1Aplant_at_any_solid_surface\x01\x08\rplant_at_face\x04down\0\n\x0Eminecraft:food\x03\tnutrition\x04\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\ron_use_action\x01\x05\x13saturation_modifier\x9A\x99\x99>\x08\rcooldown_type\0\x08\x11using_converts_to\0\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\0\0\0" } ;
     pub const GLOW_FRAME: Self = Self {
         id: 636,
         registry_key: "minecraft:glow_frame",
@@ -90352,7 +96523,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const GOLDEN_APPLE : Self = Self { id : 258 , registry_key : "minecraft:golden_apple" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\x01\x19minecraft:stacked_by_data\x01\n\x0Eminecraft:food\x08\rcooldown_type\0\x03\tnutrition\x08\x03\rcooldown_time\0\x01\x0Ecan_always_eat\x01\t\x07effects\n\x04\x03\tamplifier\x02\x03\x08duration\n\x08\x04name\x0Cregeneration\x05\x06chance\0\0\x80?\x08\rdescriptionId\x13potion.regeneration\x03\x02id\x14\0\x08\rdescriptionId\x11potion.absorption\x03\tamplifier\0\x03\x08duration\xF0\x01\x08\x04name\nabsorption\x03\x02id,\x05\x06chance\0\0\x80?\0\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x05\x13saturation_modifier\x9A\x99\x99?\0\0\0" } ;
+    pub const GOLDEN_APPLE : Self = Self { id : 258 , registry_key : "minecraft:golden_apple" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\x01\x19minecraft:stacked_by_data\x01\n\x0Eminecraft:food\x01\x0Ecan_always_eat\x01\x03\rcooldown_time\0\t\x07effects\n\x04\x03\tamplifier\x02\x03\x02id\x14\x03\x08duration\n\x05\x06chance\0\0\x80?\x08\x04name\x0Cregeneration\x08\rdescriptionId\x13potion.regeneration\0\x03\x08duration\xF0\x01\x03\x02id,\x08\rdescriptionId\x11potion.absorption\x03\tamplifier\0\x08\x04name\nabsorption\x05\x06chance\0\0\x80?\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\x9A\x99\x99?\x08\x11using_converts_to\0\x03\tnutrition\x08\x08\rcooldown_type\0\x03\ron_use_action\x01\0\0\0" } ;
     pub const GOLDEN_AXE: Self = Self {
         id: 328,
         registry_key: "minecraft:golden_axe",
@@ -90367,7 +96538,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const GOLDEN_CARROT : Self = Self { id : 283 , registry_key : "minecraft:golden_carrot" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\tnutrition\x0C\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x99?\x08\x11using_converts_to\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\ron_use_action\x01\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const GOLDEN_CARROT : Self = Self { id : 283 , registry_key : "minecraft:golden_carrot" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x08\x11using_converts_to\0\x08\rcooldown_type\0\x05\x13saturation_modifier\x9A\x99\x99?\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\tnutrition\x0C\x03\ron_use_action\x01\0\0\0" } ;
     pub const GOLDEN_CHESTPLATE: Self = Self {
         id: 355,
         registry_key: "minecraft:golden_chestplate",
@@ -90438,7 +96609,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const GOLDEN_SPEAR : Self = Self { id : 852 , registry_key : "minecraft:golden_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x16minecraft:swing_sounds\x08\nattack_hit\x1Citem.golden_spear.attack_hit\x08\x0Battack_miss\x1Ditem.golden_spear.attack_miss\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\t\x05items\n\x02\x08\x04name\x16minecraft:golden_spear\0\x08\rrepair_amount)context.other->query.remaining_durability\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\t\x05items\n\x02\x08\x04name\x14minecraft:gold_ingot\0\0\0\n\x0Fitem_properties\x01\rhand_equipped\x01\x03\x06damage\x02\x03\x0Emax_stack_size\x02\x03\ruse_animation\0\x01\x0Eshould_despawn\x01\x01\x17can_destroy_in_creative\x01\x01\x0Eallow_off_hand\0\x05\x0Cmining_speed\0\0\x80?\x08\x0Ecreative_group\0\x01\x12hidden_in_commands\x02\x08\x10enchantable_slot\x0Bmelee_spear\x03\x0Cuse_duration\x80\xE4\xAF\x01\x03\x11creative_category\x06\x03\x0Bframe_count\x02\x03\x11enchantable_value,\x01\x04foil\0\x01\x0Fstacked_by_data\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\ngold_spear\0\0\x01\x0Eliquid_clipped\0\0\n\x14minecraft:durability\n\rdamage_chance\x03\x03max\xC8\x01\x03\x03min\0\0\x03\x0Emax_durability<\0\t\titem_tags\x08\x04\x15minecraft:golden_tier\x12minecraft:is_spear\n\x17minecraft:use_modifiers\x08\x0Bstart_using\x06always\x08\x0Bstart_sound\x15item.golden_spear.use\x05\x0Cuse_duration\0\xA0\x8CG\x01\x0Femit_vibrations\0\x05\x11movement_modifier\0\0\x80?\0\n\x10minecraft:damage\x02\x05value\x01\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x18minecraft:swing_duration\x05\x05value33s?\0\n\x19minecraft:piercing_weapon\x05\rhitbox_margin\0\0\x80>\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\0\n\x16minecraft:display_name\x08\x05value\x16item.golden_spear.name\0\n\x15minecraft:enchantable\x01\x05value\x16\x08\x04slot\x0Bmelee_spear\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x15minecraft:golden_tier\x12minecraft:is_spear\0\n\x12minecraft:cooldown\x08\x04type\x06attack\x05\x08duration33s?\x08\x08category\x05spear\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\x05\x0Fdamage_modifier\0\0\0\0\n\x14knockback_conditions\x02\x0Cmax_duration\xAA\0\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed33\xA3@\0\x05\x11damage_multiplier333?\n\x13dismount_conditions\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_durationF\0\x05\tmin_speed\0\0PA\0\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\x02\x05delay\x0E\0\x05\rhitbox_margin\0\0\x80>\n\x11damage_conditions\x05\x12min_relative_speed33\x93@\x02\x0Cmax_duration\x13\x01\x05\tmin_speed\0\0\0\0\0\0\0\0\0" } ;
+    pub const GOLDEN_SPEAR : Self = Self { id : 852 , registry_key : "minecraft:golden_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x18minecraft:swing_duration\x05\x05value33s?\0\n\x10minecraft:damage\x02\x05value\x01\0\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x15minecraft:golden_tier\x12minecraft:is_spear\0\n\x19minecraft:piercing_weapon\x05\rhitbox_margin\0\0\x80>\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\0\n\x14minecraft:durability\n\rdamage_chance\x03\x03max\xC8\x01\x03\x03min\0\0\x03\x0Emax_durability<\0\n\x16minecraft:swing_sounds\x08\nattack_hit\x1Citem.golden_spear.attack_hit\x08\x0Battack_miss\x1Ditem.golden_spear.attack_miss\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\x05\rhitbox_margin\0\0\x80>\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\n\x14knockback_conditions\x02\x0Cmax_duration\xAA\0\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed33\xA3@\0\x05\x11damage_multiplier333?\x02\x05delay\x0E\0\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\n\x11damage_conditions\x02\x0Cmax_duration\x13\x01\x05\x12min_relative_speed33\x93@\x05\tmin_speed\0\0\0\0\0\n\x13dismount_conditions\x05\tmin_speed\0\0PA\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_durationF\0\0\x05\x0Fdamage_modifier\0\0\0\0\0\0\t\titem_tags\x08\x04\x15minecraft:golden_tier\x12minecraft:is_spear\n\x12minecraft:cooldown\x08\x08category\x05spear\x05\x08duration33s?\x08\x04type\x06attack\0\n\x16minecraft:display_name\x08\x05value\x16item.golden_spear.name\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\x08\rrepair_amount)context.other->query.remaining_durability\t\x05items\n\x02\x08\x04name\x16minecraft:golden_spear\0\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\t\x05items\n\x02\x08\x04name\x14minecraft:gold_ingot\0\0\0\n\x17minecraft:use_modifiers\x01\x0Femit_vibrations\0\x08\x0Bstart_sound\x15item.golden_spear.use\x08\x0Bstart_using\x06always\x05\x11movement_modifier\0\0\x80?\x05\x0Cuse_duration\0\xA0\x8CG\0\n\x15minecraft:enchantable\x01\x05value\x16\x08\x04slot\x0Bmelee_spear\0\n\x0Fitem_properties\x03\x0Cuse_duration\x80\xE4\xAF\x01\x03\x0Emax_stack_size\x02\x08\x0Ecreative_group\0\x03\x06damage\x02\x01\x04foil\0\x05\x0Cmining_speed\0\0\x80?\x01\x12hidden_in_commands\x02\x08\x10enchantable_slot\x0Bmelee_spear\x01\x0Fstacked_by_data\0\x01\rhand_equipped\x01\x01\x0Eshould_despawn\x01\x03\ruse_animation\0\x01\x0Eliquid_clipped\0\x03\x11creative_category\x06\n\x0Eminecraft:icon\n\x08textures\x08\x07default\ngold_spear\0\0\x01\x17can_destroy_in_creative\x01\x03\x0Bframe_count\x02\x01\x0Eallow_off_hand\0\x03\x11enchantable_value,\0\0\0" } ;
     pub const GOLDEN_SWORD: Self = Self {
         id: 325,
         registry_key: "minecraft:golden_sword",
@@ -90502,7 +96673,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const GRAY_BUNDLE : Self = Self { id : 862 , registry_key : "minecraft:gray_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\t\titem_tags\0\0\n\x0Fitem_properties\x05\x0Cmining_speed\0\0\x80?\x01\rhand_equipped\0\x03\ruse_animation\0\x01\x12hidden_in_commands\x02\x03\x06damage\0\x03\x0Bframe_count\x02\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x01\x0Eliquid_clipped\0\x03\x0Cuse_duration\0\x08\x10enchantable_slot\x04none\x01\x0Eshould_despawn\x01\x01\x04foil\0\x01\x0Eallow_off_hand\0\x03\x11enchantable_value\0\x03\x0Emax_stack_size\x02\x01\x0Fstacked_by_data\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Bbundle_gray\x08\x10bundle_open_back\x15bundle_gray_open_back\x08\x11bundle_open_front\x16bundle_gray_open_front\0\0\x01\x17can_destroy_in_creative\x01\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x16minecraft:storage_item\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
+    pub const GRAY_BUNDLE : Self = Self { id : 862 , registry_key : "minecraft:gray_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\0\n\x0Fitem_properties\x01\x17can_destroy_in_creative\x01\x01\x0Eshould_despawn\x01\x05\x0Cmining_speed\0\0\x80?\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x15bundle_gray_open_back\x08\x07default\x0Bbundle_gray\x08\x11bundle_open_front\x16bundle_gray_open_front\0\0\x03\ruse_animation\0\x03\x0Bframe_count\x02\x03\x0Emax_stack_size\x02\x01\x0Eliquid_clipped\0\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x01\rhand_equipped\0\x08\x10enchantable_slot\x04none\x03\x11enchantable_value\0\x01\x12hidden_in_commands\x02\x01\x0Fstacked_by_data\0\x01\x04foil\0\x03\x0Cuse_duration\0\x01\x0Eallow_off_hand\0\x03\x06damage\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\t\titem_tags\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\0\0" } ;
     pub const GRAY_CANDLE: Self = Self {
         id: -420,
         registry_key: "minecraft:gray_candle",
@@ -90601,7 +96772,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const GREEN_BUNDLE : Self = Self { id : 863 , registry_key : "minecraft:green_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x0Fitem_properties\x03\x11enchantable_value\0\x01\rhand_equipped\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Eallow_off_hand\0\x01\x17can_destroy_in_creative\x01\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Cbundle_green\x08\x10bundle_open_back\x16bundle_green_open_back\x08\x11bundle_open_front\x17bundle_green_open_front\0\0\x01\x0Eshould_despawn\x01\x01\x0Fstacked_by_data\0\x03\x06damage\0\x03\x0Cuse_duration\0\x08\x10enchantable_slot\x04none\x08\x0Ecreative_group\0\x03\ruse_animation\0\x03\x0Bframe_count\x02\x03\x0Emax_stack_size\x02\x01\x0Eliquid_clipped\0\x03\x11creative_category\x06\x01\x04foil\0\x01\x12hidden_in_commands\x02\0\t\titem_tags\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\0\0" } ;
+    pub const GREEN_BUNDLE : Self = Self { id : 863 , registry_key : "minecraft:green_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x0Fitem_properties\x01\x17can_destroy_in_creative\x01\x01\x0Eliquid_clipped\0\x01\x0Eallow_off_hand\0\x01\rhand_equipped\0\x03\x06damage\0\x01\x04foil\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Eshould_despawn\x01\x03\x11enchantable_value\0\x08\x0Ecreative_group\0\x03\x0Cuse_duration\0\x01\x12hidden_in_commands\x02\x03\x0Bframe_count\x02\x03\x0Emax_stack_size\x02\x03\ruse_animation\0\x03\x11creative_category\x06\x08\x10enchantable_slot\x04none\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Cbundle_green\x08\x11bundle_open_front\x17bundle_green_open_front\x08\x10bundle_open_back\x16bundle_green_open_back\0\0\x01\x0Fstacked_by_data\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\t\titem_tags\0\0\0\0" } ;
     pub const GREEN_CANDLE: Self = Self {
         id: -426,
         registry_key: "minecraft:green_candle",
@@ -91064,7 +97235,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const HONEY_BOTTLE : Self = Self { id : 604 , registry_key : "minecraft:honey_bottle" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\x11using_converts_to\x0Cglass_bottle\x08\rcooldown_type\0\x05\x13saturation_modifier\xCD\xCC\xCC=\x03\rcooldown_time\0\t\x0Eremove_effects\x03\x02&\x01\x0Ecan_always_eat\x01\x03\tnutrition\x0C\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\0\x03\x18minecraft:max_stack_size \x03\x16minecraft:use_durationP\0\0" } ;
+    pub const HONEY_BOTTLE : Self = Self { id : 604 , registry_key : "minecraft:honey_bottle" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x05\x13saturation_modifier\xCD\xCC\xCC=\x08\x11using_converts_to\x0Cglass_bottle\x03\rcooldown_time\0\x03\ron_use_action\x01\x03\tnutrition\x0C\t\x0Eremove_effects\x03\x02&\x08\rcooldown_type\0\x01\x0Ecan_always_eat\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\0\x03\x18minecraft:max_stack_size \x03\x16minecraft:use_durationP\0\0" } ;
     pub const HONEYCOMB: Self = Self {
         id: 603,
         registry_key: "minecraft:honeycomb",
@@ -91366,7 +97537,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const IRON_SPEAR : Self = Self { id : 853 , registry_key : "minecraft:iron_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x18minecraft:swing_duration\x05\x05value33s?\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x16minecraft:display_name\x08\x05value\x14item.iron_spear.name\0\n\x10minecraft:damage\x02\x05value\x03\0\0\n\x16minecraft:swing_sounds\x08\nattack_hit\x1Aitem.iron_spear.attack_hit\x08\x0Battack_miss\x1Bitem.iron_spear.attack_miss\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\n\x11damage_conditions\x05\x12min_relative_speed33\x93@\x02\x0Cmax_duration\xE1\0\x05\tmin_speed\0\0\0\0\0\n\x14knockback_conditions\x02\x0Cmax_duration\x87\0\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed33\xA3@\0\x02\x05delay\x0C\0\x05\rhitbox_margin\0\0\x80>\x05\x11damage_multiplier33s?\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\n\x13dismount_conditions\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed\0\x000A\x02\x0Cmax_duration2\0\0\x05\x0Fdamage_modifier\0\0\0\0\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\0\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\x08\rrepair_amount)context.other->query.remaining_durability\t\x05items\n\x02\x08\x04name\x14minecraft:iron_spear\0\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\t\x05items\n\x02\x08\x04name\x14minecraft:iron_ingot\0\0\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x13minecraft:iron_tier\x12minecraft:is_spear\0\t\titem_tags\x08\x04\x13minecraft:iron_tier\x12minecraft:is_spear\n\x15minecraft:enchantable\x01\x05value\x0E\x08\x04slot\x0Bmelee_spear\0\n\x12minecraft:cooldown\x08\x08category\x05spear\x05\x08duration33s?\x08\x04type\x06attack\0\n\x14minecraft:durability\x03\x0Emax_durability\xF4\x03\n\rdamage_chance\x03\x03min\0\x03\x03max\xC8\x01\0\0\n\x0Fitem_properties\x08\x10enchantable_slot\x0Bmelee_spear\x08\x0Ecreative_group\0\x01\rhand_equipped\x01\x03\x0Emax_stack_size\x02\x01\x04foil\0\x01\x0Fstacked_by_data\0\x03\ruse_animation\0\x03\x11creative_category\x06\x05\x0Cmining_speed\0\0\x80?\n\x0Eminecraft:icon\n\x08textures\x08\x07default\niron_spear\0\0\x01\x0Eshould_despawn\x01\x03\x11enchantable_value\x1C\x03\x0Cuse_duration\x80\xE4\xAF\x01\x01\x0Eallow_off_hand\0\x01\x17can_destroy_in_creative\x01\x01\x0Eliquid_clipped\0\x03\x06damage\x06\x01\x12hidden_in_commands\x02\x03\x0Bframe_count\x02\0\n\x19minecraft:piercing_weapon\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\x05\rhitbox_margin\0\0\x80>\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x17minecraft:use_modifiers\x08\x0Bstart_using\x06always\x05\x0Cuse_duration\0\xA0\x8CG\x08\x0Bstart_sound\x13item.iron_spear.use\x01\x0Femit_vibrations\0\x05\x11movement_modifier\0\0\x80?\0\0\0" } ;
+    pub const IRON_SPEAR : Self = Self { id : 853 , registry_key : "minecraft:iron_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x16minecraft:display_name\x08\x05value\x14item.iron_spear.name\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\n\x11damage_conditions\x02\x0Cmax_duration\xE1\0\x05\tmin_speed\0\0\0\0\x05\x12min_relative_speed33\x93@\0\x05\x11damage_multiplier33s?\n\x14knockback_conditions\x05\tmin_speed33\xA3@\x02\x0Cmax_duration\x87\0\x05\x12min_relative_speed\0\0\0\0\0\x05\x0Fdamage_modifier\0\0\0\0\x02\x05delay\x0C\0\x05\rhitbox_margin\0\0\x80>\n\x13dismount_conditions\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_duration2\0\x05\tmin_speed\0\x000A\0\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\0\0\n\x14minecraft:durability\n\rdamage_chance\x03\x03max\xC8\x01\x03\x03min\0\0\x03\x0Emax_durability\xF4\x03\0\t\titem_tags\x08\x04\x13minecraft:iron_tier\x12minecraft:is_spear\n\x10minecraft:damage\x02\x05value\x03\0\0\n\x12minecraft:cooldown\x05\x08duration33s?\x08\x08category\x05spear\x08\x04type\x06attack\0\n\x19minecraft:piercing_weapon\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\x05\rhitbox_margin\0\0\x80>\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\t\x05items\n\x02\x08\x04name\x14minecraft:iron_spear\0\x08\rrepair_amount)context.other->query.remaining_durability\0\t\x05items\n\x02\x08\x04name\x14minecraft:iron_ingot\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\0\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x0Fitem_properties\x01\x12hidden_in_commands\x02\x01\x17can_destroy_in_creative\x01\x03\x11creative_category\x06\x05\x0Cmining_speed\0\0\x80?\x03\ruse_animation\0\x03\x06damage\x06\x08\x10enchantable_slot\x0Bmelee_spear\x08\x0Ecreative_group\0\x01\rhand_equipped\x01\x01\x0Eshould_despawn\x01\x01\x0Fstacked_by_data\0\x01\x04foil\0\x03\x0Bframe_count\x02\x03\x0Cuse_duration\x80\xE4\xAF\x01\x01\x0Eallow_off_hand\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\niron_spear\0\0\x03\x11enchantable_value\x1C\x03\x0Emax_stack_size\x02\x01\x0Eliquid_clipped\0\0\n\x18minecraft:swing_duration\x05\x05value33s?\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:swing_sounds\x08\x0Battack_miss\x1Bitem.iron_spear.attack_miss\x08\nattack_hit\x1Aitem.iron_spear.attack_hit\0\n\x15minecraft:enchantable\x01\x05value\x0E\x08\x04slot\x0Bmelee_spear\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x13minecraft:iron_tier\x12minecraft:is_spear\0\n\x17minecraft:use_modifiers\x05\x11movement_modifier\0\0\x80?\x08\x0Bstart_using\x06always\x05\x0Cuse_duration\0\xA0\x8CG\x01\x0Femit_vibrations\0\x08\x0Bstart_sound\x13item.iron_spear.use\0\0\0" } ;
     pub const IRON_SWORD: Self = Self {
         id: 309,
         registry_key: "minecraft:iron_sword",
@@ -91948,7 +98119,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const LIGHT_BLUE_BUNDLE : Self = Self { id : 864 , registry_key : "minecraft:light_blue_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\t\titem_tags\0\0\n\x0Fitem_properties\x03\ruse_animation\0\x03\x06damage\0\x01\x12hidden_in_commands\x02\x03\x0Bframe_count\x02\x03\x0Cuse_duration\0\x01\x17can_destroy_in_creative\x01\x03\x11enchantable_value\0\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x01\x0Eshould_despawn\x01\x01\x0Eliquid_clipped\0\x01\x0Eallow_off_hand\0\x01\x04foil\0\x08\x10enchantable_slot\x04none\x01\x0Fstacked_by_data\0\x05\x0Cmining_speed\0\0\x80?\x03\x0Emax_stack_size\x02\x01\rhand_equipped\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x1Bbundle_light_blue_open_back\x08\x11bundle_open_front\x1Cbundle_light_blue_open_front\x08\x07default\x11bundle_light_blue\0\0\0\n\x16minecraft:storage_item\t\rallowed_items\0\0\x03\tmax_slots\x80\x01\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
+    pub const LIGHT_BLUE_BUNDLE : Self = Self { id : 864 , registry_key : "minecraft:light_blue_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\t\titem_tags\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x0Fitem_properties\x01\x17can_destroy_in_creative\x01\x03\x06damage\0\x08\x10enchantable_slot\x04none\x01\x0Eliquid_clipped\0\x01\x12hidden_in_commands\x02\x01\x0Fstacked_by_data\0\x01\rhand_equipped\0\x01\x0Eallow_off_hand\0\x01\x04foil\0\x03\x0Bframe_count\x02\x03\x0Cuse_duration\0\x08\x0Ecreative_group\0\x03\x11creative_category\x06\n\x0Eminecraft:icon\n\x08textures\x08\x11bundle_open_front\x1Cbundle_light_blue_open_front\x08\x07default\x11bundle_light_blue\x08\x10bundle_open_back\x1Bbundle_light_blue_open_back\0\0\x03\x0Emax_stack_size\x02\x01\x0Eshould_despawn\x01\x05\x0Cmining_speed\0\0\x80?\x03\ruse_animation\0\x03\x11enchantable_value\0\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
     pub const LIGHT_BLUE_CANDLE: Self = Self {
         id: -416,
         registry_key: "minecraft:light_blue_candle",
@@ -92047,7 +98218,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const LIGHT_GRAY_BUNDLE : Self = Self { id : 865 , registry_key : "minecraft:light_gray_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\t\titem_tags\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x0Fitem_properties\x05\x0Cmining_speed\0\0\x80?\x08\x10enchantable_slot\x04none\x03\x11enchantable_value\0\x03\x06damage\0\x01\x0Eliquid_clipped\0\x01\x0Eshould_despawn\x01\x01\x0Fstacked_by_data\0\x03\ruse_animation\0\x03\x0Cuse_duration\0\x01\x0Eallow_off_hand\0\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x01\x12hidden_in_commands\x02\x03\x0Bframe_count\x02\x01\rhand_equipped\0\x03\x0Emax_stack_size\x02\x01\x17can_destroy_in_creative\x01\x01\x04foil\0\n\x0Eminecraft:icon\n\x08textures\x08\x11bundle_open_front\x1Cbundle_light_gray_open_front\x08\x10bundle_open_back\x1Bbundle_light_gray_open_back\x08\x07default\x11bundle_light_gray\0\0\0\0\0" } ;
+    pub const LIGHT_GRAY_BUNDLE : Self = Self { id : 865 , registry_key : "minecraft:light_gray_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x0Fitem_properties\x01\x17can_destroy_in_creative\x01\x01\rhand_equipped\0\x03\x06damage\0\x01\x12hidden_in_commands\x02\x01\x0Eliquid_clipped\0\x08\x10enchantable_slot\x04none\x05\x0Cmining_speed\0\0\x80?\x03\x11creative_category\x06\x01\x0Fstacked_by_data\0\x01\x0Eshould_despawn\x01\x03\x11enchantable_value\0\x01\x0Eallow_off_hand\0\x03\x0Emax_stack_size\x02\x03\x0Cuse_duration\0\x01\x04foil\0\x03\x0Bframe_count\x02\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x1Bbundle_light_gray_open_back\x08\x11bundle_open_front\x1Cbundle_light_gray_open_front\x08\x07default\x11bundle_light_gray\0\0\x03\ruse_animation\0\x08\x0Ecreative_group\0\0\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\0\t\titem_tags\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
     pub const LIGHT_GRAY_CANDLE: Self = Self {
         id: -421,
         registry_key: "minecraft:light_gray_candle",
@@ -92167,7 +98338,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const LIME_BUNDLE : Self = Self { id : 866 , registry_key : "minecraft:lime_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x0Fitem_properties\x03\x11enchantable_value\0\x03\x0Cuse_duration\0\x03\x11creative_category\x06\x01\x0Eshould_despawn\x01\n\x0Eminecraft:icon\n\x08textures\x08\x11bundle_open_front\x16bundle_lime_open_front\x08\x07default\x0Bbundle_lime\x08\x10bundle_open_back\x15bundle_lime_open_back\0\0\x01\x0Eliquid_clipped\0\x01\x0Fstacked_by_data\0\x03\ruse_animation\0\x03\x0Emax_stack_size\x02\x03\x06damage\0\x01\x04foil\0\x01\rhand_equipped\0\x01\x17can_destroy_in_creative\x01\x08\x0Ecreative_group\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Eallow_off_hand\0\x03\x0Bframe_count\x02\x08\x10enchantable_slot\x04none\x01\x12hidden_in_commands\x02\0\t\titem_tags\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x01\x1Aallow_nested_storage_items\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
+    pub const LIME_BUNDLE : Self = Self { id : 866 , registry_key : "minecraft:lime_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\t\titem_tags\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x0Fitem_properties\x05\x0Cmining_speed\0\0\x80?\x01\x0Eliquid_clipped\0\x01\x0Eallow_off_hand\0\x01\x17can_destroy_in_creative\x01\x03\x0Cuse_duration\0\x03\x11creative_category\x06\x03\x11enchantable_value\0\x03\x06damage\0\x01\rhand_equipped\0\x08\x10enchantable_slot\x04none\x03\ruse_animation\0\x03\x0Bframe_count\x02\x01\x04foil\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x15bundle_lime_open_back\x08\x07default\x0Bbundle_lime\x08\x11bundle_open_front\x16bundle_lime_open_front\0\0\x01\x0Eshould_despawn\x01\x03\x0Emax_stack_size\x02\x08\x0Ecreative_group\0\x01\x0Fstacked_by_data\0\x01\x12hidden_in_commands\x02\0\n\x16minecraft:storage_item\t\rallowed_items\0\0\x03\tmax_slots\x80\x01\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
     pub const LIME_CANDLE: Self = Self {
         id: -418,
         registry_key: "minecraft:lime_candle",
@@ -92371,7 +98542,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const MAGENTA_BUNDLE : Self = Self { id : 867 , registry_key : "minecraft:magenta_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\t\titem_tags\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x0Fitem_properties\x05\x0Cmining_speed\0\0\x80?\x01\rhand_equipped\0\x01\x17can_destroy_in_creative\x01\x03\x06damage\0\x01\x12hidden_in_commands\x02\x01\x0Eallow_off_hand\0\x01\x0Eliquid_clipped\0\x03\x0Cuse_duration\0\x03\x0Emax_stack_size\x02\x03\x0Bframe_count\x02\x01\x0Eshould_despawn\x01\x08\x0Ecreative_group\0\x01\x0Fstacked_by_data\0\x01\x04foil\0\x03\ruse_animation\0\x03\x11creative_category\x06\x08\x10enchantable_slot\x04none\x03\x11enchantable_value\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x18bundle_magenta_open_back\x08\x11bundle_open_front\x19bundle_magenta_open_front\x08\x07default\x0Ebundle_magenta\0\0\0\0\0" } ;
+    pub const MAGENTA_BUNDLE : Self = Self { id : 867 , registry_key : "minecraft:magenta_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\0\n\x0Fitem_properties\x01\x12hidden_in_commands\x02\x03\ruse_animation\0\x03\x0Cuse_duration\0\x01\x0Fstacked_by_data\0\x03\x06damage\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x18bundle_magenta_open_back\x08\x11bundle_open_front\x19bundle_magenta_open_front\x08\x07default\x0Ebundle_magenta\0\0\x03\x11enchantable_value\0\x03\x0Emax_stack_size\x02\x01\x17can_destroy_in_creative\x01\x03\x11creative_category\x06\x08\x10enchantable_slot\x04none\x03\x0Bframe_count\x02\x01\x0Eliquid_clipped\0\x01\x0Eallow_off_hand\0\x01\x04foil\0\x08\x0Ecreative_group\0\x05\x0Cmining_speed\0\0\x80?\x01\rhand_equipped\0\x01\x0Eshould_despawn\x01\0\t\titem_tags\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
     pub const MAGENTA_CANDLE: Self = Self {
         id: -415,
         registry_key: "minecraft:magenta_candle",
@@ -92673,8 +98844,8 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const MELON_SEEDS : Self = Self { id : 293 , registry_key : "minecraft:melon_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\t\x08plant_at\x08\x02\x12minecraft:farmland\x08\x0Bcrop_result\x14minecraft:melon_stem\x01\x1Aplant_at_any_solid_surface\0\x08\rplant_at_face\x02up\0\0\0" } ;
-    pub const MELON_SLICE : Self = Self { id : 272 , registry_key : "minecraft:melon_slice" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\tnutrition\x04\x05\x13saturation_modifier\x9A\x99\x99>\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x03\ron_use_action\x01\x08\x11using_converts_to\0\0\0\0" } ;
+    pub const MELON_SEEDS : Self = Self { id : 293 , registry_key : "minecraft:melon_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\x08\rplant_at_face\x02up\t\x08plant_at\x08\x02\x12minecraft:farmland\x01\x1Aplant_at_any_solid_surface\0\x08\x0Bcrop_result\x14minecraft:melon_stem\0\0\0" } ;
+    pub const MELON_SLICE : Self = Self { id : 272 , registry_key : "minecraft:melon_slice" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\rcooldown_type\0\x05\x13saturation_modifier\x9A\x99\x99>\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\x03\tnutrition\x04\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\0\x03\x16minecraft:use_duration@\0\0" } ;
     pub const MELON_STEM: Self = Self {
         id: 105,
         registry_key: "minecraft:melon_stem",
@@ -92892,7 +99063,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const MUSHROOM_STEW : Self = Self { id : 260 , registry_key : "minecraft:mushroom_stew" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x18minecraft:max_stack_size\x02\n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\ron_use_action\x01\x03\tnutrition\x0C\x05\x13saturation_modifier\x9A\x99\x19?\x03\rcooldown_time\0\x08\x11using_converts_to\x04bowl\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const MUSHROOM_STEW : Self = Self { id : 260 , registry_key : "minecraft:mushroom_stew" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x05\x13saturation_modifier\x9A\x99\x19?\x08\x11using_converts_to\x04bowl\x03\tnutrition\x0C\x03\rcooldown_time\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\rcooldown_type\0\x03\ron_use_action\x01\x01\x0Ecan_always_eat\0\0\x03\x18minecraft:max_stack_size\x02\x03\x16minecraft:use_duration@\0\0" } ;
     pub const MUSIC_DISC_11: Self = Self {
         id: 554,
         registry_key: "minecraft:music_disc_11",
@@ -93047,7 +99218,7 @@ impl BedrockItem {
         component_based: true,
         definition_components: b"\n\0\0",
     };
-    pub const MUTTON : Self = Self { id : 560 , registry_key : "minecraft:mutton" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x08\rcooldown_type\0\x03\tnutrition\x04\x05\x13saturation_modifier\x9A\x99\x99>\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x03\ron_use_action\x01\x08\x11using_converts_to\0\x01\x0Ecan_always_eat\0\0\0\0" } ;
+    pub const MUTTON : Self = Self { id : 560 , registry_key : "minecraft:mutton" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\rcooldown_time\0\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\x08\rcooldown_type\0\x05\x13saturation_modifier\x9A\x99\x99>\x03\tnutrition\x04\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\0\0\0" } ;
     pub const MYCELIUM: Self = Self {
         id: 110,
         registry_key: "minecraft:mycelium",
@@ -93139,7 +99310,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const NETHER_WART : Self = Self { id : 294 , registry_key : "minecraft:nether_wart" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\t\x08plant_at\x08\x02\tsoul_sand\x08\rplant_at_face\x02up\x08\x0Bcrop_result\x15minecraft:nether_wart\x01\x1Aplant_at_any_solid_surface\0\0\0\0" } ;
+    pub const NETHER_WART : Self = Self { id : 294 , registry_key : "minecraft:nether_wart" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\t\x08plant_at\x08\x02\tsoul_sand\x08\x0Bcrop_result\x15minecraft:nether_wart\x01\x1Aplant_at_any_solid_surface\0\x08\rplant_at_face\x02up\0\0\0" } ;
     pub const NETHER_WART_BLOCK: Self = Self {
         id: 214,
         registry_key: "minecraft:nether_wart_block",
@@ -93245,7 +99416,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const NETHERITE_SPEAR : Self = Self { id : 854 , registry_key : "minecraft:netherite_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x0Fitem_properties\x01\x04foil\0\x01\x0Eallow_off_hand\0\x05\x0Cmining_speed\0\0\x80?\x03\x06damage\n\x03\x0Emax_stack_size\x02\x01\x0Eshould_despawn\x01\x01\x17can_destroy_in_creative\x01\x08\x10enchantable_slot\x0Bmelee_spear\x01\x0Fstacked_by_data\0\x03\x0Cuse_duration\x80\xE4\xAF\x01\x03\x11creative_category\x06\x03\x11enchantable_value\x1E\x01\rhand_equipped\x01\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Fnetherite_spear\0\0\x03\ruse_animation\0\x08\x0Ecreative_group\0\x03\x0Bframe_count\x02\x01\x0Eliquid_clipped\0\x01\x12hidden_in_commands\x02\0\n\x16minecraft:display_name\x08\x05value\x19item.netherite_spear.name\0\n\x18minecraft:swing_duration\x05\x05value33\x93?\0\n\x15minecraft:enchantable\x01\x05value\x0F\x08\x04slot\x0Bmelee_spear\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\n\x11damage_conditions\x02\x0Cmax_duration\xAF\0\x05\x12min_relative_speed33\x93@\x05\tmin_speed\0\0\0\0\0\x05\x0Fdamage_modifier\0\0\0\0\n\x13dismount_conditions\x02\x0Cmax_duration2\0\x05\tmin_speed\0\0\x10A\x05\x12min_relative_speed\0\0\0\0\0\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\x05\x11damage_multiplier\x9A\x99\x99?\n\x14knockback_conditions\x02\x0Cmax_durationn\0\x05\tmin_speed33\xA3@\x05\x12min_relative_speed\0\0\0\0\0\x05\rhitbox_margin\0\0\x80>\x02\x05delay\x08\0\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\0\0\n\x18minecraft:fire_resistant\x01\x05value\x01\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x16minecraft:swing_sounds\x08\x0Battack_miss item.netherite_spear.attack_miss\x08\nattack_hit\x1Fitem.netherite_spear.attack_hit\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x18minecraft:netherite_tier\x12minecraft:is_spear\0\n\x10minecraft:damage\x02\x05value\x05\0\0\t\titem_tags\x08\x04\x18minecraft:netherite_tier\x12minecraft:is_spear\n\x12minecraft:cooldown\x08\x08category\x05spear\x08\x04type\x06attack\x05\x08duration33\x93?\0\n\x14minecraft:durability\n\rdamage_chance\x03\x03min\0\x03\x03max\xC8\x01\0\x03\x0Emax_durability\xDC\x1F\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\t\x05items\n\x02\x08\x04name\x19minecraft:netherite_spear\0\x08\rrepair_amount)context.other->query.remaining_durability\0\t\x05items\n\x02\x08\x04name\x19minecraft:netherite_ingot\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\0\0\n\x17minecraft:use_modifiers\x08\x0Bstart_sound\x18item.netherite_spear.use\x05\x0Cuse_duration\0\xA0\x8CG\x01\x0Femit_vibrations\0\x05\x11movement_modifier\0\0\x80?\x08\x0Bstart_using\x06always\0\n\x19minecraft:piercing_weapon\x05\rhitbox_margin\0\0\x80>\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\0\0\0" } ;
+    pub const NETHERITE_SPEAR : Self = Self { id : 854 , registry_key : "minecraft:netherite_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:tags\t\x04tags\x08\x04\x18minecraft:netherite_tier\x12minecraft:is_spear\0\n\x17minecraft:use_modifiers\x08\x0Bstart_using\x06always\x05\x0Cuse_duration\0\xA0\x8CG\x01\x0Femit_vibrations\0\x05\x11movement_modifier\0\0\x80?\x08\x0Bstart_sound\x18item.netherite_spear.use\0\n\x14minecraft:durability\n\rdamage_chance\x03\x03min\0\x03\x03max\xC8\x01\0\x03\x0Emax_durability\xDC\x1F\0\n\x16minecraft:display_name\x08\x05value\x19item.netherite_spear.name\0\n\x15minecraft:enchantable\x01\x05value\x0F\x08\x04slot\x0Bmelee_spear\0\n\x0Fitem_properties\x03\x0Cuse_duration\x80\xE4\xAF\x01\x05\x0Cmining_speed\0\0\x80?\x03\x0Emax_stack_size\x02\x01\rhand_equipped\x01\x01\x0Eallow_off_hand\0\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x03\x06damage\n\x01\x17can_destroy_in_creative\x01\x01\x04foil\0\x03\x0Bframe_count\x02\x01\x12hidden_in_commands\x02\x01\x0Eshould_despawn\x01\x03\x11enchantable_value\x1E\x01\x0Eliquid_clipped\0\x01\x0Fstacked_by_data\0\x08\x10enchantable_slot\x0Bmelee_spear\x03\ruse_animation\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Fnetherite_spear\0\0\0\n\x10minecraft:damage\x02\x05value\x05\0\0\n\x18minecraft:swing_duration\x05\x05value33\x93?\0\n\x18minecraft:fire_resistant\x01\x05value\x01\0\n\x12minecraft:cooldown\x08\x08category\x05spear\x08\x04type\x06attack\x05\x08duration33\x93?\0\t\titem_tags\x08\x04\x18minecraft:netherite_tier\x12minecraft:is_spear\n\x16minecraft:swing_sounds\x08\x0Battack_miss item.netherite_spear.attack_miss\x08\nattack_hit\x1Fitem.netherite_spear.attack_hit\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\t\x05items\n\x02\x08\x04name\x19minecraft:netherite_spear\0\x08\rrepair_amount)context.other->query.remaining_durability\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\t\x05items\n\x02\x08\x04name\x19minecraft:netherite_ingot\0\0\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\x05\rhitbox_margin\0\0\x80>\n\x13dismount_conditions\x05\tmin_speed\0\0\x10A\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_duration2\0\0\n\x11damage_conditions\x05\tmin_speed\0\0\0\0\x05\x12min_relative_speed33\x93@\x02\x0Cmax_duration\xAF\0\0\x02\x05delay\x08\0\n\x14knockback_conditions\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_durationn\0\x05\tmin_speed33\xA3@\0\x05\x0Fdamage_modifier\0\0\0\0\x05\x11damage_multiplier\x9A\x99\x99?\0\0\n\x19minecraft:piercing_weapon\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\x05\rhitbox_margin\0\0\x80>\0\0\0" } ;
     pub const NETHERITE_SWORD: Self = Self {
         id: 617,
         registry_key: "minecraft:netherite_sword",
@@ -93442,7 +99613,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const OMINOUS_TRIAL_KEY : Self = Self { id : 875 , registry_key : "minecraft:ominous_trial_key" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\t\titem_tags\0\0\n\x16minecraft:display_name\x08\x05value\x1Bitem.ominous_trial_key.name\0\n\x0Fitem_properties\x01\x0Fstacked_by_data\0\x03\x06damage\0\x03\x0Cuse_duration\0\x03\x0Emax_stack_size\x80\x01\x01\x17can_destroy_in_creative\x01\x03\x11enchantable_value\0\x08\x0Ecreative_group\0\x05\x0Cmining_speed\0\0\x80?\x08\x10enchantable_slot\x04none\x03\x11creative_category\x08\x01\x12hidden_in_commands\x02\x01\x0Eliquid_clipped\0\x01\x0Eshould_despawn\x01\x01\x0Eallow_off_hand\0\x01\x04foil\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x11ominous_trial_key\0\0\x03\ruse_animation\0\x03\x0Bframe_count\x02\x01\rhand_equipped\0\0\0\0" } ;
+    pub const OMINOUS_TRIAL_KEY : Self = Self { id : 875 , registry_key : "minecraft:ominous_trial_key" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Fitem_properties\x08\x0Ecreative_group\0\x05\x0Cmining_speed\0\0\x80?\x08\x10enchantable_slot\x04none\x03\x0Bframe_count\x02\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x11ominous_trial_key\0\0\x01\x17can_destroy_in_creative\x01\x03\x11creative_category\x08\x01\x12hidden_in_commands\x02\x01\x0Eliquid_clipped\0\x03\x06damage\0\x01\rhand_equipped\0\x03\x0Cuse_duration\0\x01\x04foil\0\x01\x0Fstacked_by_data\0\x03\x11enchantable_value\0\x03\ruse_animation\0\x01\x0Eallow_off_hand\0\x03\x0Emax_stack_size\x80\x01\x01\x0Eshould_despawn\x01\0\t\titem_tags\0\0\n\x16minecraft:display_name\x08\x05value\x1Bitem.ominous_trial_key.name\0\0\0" } ;
     pub const OPEN_EYEBLOSSOM: Self = Self {
         id: -1018,
         registry_key: "minecraft:open_eyeblossom",
@@ -93450,7 +99621,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const ORANGE_BUNDLE : Self = Self { id : 868 , registry_key : "minecraft:orange_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x0Fitem_properties\x01\x04foil\0\x03\x0Emax_stack_size\x02\x03\x06damage\0\x01\x12hidden_in_commands\x02\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x17bundle_orange_open_back\x08\x11bundle_open_front\x18bundle_orange_open_front\x08\x07default\rbundle_orange\0\0\x03\x0Cuse_duration\0\x08\x10enchantable_slot\x04none\x03\ruse_animation\0\x08\x0Ecreative_group\0\x01\rhand_equipped\0\x03\x11enchantable_value\0\x01\x0Eallow_off_hand\0\x03\x0Bframe_count\x02\x01\x0Fstacked_by_data\0\x01\x0Eliquid_clipped\0\x05\x0Cmining_speed\0\0\x80?\x01\x17can_destroy_in_creative\x01\x03\x11creative_category\x06\x01\x0Eshould_despawn\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\t\titem_tags\0\0\0\0" } ;
+    pub const ORANGE_BUNDLE : Self = Self { id : 868 , registry_key : "minecraft:orange_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\t\titem_tags\0\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x0Fitem_properties\x03\x11creative_category\x06\x03\x0Emax_stack_size\x02\x03\ruse_animation\0\x01\x0Eallow_off_hand\0\x03\x11enchantable_value\0\x03\x06damage\0\x01\x04foil\0\x01\x12hidden_in_commands\x02\x01\x17can_destroy_in_creative\x01\x01\x0Eshould_despawn\x01\x08\x10enchantable_slot\x04none\x08\x0Ecreative_group\0\x03\x0Bframe_count\x02\x01\x0Fstacked_by_data\0\x03\x0Cuse_duration\0\x01\rhand_equipped\0\x05\x0Cmining_speed\0\0\x80?\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x17bundle_orange_open_back\x08\x11bundle_open_front\x18bundle_orange_open_front\x08\x07default\rbundle_orange\0\0\x01\x0Eliquid_clipped\0\0\n\x16minecraft:storage_item\t\rallowed_items\0\0\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\x01\x1Aallow_nested_storage_items\x01\0\0\0" } ;
     pub const ORANGE_CANDLE: Self = Self {
         id: -414,
         registry_key: "minecraft:orange_candle",
@@ -93983,7 +100154,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const PINK_BUNDLE : Self = Self { id : 869 , registry_key : "minecraft:pink_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\t\titem_tags\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x0Fitem_properties\x03\x0Bframe_count\x02\x01\x0Eallow_off_hand\0\x03\x06damage\0\x08\x10enchantable_slot\x04none\x01\x0Fstacked_by_data\0\x01\x17can_destroy_in_creative\x01\x08\x0Ecreative_group\0\x01\rhand_equipped\0\x03\ruse_animation\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Eshould_despawn\x01\x01\x04foil\0\x03\x11creative_category\x06\x03\x0Emax_stack_size\x02\x01\x12hidden_in_commands\x02\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x15bundle_pink_open_back\x08\x11bundle_open_front\x16bundle_pink_open_front\x08\x07default\x0Bbundle_pink\0\0\x03\x11enchantable_value\0\x01\x0Eliquid_clipped\0\x03\x0Cuse_duration\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\0\0" } ;
+    pub const PINK_BUNDLE : Self = Self { id : 869 , registry_key : "minecraft:pink_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\t\titem_tags\0\0\n\x16minecraft:storage_item\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\x03\tmax_slots\x80\x01\0\n\x0Fitem_properties\x03\ruse_animation\0\x01\x0Eallow_off_hand\0\x01\x04foil\0\x08\x0Ecreative_group\0\x01\x17can_destroy_in_creative\x01\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Bbundle_pink\x08\x10bundle_open_back\x15bundle_pink_open_back\x08\x11bundle_open_front\x16bundle_pink_open_front\0\0\x03\x0Cuse_duration\0\x01\x0Eliquid_clipped\0\x08\x10enchantable_slot\x04none\x03\x11creative_category\x06\x01\rhand_equipped\0\x03\x0Emax_stack_size\x02\x05\x0Cmining_speed\0\0\x80?\x01\x0Eshould_despawn\x01\x03\x11enchantable_value\0\x01\x12hidden_in_commands\x02\x03\x0Bframe_count\x02\x03\x06damage\0\x01\x0Fstacked_by_data\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
     pub const PINK_CANDLE: Self = Self {
         id: -419,
         registry_key: "minecraft:pink_candle",
@@ -94124,7 +100295,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const PITCHER_POD : Self = Self { id : 297 , registry_key : "minecraft:pitcher_pod" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\x01\x1Aplant_at_any_solid_surface\0\x08\rplant_at_face\x02up\x08\x0Bcrop_result\x16minecraft:pitcher_crop\t\x08plant_at\x08\x02\x12minecraft:farmland\0\0\0" } ;
+    pub const PITCHER_POD : Self = Self { id : 297 , registry_key : "minecraft:pitcher_pod" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\t\x08plant_at\x08\x02\x12minecraft:farmland\x08\rplant_at_face\x02up\x08\x0Bcrop_result\x16minecraft:pitcher_crop\x01\x1Aplant_at_any_solid_surface\0\0\0\0" } ;
     pub const PLANKS: Self = Self {
         id: 814,
         registry_key: "minecraft:planks",
@@ -94160,7 +100331,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const POISONOUS_POTATO : Self = Self { id : 282 , registry_key : "minecraft:poisonous_potato" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\t\x07effects\n\x02\x03\tamplifier\0\x03\x08duration\n\x08\x04name\x06poison\x03\x02id&\x08\rdescriptionId\rpotion.poison\x05\x06chance\x9A\x99\x19?\0\x08\rcooldown_type\0\x08\x11using_converts_to\0\x03\rcooldown_time\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\tnutrition\x04\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\x05\x13saturation_modifier\x9A\x99\x99>\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const POISONOUS_POTATO : Self = Self { id : 282 , registry_key : "minecraft:poisonous_potato" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\ron_use_action\x01\t\x07effects\n\x02\x05\x06chance\x9A\x99\x19?\x03\x08duration\n\x08\x04name\x06poison\x08\rdescriptionId\rpotion.poison\x03\tamplifier\0\x03\x02id&\0\x03\rcooldown_time\0\x01\x0Ecan_always_eat\0\x08\x11using_converts_to\0\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\x9A\x99\x99>\x03\tnutrition\x04\0\x03\x16minecraft:use_duration@\0\0" } ;
     pub const POLAR_BEAR_SPAWN_EGG: Self = Self {
         id: 477,
         registry_key: "minecraft:polar_bear_spawn_egg",
@@ -94637,7 +100808,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const PORKCHOP : Self = Self { id : 262 , registry_key : "minecraft:porkchop" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\tnutrition\x06\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x99>\x03\ron_use_action\x01\x08\rcooldown_type\0\x08\x11using_converts_to\0\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const PORKCHOP : Self = Self { id : 262 , registry_key : "minecraft:porkchop" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\tnutrition\x06\x08\rcooldown_type\0\x05\x13saturation_modifier\x9A\x99\x99>\x03\ron_use_action\x01\x03\rcooldown_time\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x01\x0Ecan_always_eat\0\x08\x11using_converts_to\0\0\0\0" } ;
     pub const PORTAL: Self = Self {
         id: 90,
         registry_key: "minecraft:portal",
@@ -94645,7 +100816,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const POTATO : Self = Self { id : 280 , registry_key : "minecraft:potato" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\ron_use_action\x01\x03\rcooldown_time\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\x05\x13saturation_modifier\x9A\x99\x99>\x08\x11using_converts_to\0\x03\tnutrition\x02\0\n\x0Eminecraft:seed\x01\x1Aplant_at_any_solid_surface\0\x08\rplant_at_face\x02up\x08\x0Bcrop_result\x12minecraft:potatoes\t\x08plant_at\x08\x02\x12minecraft:farmland\0\0\0" } ;
+    pub const POTATO : Self = Self { id : 280 , registry_key : "minecraft:potato" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\rcooldown_time\0\x03\tnutrition\x02\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x01\x0Ecan_always_eat\0\x08\rcooldown_type\0\x05\x13saturation_modifier\x9A\x99\x99>\x08\x11using_converts_to\0\0\n\x0Eminecraft:seed\x01\x1Aplant_at_any_solid_surface\0\t\x08plant_at\x08\x02\x12minecraft:farmland\x08\x0Bcrop_result\x12minecraft:potatoes\x08\rplant_at_face\x02up\0\x03\x16minecraft:use_duration@\0\0" } ;
     pub const POTATOES: Self = Self {
         id: 142,
         registry_key: "minecraft:potatoes",
@@ -94779,7 +100950,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const PUFFERFISH : Self = Self { id : 267 , registry_key : "minecraft:pufferfish" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x03\tnutrition\x02\x03\ron_use_action\x01\x05\x13saturation_modifier\xCD\xCC\xCC=\x08\x11using_converts_to\0\x08\rcooldown_type\0\x01\x0Ecan_always_eat\0\t\x07effects\n\x06\x03\x08durationx\x08\rdescriptionId\rpotion.poison\x03\tamplifier\x02\x03\x02id&\x05\x06chance\0\0\x80?\x08\x04name\x06poison\0\x03\tamplifier\0\x03\x02id\x12\x08\x04name\x06nausea\x05\x06chance\0\0\x80?\x08\rdescriptionId\x10potion.confusion\x03\x08duration\x1E\0\x03\x08duration\x1E\x03\x02id\"\x05\x06chance\0\0\x80?\x03\tamplifier\x04\x08\rdescriptionId\rpotion.hunger\x08\x04name\x06hunger\0\0\x01\x19minecraft:stacked_by_data\x01\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const PUFFERFISH : Self = Self { id : 267 , registry_key : "minecraft:pufferfish" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x01\x19minecraft:stacked_by_data\x01\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\tnutrition\x02\x08\rcooldown_type\0\x03\rcooldown_time\0\t\x07effects\n\x06\x03\tamplifier\x02\x03\x08durationx\x05\x06chance\0\0\x80?\x08\x04name\x06poison\x08\rdescriptionId\rpotion.poison\x03\x02id&\0\x08\rdescriptionId\x10potion.confusion\x08\x04name\x06nausea\x03\tamplifier\0\x03\x08duration\x1E\x03\x02id\x12\x05\x06chance\0\0\x80?\0\x05\x06chance\0\0\x80?\x08\x04name\x06hunger\x03\tamplifier\x04\x08\rdescriptionId\rpotion.hunger\x03\x02id\"\x03\x08duration\x1E\0\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x05\x13saturation_modifier\xCD\xCC\xCC=\x01\x0Ecan_always_eat\0\0\0\0" } ;
     pub const PUFFERFISH_BUCKET: Self = Self {
         id: 370,
         registry_key: "minecraft:pufferfish_bucket",
@@ -94801,8 +100972,8 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const PUMPKIN_PIE : Self = Self { id : 284 , registry_key : "minecraft:pumpkin_pie" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\x11using_converts_to\0\x08\rcooldown_type\0\x03\tnutrition\x10\x03\ron_use_action\x01\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x99>\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\0\x03\x16minecraft:use_duration@\0\0" } ;
-    pub const PUMPKIN_SEEDS : Self = Self { id : 292 , registry_key : "minecraft:pumpkin_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\t\x08plant_at\x08\x02\x12minecraft:farmland\x01\x1Aplant_at_any_solid_surface\0\x08\x0Bcrop_result\x16minecraft:pumpkin_stem\x08\rplant_at_face\x02up\0\0\0" } ;
+    pub const PUMPKIN_PIE : Self = Self { id : 284 , registry_key : "minecraft:pumpkin_pie" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x05\x13saturation_modifier\x9A\x99\x99>\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x03\rcooldown_time\0\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\x03\tnutrition\x10\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const PUMPKIN_SEEDS : Self = Self { id : 292 , registry_key : "minecraft:pumpkin_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\x08\rplant_at_face\x02up\t\x08plant_at\x08\x02\x12minecraft:farmland\x01\x1Aplant_at_any_solid_surface\0\x08\x0Bcrop_result\x16minecraft:pumpkin_stem\0\0\0" } ;
     pub const PUMPKIN_STEM: Self = Self {
         id: 104,
         registry_key: "minecraft:pumpkin_stem",
@@ -94810,7 +100981,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const PURPLE_BUNDLE : Self = Self { id : 870 , registry_key : "minecraft:purple_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\t\titem_tags\0\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x0Fitem_properties\x01\x0Fstacked_by_data\0\x08\x10enchantable_slot\x04none\x03\x11creative_category\x06\x01\x0Eallow_off_hand\0\x01\x0Eliquid_clipped\0\x01\x12hidden_in_commands\x02\x01\rhand_equipped\0\x01\x04foil\0\x08\x0Ecreative_group\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x17bundle_purple_open_back\x08\x11bundle_open_front\x18bundle_purple_open_front\x08\x07default\rbundle_purple\0\0\x03\x0Bframe_count\x02\x01\x17can_destroy_in_creative\x01\x03\x0Emax_stack_size\x02\x01\x0Eshould_despawn\x01\x03\ruse_animation\0\x05\x0Cmining_speed\0\0\x80?\x03\x0Cuse_duration\0\x03\x06damage\0\x03\x11enchantable_value\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\t\rallowed_items\0\0\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\0\0" } ;
+    pub const PURPLE_BUNDLE : Self = Self { id : 870 , registry_key : "minecraft:purple_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Fitem_properties\x01\x0Eallow_off_hand\0\x03\ruse_animation\0\x08\x0Ecreative_group\0\x01\x12hidden_in_commands\x02\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x17bundle_purple_open_back\x08\x11bundle_open_front\x18bundle_purple_open_front\x08\x07default\rbundle_purple\0\0\x03\x06damage\0\x01\rhand_equipped\0\x01\x0Fstacked_by_data\0\x01\x04foil\0\x03\x11creative_category\x06\x01\x0Eshould_despawn\x01\x01\x17can_destroy_in_creative\x01\x08\x10enchantable_slot\x04none\x03\x11enchantable_value\0\x01\x0Eliquid_clipped\0\x05\x0Cmining_speed\0\0\x80?\x03\x0Emax_stack_size\x02\x03\x0Cuse_duration\0\x03\x0Bframe_count\x02\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\t\titem_tags\0\0\0\0" } ;
     pub const PURPLE_CANDLE: Self = Self {
         id: -423,
         registry_key: "minecraft:purple_candle",
@@ -95000,7 +101171,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const RABBIT : Self = Self { id : 288 , registry_key : "minecraft:rabbit" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\ron_use_action\x01\x08\rcooldown_type\0\x03\tnutrition\x06\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\x9A\x99\x99>\x03\rcooldown_time\0\x01\x0Ecan_always_eat\0\x08\x11using_converts_to\0\0\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const RABBIT : Self = Self { id : 288 , registry_key : "minecraft:rabbit" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\rcooldown_time\0\x03\tnutrition\x06\x03\ron_use_action\x01\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x01\x0Ecan_always_eat\0\x05\x13saturation_modifier\x9A\x99\x99>\x08\x11using_converts_to\0\0\x03\x16minecraft:use_duration@\0\0" } ;
     pub const RABBIT_FOOT: Self = Self {
         id: 538,
         registry_key: "minecraft:rabbit_foot",
@@ -95022,7 +101193,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const RABBIT_STEW : Self = Self { id : 290 , registry_key : "minecraft:rabbit_stew" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x05\x13saturation_modifier\x9A\x99\x19?\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\tnutrition\x14\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\x08\rcooldown_type\0\x03\ron_use_action\x01\x08\x11using_converts_to\x04bowl\0\x03\x18minecraft:max_stack_size\x02\0\0" } ;
+    pub const RABBIT_STEW : Self = Self { id : 290 , registry_key : "minecraft:rabbit_stew" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x18minecraft:max_stack_size\x02\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x05\x13saturation_modifier\x9A\x99\x19?\x03\tnutrition\x14\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\rcooldown_time\0\x08\rcooldown_type\0\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\x08\x11using_converts_to\x04bowl\0\0\0" } ;
     pub const RAIL: Self = Self {
         id: 66,
         registry_key: "minecraft:rail",
@@ -95100,7 +101271,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const RED_BUNDLE : Self = Self { id : 871 , registry_key : "minecraft:red_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\t\titem_tags\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x0Fitem_properties\x03\x11enchantable_value\0\x01\x12hidden_in_commands\x02\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x14bundle_red_open_back\x08\x11bundle_open_front\x15bundle_red_open_front\x08\x07default\nbundle_red\0\0\x01\x0Eallow_off_hand\0\x05\x0Cmining_speed\0\0\x80?\x01\x0Eliquid_clipped\0\x01\x0Eshould_despawn\x01\x08\x10enchantable_slot\x04none\x01\x0Fstacked_by_data\0\x01\x04foil\0\x01\x17can_destroy_in_creative\x01\x03\x06damage\0\x03\x11creative_category\x06\x03\x0Emax_stack_size\x02\x03\x0Cuse_duration\0\x03\x0Bframe_count\x02\x03\ruse_animation\0\x08\x0Ecreative_group\0\x01\rhand_equipped\0\0\0\0" } ;
+    pub const RED_BUNDLE : Self = Self { id : 871 , registry_key : "minecraft:red_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x16minecraft:storage_item\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x0Fitem_properties\n\x0Eminecraft:icon\n\x08textures\x08\x11bundle_open_front\x15bundle_red_open_front\x08\x07default\nbundle_red\x08\x10bundle_open_back\x14bundle_red_open_back\0\0\x03\x0Cuse_duration\0\x08\x10enchantable_slot\x04none\x01\rhand_equipped\0\x05\x0Cmining_speed\0\0\x80?\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x01\x04foil\0\x01\x17can_destroy_in_creative\x01\x01\x0Fstacked_by_data\0\x03\x11enchantable_value\0\x03\x06damage\0\x01\x0Eallow_off_hand\0\x01\x0Eshould_despawn\x01\x03\ruse_animation\0\x03\x0Bframe_count\x02\x03\x0Emax_stack_size\x02\x01\x0Eliquid_clipped\0\x01\x12hidden_in_commands\x02\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\t\titem_tags\0\0\0\0" } ;
     pub const RED_CANDLE: Self = Self {
         id: -427,
         registry_key: "minecraft:red_candle",
@@ -95458,7 +101629,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const ROTTEN_FLESH : Self = Self { id : 277 , registry_key : "minecraft:rotten_flesh" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x08\rcooldown_type\0\x03\tnutrition\x08\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x01\x0Ecan_always_eat\0\t\x07effects\n\x02\x05\x06chance\xCD\xCCL?\x08\rdescriptionId\rpotion.hunger\x03\x02id\"\x03\x08duration<\x08\x04name\x06hunger\x03\tamplifier\0\0\x03\ron_use_action\x01\x05\x13saturation_modifier\xCD\xCC\xCC=\x08\x11using_converts_to\0\x03\rcooldown_time\0\0\0\0" } ;
+    pub const ROTTEN_FLESH : Self = Self { id : 277 , registry_key : "minecraft:rotten_flesh" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\rcooldown_time\0\x08\rcooldown_type\0\x03\ron_use_action\x01\t\x07effects\n\x02\x08\rdescriptionId\rpotion.hunger\x03\x02id\"\x03\tamplifier\0\x05\x06chance\xCD\xCCL?\x03\x08duration<\x08\x04name\x06hunger\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\xCD\xCC\xCC=\x01\x0Ecan_always_eat\0\x08\x11using_converts_to\0\x03\tnutrition\x08\0\0\0" } ;
     pub const SADDLE: Self = Self {
         id: 374,
         registry_key: "minecraft:saddle",
@@ -95466,7 +101637,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const SALMON : Self = Self { id : 265 , registry_key : "minecraft:salmon" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x05\x13saturation_modifier\xCD\xCC\xCC=\x03\ron_use_action\x01\x08\rcooldown_type\0\x01\x0Ecan_always_eat\0\x08\x11using_converts_to\0\x03\tnutrition\x04\x03\rcooldown_time\0\0\x01\x19minecraft:stacked_by_data\x01\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const SALMON : Self = Self { id : 265 , registry_key : "minecraft:salmon" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\x01\x19minecraft:stacked_by_data\x01\n\x0Eminecraft:food\x03\ron_use_action\x01\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\rcooldown_type\0\x01\x0Ecan_always_eat\0\x03\tnutrition\x04\x05\x13saturation_modifier\xCD\xCC\xCC=\x08\x11using_converts_to\0\x03\rcooldown_time\0\0\0\0" } ;
     pub const SALMON_BUCKET: Self = Self {
         id: 368,
         registry_key: "minecraft:salmon_bucket",
@@ -96027,7 +102198,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const SPIDER_EYE : Self = Self { id : 278 , registry_key : "minecraft:spider_eye" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x01\x0Ecan_always_eat\0\x03\tnutrition\x04\x03\rcooldown_time\0\t\x07effects\n\x02\x03\x08duration\n\x08\x04name\x06poison\x03\tamplifier\0\x03\x02id&\x08\rdescriptionId\rpotion.poison\x05\x06chance\0\0\x80?\0\x03\ron_use_action\x01\x08\rcooldown_type\0\x05\x13saturation_modifier\xCD\xCCL?\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\0\0\0" } ;
+    pub const SPIDER_EYE : Self = Self { id : 278 , registry_key : "minecraft:spider_eye" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x08\x11using_converts_to\0\x03\rcooldown_time\0\x03\tnutrition\x04\x05\x13saturation_modifier\xCD\xCCL?\x08\rcooldown_type\0\t\x07effects\n\x02\x03\tamplifier\0\x05\x06chance\0\0\x80?\x08\rdescriptionId\rpotion.poison\x03\x02id&\x03\x08duration\n\x08\x04name\x06poison\0\x03\ron_use_action\x01\x01\x0Ecan_always_eat\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\0\x03\x16minecraft:use_duration@\0\0" } ;
     pub const SPIDER_SPAWN_EGG: Self = Self {
         id: 450,
         registry_key: "minecraft:spider_spawn_egg",
@@ -96392,7 +102563,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const STONE_SPEAR : Self = Self { id : 855 , registry_key : "minecraft:stone_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\x08\rrepair_amount)context.other->query.remaining_durability\t\x05items\n\x02\x08\x04name\x15minecraft:stone_spear\0\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\t\x05items\n\x02\x08\x04tags,q.all_tags('minecraft:stone_tool_materials')\0\0\0\n\x17minecraft:use_modifiers\x05\x11movement_modifier\0\0\x80?\x08\x0Bstart_using\x06always\x05\x0Cuse_duration\0\xA0\x8CG\x01\x0Femit_vibrations\0\x08\x0Bstart_sound\x14item.stone_spear.use\0\n\x19minecraft:piercing_weapon\x05\rhitbox_margin\0\0\x80>\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\0\n\x14minecraft:durability\n\rdamage_chance\x03\x03max\xC8\x01\x03\x03min\0\0\x03\x0Emax_durability\x84\x02\0\n\x0Fitem_properties\x03\x11creative_category\x06\x01\rhand_equipped\x01\x03\x0Emax_stack_size\x02\x01\x0Eallow_off_hand\0\x01\x17can_destroy_in_creative\x01\x01\x0Eliquid_clipped\0\x03\x0Bframe_count\x02\x08\x0Ecreative_group\0\x01\x0Fstacked_by_data\0\x03\x0Cuse_duration\x80\xE4\xAF\x01\x01\x04foil\0\x03\ruse_animation\0\x05\x0Cmining_speed\0\0\x80?\x08\x10enchantable_slot\x0Bmelee_spear\x01\x12hidden_in_commands\x02\x03\x11enchantable_value\n\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Bstone_spear\0\0\x03\x06damage\x04\x01\x0Eshould_despawn\x01\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\t\titem_tags\x08\x04\x14minecraft:stone_tier\x12minecraft:is_spear\n\x10minecraft:damage\x02\x05value\x02\0\0\n\x16minecraft:display_name\x08\x05value\x15item.stone_spear.name\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\n\x13dismount_conditions\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_durationZ\0\x05\tmin_speed\0\0PA\0\x05\x0Fdamage_modifier\0\0\0\0\n\x14knockback_conditions\x02\x0Cmax_duration\xB4\0\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed33\xA3@\0\x05\x11damage_multiplier\x85\xEBQ?\x05\rhitbox_margin\0\0\x80>\x02\x05delay\x0E\0\n\x11damage_conditions\x02\x0Cmax_duration\x13\x01\x05\x12min_relative_speed33\x93@\x05\tmin_speed\0\0\0\0\0\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\0\0\n\x15minecraft:enchantable\x08\x04slot\x0Bmelee_spear\x01\x05value\x05\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x18minecraft:swing_duration\x05\x05value\0\0@?\0\n\x12minecraft:cooldown\x08\x04type\x06attack\x05\x08duration\0\0@?\x08\x08category\x05spear\0\n\x16minecraft:swing_sounds\x08\nattack_hit\x1Bitem.stone_spear.attack_hit\x08\x0Battack_miss\x1Citem.stone_spear.attack_miss\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x14minecraft:stone_tier\x12minecraft:is_spear\0\0\0" } ;
+    pub const STONE_SPEAR : Self = Self { id : 855 , registry_key : "minecraft:stone_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x10minecraft:damage\x02\x05value\x02\0\0\n\x15minecraft:enchantable\x01\x05value\x05\x08\x04slot\x0Bmelee_spear\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\t\x05items\n\x02\x08\x04name\x15minecraft:stone_spear\0\x08\rrepair_amount)context.other->query.remaining_durability\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\t\x05items\n\x02\x08\x04tags,q.all_tags('minecraft:stone_tool_materials')\0\0\0\n\x17minecraft:use_modifiers\x01\x0Femit_vibrations\0\x05\x0Cuse_duration\0\xA0\x8CG\x08\x0Bstart_sound\x14item.stone_spear.use\x05\x11movement_modifier\0\0\x80?\x08\x0Bstart_using\x06always\0\t\titem_tags\x08\x04\x14minecraft:stone_tier\x12minecraft:is_spear\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x14minecraft:durability\n\rdamage_chance\x03\x03min\0\x03\x03max\xC8\x01\0\x03\x0Emax_durability\x84\x02\0\n\x18minecraft:swing_duration\x05\x05value\0\0@?\0\n\x0Fitem_properties\x03\ruse_animation\0\x01\x12hidden_in_commands\x02\x03\x0Bframe_count\x02\x01\x0Eliquid_clipped\0\x03\x0Cuse_duration\x80\xE4\xAF\x01\x01\x17can_destroy_in_creative\x01\x03\x11enchantable_value\n\x08\x0Ecreative_group\0\x01\x0Eshould_despawn\x01\x03\x11creative_category\x06\x01\x04foil\0\x03\x0Emax_stack_size\x02\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Bstone_spear\0\0\x08\x10enchantable_slot\x0Bmelee_spear\x05\x0Cmining_speed\0\0\x80?\x01\x0Eallow_off_hand\0\x01\x0Fstacked_by_data\0\x03\x06damage\x04\x01\rhand_equipped\x01\0\n\x12minecraft:cooldown\x08\x08category\x05spear\x05\x08duration\0\0@?\x08\x04type\x06attack\0\n\x16minecraft:swing_sounds\x08\x0Battack_miss\x1Citem.stone_spear.attack_miss\x08\nattack_hit\x1Bitem.stone_spear.attack_hit\0\n\x19minecraft:piercing_weapon\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\x05\rhitbox_margin\0\0\x80>\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x14minecraft:stone_tier\x12minecraft:is_spear\0\n\x16minecraft:display_name\x08\x05value\x15item.stone_spear.name\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\x05\rhitbox_margin\0\0\x80>\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\n\x14knockback_conditions\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed33\xA3@\x02\x0Cmax_duration\xB4\0\0\x05\x11damage_multiplier\x85\xEBQ?\x05\x0Fdamage_modifier\0\0\0\0\n\x11damage_conditions\x05\x12min_relative_speed33\x93@\x02\x0Cmax_duration\x13\x01\x05\tmin_speed\0\0\0\0\0\n\x13dismount_conditions\x05\tmin_speed\0\0PA\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_durationZ\0\0\x02\x05delay\x0E\0\0\0\0\0" } ;
     pub const STONE_STAIRS: Self = Self {
         id: 67,
         registry_key: "minecraft:stone_stairs",
@@ -96771,8 +102942,8 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const SUSPICIOUS_STEW : Self = Self { id : 602 , registry_key : "minecraft:suspicious_stew" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\rcooldown_time\0\x03\tnutrition\x0C\x01\x0Ecan_always_eat\x01\x03\ron_use_action\x02\x05\x13saturation_modifier\x9A\x99\x19?\x08\rcooldown_type\0\x08\x11using_converts_to\x04bowl\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\0\x03\x18minecraft:max_stack_size\x02\x03\x16minecraft:use_duration@\0\0" } ;
-    pub const SWEET_BERRIES : Self = Self { id : 287 , registry_key : "minecraft:sweet_berries" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x05\x13saturation_modifier\x9A\x99\x99>\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\x08\x11using_converts_to\0\x03\tnutrition\x04\x03\rcooldown_time\0\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\0\n\x0Eminecraft:seed\t\x08plant_at\x08\x14\x08farmland\x05grass\x04dirt\x0Bcoarse_dirt\x06podzol\nmoss_block\x08mycelium\x03mud\x14muddy_mangrove_roots\x0Fdirt_with_roots\x01\x1Aplant_at_any_solid_surface\0\x08\x0Bcrop_result\x1Aminecraft:sweet_berry_bush\x08\rplant_at_face\x02up\0\0\0" } ;
+    pub const SUSPICIOUS_STEW : Self = Self { id : 602 , registry_key : "minecraft:suspicious_stew" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x18minecraft:max_stack_size\x02\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x03\rcooldown_time\0\x08\rcooldown_type\0\x05\x13saturation_modifier\x9A\x99\x19?\x03\tnutrition\x0C\x01\x0Ecan_always_eat\x01\x08\x11using_converts_to\x04bowl\x03\ron_use_action\x02\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\0\0\0" } ;
+    pub const SWEET_BERRIES : Self = Self { id : 287 , registry_key : "minecraft:sweet_berries" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:seed\x08\x0Bcrop_result\x1Aminecraft:sweet_berry_bush\x01\x1Aplant_at_any_solid_surface\0\x08\rplant_at_face\x02up\t\x08plant_at\x08\x14\x08farmland\x05grass\x04dirt\x0Bcoarse_dirt\x06podzol\nmoss_block\x08mycelium\x03mud\x14muddy_mangrove_roots\x0Fdirt_with_roots\0\n\x0Eminecraft:food\x08\rcooldown_type\0\x03\rcooldown_time\0\x05\x13saturation_modifier\x9A\x99\x99>\x08\x11using_converts_to\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x03\tnutrition\x04\x01\x0Ecan_always_eat\0\x03\ron_use_action\x01\0\0\0" } ;
     pub const SWEET_BERRY_BUSH: Self = Self {
         id: -207,
         registry_key: "minecraft:sweet_berry_bush",
@@ -96871,7 +103042,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const TORCHFLOWER_SEEDS : Self = Self { id : 296 , registry_key : "minecraft:torchflower_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\x08\x0Bcrop_result\x1Aminecraft:torchflower_crop\t\x08plant_at\x08\x02\x12minecraft:farmland\x08\rplant_at_face\x02up\x01\x1Aplant_at_any_solid_surface\0\0\0\0" } ;
+    pub const TORCHFLOWER_SEEDS : Self = Self { id : 296 , registry_key : "minecraft:torchflower_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\x01\x1Aplant_at_any_solid_surface\0\x08\rplant_at_face\x02up\t\x08plant_at\x08\x02\x12minecraft:farmland\x08\x0Bcrop_result\x1Aminecraft:torchflower_crop\0\0\0" } ;
     pub const TOTEM_OF_UNDYING: Self = Self {
         id: 578,
         registry_key: "minecraft:totem_of_undying",
@@ -96900,7 +103071,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const TRIAL_KEY : Self = Self { id : 876 , registry_key : "minecraft:trial_key" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Fitem_properties\x01\x04foil\0\x03\x0Bframe_count\x02\x08\x10enchantable_slot\x04none\x01\x0Eshould_despawn\x01\x01\x12hidden_in_commands\x02\x03\x0Emax_stack_size\x80\x01\x03\x0Cuse_duration\0\x03\x06damage\0\x03\x11enchantable_value\0\x01\rhand_equipped\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\ttrial_key\0\0\x03\x11creative_category\x08\x01\x0Eliquid_clipped\0\x05\x0Cmining_speed\0\0\x80?\x01\x17can_destroy_in_creative\x01\x03\ruse_animation\0\x01\x0Fstacked_by_data\0\x08\x0Ecreative_group\0\x01\x0Eallow_off_hand\0\0\t\titem_tags\0\0\n\x16minecraft:display_name\x08\x05value\x13item.trial_key.name\0\0\0" } ;
+    pub const TRIAL_KEY : Self = Self { id : 876 , registry_key : "minecraft:trial_key" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x16minecraft:display_name\x08\x05value\x13item.trial_key.name\0\t\titem_tags\0\0\n\x0Fitem_properties\x01\x0Eallow_off_hand\0\x03\x06damage\0\x01\x0Eshould_despawn\x01\x08\x10enchantable_slot\x04none\x03\x11enchantable_value\0\x03\x0Bframe_count\x02\x01\x0Fstacked_by_data\0\x01\x17can_destroy_in_creative\x01\x01\rhand_equipped\0\x01\x0Eliquid_clipped\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\ttrial_key\0\0\x03\x11creative_category\x08\x03\x0Emax_stack_size\x80\x01\x05\x0Cmining_speed\0\0\x80?\x01\x04foil\0\x03\ruse_animation\0\x08\x0Ecreative_group\0\x01\x12hidden_in_commands\x02\x03\x0Cuse_duration\0\0\0\0" } ;
     pub const TRIAL_SPAWNER: Self = Self {
         id: -315,
         registry_key: "minecraft:trial_spawner",
@@ -96929,7 +103100,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const TROPICAL_FISH : Self = Self { id : 266 , registry_key : "minecraft:tropical_fish" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:food\x03\tnutrition\x02\x01\x0Ecan_always_eat\0\x03\rcooldown_time\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\rcooldown_type\0\x03\ron_use_action\x01\x05\x13saturation_modifier\xCD\xCC\xCC=\x08\x11using_converts_to\0\0\x01\x19minecraft:stacked_by_data\x01\x03\x16minecraft:use_duration@\0\0" } ;
+    pub const TROPICAL_FISH : Self = Self { id : 266 , registry_key : "minecraft:tropical_fish" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\x03\x16minecraft:use_duration@\n\x0Eminecraft:food\x05\x13saturation_modifier\xCD\xCC\xCC=\x08\rcooldown_type\0\t\x0Con_use_range\x05\x06\0\0\0A\0\0\0A\0\0\0A\x08\x11using_converts_to\0\x03\ron_use_action\x01\x01\x0Ecan_always_eat\0\x03\tnutrition\x02\x03\rcooldown_time\0\0\x01\x19minecraft:stacked_by_data\x01\0\0" } ;
     pub const TROPICAL_FISH_BUCKET: Self = Self {
         id: 369,
         registry_key: "minecraft:tropical_fish_bucket",
@@ -97980,8 +104151,8 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const WHEAT_SEEDS : Self = Self { id : 291 , registry_key : "minecraft:wheat_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\x08\rplant_at_face\x02up\x08\x0Bcrop_result\x0Fminecraft:wheat\x01\x1Aplant_at_any_solid_surface\0\t\x08plant_at\x08\x02\x12minecraft:farmland\0\0\0" } ;
-    pub const WHITE_BUNDLE : Self = Self { id : 872 , registry_key : "minecraft:white_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x0Fitem_properties\x01\x0Eliquid_clipped\0\x01\x04foil\0\x01\rhand_equipped\0\x01\x0Eallow_off_hand\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x16bundle_white_open_back\x08\x11bundle_open_front\x17bundle_white_open_front\x08\x07default\x0Cbundle_white\0\0\x01\x0Fstacked_by_data\0\x03\x11enchantable_value\0\x01\x12hidden_in_commands\x02\x05\x0Cmining_speed\0\0\x80?\x08\x10enchantable_slot\x04none\x03\x0Bframe_count\x02\x03\x0Emax_stack_size\x02\x03\x0Cuse_duration\0\x03\x11creative_category\x06\x01\x0Eshould_despawn\x01\x03\ruse_animation\0\x01\x17can_destroy_in_creative\x01\x08\x0Ecreative_group\0\x03\x06damage\0\0\t\titem_tags\0\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x16minecraft:storage_item\x01\x1Aallow_nested_storage_items\x01\x03\tmax_slots\x80\x01\t\rallowed_items\0\0\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\0\0" } ;
+    pub const WHEAT_SEEDS : Self = Self { id : 291 , registry_key : "minecraft:wheat_seeds" , version : BedrockItemVersion :: Legacy , component_based : false , definition_components : b"\n\0\n\ncomponents\n\x0Eminecraft:seed\x08\rplant_at_face\x02up\x08\x0Bcrop_result\x0Fminecraft:wheat\t\x08plant_at\x08\x02\x12minecraft:farmland\x01\x1Aplant_at_any_solid_surface\0\0\0\0" } ;
+    pub const WHITE_BUNDLE : Self = Self { id : 872 , registry_key : "minecraft:white_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x16minecraft:storage_item\t\rallowed_items\0\0\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\x01\x1Aallow_nested_storage_items\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\t\titem_tags\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x0Fitem_properties\x05\x0Cmining_speed\0\0\x80?\x03\x0Cuse_duration\0\x01\x17can_destroy_in_creative\x01\x03\x0Bframe_count\x02\x01\x0Eliquid_clipped\0\x03\ruse_animation\0\x01\x12hidden_in_commands\x02\x08\x10enchantable_slot\x04none\x03\x0Emax_stack_size\x02\x01\x04foil\0\x01\x0Fstacked_by_data\0\x03\x11enchantable_value\0\x01\x0Eallow_off_hand\0\x01\x0Eshould_despawn\x01\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x01\rhand_equipped\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x16bundle_white_open_back\x08\x07default\x0Cbundle_white\x08\x11bundle_open_front\x17bundle_white_open_front\0\0\x03\x06damage\0\0\0\0" } ;
     pub const WHITE_CANDLE: Self = Self {
         id: -413,
         registry_key: "minecraft:white_candle",
@@ -98101,7 +104272,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const WIND_CHARGE : Self = Self { id : 877 , registry_key : "minecraft:wind_charge" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x0Fitem_properties\x03\x11enchantable_value\0\x03\x0Emax_stack_size\x80\x01\x01\x17can_destroy_in_creative\x01\x01\x0Eshould_despawn\x01\x01\x0Fstacked_by_data\0\x08\x0Ecreative_group\0\x03\x0Bframe_count\x02\x01\x0Eallow_off_hand\0\x03\x06damage\0\x03\x11creative_category\x06\x03\x0Cuse_duration\0\x01\rhand_equipped\0\x01\x04foil\0\x01\x12hidden_in_commands\x02\x01\x0Eliquid_clipped\0\x05\x0Cmining_speed\0\0\x80?\x03\ruse_animation\0\x08\x10enchantable_slot\x04none\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Bwind_charge\0\0\0\n\x14minecraft:projectile\x08\x11projectile_entity\"minecraft:wind_charge_projectile<>\x05\x16minimum_critical_power\0\0\0\0\0\n\x12minecraft:cooldown\x08\x08category\x0Bwind_charge\x05\x08duration\0\0\0?\x08\x04type\x03use\0\n\x13minecraft:throwable\x05\x10max_launch_power\0\0\xC0?\x01\x12do_swing_animation\x01\x05\x12launch_power_scale\0\0\xC0?\x05\x11min_draw_duration\0\0\0\0\x01\x1Cscale_power_by_draw_duration\0\x05\x11max_draw_duration\0\0\0\0\0\n\x16minecraft:display_name\x08\x05value\x15item.wind_charge.name\0\t\titem_tags\0\0\0\0" } ;
+    pub const WIND_CHARGE : Self = Self { id : 877 , registry_key : "minecraft:wind_charge" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x12minecraft:cooldown\x08\x08category\x0Bwind_charge\x05\x08duration\0\0\0?\x08\x04type\x03use\0\n\x16minecraft:display_name\x08\x05value\x15item.wind_charge.name\0\n\x13minecraft:throwable\x05\x11min_draw_duration\0\0\0\0\x01\x1Cscale_power_by_draw_duration\0\x05\x11max_draw_duration\0\0\0\0\x05\x10max_launch_power\0\0\xC0?\x05\x12launch_power_scale\0\0\xC0?\x01\x12do_swing_animation\x01\0\t\titem_tags\0\0\n\x0Fitem_properties\x01\x04foil\0\x08\x0Ecreative_group\0\x03\x06damage\0\x03\x11enchantable_value\0\x05\x0Cmining_speed\0\0\x80?\x03\ruse_animation\0\x01\x0Eliquid_clipped\0\x01\x17can_destroy_in_creative\x01\x03\x11creative_category\x06\x01\x0Eshould_despawn\x01\x01\rhand_equipped\0\x08\x10enchantable_slot\x04none\x01\x12hidden_in_commands\x02\x01\x0Eallow_off_hand\0\x03\x0Bframe_count\x02\x01\x0Fstacked_by_data\0\n\x0Eminecraft:icon\n\x08textures\x08\x07default\x0Bwind_charge\0\0\x03\x0Cuse_duration\0\x03\x0Emax_stack_size\x80\x01\0\n\x14minecraft:projectile\x05\x16minimum_critical_power\0\0\0\0\x08\x11projectile_entity\"minecraft:wind_charge_projectile<>\0\0\0" } ;
     pub const WITCH_SPAWN_EGG: Self = Self {
         id: 456,
         registry_key: "minecraft:witch_spawn_egg",
@@ -98214,7 +104385,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const WOODEN_SPEAR : Self = Self { id : 856 , registry_key : "minecraft:wooden_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x12minecraft:cooldown\x05\x08durationff&?\x08\x04type\x06attack\x08\x08category\x05spear\0\n\x16minecraft:display_name\x08\x05value\x16item.wooden_spear.name\0\n\x0Eminecraft:fuel\x05\x08duration\0\0 A\0\n\x17minecraft:use_modifiers\x05\x11movement_modifier\0\0\x80?\x08\x0Bstart_using\x06always\x08\x0Bstart_sound\x15item.wooden_spear.use\x05\x0Cuse_duration\0\xA0\x8CG\x01\x0Femit_vibrations\0\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x10minecraft:damage\x02\x05value\x01\0\0\n\x16minecraft:swing_sounds\x08\x0Battack_miss\x1Ditem.wooden_spear.attack_miss\x08\nattack_hit\x1Citem.wooden_spear.attack_hit\0\n\x19minecraft:piercing_weapon\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\x05\rhitbox_margin\0\0\x80>\0\n\x0Fitem_properties\x01\rhand_equipped\x01\x01\x0Eallow_off_hand\0\x01\x0Eshould_despawn\x01\n\x0Eminecraft:icon\n\x08textures\x08\x07default\nwood_spear\0\0\x03\x06damage\x02\x01\x0Eliquid_clipped\0\x03\x11creative_category\x06\x01\x04foil\0\x03\x0Emax_stack_size\x02\x03\x11enchantable_value\x1E\x03\x0Bframe_count\x02\x08\x10enchantable_slot\x0Bmelee_spear\x08\x0Ecreative_group\0\x03\ruse_animation\0\x01\x0Fstacked_by_data\0\x01\x17can_destroy_in_creative\x01\x05\x0Cmining_speed\0\0\x80?\x01\x12hidden_in_commands\x02\x03\x0Cuse_duration\x80\xE4\xAF\x01\0\n\x15minecraft:enchantable\x08\x04slot\x0Bmelee_spear\x01\x05value\x0F\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\x05\rhitbox_margin\0\0\x80>\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\n\x11damage_conditions\x02\x0Cmax_duration,\x01\x05\tmin_speed\0\0\0\0\x05\x12min_relative_speed33\x93@\0\x02\x05delay\x0F\0\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\x05\x11damage_multiplier333?\n\x13dismount_conditions\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_durationd\0\x05\tmin_speed\0\0`A\0\n\x14knockback_conditions\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed33\xA3@\x02\x0Cmax_duration\xC8\0\0\x05\x0Fdamage_modifier\0\0\0\0\0\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x15minecraft:wooden_tier\x12minecraft:is_spear\0\n\x18minecraft:swing_duration\x05\x05valueff&?\0\n\x14minecraft:durability\x03\x0Emax_durabilityx\n\rdamage_chance\x03\x03max\xC8\x01\x03\x03min\0\0\0\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\x08\rrepair_amount)context.other->query.remaining_durability\t\x05items\n\x02\x08\x04name\x16minecraft:wooden_spear\0\0\t\x05items\n\x02\x08\x04tags\x1Eq.all_tags('minecraft:planks')\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\0\0\t\titem_tags\x08\x04\x15minecraft:wooden_tier\x12minecraft:is_spear\n\x18minecraft:max_stack_size\x01\x05value\x01\0\0\0" } ;
+    pub const WOODEN_SPEAR : Self = Self { id : 856 , registry_key : "minecraft:wooden_spear" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x10minecraft:damage\x02\x05value\x01\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x18minecraft:swing_duration\x05\x05valueff&?\0\n\x15minecraft:enchantable\x08\x04slot\x0Bmelee_spear\x01\x05value\x0F\0\n\x12minecraft:cooldown\x08\x04type\x06attack\x05\x08durationff&?\x08\x08category\x05spear\0\n\x17minecraft:hand_equipped\x01\x05value\x01\0\n\x17minecraft:use_modifiers\x05\x11movement_modifier\0\0\x80?\x05\x0Cuse_duration\0\xA0\x8CG\x08\x0Bstart_sound\x15item.wooden_spear.use\x01\x0Femit_vibrations\0\x08\x0Bstart_using\x06always\0\n\x19minecraft:piercing_weapon\n\x0Ecreative_reach\x05\x03max\0\0\xF0@\x05\x03min\0\0\0@\0\x05\rhitbox_margin\0\0\x80>\n\x05reach\x05\x03min\0\0\0@\x05\x03max\0\0\x90@\0\0\n\x14minecraft:durability\n\rdamage_chance\x03\x03max\xC8\x01\x03\x03min\0\0\x03\x0Emax_durabilityx\0\n\x16minecraft:display_name\x08\x05value\x16item.wooden_spear.name\0\n\x18minecraft:kinetic_weapon\n\x18minecraft:kinetic_weapon\n\x14knockback_conditions\x05\x12min_relative_speed\0\0\0\0\x02\x0Cmax_duration\xC8\0\x05\tmin_speed33\xA3@\0\n\x0Ecreative_reach\x05\x03min\0\0\0@\x05\x03max\0\0\xF0@\0\x02\x05delay\x0F\0\x05\x0Fdamage_modifier\0\0\0\0\n\x11damage_conditions\x05\x12min_relative_speed33\x93@\x02\x0Cmax_duration,\x01\x05\tmin_speed\0\0\0\0\0\n\x13dismount_conditions\x02\x0Cmax_durationd\0\x05\x12min_relative_speed\0\0\0\0\x05\tmin_speed\0\0`A\0\x05\x11damage_multiplier333?\x05\rhitbox_margin\0\0\x80>\n\x05reach\x05\x03max\0\0\x90@\x05\x03min\0\0\0@\0\0\0\n\x0Fitem_properties\x03\x0Emax_stack_size\x02\x01\x17can_destroy_in_creative\x01\x03\x0Bframe_count\x02\x08\x10enchantable_slot\x0Bmelee_spear\x05\x0Cmining_speed\0\0\x80?\x03\x06damage\x02\x01\x0Eliquid_clipped\0\x03\x11creative_category\x06\n\x0Eminecraft:icon\n\x08textures\x08\x07default\nwood_spear\0\0\x03\x0Cuse_duration\x80\xE4\xAF\x01\x08\x0Ecreative_group\0\x01\x0Fstacked_by_data\0\x03\x11enchantable_value\x1E\x01\rhand_equipped\x01\x01\x12hidden_in_commands\x02\x01\x0Eallow_off_hand\0\x03\ruse_animation\0\x01\x0Eshould_despawn\x01\x01\x04foil\0\0\n\x0Eminecraft:fuel\x05\x08duration\0\0 A\0\n\x16minecraft:swing_sounds\x08\nattack_hit\x1Citem.wooden_spear.attack_hit\x08\x0Battack_miss\x1Ditem.wooden_spear.attack_miss\0\t\titem_tags\x08\x04\x15minecraft:wooden_tier\x12minecraft:is_spear\n\x14minecraft:repairable\t\x0Crepair_items\n\x04\x08\rrepair_amount)context.other->query.remaining_durability\t\x05items\n\x02\x08\x04name\x16minecraft:wooden_spear\0\0\t\x05items\n\x02\x08\x04tags\x1Eq.all_tags('minecraft:planks')\0\x08\rrepair_amount\x1Bquery.max_durability * 0.25\0\0\n\x0Eminecraft:tags\t\x04tags\x08\x04\x15minecraft:wooden_tier\x12minecraft:is_spear\0\0\0" } ;
     pub const WOODEN_SWORD: Self = Self {
         id: 310,
         registry_key: "minecraft:wooden_sword",
@@ -98243,7 +104414,7 @@ impl BedrockItem {
         component_based: false,
         definition_components: b"\n\0\0",
     };
-    pub const YELLOW_BUNDLE : Self = Self { id : 873 , registry_key : "minecraft:yellow_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\n\x0Fitem_properties\x03\ruse_animation\0\x03\x0Bframe_count\x02\x05\x0Cmining_speed\0\0\x80?\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x17bundle_yellow_open_back\x08\x11bundle_open_front\x18bundle_yellow_open_front\x08\x07default\rbundle_yellow\0\0\x03\x0Cuse_duration\0\x01\x0Eshould_despawn\x01\x01\x17can_destroy_in_creative\x01\x03\x11creative_category\x06\x08\x0Ecreative_group\0\x01\x12hidden_in_commands\x02\x03\x06damage\0\x01\x04foil\0\x03\x0Emax_stack_size\x02\x01\rhand_equipped\0\x08\x10enchantable_slot\x04none\x01\x0Eliquid_clipped\0\x01\x0Fstacked_by_data\0\x03\x11enchantable_value\0\x01\x0Eallow_off_hand\0\0\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\t\titem_tags\0\0\n\x16minecraft:storage_item\t\rallowed_items\0\0\x03\tmax_slots\x80\x01\x01\x1Aallow_nested_storage_items\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\0\0" } ;
+    pub const YELLOW_BUNDLE : Self = Self { id : 873 , registry_key : "minecraft:yellow_bundle" , version : BedrockItemVersion :: DataDriven , component_based : true , definition_components : b"\n\0\n\ncomponents\n\x1Cminecraft:bundle_interaction\x03\x12num_viewable_slots\x18\0\t\titem_tags\0\0\n\x18minecraft:max_stack_size\x01\x05value\x01\0\n\x16minecraft:storage_item\x03\tmax_slots\x80\x01\t\x0Cbanned_items\n\x04\x08\x04name\x15minecraft:shulker_box\0\x08\x04name\x1Cminecraft:undyed_shulker_box\0\t\rallowed_items\0\0\x01\x1Aallow_nested_storage_items\x01\0\n\x1Eminecraft:storage_weight_limit\x03\x10max_weight_limit\x80\x01\0\n\x0Fitem_properties\x01\rhand_equipped\0\x08\x10enchantable_slot\x04none\x03\x06damage\0\n\x0Eminecraft:icon\n\x08textures\x08\x10bundle_open_back\x17bundle_yellow_open_back\x08\x11bundle_open_front\x18bundle_yellow_open_front\x08\x07default\rbundle_yellow\0\0\x03\x0Emax_stack_size\x02\x08\x0Ecreative_group\0\x01\x0Eliquid_clipped\0\x03\x0Cuse_duration\0\x03\x0Bframe_count\x02\x01\x12hidden_in_commands\x02\x01\x0Eshould_despawn\x01\x01\x0Fstacked_by_data\0\x03\ruse_animation\0\x01\x0Eallow_off_hand\0\x05\x0Cmining_speed\0\0\x80?\x03\x11creative_category\x06\x01\x04foil\0\x03\x11enchantable_value\0\x01\x17can_destroy_in_creative\x01\0\n!minecraft:storage_weight_modifier\x03\x16weight_in_storage_item\x08\0\0\0" } ;
     pub const YELLOW_CANDLE: Self = Self {
         id: -417,
         registry_key: "minecraft:yellow_candle",
@@ -100378,6 +106549,12 @@ impl BedrockItem {
     ];
 }
 impl JavaToBedrockItemMapping {
+    pub const ABANDONED_CAMP_MAP: Self = Self {
+        java_item: &Item::ABANDONED_CAMP_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const ACACIA_BOAT: Self = Self {
         java_item: &Item::ACACIA_BOAT,
         bedrock_item: &BedrockItem::ACACIA_BOAT,
@@ -101002,6 +107179,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 15,
         bedrock_block_state: 0,
     };
+    pub const BLACK_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::BLACK_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BLACK_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::BLACK_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BLACK_CUSHION: Self = Self {
+        java_item: &Item::BLACK_CUSHION,
+        bedrock_item: &BedrockItem::BLACK_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const BLACK_DYE: Self = Self {
         java_item: &Item::BLACK_DYE,
         bedrock_item: &BedrockItem::BLACK_DYE,
@@ -101047,6 +107242,18 @@ impl JavaToBedrockItemMapping {
     pub const BLACK_WOOL: Self = Self {
         java_item: &Item::BLACK_WOOL,
         bedrock_item: &BedrockItem::BLACK_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BLACK_WOOL_SLAB: Self = Self {
+        java_item: &Item::BLACK_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BLACK_WOOL_STAIRS: Self = Self {
+        java_item: &Item::BLACK_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -101146,6 +107353,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 11,
         bedrock_block_state: 0,
     };
+    pub const BLUE_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::BLUE_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BLUE_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::BLUE_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BLUE_CUSHION: Self = Self {
+        java_item: &Item::BLUE_CUSHION,
+        bedrock_item: &BedrockItem::BLUE_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const BLUE_DYE: Self = Self {
         java_item: &Item::BLUE_DYE,
         bedrock_item: &BedrockItem::BLUE_DYE,
@@ -101209,6 +107434,18 @@ impl JavaToBedrockItemMapping {
     pub const BLUE_WOOL: Self = Self {
         java_item: &Item::BLUE_WOOL,
         bedrock_item: &BedrockItem::BLUE_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BLUE_WOOL_SLAB: Self = Self {
+        java_item: &Item::BLUE_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BLUE_WOOL_STAIRS: Self = Self {
+        java_item: &Item::BLUE_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -101392,6 +107629,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 12,
         bedrock_block_state: 0,
     };
+    pub const BROWN_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::BROWN_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BROWN_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::BROWN_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BROWN_CUSHION: Self = Self {
+        java_item: &Item::BROWN_CUSHION,
+        bedrock_item: &BedrockItem::BROWN_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const BROWN_DYE: Self = Self {
         java_item: &Item::BROWN_DYE,
         bedrock_item: &BedrockItem::BROWN_DYE,
@@ -101458,6 +107713,18 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const BROWN_WOOL_SLAB: Self = Self {
+        java_item: &Item::BROWN_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BROWN_WOOL_STAIRS: Self = Self {
+        java_item: &Item::BROWN_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const BRUSH: Self = Self {
         java_item: &Item::BRUSH,
         bedrock_item: &BedrockItem::BRUSH,
@@ -101497,6 +107764,30 @@ impl JavaToBedrockItemMapping {
     pub const BUNDLE: Self = Self {
         java_item: &Item::BUNDLE,
         bedrock_item: &BedrockItem::BUNDLE,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BURIED_ANCIENT_CITY_MAP: Self = Self {
+        java_item: &Item::BURIED_ANCIENT_CITY_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BURIED_MINESHAFT_MAP: Self = Self {
+        java_item: &Item::BURIED_MINESHAFT_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BURIED_TREASURE_MAP: Self = Self {
+        java_item: &Item::BURIED_TREASURE_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const BURIED_TRIAL_CHAMBERS_MAP: Self = Self {
+        java_item: &Item::BURIED_TRIAL_CHAMBERS_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -102592,6 +108883,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 9,
         bedrock_block_state: 0,
     };
+    pub const CYAN_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::CYAN_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const CYAN_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::CYAN_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const CYAN_CUSHION: Self = Self {
+        java_item: &Item::CYAN_CUSHION,
+        bedrock_item: &BedrockItem::CYAN_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const CYAN_DYE: Self = Self {
         java_item: &Item::CYAN_DYE,
         bedrock_item: &BedrockItem::CYAN_DYE,
@@ -102637,6 +108946,18 @@ impl JavaToBedrockItemMapping {
     pub const CYAN_WOOL: Self = Self {
         java_item: &Item::CYAN_WOOL,
         bedrock_item: &BedrockItem::CYAN_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const CYAN_WOOL_SLAB: Self = Self {
+        java_item: &Item::CYAN_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const CYAN_WOOL_STAIRS: Self = Self {
+        java_item: &Item::CYAN_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -102997,6 +109318,18 @@ impl JavaToBedrockItemMapping {
     pub const DEEPSLATE_TILES: Self = Self {
         java_item: &Item::DEEPSLATE_TILES,
         bedrock_item: &BedrockItem::DEEPSLATE_TILES,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const DESERT_PYRAMID_MAP: Self = Self {
+        java_item: &Item::DESERT_PYRAMID_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const DESERT_VILLAGE_MAP: Self = Self {
+        java_item: &Item::DESERT_VILLAGE_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -103948,6 +110281,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 7,
         bedrock_block_state: 0,
     };
+    pub const GRAY_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::GRAY_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const GRAY_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::GRAY_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const GRAY_CUSHION: Self = Self {
+        java_item: &Item::GRAY_CUSHION,
+        bedrock_item: &BedrockItem::GRAY_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const GRAY_DYE: Self = Self {
         java_item: &Item::GRAY_DYE,
         bedrock_item: &BedrockItem::GRAY_DYE,
@@ -103996,6 +110347,18 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const GRAY_WOOL_SLAB: Self = Self {
+        java_item: &Item::GRAY_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const GRAY_WOOL_STAIRS: Self = Self {
+        java_item: &Item::GRAY_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const GREEN_BANNER: Self = Self {
         java_item: &Item::GREEN_BANNER,
         bedrock_item: &BedrockItem::BANNER,
@@ -104036,6 +110399,24 @@ impl JavaToBedrockItemMapping {
         java_item: &Item::GREEN_CONCRETE_POWDER,
         bedrock_item: &BedrockItem::GREEN_CONCRETE_POWDER,
         bedrock_data: 13,
+        bedrock_block_state: 0,
+    };
+    pub const GREEN_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::GREEN_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const GREEN_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::GREEN_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const GREEN_CUSHION: Self = Self {
+        java_item: &Item::GREEN_CUSHION,
+        bedrock_item: &BedrockItem::GREEN_CUSHION,
+        bedrock_data: 0,
         bedrock_block_state: 0,
     };
     pub const GREEN_DYE: Self = Self {
@@ -104083,6 +110464,18 @@ impl JavaToBedrockItemMapping {
     pub const GREEN_WOOL: Self = Self {
         java_item: &Item::GREEN_WOOL,
         bedrock_item: &BedrockItem::GREEN_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const GREEN_WOOL_SLAB: Self = Self {
+        java_item: &Item::GREEN_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const GREEN_WOOL_STAIRS: Self = Self {
+        java_item: &Item::GREEN_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -104518,6 +110911,12 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const JUNGLE_PYRAMID_MAP: Self = Self {
+        java_item: &Item::JUNGLE_PYRAMID_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const JUNGLE_SAPLING: Self = Self {
         java_item: &Item::JUNGLE_SAPLING,
         bedrock_item: &BedrockItem::JUNGLE_SAPLING,
@@ -104728,6 +111127,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 3,
         bedrock_block_state: 0,
     };
+    pub const LIGHT_BLUE_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::LIGHT_BLUE_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIGHT_BLUE_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::LIGHT_BLUE_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIGHT_BLUE_CUSHION: Self = Self {
+        java_item: &Item::LIGHT_BLUE_CUSHION,
+        bedrock_item: &BedrockItem::LIGHT_BLUE_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const LIGHT_BLUE_DYE: Self = Self {
         java_item: &Item::LIGHT_BLUE_DYE,
         bedrock_item: &BedrockItem::LIGHT_BLUE_DYE,
@@ -104776,6 +111193,18 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const LIGHT_BLUE_WOOL_SLAB: Self = Self {
+        java_item: &Item::LIGHT_BLUE_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIGHT_BLUE_WOOL_STAIRS: Self = Self {
+        java_item: &Item::LIGHT_BLUE_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const LIGHT_GRAY_BANNER: Self = Self {
         java_item: &Item::LIGHT_GRAY_BANNER,
         bedrock_item: &BedrockItem::BANNER,
@@ -104816,6 +111245,24 @@ impl JavaToBedrockItemMapping {
         java_item: &Item::LIGHT_GRAY_CONCRETE_POWDER,
         bedrock_item: &BedrockItem::LIGHT_GRAY_CONCRETE_POWDER,
         bedrock_data: 8,
+        bedrock_block_state: 0,
+    };
+    pub const LIGHT_GRAY_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::LIGHT_GRAY_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIGHT_GRAY_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::LIGHT_GRAY_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIGHT_GRAY_CUSHION: Self = Self {
+        java_item: &Item::LIGHT_GRAY_CUSHION,
+        bedrock_item: &BedrockItem::LIGHT_GRAY_CUSHION,
+        bedrock_data: 0,
         bedrock_block_state: 0,
     };
     pub const LIGHT_GRAY_DYE: Self = Self {
@@ -104864,6 +111311,18 @@ impl JavaToBedrockItemMapping {
         java_item: &Item::LIGHT_GRAY_WOOL,
         bedrock_item: &BedrockItem::LIGHT_GRAY_WOOL,
         bedrock_data: 8,
+        bedrock_block_state: 0,
+    };
+    pub const LIGHT_GRAY_WOOL_SLAB: Self = Self {
+        java_item: &Item::LIGHT_GRAY_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIGHT_GRAY_WOOL_STAIRS: Self = Self {
+        java_item: &Item::LIGHT_GRAY_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
         bedrock_block_state: 0,
     };
     pub const LIGHT_WEIGHTED_PRESSURE_PLATE: Self = Self {
@@ -104938,6 +111397,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 5,
         bedrock_block_state: 0,
     };
+    pub const LIME_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::LIME_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIME_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::LIME_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIME_CUSHION: Self = Self {
+        java_item: &Item::LIME_CUSHION,
+        bedrock_item: &BedrockItem::LIME_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const LIME_DYE: Self = Self {
         java_item: &Item::LIME_DYE,
         bedrock_item: &BedrockItem::LIME_DYE,
@@ -104983,6 +111460,18 @@ impl JavaToBedrockItemMapping {
     pub const LIME_WOOL: Self = Self {
         java_item: &Item::LIME_WOOL,
         bedrock_item: &BedrockItem::LIME_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIME_WOOL_SLAB: Self = Self {
+        java_item: &Item::LIME_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const LIME_WOOL_STAIRS: Self = Self {
+        java_item: &Item::LIME_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -105058,6 +111547,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 2,
         bedrock_block_state: 0,
     };
+    pub const MAGENTA_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::MAGENTA_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const MAGENTA_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::MAGENTA_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const MAGENTA_CUSHION: Self = Self {
+        java_item: &Item::MAGENTA_CUSHION,
+        bedrock_item: &BedrockItem::MAGENTA_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const MAGENTA_DYE: Self = Self {
         java_item: &Item::MAGENTA_DYE,
         bedrock_item: &BedrockItem::MAGENTA_DYE,
@@ -105103,6 +111610,18 @@ impl JavaToBedrockItemMapping {
     pub const MAGENTA_WOOL: Self = Self {
         java_item: &Item::MAGENTA_WOOL,
         bedrock_item: &BedrockItem::MAGENTA_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const MAGENTA_WOOL_SLAB: Self = Self {
+        java_item: &Item::MAGENTA_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const MAGENTA_WOOL_STAIRS: Self = Self {
+        java_item: &Item::MAGENTA_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -105880,6 +112399,12 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const OCEAN_MONUMENT_MAP: Self = Self {
+        java_item: &Item::OCEAN_MONUMENT_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const OCELOT_SPAWN_EGG: Self = Self {
         java_item: &Item::OCELOT_SPAWN_EGG,
         bedrock_item: &BedrockItem::OCELOT_SPAWN_EGG,
@@ -105952,6 +112477,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 1,
         bedrock_block_state: 0,
     };
+    pub const ORANGE_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::ORANGE_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const ORANGE_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::ORANGE_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const ORANGE_CUSHION: Self = Self {
+        java_item: &Item::ORANGE_CUSHION,
+        bedrock_item: &BedrockItem::ORANGE_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const ORANGE_DYE: Self = Self {
         java_item: &Item::ORANGE_DYE,
         bedrock_item: &BedrockItem::ORANGE_DYE,
@@ -105967,6 +112510,12 @@ impl JavaToBedrockItemMapping {
     pub const ORANGE_HARNESS: Self = Self {
         java_item: &Item::ORANGE_HARNESS,
         bedrock_item: &BedrockItem::ORANGE_HARNESS,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const ORANGE_POPLAR_LEAVES: Self = Self {
+        java_item: &Item::ORANGE_POPLAR_LEAVES,
+        bedrock_item: &BedrockItem::ORANGE_POPLAR_LEAVES,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -106003,6 +112552,18 @@ impl JavaToBedrockItemMapping {
     pub const ORANGE_WOOL: Self = Self {
         java_item: &Item::ORANGE_WOOL,
         bedrock_item: &BedrockItem::ORANGE_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const ORANGE_WOOL_SLAB: Self = Self {
+        java_item: &Item::ORANGE_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const ORANGE_WOOL_STAIRS: Self = Self {
+        java_item: &Item::ORANGE_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -106378,6 +112939,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 6,
         bedrock_block_state: 0,
     };
+    pub const PINK_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::PINK_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const PINK_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::PINK_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const PINK_CUSHION: Self = Self {
+        java_item: &Item::PINK_CUSHION,
+        bedrock_item: &BedrockItem::PINK_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const PINK_DYE: Self = Self {
         java_item: &Item::PINK_DYE,
         bedrock_item: &BedrockItem::PINK_DYE,
@@ -106438,6 +113017,18 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const PINK_WOOL_SLAB: Self = Self {
+        java_item: &Item::PINK_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const PINK_WOOL_STAIRS: Self = Self {
+        java_item: &Item::PINK_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const PISTON: Self = Self {
         java_item: &Item::PISTON,
         bedrock_item: &BedrockItem::PISTON,
@@ -106453,6 +113044,12 @@ impl JavaToBedrockItemMapping {
     pub const PITCHER_POD: Self = Self {
         java_item: &Item::PITCHER_POD,
         bedrock_item: &BedrockItem::PITCHER_POD,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const PLAINS_VILLAGE_MAP: Self = Self {
+        java_item: &Item::PLAINS_VILLAGE_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -106708,6 +113305,108 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const POPLAR_BOAT: Self = Self {
+        java_item: &Item::POPLAR_BOAT,
+        bedrock_item: &BedrockItem::POPLAR_BOAT,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_BUTTON: Self = Self {
+        java_item: &Item::POPLAR_BUTTON,
+        bedrock_item: &BedrockItem::POPLAR_BUTTON,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_CHEST_BOAT: Self = Self {
+        java_item: &Item::POPLAR_CHEST_BOAT,
+        bedrock_item: &BedrockItem::POPLAR_CHEST_BOAT,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_DOOR: Self = Self {
+        java_item: &Item::POPLAR_DOOR,
+        bedrock_item: &BedrockItem::POPLAR_DOOR,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_FENCE: Self = Self {
+        java_item: &Item::POPLAR_FENCE,
+        bedrock_item: &BedrockItem::POPLAR_FENCE,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_FENCE_GATE: Self = Self {
+        java_item: &Item::POPLAR_FENCE_GATE,
+        bedrock_item: &BedrockItem::POPLAR_FENCE_GATE,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_HANGING_SIGN: Self = Self {
+        java_item: &Item::POPLAR_HANGING_SIGN,
+        bedrock_item: &BedrockItem::POPLAR_HANGING_SIGN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_LOG: Self = Self {
+        java_item: &Item::POPLAR_LOG,
+        bedrock_item: &BedrockItem::POPLAR_LOG,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_PLANKS: Self = Self {
+        java_item: &Item::POPLAR_PLANKS,
+        bedrock_item: &BedrockItem::POPLAR_PLANKS,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_PRESSURE_PLATE: Self = Self {
+        java_item: &Item::POPLAR_PRESSURE_PLATE,
+        bedrock_item: &BedrockItem::POPLAR_PRESSURE_PLATE,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_SAPLING: Self = Self {
+        java_item: &Item::POPLAR_SAPLING,
+        bedrock_item: &BedrockItem::POPLAR_SAPLING,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_SHELF: Self = Self {
+        java_item: &Item::POPLAR_SHELF,
+        bedrock_item: &BedrockItem::POPLAR_SHELF,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_SIGN: Self = Self {
+        java_item: &Item::POPLAR_SIGN,
+        bedrock_item: &BedrockItem::POPLAR_SIGN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_SLAB: Self = Self {
+        java_item: &Item::POPLAR_SLAB,
+        bedrock_item: &BedrockItem::POPLAR_SLAB,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_STAIRS: Self = Self {
+        java_item: &Item::POPLAR_STAIRS,
+        bedrock_item: &BedrockItem::POPLAR_STAIRS,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_TRAPDOOR: Self = Self {
+        java_item: &Item::POPLAR_TRAPDOOR,
+        bedrock_item: &BedrockItem::POPLAR_TRAPDOOR,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const POPLAR_WOOD: Self = Self {
+        java_item: &Item::POPLAR_WOOD,
+        bedrock_item: &BedrockItem::POPLAR_WOOD,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const POPPED_CHORUS_FRUIT: Self = Self {
         java_item: &Item::POPPED_CHORUS_FRUIT,
         bedrock_item: &BedrockItem::POPPED_CHORUS_FRUIT,
@@ -106894,6 +113593,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 10,
         bedrock_block_state: 0,
     };
+    pub const PURPLE_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::PURPLE_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const PURPLE_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::PURPLE_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const PURPLE_CUSHION: Self = Self {
+        java_item: &Item::PURPLE_CUSHION,
+        bedrock_item: &BedrockItem::PURPLE_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const PURPLE_DYE: Self = Self {
         java_item: &Item::PURPLE_DYE,
         bedrock_item: &BedrockItem::PURPLE_DYE,
@@ -106939,6 +113656,18 @@ impl JavaToBedrockItemMapping {
     pub const PURPLE_WOOL: Self = Self {
         java_item: &Item::PURPLE_WOOL,
         bedrock_item: &BedrockItem::PURPLE_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const PURPLE_WOOL_SLAB: Self = Self {
+        java_item: &Item::PURPLE_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const PURPLE_WOOL_STAIRS: Self = Self {
+        java_item: &Item::PURPLE_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -107134,6 +113863,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 14,
         bedrock_block_state: 0,
     };
+    pub const RED_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::RED_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const RED_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::RED_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const RED_CUSHION: Self = Self {
+        java_item: &Item::RED_CUSHION,
+        bedrock_item: &BedrockItem::RED_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const RED_DYE: Self = Self {
         java_item: &Item::RED_DYE,
         bedrock_item: &BedrockItem::RED_DYE,
@@ -107188,6 +113935,12 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const RED_POPLAR_LEAVES: Self = Self {
+        java_item: &Item::RED_POPLAR_LEAVES,
+        bedrock_item: &BedrockItem::RED_POPLAR_LEAVES,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const RED_SAND: Self = Self {
         java_item: &Item::RED_SAND,
         bedrock_item: &BedrockItem::RED_SAND,
@@ -107216,6 +113969,12 @@ impl JavaToBedrockItemMapping {
         java_item: &Item::RED_SANDSTONE_WALL,
         bedrock_item: &BedrockItem::RED_SANDSTONE_WALL,
         bedrock_data: 12,
+        bedrock_block_state: 0,
+    };
+    pub const RED_SHRUB: Self = Self {
+        java_item: &Item::RED_SHRUB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
         bedrock_block_state: 0,
     };
     pub const RED_SHULKER_BOX: Self = Self {
@@ -107251,6 +114010,18 @@ impl JavaToBedrockItemMapping {
     pub const RED_WOOL: Self = Self {
         java_item: &Item::RED_WOOL,
         bedrock_item: &BedrockItem::RED_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const RED_WOOL_SLAB: Self = Self {
+        java_item: &Item::RED_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const RED_WOOL_STAIRS: Self = Self {
+        java_item: &Item::RED_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -107428,6 +114199,12 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 5,
         bedrock_block_state: 0,
     };
+    pub const SAVANNA_VILLAGE_MAP: Self = Self {
+        java_item: &Item::SAVANNA_VILLAGE_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const SCAFFOLDING: Self = Self {
         java_item: &Item::SCAFFOLDING,
         bedrock_item: &BedrockItem::SCAFFOLDING,
@@ -107515,6 +114292,12 @@ impl JavaToBedrockItemMapping {
     pub const SHEEP_SPAWN_EGG: Self = Self {
         java_item: &Item::SHEEP_SPAWN_EGG,
         bedrock_item: &BedrockItem::SHEEP_SPAWN_EGG,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const SHELF_MUSHROOM: Self = Self {
+        java_item: &Item::SHELF_MUSHROOM,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -107767,6 +114550,12 @@ impl JavaToBedrockItemMapping {
     pub const SNOWBALL: Self = Self {
         java_item: &Item::SNOWBALL,
         bedrock_item: &BedrockItem::SNOWBALL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const SNOWY_VILLAGE_MAP: Self = Self {
+        java_item: &Item::SNOWY_VILLAGE_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -108076,6 +114865,12 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const STRAW_BED: Self = Self {
+        java_item: &Item::STRAW_BED,
+        bedrock_item: &BedrockItem::BED,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const STRAY_SPAWN_EGG: Self = Self {
         java_item: &Item::STRAY_SPAWN_EGG,
         bedrock_item: &BedrockItem::STRAY_SPAWN_EGG,
@@ -108205,6 +115000,18 @@ impl JavaToBedrockItemMapping {
     pub const STRIPPED_PALE_OAK_WOOD: Self = Self {
         java_item: &Item::STRIPPED_PALE_OAK_WOOD,
         bedrock_item: &BedrockItem::STRIPPED_PALE_OAK_WOOD,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const STRIPPED_POPLAR_LOG: Self = Self {
+        java_item: &Item::STRIPPED_POPLAR_LOG,
+        bedrock_item: &BedrockItem::STRIPPED_POPLAR_LOG,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const STRIPPED_POPLAR_WOOD: Self = Self {
+        java_item: &Item::STRIPPED_POPLAR_WOOD,
+        bedrock_item: &BedrockItem::STRIPPED_POPLAR_WOOD,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -108346,6 +115153,12 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const SWAMP_HUT_MAP: Self = Self {
+        java_item: &Item::SWAMP_HUT_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const SWEET_BERRIES: Self = Self {
         java_item: &Item::SWEET_BERRIES,
         bedrock_item: &BedrockItem::SWEET_BERRIES,
@@ -108361,6 +115174,12 @@ impl JavaToBedrockItemMapping {
     pub const TADPOLE_SPAWN_EGG: Self = Self {
         java_item: &Item::TADPOLE_SPAWN_EGG,
         bedrock_item: &BedrockItem::TADPOLE_SPAWN_EGG,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const TAIGA_VILLAGE_MAP: Self = Self {
+        java_item: &Item::TAIGA_VILLAGE_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -108661,6 +115480,12 @@ impl JavaToBedrockItemMapping {
     pub const WARDEN_SPAWN_EGG: Self = Self {
         java_item: &Item::WARDEN_SPAWN_EGG,
         bedrock_item: &BedrockItem::WARDEN_SPAWN_EGG,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const WARM_OCEAN_RUINS_MAP: Self = Self {
+        java_item: &Item::WARM_OCEAN_RUINS_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -109306,6 +116131,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const WHITE_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::WHITE_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const WHITE_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::WHITE_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const WHITE_CUSHION: Self = Self {
+        java_item: &Item::WHITE_CUSHION,
+        bedrock_item: &BedrockItem::WHITE_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const WHITE_DYE: Self = Self {
         java_item: &Item::WHITE_DYE,
         bedrock_item: &BedrockItem::WHITE_DYE,
@@ -109357,6 +116200,18 @@ impl JavaToBedrockItemMapping {
     pub const WHITE_WOOL: Self = Self {
         java_item: &Item::WHITE_WOOL,
         bedrock_item: &BedrockItem::WHITE_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const WHITE_WOOL_SLAB: Self = Self {
+        java_item: &Item::WHITE_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const WHITE_WOOL_STAIRS: Self = Self {
+        java_item: &Item::WHITE_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -109456,6 +116311,12 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
+    pub const WOODLAND_MANSION_MAP: Self = Self {
+        java_item: &Item::WOODLAND_MANSION_MAP,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const WRITABLE_BOOK: Self = Self {
         java_item: &Item::WRITABLE_BOOK,
         bedrock_item: &BedrockItem::WRITABLE_BOOK,
@@ -109510,6 +116371,24 @@ impl JavaToBedrockItemMapping {
         bedrock_data: 4,
         bedrock_block_state: 0,
     };
+    pub const YELLOW_CONCRETE_SLAB: Self = Self {
+        java_item: &Item::YELLOW_CONCRETE_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const YELLOW_CONCRETE_STAIRS: Self = Self {
+        java_item: &Item::YELLOW_CONCRETE_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const YELLOW_CUSHION: Self = Self {
+        java_item: &Item::YELLOW_CUSHION,
+        bedrock_item: &BedrockItem::YELLOW_CUSHION,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
     pub const YELLOW_DYE: Self = Self {
         java_item: &Item::YELLOW_DYE,
         bedrock_item: &BedrockItem::YELLOW_DYE,
@@ -109525,6 +116404,12 @@ impl JavaToBedrockItemMapping {
     pub const YELLOW_HARNESS: Self = Self {
         java_item: &Item::YELLOW_HARNESS,
         bedrock_item: &BedrockItem::YELLOW_HARNESS,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const YELLOW_POPLAR_LEAVES: Self = Self {
+        java_item: &Item::YELLOW_POPLAR_LEAVES,
+        bedrock_item: &BedrockItem::YELLOW_POPLAR_LEAVES,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -109555,6 +116440,18 @@ impl JavaToBedrockItemMapping {
     pub const YELLOW_WOOL: Self = Self {
         java_item: &Item::YELLOW_WOOL,
         bedrock_item: &BedrockItem::YELLOW_WOOL,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const YELLOW_WOOL_SLAB: Self = Self {
+        java_item: &Item::YELLOW_WOOL_SLAB,
+        bedrock_item: &BedrockItem::UNKNOWN,
+        bedrock_data: 0,
+        bedrock_block_state: 0,
+    };
+    pub const YELLOW_WOOL_STAIRS: Self = Self {
+        java_item: &Item::YELLOW_WOOL_STAIRS,
+        bedrock_item: &BedrockItem::UNKNOWN,
         bedrock_data: 0,
         bedrock_block_state: 0,
     };
@@ -109603,6 +116500,7 @@ impl JavaToBedrockItemMapping {
     #[must_use]
     pub const fn from_java_item_id(item_id: u16) -> Option<&'static Self> {
         match item_id {
+            1642 => Some(&Self::ABANDONED_CAMP_MAP),
             899 => Some(&Self::ACACIA_BOAT),
             783 => Some(&Self::ACACIA_BUTTON),
             900 => Some(&Self::ACACIA_CHEST_BOAT),
@@ -109707,6 +116605,9 @@ impl JavaToBedrockItemMapping {
             548 => Some(&Self::BLACK_CARPET),
             657 => Some(&Self::BLACK_CONCRETE),
             673 => Some(&Self::BLACK_CONCRETE_POWDER),
+            1603 => Some(&Self::BLACK_CONCRETE_SLAB),
+            1587 => Some(&Self::BLACK_CONCRETE_STAIRS),
+            1641 => Some(&Self::BLACK_CUSHION),
             1110 => Some(&Self::BLACK_DYE),
             641 => Some(&Self::BLACK_GLAZED_TERRACOTTA),
             881 => Some(&Self::BLACK_HARNESS),
@@ -109715,6 +116616,8 @@ impl JavaToBedrockItemMapping {
             589 => Some(&Self::BLACK_STAINED_GLASS_PANE),
             529 => Some(&Self::BLACK_TERRACOTTA),
             255 => Some(&Self::BLACK_WOOL),
+            1568 => Some(&Self::BLACK_WOOL_SLAB),
+            1552 => Some(&Self::BLACK_WOOL_STAIRS),
             1416 => Some(&Self::BLACKSTONE),
             1417 => Some(&Self::BLACKSTONE_SLAB),
             1418 => Some(&Self::BLACKSTONE_STAIRS),
@@ -109731,6 +116634,9 @@ impl JavaToBedrockItemMapping {
             544 => Some(&Self::BLUE_CARPET),
             653 => Some(&Self::BLUE_CONCRETE),
             669 => Some(&Self::BLUE_CONCRETE_POWDER),
+            1599 => Some(&Self::BLUE_CONCRETE_SLAB),
+            1583 => Some(&Self::BLUE_CONCRETE_STAIRS),
+            1637 => Some(&Self::BLUE_CUSHION),
             1106 => Some(&Self::BLUE_DYE),
             1061 => Some(&Self::BLUE_EGG),
             637 => Some(&Self::BLUE_GLAZED_TERRACOTTA),
@@ -109742,6 +116648,8 @@ impl JavaToBedrockItemMapping {
             585 => Some(&Self::BLUE_STAINED_GLASS_PANE),
             525 => Some(&Self::BLUE_TERRACOTTA),
             251 => Some(&Self::BLUE_WOOL),
+            1564 => Some(&Self::BLUE_WOOL_SLAB),
+            1548 => Some(&Self::BLUE_WOOL_STAIRS),
             1202 => Some(&Self::BOGGED_SPAWN_EGG),
             1476 => Some(&Self::BOLT_ARMOR_TRIM_SMITHING_TEMPLATE),
             1112 => Some(&Self::BONE),
@@ -109772,6 +116680,9 @@ impl JavaToBedrockItemMapping {
             545 => Some(&Self::BROWN_CARPET),
             654 => Some(&Self::BROWN_CONCRETE),
             670 => Some(&Self::BROWN_CONCRETE_POWDER),
+            1600 => Some(&Self::BROWN_CONCRETE_SLAB),
+            1584 => Some(&Self::BROWN_CONCRETE_STAIRS),
+            1638 => Some(&Self::BROWN_CUSHION),
             1107 => Some(&Self::BROWN_DYE),
             1062 => Some(&Self::BROWN_EGG),
             638 => Some(&Self::BROWN_GLAZED_TERRACOTTA),
@@ -109783,6 +116694,8 @@ impl JavaToBedrockItemMapping {
             586 => Some(&Self::BROWN_STAINED_GLASS_PANE),
             526 => Some(&Self::BROWN_TERRACOTTA),
             252 => Some(&Self::BROWN_WOOL),
+            1565 => Some(&Self::BROWN_WOOL_SLAB),
+            1549 => Some(&Self::BROWN_WOOL_STAIRS),
             1457 => Some(&Self::BRUSH),
             689 => Some(&Self::BUBBLE_CORAL),
             684 => Some(&Self::BUBBLE_CORAL_BLOCK),
@@ -109790,6 +116703,10 @@ impl JavaToBedrockItemMapping {
             1040 => Some(&Self::BUCKET),
             116 => Some(&Self::BUDDING_AMETHYST),
             1065 => Some(&Self::BUNDLE),
+            1643 => Some(&Self::BURIED_ANCIENT_CITY_MAP),
+            1644 => Some(&Self::BURIED_MINESHAFT_MAP),
+            1645 => Some(&Self::BURIED_TREASURE_MAP),
+            1646 => Some(&Self::BURIED_TRIAL_CHAMBERS_MAP),
             1482 => Some(&Self::BURN_POTTERY_SHERD),
             231 => Some(&Self::BUSH),
             368 => Some(&Self::CACTUS),
@@ -109972,6 +116889,9 @@ impl JavaToBedrockItemMapping {
             542 => Some(&Self::CYAN_CARPET),
             651 => Some(&Self::CYAN_CONCRETE),
             667 => Some(&Self::CYAN_CONCRETE_POWDER),
+            1597 => Some(&Self::CYAN_CONCRETE_SLAB),
+            1581 => Some(&Self::CYAN_CONCRETE_STAIRS),
+            1635 => Some(&Self::CYAN_CUSHION),
             1104 => Some(&Self::CYAN_DYE),
             635 => Some(&Self::CYAN_GLAZED_TERRACOTTA),
             875 => Some(&Self::CYAN_HARNESS),
@@ -109980,6 +116900,8 @@ impl JavaToBedrockItemMapping {
             583 => Some(&Self::CYAN_STAINED_GLASS_PANE),
             523 => Some(&Self::CYAN_TERRACOTTA),
             249 => Some(&Self::CYAN_WOOL),
+            1562 => Some(&Self::CYAN_WOOL_SLAB),
+            1546 => Some(&Self::CYAN_WOOL_STAIRS),
             508 => Some(&Self::DAMAGED_ANVIL),
             256 => Some(&Self::DANDELION),
             1483 => Some(&Self::DANGER_POTTERY_SHERD),
@@ -110040,6 +116962,8 @@ impl JavaToBedrockItemMapping {
             726 => Some(&Self::DEEPSLATE_TILE_STAIRS),
             505 => Some(&Self::DEEPSLATE_TILE_WALL),
             411 => Some(&Self::DEEPSLATE_TILES),
+            1647 => Some(&Self::DESERT_PYRAMID_MAP),
+            1648 => Some(&Self::DESERT_VILLAGE_MAP),
             862 => Some(&Self::DETECTOR_RAIL),
             926 => Some(&Self::DIAMOND),
             967 => Some(&Self::DIAMOND_AXE),
@@ -110198,6 +117122,9 @@ impl JavaToBedrockItemMapping {
             540 => Some(&Self::GRAY_CARPET),
             649 => Some(&Self::GRAY_CONCRETE),
             665 => Some(&Self::GRAY_CONCRETE_POWDER),
+            1595 => Some(&Self::GRAY_CONCRETE_SLAB),
+            1579 => Some(&Self::GRAY_CONCRETE_STAIRS),
+            1633 => Some(&Self::GRAY_CUSHION),
             1102 => Some(&Self::GRAY_DYE),
             633 => Some(&Self::GRAY_GLAZED_TERRACOTTA),
             873 => Some(&Self::GRAY_HARNESS),
@@ -110206,6 +117133,8 @@ impl JavaToBedrockItemMapping {
             581 => Some(&Self::GRAY_STAINED_GLASS_PANE),
             521 => Some(&Self::GRAY_TERRACOTTA),
             247 => Some(&Self::GRAY_WOOL),
+            1560 => Some(&Self::GRAY_WOOL_SLAB),
+            1544 => Some(&Self::GRAY_WOOL_STAIRS),
             1309 => Some(&Self::GREEN_BANNER),
             1128 => Some(&Self::GREEN_BED),
             1079 => Some(&Self::GREEN_BUNDLE),
@@ -110213,6 +117142,9 @@ impl JavaToBedrockItemMapping {
             546 => Some(&Self::GREEN_CARPET),
             655 => Some(&Self::GREEN_CONCRETE),
             671 => Some(&Self::GREEN_CONCRETE_POWDER),
+            1601 => Some(&Self::GREEN_CONCRETE_SLAB),
+            1585 => Some(&Self::GREEN_CONCRETE_STAIRS),
+            1639 => Some(&Self::GREEN_CUSHION),
             1108 => Some(&Self::GREEN_DYE),
             639 => Some(&Self::GREEN_GLAZED_TERRACOTTA),
             879 => Some(&Self::GREEN_HARNESS),
@@ -110221,6 +117153,8 @@ impl JavaToBedrockItemMapping {
             587 => Some(&Self::GREEN_STAINED_GLASS_PANE),
             527 => Some(&Self::GREEN_TERRACOTTA),
             253 => Some(&Self::GREEN_WOOL),
+            1566 => Some(&Self::GREEN_WOOL_SLAB),
+            1550 => Some(&Self::GREEN_WOOL_STAIRS),
             1390 => Some(&Self::GRINDSTONE),
             1222 => Some(&Self::GUARDIAN_SPAWN_EGG),
             978 => Some(&Self::GUNPOWDER),
@@ -110293,6 +117227,7 @@ impl JavaToBedrockItemMapping {
             164 => Some(&Self::JUNGLE_LOG),
             66 => Some(&Self::JUNGLE_PLANKS),
             798 => Some(&Self::JUNGLE_PRESSURE_PLATE),
+            1649 => Some(&Self::JUNGLE_PYRAMID_MAP),
             79 => Some(&Self::JUNGLE_SAPLING),
             339 => Some(&Self::JUNGLE_SHELF),
             1019 => Some(&Self::JUNGLE_SIGN),
@@ -110328,6 +117263,9 @@ impl JavaToBedrockItemMapping {
             536 => Some(&Self::LIGHT_BLUE_CARPET),
             645 => Some(&Self::LIGHT_BLUE_CONCRETE),
             661 => Some(&Self::LIGHT_BLUE_CONCRETE_POWDER),
+            1591 => Some(&Self::LIGHT_BLUE_CONCRETE_SLAB),
+            1575 => Some(&Self::LIGHT_BLUE_CONCRETE_STAIRS),
+            1629 => Some(&Self::LIGHT_BLUE_CUSHION),
             1098 => Some(&Self::LIGHT_BLUE_DYE),
             629 => Some(&Self::LIGHT_BLUE_GLAZED_TERRACOTTA),
             869 => Some(&Self::LIGHT_BLUE_HARNESS),
@@ -110336,6 +117274,8 @@ impl JavaToBedrockItemMapping {
             577 => Some(&Self::LIGHT_BLUE_STAINED_GLASS_PANE),
             517 => Some(&Self::LIGHT_BLUE_TERRACOTTA),
             243 => Some(&Self::LIGHT_BLUE_WOOL),
+            1556 => Some(&Self::LIGHT_BLUE_WOOL_SLAB),
+            1540 => Some(&Self::LIGHT_BLUE_WOOL_STAIRS),
             1304 => Some(&Self::LIGHT_GRAY_BANNER),
             1123 => Some(&Self::LIGHT_GRAY_BED),
             1074 => Some(&Self::LIGHT_GRAY_BUNDLE),
@@ -110343,6 +117283,9 @@ impl JavaToBedrockItemMapping {
             541 => Some(&Self::LIGHT_GRAY_CARPET),
             650 => Some(&Self::LIGHT_GRAY_CONCRETE),
             666 => Some(&Self::LIGHT_GRAY_CONCRETE_POWDER),
+            1596 => Some(&Self::LIGHT_GRAY_CONCRETE_SLAB),
+            1580 => Some(&Self::LIGHT_GRAY_CONCRETE_STAIRS),
+            1634 => Some(&Self::LIGHT_GRAY_CUSHION),
             1103 => Some(&Self::LIGHT_GRAY_DYE),
             634 => Some(&Self::LIGHT_GRAY_GLAZED_TERRACOTTA),
             874 => Some(&Self::LIGHT_GRAY_HARNESS),
@@ -110351,6 +117294,8 @@ impl JavaToBedrockItemMapping {
             582 => Some(&Self::LIGHT_GRAY_STAINED_GLASS_PANE),
             522 => Some(&Self::LIGHT_GRAY_TERRACOTTA),
             248 => Some(&Self::LIGHT_GRAY_WOOL),
+            1561 => Some(&Self::LIGHT_GRAY_WOOL_SLAB),
+            1545 => Some(&Self::LIGHT_GRAY_WOOL_STAIRS),
             793 => Some(&Self::LIGHT_WEIGHTED_PRESSURE_PLATE),
             761 => Some(&Self::LIGHTNING_ROD),
             553 => Some(&Self::LILAC),
@@ -110363,6 +117308,9 @@ impl JavaToBedrockItemMapping {
             538 => Some(&Self::LIME_CARPET),
             647 => Some(&Self::LIME_CONCRETE),
             663 => Some(&Self::LIME_CONCRETE_POWDER),
+            1593 => Some(&Self::LIME_CONCRETE_SLAB),
+            1577 => Some(&Self::LIME_CONCRETE_STAIRS),
+            1631 => Some(&Self::LIME_CUSHION),
             1100 => Some(&Self::LIME_DYE),
             631 => Some(&Self::LIME_GLAZED_TERRACOTTA),
             871 => Some(&Self::LIME_HARNESS),
@@ -110371,6 +117319,8 @@ impl JavaToBedrockItemMapping {
             579 => Some(&Self::LIME_STAINED_GLASS_PANE),
             519 => Some(&Self::LIME_TERRACOTTA),
             245 => Some(&Self::LIME_WOOL),
+            1558 => Some(&Self::LIME_WOOL_SLAB),
+            1542 => Some(&Self::LIME_WOOL_STAIRS),
             1324 => Some(&Self::LINGERING_POTION),
             1175 => Some(&Self::LLAMA_SPAWN_EGG),
             1414 => Some(&Self::LODESTONE),
@@ -110383,6 +117333,9 @@ impl JavaToBedrockItemMapping {
             535 => Some(&Self::MAGENTA_CARPET),
             644 => Some(&Self::MAGENTA_CONCRETE),
             660 => Some(&Self::MAGENTA_CONCRETE_POWDER),
+            1590 => Some(&Self::MAGENTA_CONCRETE_SLAB),
+            1574 => Some(&Self::MAGENTA_CONCRETE_STAIRS),
+            1628 => Some(&Self::MAGENTA_CUSHION),
             1097 => Some(&Self::MAGENTA_DYE),
             628 => Some(&Self::MAGENTA_GLAZED_TERRACOTTA),
             868 => Some(&Self::MAGENTA_HARNESS),
@@ -110391,6 +117344,8 @@ impl JavaToBedrockItemMapping {
             576 => Some(&Self::MAGENTA_STAINED_GLASS_PANE),
             516 => Some(&Self::MAGENTA_TERRACOTTA),
             242 => Some(&Self::MAGENTA_WOOL),
+            1555 => Some(&Self::MAGENTA_WOOL_SLAB),
+            1539 => Some(&Self::MAGENTA_WOOL_STAIRS),
             603 => Some(&Self::MAGMA_BLOCK),
             1154 => Some(&Self::MAGMA_CREAM),
             1237 => Some(&Self::MAGMA_CUBE_SPAWN_EGG),
@@ -110520,6 +117475,7 @@ impl JavaToBedrockItemMapping {
             198 => Some(&Self::OAK_WOOD),
             754 => Some(&Self::OBSERVER),
             349 => Some(&Self::OBSIDIAN),
+            1650 => Some(&Self::OCEAN_MONUMENT_MAP),
             1176 => Some(&Self::OCELOT_SPAWN_EGG),
             1452 => Some(&Self::OCHRE_FROGLIGHT),
             1536 => Some(&Self::OMINOUS_BOTTLE),
@@ -110532,15 +117488,21 @@ impl JavaToBedrockItemMapping {
             534 => Some(&Self::ORANGE_CARPET),
             643 => Some(&Self::ORANGE_CONCRETE),
             659 => Some(&Self::ORANGE_CONCRETE_POWDER),
+            1589 => Some(&Self::ORANGE_CONCRETE_SLAB),
+            1573 => Some(&Self::ORANGE_CONCRETE_STAIRS),
+            1627 => Some(&Self::ORANGE_CUSHION),
             1096 => Some(&Self::ORANGE_DYE),
             627 => Some(&Self::ORANGE_GLAZED_TERRACOTTA),
             867 => Some(&Self::ORANGE_HARNESS),
+            1611 => Some(&Self::ORANGE_POPLAR_LEAVES),
             611 => Some(&Self::ORANGE_SHULKER_BOX),
             559 => Some(&Self::ORANGE_STAINED_GLASS),
             575 => Some(&Self::ORANGE_STAINED_GLASS_PANE),
             515 => Some(&Self::ORANGE_TERRACOTTA),
             265 => Some(&Self::ORANGE_TULIP),
             241 => Some(&Self::ORANGE_WOOL),
+            1554 => Some(&Self::ORANGE_WOOL_SLAB),
+            1538 => Some(&Self::ORANGE_WOOL_STAIRS),
             268 => Some(&Self::OXEYE_DAISY),
             132 => Some(&Self::OXIDIZED_CHISELED_COPPER),
             121 => Some(&Self::OXIDIZED_COPPER),
@@ -110603,6 +117565,9 @@ impl JavaToBedrockItemMapping {
             539 => Some(&Self::PINK_CARPET),
             648 => Some(&Self::PINK_CONCRETE),
             664 => Some(&Self::PINK_CONCRETE_POWDER),
+            1594 => Some(&Self::PINK_CONCRETE_SLAB),
+            1578 => Some(&Self::PINK_CONCRETE_STAIRS),
+            1632 => Some(&Self::PINK_CUSHION),
             1101 => Some(&Self::PINK_DYE),
             632 => Some(&Self::PINK_GLAZED_TERRACOTTA),
             872 => Some(&Self::PINK_HARNESS),
@@ -110613,9 +117578,12 @@ impl JavaToBedrockItemMapping {
             520 => Some(&Self::PINK_TERRACOTTA),
             267 => Some(&Self::PINK_TULIP),
             246 => Some(&Self::PINK_WOOL),
+            1559 => Some(&Self::PINK_WOOL_SLAB),
+            1543 => Some(&Self::PINK_WOOL_STAIRS),
             750 => Some(&Self::PISTON),
             273 => Some(&Self::PITCHER_PLANT),
             1316 => Some(&Self::PITCHER_POD),
+            1651 => Some(&Self::PLAINS_VILLAGE_MAP),
             1265 => Some(&Self::PLAYER_HEAD),
             1493 => Some(&Self::PLENTY_POTTERY_SHERD),
             57 => Some(&Self::PODZOL),
@@ -110658,6 +117626,23 @@ impl JavaToBedrockItemMapping {
             18 => Some(&Self::POLISHED_TUFF_SLAB),
             19 => Some(&Self::POLISHED_TUFF_STAIRS),
             20 => Some(&Self::POLISHED_TUFF_WALL),
+            1624 => Some(&Self::POPLAR_BOAT),
+            1618 => Some(&Self::POPLAR_BUTTON),
+            1625 => Some(&Self::POPLAR_CHEST_BOAT),
+            1623 => Some(&Self::POPLAR_DOOR),
+            1622 => Some(&Self::POPLAR_FENCE),
+            1621 => Some(&Self::POPLAR_FENCE_GATE),
+            1615 => Some(&Self::POPLAR_HANGING_SIGN),
+            1606 => Some(&Self::POPLAR_LOG),
+            1604 => Some(&Self::POPLAR_PLANKS),
+            1616 => Some(&Self::POPLAR_PRESSURE_PLATE),
+            1605 => Some(&Self::POPLAR_SAPLING),
+            1613 => Some(&Self::POPLAR_SHELF),
+            1614 => Some(&Self::POPLAR_SIGN),
+            1620 => Some(&Self::POPLAR_SLAB),
+            1619 => Some(&Self::POPLAR_STAIRS),
+            1617 => Some(&Self::POPLAR_TRAPDOOR),
+            1609 => Some(&Self::POPLAR_WOOD),
             1314 => Some(&Self::POPPED_CHORUS_FRUIT),
             260 => Some(&Self::POPPY),
             1011 => Some(&Self::PORKCHOP),
@@ -110689,6 +117674,9 @@ impl JavaToBedrockItemMapping {
             543 => Some(&Self::PURPLE_CARPET),
             652 => Some(&Self::PURPLE_CONCRETE),
             668 => Some(&Self::PURPLE_CONCRETE_POWDER),
+            1598 => Some(&Self::PURPLE_CONCRETE_SLAB),
+            1582 => Some(&Self::PURPLE_CONCRETE_STAIRS),
+            1636 => Some(&Self::PURPLE_CUSHION),
             1105 => Some(&Self::PURPLE_DYE),
             636 => Some(&Self::PURPLE_GLAZED_TERRACOTTA),
             876 => Some(&Self::PURPLE_HARNESS),
@@ -110697,6 +117685,8 @@ impl JavaToBedrockItemMapping {
             584 => Some(&Self::PURPLE_STAINED_GLASS_PANE),
             524 => Some(&Self::PURPLE_TERRACOTTA),
             250 => Some(&Self::PURPLE_WOOL),
+            1563 => Some(&Self::PURPLE_WOOL_SLAB),
+            1547 => Some(&Self::PURPLE_WOOL_STAIRS),
             354 => Some(&Self::PURPUR_BLOCK),
             355 => Some(&Self::PURPUR_PILLAR),
             324 => Some(&Self::PURPUR_SLAB),
@@ -110729,6 +117719,9 @@ impl JavaToBedrockItemMapping {
             547 => Some(&Self::RED_CARPET),
             656 => Some(&Self::RED_CONCRETE),
             672 => Some(&Self::RED_CONCRETE_POWDER),
+            1602 => Some(&Self::RED_CONCRETE_SLAB),
+            1586 => Some(&Self::RED_CONCRETE_STAIRS),
+            1640 => Some(&Self::RED_CUSHION),
             1109 => Some(&Self::RED_DYE),
             640 => Some(&Self::RED_GLAZED_TERRACOTTA),
             880 => Some(&Self::RED_HARNESS),
@@ -110738,17 +117731,21 @@ impl JavaToBedrockItemMapping {
             720 => Some(&Self::RED_NETHER_BRICK_STAIRS),
             495 => Some(&Self::RED_NETHER_BRICK_WALL),
             606 => Some(&Self::RED_NETHER_BRICKS),
+            1610 => Some(&Self::RED_POPLAR_LEAVES),
             89 => Some(&Self::RED_SAND),
             597 => Some(&Self::RED_SANDSTONE),
             322 => Some(&Self::RED_SANDSTONE_SLAB),
             600 => Some(&Self::RED_SANDSTONE_STAIRS),
             488 => Some(&Self::RED_SANDSTONE_WALL),
+            1570 => Some(&Self::RED_SHRUB),
             624 => Some(&Self::RED_SHULKER_BOX),
             572 => Some(&Self::RED_STAINED_GLASS),
             588 => Some(&Self::RED_STAINED_GLASS_PANE),
             528 => Some(&Self::RED_TERRACOTTA),
             264 => Some(&Self::RED_TULIP),
             254 => Some(&Self::RED_WOOL),
+            1567 => Some(&Self::RED_WOOL_SLAB),
+            1551 => Some(&Self::RED_WOOL_STAIRS),
             745 => Some(&Self::REDSTONE),
             747 => Some(&Self::REDSTONE_BLOCK),
             775 => Some(&Self::REDSTONE_LAMP),
@@ -110778,6 +117775,7 @@ impl JavaToBedrockItemMapping {
             313 => Some(&Self::SANDSTONE_SLAB),
             466 => Some(&Self::SANDSTONE_STAIRS),
             496 => Some(&Self::SANDSTONE_WALL),
+            1652 => Some(&Self::SAVANNA_VILLAGE_MAP),
             744 => Some(&Self::SCAFFOLDING),
             1495 => Some(&Self::SCRAPE_POTTERY_SHERD),
             457 => Some(&Self::SCULK),
@@ -110793,6 +117791,7 @@ impl JavaToBedrockItemMapping {
             1496 => Some(&Self::SHEAF_POTTERY_SHERD),
             1134 => Some(&Self::SHEARS),
             1162 => Some(&Self::SHEEP_SPAWN_EGG),
+            1571 => Some(&Self::SHELF_MUSHROOM),
             1497 => Some(&Self::SHELTER_POTTERY_SHERD),
             1325 => Some(&Self::SHIELD),
             236 => Some(&Self::SHORT_DRY_GRASS),
@@ -110835,6 +117834,7 @@ impl JavaToBedrockItemMapping {
             367 => Some(&Self::SNOW_BLOCK),
             1198 => Some(&Self::SNOW_GOLEM_SPAWN_EGG),
             1044 => Some(&Self::SNOWBALL),
+            1653 => Some(&Self::SNOWY_VILLAGE_MAP),
             1407 => Some(&Self::SOUL_CAMPFIRE),
             1395 => Some(&Self::SOUL_LANTERN),
             388 => Some(&Self::SOUL_SAND),
@@ -110886,6 +117886,7 @@ impl JavaToBedrockItemMapping {
             715 => Some(&Self::STONE_STAIRS),
             949 => Some(&Self::STONE_SWORD),
             1392 => Some(&Self::STONECUTTER),
+            1569 => Some(&Self::STRAW_BED),
             1209 => Some(&Self::STRAY_SPAWN_EGG),
             1240 => Some(&Self::STRIDER_SPAWN_EGG),
             976 => Some(&Self::STRING),
@@ -110908,6 +117909,8 @@ impl JavaToBedrockItemMapping {
             186 => Some(&Self::STRIPPED_OAK_WOOD),
             182 => Some(&Self::STRIPPED_PALE_OAK_LOG),
             193 => Some(&Self::STRIPPED_PALE_OAK_WOOD),
+            1607 => Some(&Self::STRIPPED_POPLAR_LOG),
+            1608 => Some(&Self::STRIPPED_POPLAR_WOOD),
             176 => Some(&Self::STRIPPED_SPRUCE_LOG),
             187 => Some(&Self::STRIPPED_SPRUCE_WOOD),
             196 => Some(&Self::STRIPPED_WARPED_HYPHAE),
@@ -110931,9 +117934,11 @@ impl JavaToBedrockItemMapping {
             88 => Some(&Self::SUSPICIOUS_GRAVEL),
             87 => Some(&Self::SUSPICIOUS_SAND),
             1371 => Some(&Self::SUSPICIOUS_STEW),
+            1654 => Some(&Self::SWAMP_HUT_MAP),
             1404 => Some(&Self::SWEET_BERRIES),
             1053 => Some(&Self::TADPOLE_BUCKET),
             1189 => Some(&Self::TADPOLE_SPAWN_EGG),
+            1655 => Some(&Self::TAIGA_VILLAGE_MAP),
             237 => Some(&Self::TALL_DRY_GRASS),
             556 => Some(&Self::TALL_GRASS),
             759 => Some(&Self::TARGET),
@@ -110984,6 +117989,7 @@ impl JavaToBedrockItemMapping {
             1201 => Some(&Self::WANDERING_TRADER_SPAWN_EGG),
             1463 => Some(&Self::WARD_ARMOR_TRIM_SMITHING_TEMPLATE),
             1226 => Some(&Self::WARDEN_SPAWN_EGG),
+            1656 => Some(&Self::WARM_OCEAN_RUINS_MAP),
             790 => Some(&Self::WARPED_BUTTON),
             819 => Some(&Self::WARPED_DOOR),
             383 => Some(&Self::WARPED_FENCE),
@@ -111091,6 +118097,9 @@ impl JavaToBedrockItemMapping {
             533 => Some(&Self::WHITE_CARPET),
             642 => Some(&Self::WHITE_CONCRETE),
             658 => Some(&Self::WHITE_CONCRETE_POWDER),
+            1588 => Some(&Self::WHITE_CONCRETE_SLAB),
+            1572 => Some(&Self::WHITE_CONCRETE_STAIRS),
+            1626 => Some(&Self::WHITE_CUSHION),
             1095 => Some(&Self::WHITE_DYE),
             626 => Some(&Self::WHITE_GLAZED_TERRACOTTA),
             866 => Some(&Self::WHITE_HARNESS),
@@ -111100,6 +118109,8 @@ impl JavaToBedrockItemMapping {
             514 => Some(&Self::WHITE_TERRACOTTA),
             266 => Some(&Self::WHITE_TULIP),
             240 => Some(&Self::WHITE_WOOL),
+            1553 => Some(&Self::WHITE_WOOL_SLAB),
+            1537 => Some(&Self::WHITE_WOOL_STAIRS),
             1462 => Some(&Self::WILD_ARMOR_TRIM_SMITHING_TEMPLATE),
             287 => Some(&Self::WILDFLOWERS),
             1249 => Some(&Self::WIND_CHARGE),
@@ -111116,6 +118127,7 @@ impl JavaToBedrockItemMapping {
             940 => Some(&Self::WOODEN_SHOVEL),
             1326 => Some(&Self::WOODEN_SPEAR),
             939 => Some(&Self::WOODEN_SWORD),
+            1657 => Some(&Self::WOODLAND_MANSION_MAP),
             1250 => Some(&Self::WRITABLE_BOOK),
             1251 => Some(&Self::WRITTEN_BOOK),
             1300 => Some(&Self::YELLOW_BANNER),
@@ -111125,14 +118137,20 @@ impl JavaToBedrockItemMapping {
             537 => Some(&Self::YELLOW_CARPET),
             646 => Some(&Self::YELLOW_CONCRETE),
             662 => Some(&Self::YELLOW_CONCRETE_POWDER),
+            1592 => Some(&Self::YELLOW_CONCRETE_SLAB),
+            1576 => Some(&Self::YELLOW_CONCRETE_STAIRS),
+            1630 => Some(&Self::YELLOW_CUSHION),
             1099 => Some(&Self::YELLOW_DYE),
             630 => Some(&Self::YELLOW_GLAZED_TERRACOTTA),
             870 => Some(&Self::YELLOW_HARNESS),
+            1612 => Some(&Self::YELLOW_POPLAR_LEAVES),
             614 => Some(&Self::YELLOW_SHULKER_BOX),
             562 => Some(&Self::YELLOW_STAINED_GLASS),
             578 => Some(&Self::YELLOW_STAINED_GLASS_PANE),
             518 => Some(&Self::YELLOW_TERRACOTTA),
             244 => Some(&Self::YELLOW_WOOL),
+            1557 => Some(&Self::YELLOW_WOOL_SLAB),
+            1541 => Some(&Self::YELLOW_WOOL_STAIRS),
             1241 => Some(&Self::ZOGLIN_SPAWN_EGG),
             1266 => Some(&Self::ZOMBIE_HEAD),
             1213 => Some(&Self::ZOMBIE_HORSE_SPAWN_EGG),
@@ -111146,6 +118164,7 @@ impl JavaToBedrockItemMapping {
     #[must_use]
     pub fn from_bedrock(bedrock_id: i16, bedrock_data: u32) -> Option<&'static Self> {
         match (bedrock_id, bedrock_data) {
+            (-305, 0) => Some(&Self::ABANDONED_CAMP_MAP),
             (382, 0) => Some(&Self::ACACIA_BOAT),
             (-140, 0) => Some(&Self::ACACIA_BUTTON),
             (655, 0) => Some(&Self::ACACIA_CHEST_BOAT),
@@ -111250,6 +118269,7 @@ impl JavaToBedrockItemMapping {
             (-611, 15) => Some(&Self::BLACK_CARPET),
             (-642, 15) => Some(&Self::BLACK_CONCRETE),
             (-723, 15) => Some(&Self::BLACK_CONCRETE_POWDER),
+            (773, 0) => Some(&Self::BLACK_CUSHION),
             (398, 0) => Some(&Self::BLACK_DYE),
             (235, 0) => Some(&Self::BLACK_GLAZED_TERRACOTTA),
             (730, 0) => Some(&Self::BLACK_HARNESS),
@@ -111274,6 +118294,7 @@ impl JavaToBedrockItemMapping {
             (-607, 11) => Some(&Self::BLUE_CARPET),
             (-638, 11) => Some(&Self::BLUE_CONCRETE),
             (-719, 11) => Some(&Self::BLUE_CONCRETE_POWDER),
+            (774, 0) => Some(&Self::BLUE_CUSHION),
             (402, 0) => Some(&Self::BLUE_DYE),
             (727, 0) => Some(&Self::BLUE_EGG),
             (231, 0) => Some(&Self::BLUE_GLAZED_TERRACOTTA),
@@ -111315,6 +118336,7 @@ impl JavaToBedrockItemMapping {
             (-608, 12) => Some(&Self::BROWN_CARPET),
             (-639, 12) => Some(&Self::BROWN_CONCRETE),
             (-720, 12) => Some(&Self::BROWN_CONCRETE_POWDER),
+            (775, 0) => Some(&Self::BROWN_CUSHION),
             (401, 0) => Some(&Self::BROWN_DYE),
             (728, 0) => Some(&Self::BROWN_EGG),
             (232, 0) => Some(&Self::BROWN_GLAZED_TERRACOTTA),
@@ -111391,7 +118413,6 @@ impl JavaToBedrockItemMapping {
             (-1020, 0) => Some(&Self::CHISELED_RESIN_BRICKS),
             (-944, 0) => Some(&Self::CHISELED_SANDSTONE),
             (-870, 0) => Some(&Self::CHISELED_STONE_BRICKS),
-            (-305, 0) => Some(&Self::CHISELED_SULFUR),
             (-753, 0) => Some(&Self::CHISELED_TUFF),
             (-759, 0) => Some(&Self::CHISELED_TUFF_BRICKS),
             (200, 0) => Some(&Self::CHORUS_FLOWER),
@@ -111515,6 +118536,7 @@ impl JavaToBedrockItemMapping {
             (-605, 9) => Some(&Self::CYAN_CARPET),
             (-636, 9) => Some(&Self::CYAN_CONCRETE),
             (-717, 9) => Some(&Self::CYAN_CONCRETE_POWDER),
+            (776, 0) => Some(&Self::CYAN_CUSHION),
             (404, 0) => Some(&Self::CYAN_DYE),
             (229, 0) => Some(&Self::CYAN_GLAZED_TERRACOTTA),
             (733, 0) => Some(&Self::CYAN_HARNESS),
@@ -111741,6 +118763,7 @@ impl JavaToBedrockItemMapping {
             (-603, 7) => Some(&Self::GRAY_CARPET),
             (-634, 7) => Some(&Self::GRAY_CONCRETE),
             (-715, 7) => Some(&Self::GRAY_CONCRETE_POWDER),
+            (777, 0) => Some(&Self::GRAY_CUSHION),
             (406, 0) => Some(&Self::GRAY_DYE),
             (227, 0) => Some(&Self::GRAY_GLAZED_TERRACOTTA),
             (734, 0) => Some(&Self::GRAY_HARNESS),
@@ -111756,6 +118779,7 @@ impl JavaToBedrockItemMapping {
             (-609, 13) => Some(&Self::GREEN_CARPET),
             (-640, 13) => Some(&Self::GREEN_CONCRETE),
             (-721, 13) => Some(&Self::GREEN_CONCRETE_POWDER),
+            (778, 0) => Some(&Self::GREEN_CUSHION),
             (400, 0) => Some(&Self::GREEN_DYE),
             (233, 0) => Some(&Self::GREEN_GLAZED_TERRACOTTA),
             (735, 0) => Some(&Self::GREEN_HARNESS),
@@ -111869,6 +118893,7 @@ impl JavaToBedrockItemMapping {
             (-599, 3) => Some(&Self::LIGHT_BLUE_CARPET),
             (-630, 3) => Some(&Self::LIGHT_BLUE_CONCRETE),
             (-711, 3) => Some(&Self::LIGHT_BLUE_CONCRETE_POWDER),
+            (779, 0) => Some(&Self::LIGHT_BLUE_CUSHION),
             (410, 0) => Some(&Self::LIGHT_BLUE_DYE),
             (223, 0) => Some(&Self::LIGHT_BLUE_GLAZED_TERRACOTTA),
             (736, 0) => Some(&Self::LIGHT_BLUE_HARNESS),
@@ -111884,6 +118909,7 @@ impl JavaToBedrockItemMapping {
             (-604, 8) => Some(&Self::LIGHT_GRAY_CARPET),
             (-635, 8) => Some(&Self::LIGHT_GRAY_CONCRETE),
             (-716, 8) => Some(&Self::LIGHT_GRAY_CONCRETE_POWDER),
+            (780, 0) => Some(&Self::LIGHT_GRAY_CUSHION),
             (405, 0) => Some(&Self::LIGHT_GRAY_DYE),
             (228, 0) => Some(&Self::LIGHT_GRAY_GLAZED_TERRACOTTA),
             (737, 0) => Some(&Self::LIGHT_GRAY_HARNESS),
@@ -111904,6 +118930,7 @@ impl JavaToBedrockItemMapping {
             (-601, 5) => Some(&Self::LIME_CARPET),
             (-632, 5) => Some(&Self::LIME_CONCRETE),
             (-713, 5) => Some(&Self::LIME_CONCRETE_POWDER),
+            (781, 0) => Some(&Self::LIME_CUSHION),
             (408, 0) => Some(&Self::LIME_DYE),
             (225, 0) => Some(&Self::LIME_GLAZED_TERRACOTTA),
             (738, 0) => Some(&Self::LIME_HARNESS),
@@ -111924,6 +118951,7 @@ impl JavaToBedrockItemMapping {
             (-598, 2) => Some(&Self::MAGENTA_CARPET),
             (-629, 2) => Some(&Self::MAGENTA_CONCRETE),
             (-710, 2) => Some(&Self::MAGENTA_CONCRETE_POWDER),
+            (782, 0) => Some(&Self::MAGENTA_CUSHION),
             (411, 0) => Some(&Self::MAGENTA_DYE),
             (222, 0) => Some(&Self::MAGENTA_GLAZED_TERRACOTTA),
             (739, 0) => Some(&Self::MAGENTA_HARNESS),
@@ -112072,9 +119100,11 @@ impl JavaToBedrockItemMapping {
             (-597, 1) => Some(&Self::ORANGE_CARPET),
             (-628, 1) => Some(&Self::ORANGE_CONCRETE),
             (-709, 1) => Some(&Self::ORANGE_CONCRETE_POWDER),
+            (783, 0) => Some(&Self::ORANGE_CUSHION),
             (412, 0) => Some(&Self::ORANGE_DYE),
             (221, 0) => Some(&Self::ORANGE_GLAZED_TERRACOTTA),
             (740, 0) => Some(&Self::ORANGE_HARNESS),
+            (-1144, 0) => Some(&Self::ORANGE_POPLAR_LEAVES),
             (-613, 1) => Some(&Self::ORANGE_SHULKER_BOX),
             (-673, 1) => Some(&Self::ORANGE_STAINED_GLASS),
             (-643, 1) => Some(&Self::ORANGE_STAINED_GLASS_PANE),
@@ -112143,6 +119173,7 @@ impl JavaToBedrockItemMapping {
             (-602, 6) => Some(&Self::PINK_CARPET),
             (-633, 6) => Some(&Self::PINK_CONCRETE),
             (-714, 6) => Some(&Self::PINK_CONCRETE_POWDER),
+            (784, 0) => Some(&Self::PINK_CUSHION),
             (407, 0) => Some(&Self::PINK_DYE),
             (226, 0) => Some(&Self::PINK_GLAZED_TERRACOTTA),
             (741, 0) => Some(&Self::PINK_HARNESS),
@@ -112194,6 +119225,23 @@ impl JavaToBedrockItemMapping {
             (-749, 0) => Some(&Self::POLISHED_TUFF_SLAB),
             (-751, 0) => Some(&Self::POLISHED_TUFF_STAIRS),
             (-752, 0) => Some(&Self::POLISHED_TUFF_WALL),
+            (769, 0) => Some(&Self::POPLAR_BOAT),
+            (-1126, 0) => Some(&Self::POPLAR_BUTTON),
+            (770, 0) => Some(&Self::POPLAR_CHEST_BOAT),
+            (-1127, 0) => Some(&Self::POPLAR_DOOR),
+            (-1128, 0) => Some(&Self::POPLAR_FENCE),
+            (-1129, 0) => Some(&Self::POPLAR_FENCE_GATE),
+            (-1130, 0) => Some(&Self::POPLAR_HANGING_SIGN),
+            (-1132, 0) => Some(&Self::POPLAR_LOG),
+            (-1133, 0) => Some(&Self::POPLAR_PLANKS),
+            (-1134, 0) => Some(&Self::POPLAR_PRESSURE_PLATE),
+            (-1143, 0) => Some(&Self::POPLAR_SAPLING),
+            (-1147, 0) => Some(&Self::POPLAR_SHELF),
+            (771, 0) => Some(&Self::POPLAR_SIGN),
+            (-1135, 0) => Some(&Self::POPLAR_SLAB),
+            (-1137, 0) => Some(&Self::POPLAR_STAIRS),
+            (-1139, 0) => Some(&Self::POPLAR_TRAPDOOR),
+            (-1142, 0) => Some(&Self::POPLAR_WOOD),
             (569, 0) => Some(&Self::POPPED_CHORUS_FRUIT),
             (38, 0) => Some(&Self::POPPY),
             (262, 0) => Some(&Self::PORKCHOP),
@@ -112224,6 +119272,7 @@ impl JavaToBedrockItemMapping {
             (-606, 10) => Some(&Self::PURPLE_CARPET),
             (-637, 10) => Some(&Self::PURPLE_CONCRETE),
             (-718, 10) => Some(&Self::PURPLE_CONCRETE_POWDER),
+            (785, 0) => Some(&Self::PURPLE_CUSHION),
             (403, 0) => Some(&Self::PURPLE_DYE),
             (219, 0) => Some(&Self::PURPLE_GLAZED_TERRACOTTA),
             (742, 0) => Some(&Self::PURPLE_HARNESS),
@@ -112264,6 +119313,7 @@ impl JavaToBedrockItemMapping {
             (-610, 14) => Some(&Self::RED_CARPET),
             (-641, 14) => Some(&Self::RED_CONCRETE),
             (-722, 14) => Some(&Self::RED_CONCRETE_POWDER),
+            (786, 0) => Some(&Self::RED_CUSHION),
             (399, 0) => Some(&Self::RED_DYE),
             (234, 0) => Some(&Self::RED_GLAZED_TERRACOTTA),
             (743, 0) => Some(&Self::RED_HARNESS),
@@ -112273,6 +119323,7 @@ impl JavaToBedrockItemMapping {
             (-184, 0) => Some(&Self::RED_NETHER_BRICK_STAIRS),
             (-983, 13) => Some(&Self::RED_NETHER_BRICK_WALL),
             (215, 0) => Some(&Self::RED_NETHER_BRICKS),
+            (-1145, 0) => Some(&Self::RED_POPLAR_LEAVES),
             (-949, 0) => Some(&Self::RED_SAND),
             (179, 0) => Some(&Self::RED_SANDSTONE),
             (182, 0) => Some(&Self::RED_SANDSTONE_SLAB),
@@ -112419,6 +119470,7 @@ impl JavaToBedrockItemMapping {
             (-180, 0) => Some(&Self::STONE_STAIRS),
             (314, 0) => Some(&Self::STONE_SWORD),
             (-197, 0) => Some(&Self::STONECUTTER),
+            (421, 0) => Some(&Self::STRAW_BED),
             (466, 0) => Some(&Self::STRAY_SPAWN_EGG),
             (500, 0) => Some(&Self::STRIDER_SPAWN_EGG),
             (329, 0) => Some(&Self::STRING),
@@ -112441,6 +119493,8 @@ impl JavaToBedrockItemMapping {
             (-819, 8) => Some(&Self::STRIPPED_OAK_WOOD),
             (-994, 0) => Some(&Self::STRIPPED_PALE_OAK_LOG),
             (-1004, 0) => Some(&Self::STRIPPED_PALE_OAK_WOOD),
+            (-1131, 0) => Some(&Self::STRIPPED_POPLAR_LOG),
+            (-1141, 0) => Some(&Self::STRIPPED_POPLAR_WOOD),
             (-5, 0) => Some(&Self::STRIPPED_SPRUCE_LOG),
             (-820, 9) => Some(&Self::STRIPPED_SPRUCE_WOOD),
             (-301, 0) => Some(&Self::STRIPPED_WARPED_HYPHAE),
@@ -112604,12 +119658,12 @@ impl JavaToBedrockItemMapping {
             (337, 0) => Some(&Self::WHEAT),
             (291, 0) => Some(&Self::WHEAT_SEEDS),
             (577, 15) => Some(&Self::WHITE_BANNER),
-            (421, 0) => Some(&Self::WHITE_BED),
             (872, 0) => Some(&Self::WHITE_BUNDLE),
             (-413, 0) => Some(&Self::WHITE_CANDLE),
             (171, 0) => Some(&Self::WHITE_CARPET),
             (236, 0) => Some(&Self::WHITE_CONCRETE),
             (237, 0) => Some(&Self::WHITE_CONCRETE_POWDER),
+            (787, 0) => Some(&Self::WHITE_CUSHION),
             (413, 0) => Some(&Self::WHITE_DYE),
             (220, 0) => Some(&Self::WHITE_GLAZED_TERRACOTTA),
             (744, 0) => Some(&Self::WHITE_HARNESS),
@@ -112644,9 +119698,11 @@ impl JavaToBedrockItemMapping {
             (-600, 4) => Some(&Self::YELLOW_CARPET),
             (-631, 4) => Some(&Self::YELLOW_CONCRETE),
             (-712, 4) => Some(&Self::YELLOW_CONCRETE_POWDER),
+            (788, 0) => Some(&Self::YELLOW_CUSHION),
             (409, 0) => Some(&Self::YELLOW_DYE),
             (224, 0) => Some(&Self::YELLOW_GLAZED_TERRACOTTA),
             (745, 0) => Some(&Self::YELLOW_HARNESS),
+            (-1146, 0) => Some(&Self::YELLOW_POPLAR_LEAVES),
             (-616, 4) => Some(&Self::YELLOW_SHULKER_BOX),
             (-676, 4) => Some(&Self::YELLOW_STAINED_GLASS),
             (-646, 4) => Some(&Self::YELLOW_STAINED_GLASS_PANE),
@@ -112660,6 +119716,7 @@ impl JavaToBedrockItemMapping {
             (482, 0) => Some(&Self::ZOMBIE_VILLAGER_SPAWN_EGG),
             (452, 0) => Some(&Self::ZOMBIFIED_PIGLIN_SPAWN_EGG),
             _ => match bedrock_id {
+                -305 => Some(&Self::ABANDONED_CAMP_MAP),
                 382 => Some(&Self::ACACIA_BOAT),
                 -140 => Some(&Self::ACACIA_BUTTON),
                 655 => Some(&Self::ACACIA_CHEST_BOAT),
@@ -112764,6 +119821,7 @@ impl JavaToBedrockItemMapping {
                 -611 => Some(&Self::BLACK_CARPET),
                 -642 => Some(&Self::BLACK_CONCRETE),
                 -723 => Some(&Self::BLACK_CONCRETE_POWDER),
+                773 => Some(&Self::BLACK_CUSHION),
                 398 => Some(&Self::BLACK_DYE),
                 235 => Some(&Self::BLACK_GLAZED_TERRACOTTA),
                 730 => Some(&Self::BLACK_HARNESS),
@@ -112786,6 +119844,7 @@ impl JavaToBedrockItemMapping {
                 -607 => Some(&Self::BLUE_CARPET),
                 -638 => Some(&Self::BLUE_CONCRETE),
                 -719 => Some(&Self::BLUE_CONCRETE_POWDER),
+                774 => Some(&Self::BLUE_CUSHION),
                 402 => Some(&Self::BLUE_DYE),
                 727 => Some(&Self::BLUE_EGG),
                 231 => Some(&Self::BLUE_GLAZED_TERRACOTTA),
@@ -112825,6 +119884,7 @@ impl JavaToBedrockItemMapping {
                 -608 => Some(&Self::BROWN_CARPET),
                 -639 => Some(&Self::BROWN_CONCRETE),
                 -720 => Some(&Self::BROWN_CONCRETE_POWDER),
+                775 => Some(&Self::BROWN_CUSHION),
                 401 => Some(&Self::BROWN_DYE),
                 728 => Some(&Self::BROWN_EGG),
                 232 => Some(&Self::BROWN_GLAZED_TERRACOTTA),
@@ -112901,7 +119961,6 @@ impl JavaToBedrockItemMapping {
                 -1020 => Some(&Self::CHISELED_RESIN_BRICKS),
                 -944 => Some(&Self::CHISELED_SANDSTONE),
                 -870 => Some(&Self::CHISELED_STONE_BRICKS),
-                -305 => Some(&Self::CHISELED_SULFUR),
                 -753 => Some(&Self::CHISELED_TUFF),
                 -759 => Some(&Self::CHISELED_TUFF_BRICKS),
                 200 => Some(&Self::CHORUS_FLOWER),
@@ -113023,6 +120082,7 @@ impl JavaToBedrockItemMapping {
                 -605 => Some(&Self::CYAN_CARPET),
                 -636 => Some(&Self::CYAN_CONCRETE),
                 -717 => Some(&Self::CYAN_CONCRETE_POWDER),
+                776 => Some(&Self::CYAN_CUSHION),
                 404 => Some(&Self::CYAN_DYE),
                 229 => Some(&Self::CYAN_GLAZED_TERRACOTTA),
                 733 => Some(&Self::CYAN_HARNESS),
@@ -113247,6 +120307,7 @@ impl JavaToBedrockItemMapping {
                 -603 => Some(&Self::GRAY_CARPET),
                 -634 => Some(&Self::GRAY_CONCRETE),
                 -715 => Some(&Self::GRAY_CONCRETE_POWDER),
+                777 => Some(&Self::GRAY_CUSHION),
                 406 => Some(&Self::GRAY_DYE),
                 227 => Some(&Self::GRAY_GLAZED_TERRACOTTA),
                 734 => Some(&Self::GRAY_HARNESS),
@@ -113260,6 +120321,7 @@ impl JavaToBedrockItemMapping {
                 -609 => Some(&Self::GREEN_CARPET),
                 -640 => Some(&Self::GREEN_CONCRETE),
                 -721 => Some(&Self::GREEN_CONCRETE_POWDER),
+                778 => Some(&Self::GREEN_CUSHION),
                 400 => Some(&Self::GREEN_DYE),
                 233 => Some(&Self::GREEN_GLAZED_TERRACOTTA),
                 735 => Some(&Self::GREEN_HARNESS),
@@ -113371,6 +120433,7 @@ impl JavaToBedrockItemMapping {
                 -599 => Some(&Self::LIGHT_BLUE_CARPET),
                 -630 => Some(&Self::LIGHT_BLUE_CONCRETE),
                 -711 => Some(&Self::LIGHT_BLUE_CONCRETE_POWDER),
+                779 => Some(&Self::LIGHT_BLUE_CUSHION),
                 410 => Some(&Self::LIGHT_BLUE_DYE),
                 223 => Some(&Self::LIGHT_BLUE_GLAZED_TERRACOTTA),
                 736 => Some(&Self::LIGHT_BLUE_HARNESS),
@@ -113384,6 +120447,7 @@ impl JavaToBedrockItemMapping {
                 -604 => Some(&Self::LIGHT_GRAY_CARPET),
                 -635 => Some(&Self::LIGHT_GRAY_CONCRETE),
                 -716 => Some(&Self::LIGHT_GRAY_CONCRETE_POWDER),
+                780 => Some(&Self::LIGHT_GRAY_CUSHION),
                 405 => Some(&Self::LIGHT_GRAY_DYE),
                 228 => Some(&Self::LIGHT_GRAY_GLAZED_TERRACOTTA),
                 737 => Some(&Self::LIGHT_GRAY_HARNESS),
@@ -113402,6 +120466,7 @@ impl JavaToBedrockItemMapping {
                 -601 => Some(&Self::LIME_CARPET),
                 -632 => Some(&Self::LIME_CONCRETE),
                 -713 => Some(&Self::LIME_CONCRETE_POWDER),
+                781 => Some(&Self::LIME_CUSHION),
                 408 => Some(&Self::LIME_DYE),
                 225 => Some(&Self::LIME_GLAZED_TERRACOTTA),
                 738 => Some(&Self::LIME_HARNESS),
@@ -113420,6 +120485,7 @@ impl JavaToBedrockItemMapping {
                 -598 => Some(&Self::MAGENTA_CARPET),
                 -629 => Some(&Self::MAGENTA_CONCRETE),
                 -710 => Some(&Self::MAGENTA_CONCRETE_POWDER),
+                782 => Some(&Self::MAGENTA_CUSHION),
                 411 => Some(&Self::MAGENTA_DYE),
                 222 => Some(&Self::MAGENTA_GLAZED_TERRACOTTA),
                 739 => Some(&Self::MAGENTA_HARNESS),
@@ -113566,9 +120632,11 @@ impl JavaToBedrockItemMapping {
                 -597 => Some(&Self::ORANGE_CARPET),
                 -628 => Some(&Self::ORANGE_CONCRETE),
                 -709 => Some(&Self::ORANGE_CONCRETE_POWDER),
+                783 => Some(&Self::ORANGE_CUSHION),
                 412 => Some(&Self::ORANGE_DYE),
                 221 => Some(&Self::ORANGE_GLAZED_TERRACOTTA),
                 740 => Some(&Self::ORANGE_HARNESS),
+                -1144 => Some(&Self::ORANGE_POPLAR_LEAVES),
                 -613 => Some(&Self::ORANGE_SHULKER_BOX),
                 -673 => Some(&Self::ORANGE_STAINED_GLASS),
                 -643 => Some(&Self::ORANGE_STAINED_GLASS_PANE),
@@ -113635,6 +120703,7 @@ impl JavaToBedrockItemMapping {
                 -602 => Some(&Self::PINK_CARPET),
                 -633 => Some(&Self::PINK_CONCRETE),
                 -714 => Some(&Self::PINK_CONCRETE_POWDER),
+                784 => Some(&Self::PINK_CUSHION),
                 407 => Some(&Self::PINK_DYE),
                 226 => Some(&Self::PINK_GLAZED_TERRACOTTA),
                 741 => Some(&Self::PINK_HARNESS),
@@ -113686,6 +120755,23 @@ impl JavaToBedrockItemMapping {
                 -749 => Some(&Self::POLISHED_TUFF_SLAB),
                 -751 => Some(&Self::POLISHED_TUFF_STAIRS),
                 -752 => Some(&Self::POLISHED_TUFF_WALL),
+                769 => Some(&Self::POPLAR_BOAT),
+                -1126 => Some(&Self::POPLAR_BUTTON),
+                770 => Some(&Self::POPLAR_CHEST_BOAT),
+                -1127 => Some(&Self::POPLAR_DOOR),
+                -1128 => Some(&Self::POPLAR_FENCE),
+                -1129 => Some(&Self::POPLAR_FENCE_GATE),
+                -1130 => Some(&Self::POPLAR_HANGING_SIGN),
+                -1132 => Some(&Self::POPLAR_LOG),
+                -1133 => Some(&Self::POPLAR_PLANKS),
+                -1134 => Some(&Self::POPLAR_PRESSURE_PLATE),
+                -1143 => Some(&Self::POPLAR_SAPLING),
+                -1147 => Some(&Self::POPLAR_SHELF),
+                771 => Some(&Self::POPLAR_SIGN),
+                -1135 => Some(&Self::POPLAR_SLAB),
+                -1137 => Some(&Self::POPLAR_STAIRS),
+                -1139 => Some(&Self::POPLAR_TRAPDOOR),
+                -1142 => Some(&Self::POPLAR_WOOD),
                 569 => Some(&Self::POPPED_CHORUS_FRUIT),
                 38 => Some(&Self::POPPY),
                 262 => Some(&Self::PORKCHOP),
@@ -113714,6 +120800,7 @@ impl JavaToBedrockItemMapping {
                 -606 => Some(&Self::PURPLE_CARPET),
                 -637 => Some(&Self::PURPLE_CONCRETE),
                 -718 => Some(&Self::PURPLE_CONCRETE_POWDER),
+                785 => Some(&Self::PURPLE_CUSHION),
                 403 => Some(&Self::PURPLE_DYE),
                 219 => Some(&Self::PURPLE_GLAZED_TERRACOTTA),
                 742 => Some(&Self::PURPLE_HARNESS),
@@ -113752,6 +120839,7 @@ impl JavaToBedrockItemMapping {
                 -610 => Some(&Self::RED_CARPET),
                 -641 => Some(&Self::RED_CONCRETE),
                 -722 => Some(&Self::RED_CONCRETE_POWDER),
+                786 => Some(&Self::RED_CUSHION),
                 399 => Some(&Self::RED_DYE),
                 234 => Some(&Self::RED_GLAZED_TERRACOTTA),
                 743 => Some(&Self::RED_HARNESS),
@@ -113761,6 +120849,7 @@ impl JavaToBedrockItemMapping {
                 -184 => Some(&Self::RED_NETHER_BRICK_STAIRS),
                 -983 => Some(&Self::RED_NETHER_BRICK_WALL),
                 215 => Some(&Self::RED_NETHER_BRICKS),
+                -1145 => Some(&Self::RED_POPLAR_LEAVES),
                 -949 => Some(&Self::RED_SAND),
                 179 => Some(&Self::RED_SANDSTONE),
                 182 => Some(&Self::RED_SANDSTONE_SLAB),
@@ -113929,6 +121018,8 @@ impl JavaToBedrockItemMapping {
                 -819 => Some(&Self::STRIPPED_OAK_WOOD),
                 -994 => Some(&Self::STRIPPED_PALE_OAK_LOG),
                 -1004 => Some(&Self::STRIPPED_PALE_OAK_WOOD),
+                -1131 => Some(&Self::STRIPPED_POPLAR_LOG),
+                -1141 => Some(&Self::STRIPPED_POPLAR_WOOD),
                 -5 => Some(&Self::STRIPPED_SPRUCE_LOG),
                 -820 => Some(&Self::STRIPPED_SPRUCE_WOOD),
                 -301 => Some(&Self::STRIPPED_WARPED_HYPHAE),
@@ -114096,6 +121187,7 @@ impl JavaToBedrockItemMapping {
                 171 => Some(&Self::WHITE_CARPET),
                 236 => Some(&Self::WHITE_CONCRETE),
                 237 => Some(&Self::WHITE_CONCRETE_POWDER),
+                787 => Some(&Self::WHITE_CUSHION),
                 413 => Some(&Self::WHITE_DYE),
                 220 => Some(&Self::WHITE_GLAZED_TERRACOTTA),
                 744 => Some(&Self::WHITE_HARNESS),
@@ -114128,9 +121220,11 @@ impl JavaToBedrockItemMapping {
                 -600 => Some(&Self::YELLOW_CARPET),
                 -631 => Some(&Self::YELLOW_CONCRETE),
                 -712 => Some(&Self::YELLOW_CONCRETE_POWDER),
+                788 => Some(&Self::YELLOW_CUSHION),
                 409 => Some(&Self::YELLOW_DYE),
                 224 => Some(&Self::YELLOW_GLAZED_TERRACOTTA),
                 745 => Some(&Self::YELLOW_HARNESS),
+                -1146 => Some(&Self::YELLOW_POPLAR_LEAVES),
                 -616 => Some(&Self::YELLOW_SHULKER_BOX),
                 -676 => Some(&Self::YELLOW_STAINED_GLASS),
                 -646 => Some(&Self::YELLOW_STAINED_GLASS_PANE),

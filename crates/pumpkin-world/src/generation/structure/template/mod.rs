@@ -442,7 +442,10 @@ mod tests {
             "minecraft:village/common/animals/cat_black",
             "minecraft:village/plains/villagers/unemployed",
         ] {
-            let t = get_template(name).unwrap();
+            let t = match global_cache().get_or_error(name) {
+                Ok(t) => t,
+                Err(e) => panic!("get_or_error({name}) failed with: {e:?}"),
+            };
             println!("[TEMPLATE] {name} entities: {:?}", t.entities);
             assert_eq!(t.entities.len(), 1);
         }

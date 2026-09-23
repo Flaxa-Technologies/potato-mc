@@ -43,7 +43,7 @@ fn serialize_item_stack_with_id(
     write: &mut impl NetworkWriteExt,
 ) -> Result<(), WritingError> {
     if version >= JavaMinecraftVersion::V_1_20_5 {
-        if stack.is_empty() {
+        if stack.is_empty() || item_id == 0 {
             write.put_var_int(&VarInt(0))
         } else {
             let (to_add, to_remove) = item_component_counts(stack);
@@ -112,7 +112,7 @@ fn serialize_length_prefixed_item_stack_with_id(
     write: &mut impl NetworkWriteExt,
 ) -> Result<(), WritingError> {
     if version >= JavaMinecraftVersion::V_1_20_5 {
-        if stack.is_empty() {
+        if stack.is_empty() || item_id == 0 {
             write.put_var_int(&VarInt(0))
         } else {
             let (to_add, to_remove) = item_component_counts(stack);
@@ -338,7 +338,7 @@ impl ItemStackSerializer<'_> {
     ) -> Result<ItemStackSerializer<'static>, ReadingError> {
         if *version >= JavaMinecraftVersion::V_1_20_5 {
             let serializer = Self::read(read)?;
-            if *version < JavaMinecraftVersion::V_26_2 {
+            if *version != JavaMinecraftVersion::V_26_2 {
                 Ok(ItemStackSerializer(Cow::Owned(
                     serializer.to_stack_for_version(version),
                 )))
@@ -395,7 +395,7 @@ impl ItemStackSerializer<'_> {
     ) -> Result<ItemStackSerializer<'static>, ReadingError> {
         if *version >= JavaMinecraftVersion::V_1_21_5 {
             let serializer = Self::read_length_prefixed_optional(read)?;
-            if *version < JavaMinecraftVersion::V_26_2 {
+            if *version != JavaMinecraftVersion::V_26_2 {
                 Ok(ItemStackSerializer(Cow::Owned(
                     serializer.to_stack_for_version(version),
                 )))

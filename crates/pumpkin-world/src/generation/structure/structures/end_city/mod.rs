@@ -1,6 +1,6 @@
 mod layout;
 
-use std::sync::{Arc, Mutex};
+
 
 use pumpkin_data::{BlockDirection, Mirror, Rotation, item::Item, item_stack::ItemStack};
 use pumpkin_nbt::{compound::NbtCompound, tag::NbtTag};
@@ -63,10 +63,10 @@ impl StructureGenerator for EndCityGenerator {
         for descriptor in descriptors {
             collector.add_piece(Box::new(EndCityTemplatePiece::new(descriptor)));
         }
-        Some(StructurePosition {
-            start_pos: BlockPos::new(x, y, z),
-            collector: Arc::new(Mutex::new(collector)),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(x, y, z),
+            collector,
+        ))
     }
 }
 

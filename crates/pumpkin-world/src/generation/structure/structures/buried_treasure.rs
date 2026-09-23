@@ -1,4 +1,4 @@
-use std::sync::Arc;
+
 
 use pumpkin_data::Block;
 use pumpkin_nbt::compound::NbtCompound;
@@ -36,10 +36,10 @@ impl StructureGenerator for BuriedTreasureGenerator {
             piece: StructurePiece::new(StructurePieceType::BuriedTreasure, bounding_box, 0),
         }));
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(x, 90, z),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(x, 90, z),
+            collector,
+        ))
     }
 }
 

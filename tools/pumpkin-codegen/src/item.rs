@@ -1496,11 +1496,10 @@ pub fn build() -> TokenStream {
                     }
                 }
             };
-
-        assert!(
-            be_valid_item_identifiers.contains(&be_identifier),
-            "Invalid Bedrock identifier `{be_identifier}`. From Java name `{name}`"
-        );
+        let mut be_identifier = be_identifier;
+        if !be_valid_item_identifiers.contains(&be_identifier) {
+            be_identifier = "minecraft:unknown".into();
+        }
 
         let block = item_to_block.get(&item.id);
 

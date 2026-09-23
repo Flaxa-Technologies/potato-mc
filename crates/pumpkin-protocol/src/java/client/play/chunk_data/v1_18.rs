@@ -157,7 +157,7 @@ pub fn write_chunk_data(
             }
 
             let mut biome_network = biome_palette.convert_network();
-            if version < &JavaMinecraftVersion::V_26_2 {
+            if version < &JavaMinecraftVersion::V_26_3 {
                 match &mut biome_network.palette {
                     NetworkPalette::Single(registry_id) => {
                         *registry_id = pumpkin_data::biome_remap::remap_biome_for_version(
@@ -297,6 +297,8 @@ pub fn write_chunk_data(
             .map_err(|_| WritingError::Message("light_engine lock poisoned".into()))?;
         let num_sections = light_engine.sky_light.len();
 
+        use std::borrow::Cow;
+
         let mut sky_light_empty_mask = 0u64;
         let mut block_light_empty_mask = 0u64;
         let mut sky_light_mask = 0u64;
@@ -306,25 +308,49 @@ pub fn write_chunk_data(
         sky_light_empty_mask |= 1 << 0;
         block_light_empty_mask |= 1 << 0;
 
+        let mut sky_light_arrays: Vec<Cow<'_, [u8]>> = Vec::new();
+        let mut block_light_arrays: Vec<Cow<'_, [u8]>> = Vec::new();
+
         // Bits 1..=num_sections represent the actual world sections
         for section_index in 0..num_sections {
             let bit_index = section_index + 1; // Offset by 1 for the below-world section
 
-            if let LightContainer::Full(_) = &light_engine.sky_light[section_index] {
-                sky_light_mask |= 1 << bit_index;
-            } else {
-                sky_light_empty_mask |= 1 << bit_index;
+            match &light_engine.sky_light[section_index] {
+                LightContainer::Full(data) => {
+                    sky_light_mask |= 1 << bit_index;
+                    sky_light_arrays.push(Cow::Borrowed(data.as_ref()));
+                }
+                LightContainer::Empty(val) if *val > 0 => {
+                    sky_light_mask |= 1 << bit_index;
+                    sky_light_arrays.push(Cow::Owned(vec![*val << 4 | *val; 2048]));
+                }
+                LightContainer::Empty(_) => {
+                    sky_light_empty_mask |= 1 << bit_index;
+                }
             }
 
-            if let LightContainer::Full(_) = &light_engine.block_light[section_index] {
-                block_light_mask |= 1 << bit_index;
-            } else {
-                block_light_empty_mask |= 1 << bit_index;
+            match &light_engine.block_light[section_index] {
+                LightContainer::Full(data) => {
+                    block_light_mask |= 1 << bit_index;
+                    block_light_arrays.push(Cow::Borrowed(data.as_ref()));
+                }
+                LightContainer::Empty(val) if *val > 0 => {
+                    block_light_mask |= 1 << bit_index;
+                    block_light_arrays.push(Cow::Owned(vec![*val << 4 | *val; 2048]));
+                }
+                LightContainer::Empty(_) => {
+                    block_light_empty_mask |= 1 << bit_index;
+                }
             }
         }
 
-        // Bit num_sections+1 represents the section above the world (always empty)
-        sky_light_empty_mask |= 1 << (num_sections + 1);
+        // Section above the world has full sunlight if this dimension has skylight
+        let has_sky_light = sky_light_mask > 0;
+        if has_sky_light {
+            sky_light_mask |= 1 << (num_sections + 1);
+        } else {
+            sky_light_empty_mask |= 1 << (num_sections + 1);
+        }
         block_light_empty_mask |= 1 << (num_sections + 1);
 
         // Trust edges (1.18 - 1.19.4; removed in 1.20)
@@ -345,20 +371,20 @@ pub fn write_chunk_data(
 
         // Write Sky Light arrays
         write.write_var_int(&VarInt(sky_light_mask.count_ones() as i32))?;
-        for section_index in 0..num_sections {
-            if let LightContainer::Full(data) = &light_engine.sky_light[section_index] {
-                write.write_var_int(&light_data_size)?;
-                write.write_slice(data.as_ref())?;
-            }
+        for arr in &sky_light_arrays {
+            write.write_var_int(&light_data_size)?;
+            write.write_slice(arr.as_ref())?;
+        }
+        if has_sky_light {
+            write.write_var_int(&light_data_size)?;
+            write.write_slice(&[0xFF; 2048])?;
         }
 
         // Write Block Light arrays
         write.write_var_int(&VarInt(block_light_mask.count_ones() as i32))?;
-        for section_index in 0..num_sections {
-            if let LightContainer::Full(data) = &light_engine.block_light[section_index] {
-                write.write_var_int(&light_data_size)?;
-                write.write_slice(data.as_ref())?;
-            }
+        for arr in &block_light_arrays {
+            write.write_var_int(&light_data_size)?;
+            write.write_slice(arr.as_ref())?;
         }
         }
 

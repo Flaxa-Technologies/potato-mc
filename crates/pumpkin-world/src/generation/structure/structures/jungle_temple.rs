@@ -1,4 +1,4 @@
-use std::sync::Arc;
+
 
 use pumpkin_data::{
     Block, BlockState,
@@ -62,10 +62,10 @@ impl StructureGenerator for JungleTempleGenerator {
             placed_trap_2: false,
         }));
 
-        Some(StructurePosition {
-            start_pos: BlockPos::new(x + (WIDTH / 2), 64, z + (DEPTH / 2)),
-            collector: Arc::new(collector.into()),
-        })
+        Some(StructurePosition::new(
+            BlockPos::new(x + (WIDTH / 2), 64, z + (DEPTH / 2)),
+            collector,
+        ))
     }
 }
 pub struct JungleTemplePiece {

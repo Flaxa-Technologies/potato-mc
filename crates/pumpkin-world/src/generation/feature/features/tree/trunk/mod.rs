@@ -1,4 +1,5 @@
 use fancy::FancyTrunkPlacer;
+use poplar::PoplarTrunkPlacer;
 use pumpkin_data::BlockState;
 use pumpkin_util::{
     math::position::BlockPos,
@@ -24,6 +25,7 @@ pub mod fancy;
 pub mod forking;
 pub mod giant;
 pub mod mega_jungle;
+pub mod poplar;
 pub mod straight;
 pub mod upwards_branching;
 
@@ -113,6 +115,7 @@ pub enum TrunkType {
     Bending(BendingTrunkPlacer),
     UpwardsBranching(UpwardsBranchingTrunkPlacer),
     Cherry(CherryTrunkPlacer),
+    Poplar(PoplarTrunkPlacer),
 }
 
 impl TrunkType {
@@ -210,6 +213,16 @@ impl TrunkType {
                 trunk_state,
             ),
             Self::Cherry(cherry) => cherry.generate(
+                block_registry,
+                placer,
+                height,
+                start_pos,
+                chunk,
+                random,
+                below_trunk_provider,
+                trunk_state,
+            ),
+            Self::Poplar(poplar) => poplar.generate(
                 block_registry,
                 placer,
                 height,

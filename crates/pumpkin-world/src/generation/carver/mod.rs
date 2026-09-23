@@ -206,20 +206,30 @@ pub fn carve(chunk: &mut ProtoChunk, generator: &VanillaGenerator) {
     let cave_carver = cave::CaveCarver;
     let canyon_carver = canyon::CanyonCarver;
 
+    // Precompute scale factors for each carver once per chunk (they depend only on generator seed + index,
+    // not on carver_x or carver_z), avoiding 289× re-initializations of LegacyRand per carver.
+    let mut carver_scales = [None; 4];
+    for (index, &config) in carvers_to_use.iter().take(4).enumerate() {
+        let seed = generator.random_config.seed + index as u64;
+        let mut random = pumpkin_util::random::legacy_rand::LegacyRand::from_seed(seed);
+        let x_scale = random.next_i64();
+        let z_scale = random.next_i64();
+        carver_scales[index] = Some((config, x_scale, z_scale, seed as i64));
+    }
+
     for dx in -radius..=radius {
         for dz in -radius..=radius {
             let carver_x = chunk_x + dx;
             let carver_z = chunk_z + dz;
             let carver_chunk_pos = Vector2::new(carver_x, carver_z);
 
-            // In vanilla, carvers are per-biome. Here we use the hardcoded list but
-            // maintain the random seed logic.
-            for (index, &config) in carvers_to_use.iter().enumerate() {
-                let seed = get_large_feature_seed(
-                    generator.random_config.seed + index as u64,
-                    carver_x,
-                    carver_z,
-                );
+            for scale_opt in &carver_scales {
+                let Some(&(config, x_scale, z_scale, seed_i64)) = scale_opt.as_ref() else {
+                    break;
+                };
+                let seed = ((carver_x as i64).wrapping_mul(x_scale)
+                    ^ (carver_z as i64).wrapping_mul(z_scale)
+                    ^ seed_i64) as u64;
                 let mut carver_random =
                     new_carver_random(seed, generator.settings.legacy_random_source);
 

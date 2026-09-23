@@ -1,6 +1,6 @@
 use crate::generation::structure::placement::GlobalStructureCache;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use pumpkin_data::block_properties::is_air;
 use pumpkin_data::chunk::DoublePerlinNoiseParameters;
@@ -47,7 +47,7 @@ use crate::generation::section_coords::section_to_block;
 use crate::generation::structure::lazily_generate_structure;
 use crate::generation::structure::placement::should_generate_structure;
 use crate::generation::structure::structures::{
-    StructureGeneratorContext, StructureInstance, create_chunk_random,
+    StructureGeneratorContext, StructureInstance, StructurePiecesCollector, create_chunk_random,
 };
 use crate::generation::surface::rule::try_apply_material_rule;
 use crate::{
@@ -140,12 +140,14 @@ pub struct ProtoChunk {
     biome_mixer_seed: i64,
     pub(crate) flat_block_map: Box<[BlockStateId]>,
     pub flat_biome_map: Box<[u8]>,
+    pub biome_arc: Option<Arc<[u8]>>,
     pub biome_mask: [u64; 4],
     pub flat_surface_height_map: [i16; CHUNK_AREA],
     pub flat_ocean_floor_height_map: [i16; CHUNK_AREA],
     pub flat_motion_blocking_height_map: [i16; CHUNK_AREA],
     pub flat_motion_blocking_no_leaves_height_map: [i16; CHUNK_AREA],
     pub structure_starts: FxHashMap<StructureKeys, StructureInstance>,
+    pub structure_references: Vec<(StructureKeys, Arc<Mutex<StructurePiecesCollector>>)>,
     pub emissive_sections: u32,
 
     height: u16,
@@ -323,6 +325,14 @@ impl ProtoChunk {
             let default_biome_id = Biome::PLAINS.id;
             let mut initial_mask = [0u64; 4];
             initial_mask[(default_biome_id >> 6) as usize] |= 1u64 << (default_biome_id & 63);
+            let flat_biome_map = vec![
+                default_biome_id;
+                biome_coords::from_block(CHUNK_DIM as i32) as usize
+                    * biome_coords::from_block(CHUNK_DIM as i32) as usize
+                    * biome_coords::from_block(height as i32) as usize
+            ]
+            .into_boxed_slice();
+            let biome_arc = Some(Arc::from(flat_biome_map.as_ref()));
             let column_stride = height as usize * CHUNK_DIM as usize;
             let biome_height = height as usize >> 2;
             Self {
@@ -331,21 +341,16 @@ impl ProtoChunk {
                 world_seed,
                 default_block,
                 biome_mixer_seed,
-                flat_block_map: vec![BlockStateId::AIR; CHUNK_AREA * height as usize]
-                    .into_boxed_slice(),
-                flat_biome_map: vec![
-                    default_biome_id;
-                    biome_coords::from_block(CHUNK_DIM as i32) as usize
-                        * biome_coords::from_block(CHUNK_DIM as i32) as usize
-                        * biome_coords::from_block(height as i32) as usize
-                ]
-                .into_boxed_slice(),
+                flat_block_map: Box::default(),
+                flat_biome_map,
+                biome_arc,
                 biome_mask: initial_mask,
                 flat_surface_height_map: default_heightmap,
                 flat_ocean_floor_height_map: default_heightmap,
                 flat_motion_blocking_height_map: default_heightmap,
                 flat_motion_blocking_no_leaves_height_map: default_heightmap,
                 structure_starts: FxHashMap::default(),
+                structure_references: Vec::new(),
                 emissive_sections: 0,
                 height,
                 bottom_y,
@@ -373,6 +378,33 @@ impl ProtoChunk {
             }
         }
 
+    #[inline(always)]
+    pub fn ensure_block_map(&mut self) {
+        if self.flat_block_map.is_empty() {
+            self.flat_block_map = vec![
+                pumpkin_data::BlockStateId::AIR;
+                CHUNK_AREA * self.height as usize
+            ]
+            .into_boxed_slice();
+        }
+    }
+
+    #[inline(always)]
+    pub fn ensure_light(&mut self) {
+        if self.light.sky_light.is_empty() {
+            use crate::chunk::format::LightContainer;
+            let section_count = (self.height as usize) / 16;
+            self.light.sky_light = (0..section_count)
+                .map(|_| LightContainer::new_empty(0))
+                .collect::<Vec<_>>()
+                .into_boxed_slice();
+            self.light.block_light = (0..section_count)
+                .map(|_| LightContainer::new_empty(0))
+                .collect::<Vec<_>>()
+                .into_boxed_slice();
+        }
+    }
+
     #[inline]
     pub fn update_biome_mask(&mut self) {
         let mut mask = [0u64; 4];
@@ -389,10 +421,8 @@ impl ProtoChunk {
     /// structure-start generation on the cloned chunk.
     #[must_use]
     pub(crate) fn new_raw(x: i32, z: i32, template: &Self) -> Self {
-        use crate::chunk::format::LightContainer;
         let height = template.height;
         let bottom_y = template.bottom_y;
-        let section_count = (height as usize) / 16;
         let default_heightmap = [i16::MIN; CHUNK_AREA];
         Self {
             x,
@@ -400,18 +430,16 @@ impl ProtoChunk {
             world_seed: template.world_seed,
             default_block: template.default_block,
             biome_mixer_seed: template.biome_mixer_seed,
-            flat_block_map: vec![
-                pumpkin_data::BlockStateId::AIR;
-                CHUNK_AREA * height as usize
-            ]
-            .into_boxed_slice(),
+            flat_block_map: Box::default(),
             flat_biome_map: template.flat_biome_map.clone(),
+            biome_arc: template.biome_arc.clone(),
             biome_mask: template.biome_mask,
             flat_surface_height_map: default_heightmap,
             flat_ocean_floor_height_map: default_heightmap,
             flat_motion_blocking_height_map: default_heightmap,
             flat_motion_blocking_no_leaves_height_map: default_heightmap,
             structure_starts: rustc_hash::FxHashMap::default(),
+            structure_references: Vec::new(),
             emissive_sections: template.emissive_sections,
             height,
             bottom_y,
@@ -420,15 +448,8 @@ impl ProtoChunk {
             column_stride: template.column_stride,
             biome_height: template.biome_height,
             stage: StagedChunkEnum::Biomes,
-            light: ChunkLight {
-                sky_light: (0..section_count)
-                    .map(|_| LightContainer::new_empty(0))
-                    .collect(),
-                block_light: (0..section_count)
-                    .map(|_| LightContainer::new_empty(0))
-                    .collect(),
-            },
-            carving_mask: crate::generation::carver::mask::CarvingMask::new(
+            light: ChunkLight::default(),
+            carving_mask: crate::generation::carver::mask::CarvingMask::new_empty(
                 height as i32,
                 bottom_y as i32,
             ),
@@ -445,7 +466,12 @@ impl ProtoChunk {
     /// a cached chunk into a fresh mutable chunk that will continue through
     /// StructureReferences and later stages.
     pub(crate) fn copy_structure_starts_from(&mut self, src: &Self) {
-        self.structure_starts.clone_from(&src.structure_starts);
+        if !src.structure_starts.is_empty() {
+            self.structure_starts.clone_from(&src.structure_starts);
+        }
+        if !src.structure_references.is_empty() {
+            self.structure_references.clone_from(&src.structure_references);
+        }
     }
 
     #[inline]
@@ -725,6 +751,9 @@ impl ProtoChunk {
     #[inline(always)]
     #[must_use]
     pub fn get_block_state_raw(&self, x: i32, y: i32, z: i32) -> BlockStateId {
+        if self.flat_block_map.is_empty() {
+            return BlockStateId::AIR;
+        }
         let index = self.local_pos_to_block_index(x, y, z);
         self.flat_block_map[index]
     }
@@ -747,6 +776,9 @@ impl ProtoChunk {
 
         if local_y < 0 || local_y >= self.height() as i32 {
             return;
+        }
+        if self.flat_block_map.is_empty() {
+            self.ensure_block_map();
         }
         if !block_state.is_air() {
             if block_state.luminance > 0 {
@@ -792,13 +824,18 @@ impl ProtoChunk {
             local_y,
             z & 3,
         );
-        self.flat_biome_map[index]
+        if !self.flat_biome_map.is_empty() {
+            self.flat_biome_map[index]
+        } else if let Some(arc) = &self.biome_arc {
+            arc[index]
+        } else {
+            Biome::PLAINS.id
+        }
     }
 
     pub fn step_to_biomes(&mut self, generator: &super::generator::VanillaGenerator) {
         debug_assert_eq!(self.stage, StagedChunkEnum::Empty);
-        let mut multi_noise_sampler =
-            MultiNoiseSampler::generate(&generator.base_router.multi_noise);
+        let mut multi_noise_sampler = MultiNoiseSampler::generate(&generator.base_router.multi_noise);
         self.populate_biomes(generator, &mut multi_noise_sampler);
         self.stage = StagedChunkEnum::Biomes;
     }
@@ -806,6 +843,7 @@ impl ProtoChunk {
     #[expect(clippy::too_many_lines)]
     pub fn step_to_noise(&mut self, generator: &super::generator::VanillaGenerator) {
         debug_assert_eq!(self.stage, StagedChunkEnum::StructureReferences);
+        self.ensure_block_map();
         let settings = generator.settings;
         let generation_shape = &settings.shape;
         let start_x = start_block_x(self.x);
@@ -820,7 +858,7 @@ impl ProtoChunk {
         );
 
         let (beardifier_structures, beardifier_junctions, affected_box) =
-            if self.structure_starts.is_empty() {
+            if self.structure_starts.is_empty() && self.structure_references.is_empty() {
                 (Vec::new(), Vec::new(), None)
             } else {
                 let mut beardifier_structures = Vec::new();
@@ -830,8 +868,31 @@ impl ProtoChunk {
                 let chunk_start_x = self.start_block_x();
                 let chunk_start_z = self.start_block_z();
 
+                let mut seen_collectors: Vec<*const Mutex<StructurePiecesCollector>> = Vec::new();
+                let mut collectors_to_process = Vec::new();
+
                 for (key, instance) in &self.structure_starts {
-                    let structure = pumpkin_data::structures::Structure::get(key);
+                    let collector = match instance {
+                        StructureInstance::Start(pos) => &pos.collector,
+                        StructureInstance::Reference(_, c) => c,
+                    };
+                    let ptr = Arc::as_ptr(collector);
+                    if !seen_collectors.contains(&ptr) {
+                        seen_collectors.push(ptr);
+                        collectors_to_process.push((*key, collector.clone()));
+                    }
+                }
+
+                for (key, collector) in &self.structure_references {
+                    let ptr = Arc::as_ptr(collector);
+                    if !seen_collectors.contains(&ptr) {
+                        seen_collectors.push(ptr);
+                        collectors_to_process.push((*key, collector.clone()));
+                    }
+                }
+
+                for (key, collector_arc) in collectors_to_process {
+                    let structure = pumpkin_data::structures::Structure::get(&key);
                     let terrain_adaptation = structure.terrain_adaptation;
 
                     // Vanilla strictly skips filtering Beardifier parts if adaptation is None early-on
@@ -839,12 +900,7 @@ impl ProtoChunk {
                         continue;
                     }
 
-                    let collector = match instance {
-                        StructureInstance::Start(pos) => &pos.collector,
-                        StructureInstance::Reference(collector) => collector,
-                    };
-
-                    let collector = collector
+                    let collector = collector_arc
                         .lock()
                         .unwrap_or_else(std::sync::PoisonError::into_inner);
                     for piece in &collector.pieces {
@@ -1088,6 +1144,12 @@ impl ProtoChunk {
             let b_erosion = &col_buffers[3];
             let b_ridges = &col_buffers[4];
 
+            let mut d_long_buf = [0i64; 96];
+            for (by, &d) in depth_buf[..total_biome_y.min(96)].iter().enumerate() {
+                d_long_buf[by] = crate::biome::multi_noise::to_long(d);
+            }
+
+            let col_stride = self.biome_height * 4;
             for z in 0..biomes_per_section {
                 for x in 0..biomes_per_section {
                     let col_idx_2d = x + z * biomes_per_section;
@@ -1099,9 +1161,10 @@ impl ProtoChunk {
 
                     let mut last_depth = i64::MAX;
                     let mut last_biome = &pumpkin_data::chunk::Biome::PLAINS;
+                    let base_col_idx = col_stride * x + z;
 
                     for by in 0..total_biome_y {
-                        let d_long = crate::biome::multi_noise::to_long(depth_buf[by]);
+                        let d_long = d_long_buf[by];
                         let biome = if d_long == last_depth {
                             last_biome
                         } else {
@@ -1111,7 +1174,7 @@ impl ProtoChunk {
                             last_biome = b;
                             b
                         };
-                        let index = self.local_biome_pos_to_biome_index(x as i32, by as i32, z as i32);
+                        let index = base_col_idx + 4 * by;
                         self.flat_biome_map[index] = biome.id;
                     }
                 }
@@ -1171,6 +1234,7 @@ impl ProtoChunk {
             }
         }
         self.update_biome_mask();
+        self.biome_arc = Some(Arc::from(self.flat_biome_map.as_ref()));
     }
 
     pub fn populate_noise(
@@ -1180,6 +1244,7 @@ impl ProtoChunk {
         ore_random_deriver: &XoroshiroSplitter,
         surface_height_estimate_sampler: &mut SurfaceHeightEstimateSampler,
     ) {
+        self.ensure_block_map();
         let volume = *noise_sampler.volume();
         let densities = noise_sampler.sample_density();
         let chunk_height = self.height() as usize;
@@ -1192,6 +1257,8 @@ impl ProtoChunk {
         let sky_skip_y = noise_sampler
             .get_skip_sampling_above_y(surface_height_estimate_sampler)
             .map(|skip_y| (skip_y + 1).max(generator.settings.sea_level));
+
+        let veins_buffers = densities.veins();
 
         for z in 0..volume.size_z {
             let block_z = volume.block_z(z);
@@ -1211,10 +1278,25 @@ impl ProtoChunk {
                     let block_y = volume.block_y(y);
                     let index = col_density_offset + y;
                     let density = densities.density[index];
+
+                    if density <= 0.0 && sky_skip_y.is_some_and(|sy| block_y >= sy) {
+                        if block_idx >= CHUNK_DIM as usize {
+                            block_idx -= CHUNK_DIM as usize;
+                        }
+                        continue;
+                    }
+
                     let vein = if block_y >= crate::generation::noise::ore_sampler::vein_type::MIN_Y
                         && block_y <= crate::generation::noise::ore_sampler::vein_type::MAX_Y
                     {
-                        densities.vein_sample(index)
+                        if let Some([toggle, ridged]) = veins_buffers {
+                            Some(crate::generation::noise::VeinSample {
+                                toggle: toggle[index],
+                                ridged: ridged[index],
+                            })
+                        } else {
+                            None
+                        }
                     } else {
                         None
                     };
@@ -1323,11 +1405,10 @@ impl ProtoChunk {
         }
         debug_assert_eq!(chunk.stage, StagedChunkEnum::Lighting);
 
-        let biome = chunk.get_terrain_gen_biome(
-            section_to_block(chunk.x),
-            chunk.bottom_y() as i32 + chunk.height() as i32 - 1,
-            section_to_block(chunk.z),
-        );
+        let center_x = section_to_block(chunk.x) + 8;
+        let center_z = section_to_block(chunk.z) + 8;
+        let top_y = chunk.get_top_y(&HeightMap::WorldSurface, center_x, center_z);
+        let biome = chunk.get_terrain_gen_biome(center_x, top_y, center_z);
         let x = chunk.x;
         let z = chunk.z;
 
@@ -1746,25 +1827,36 @@ impl ProtoChunk {
             let end_x = start_x + 15;
             let end_z = start_z + 15;
 
-            for (id, instance) in &center_chunk.structure_starts {
-                let s = Structure::get(id);
+            let mut seen_tasks: Vec<*const Mutex<StructurePiecesCollector>> = Vec::new();
+
+            let mut add_structure = |key: &StructureKeys, collector: &Arc<Mutex<StructurePiecesCollector>>| {
+                let s = Structure::get(key);
                 let step = s.step.ordinal();
                 if step < 11 {
-                    match instance {
-                        StructureInstance::Start(pos) => tasks_by_step[step].push(pos.collector.clone()),
-                        StructureInstance::Reference(collector) => {
-                            let collector_arc = collector.clone();
-                            if !tasks_by_step[step].iter().any(|t| Arc::ptr_eq(t, &collector_arc)) {
-                                tasks_by_step[step].push(collector_arc);
-                            }
+                    let ptr = Arc::as_ptr(collector);
+                    if !seen_tasks.contains(&ptr) {
+                        let mut locked = collector.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+                        if locked.get_bounding_box().intersects_raw_xz(start_x, start_z, end_x, end_z) {
+                            seen_tasks.push(ptr);
+                            tasks_by_step[step].push(collector.clone());
                         }
                     }
                 }
+            };
+
+            for (id, instance) in &center_chunk.structure_starts {
+                let collector = match instance {
+                    StructureInstance::Start(pos) => &pos.collector,
+                    StructureInstance::Reference(_, c) => c,
+                };
+                add_structure(id, collector);
+            }
+            for (id, collector) in &center_chunk.structure_references {
+                add_structure(id, collector);
             }
 
-            let radius = 8;
-            for dx in -radius..=radius {
-                for dz in -radius..=radius {
+            for dx in -1..=1 {
+                for dz in -1..=1 {
                     if dx == 0 && dz == 0 {
                         continue;
                     }
@@ -1774,29 +1866,14 @@ impl ProtoChunk {
 
                     if let Some(neighbor) = cache.try_get_proto_chunk(neighbor_x, neighbor_z) {
                         for (id, instance) in &neighbor.structure_starts {
-                            let s = Structure::get(id);
-                            let step = s.step.ordinal();
-                            if step < 11 {
-                                match instance {
-                                    StructureInstance::Start(pos) => {
-                                        if pos
-                                            .get_bounding_box()
-                                            .intersects_raw_xz(start_x, start_z, end_x, end_z)
-                                        {
-                                            let collector_arc = pos.collector.clone();
-                                            if !tasks_by_step[step].iter().any(|t| Arc::ptr_eq(t, &collector_arc)) {
-                                                tasks_by_step[step].push(collector_arc);
-                                            }
-                                        }
-                                    }
-                                    StructureInstance::Reference(collector) => {
-                                        let collector_arc = collector.clone();
-                                        if !tasks_by_step[step].iter().any(|t| Arc::ptr_eq(t, &collector_arc)) {
-                                            tasks_by_step[step].push(collector_arc);
-                                        }
-                                    }
-                                }
-                            }
+                            let collector = match instance {
+                                StructureInstance::Start(pos) => &pos.collector,
+                                StructureInstance::Reference(_, c) => c,
+                            };
+                            add_structure(id, collector);
+                        }
+                        for (id, collector) in &neighbor.structure_references {
+                            add_structure(id, collector);
                         }
                     }
                 }
@@ -2261,12 +2338,11 @@ impl ProtoChunk {
                     }
 
                     let t_bb = if prof { Some(std::time::Instant::now()) } else { None };
-                    if let Some(start_data) = start_data
-                        && start_data
-                            .get_bounding_box()
-                            .intersects_raw_xz(start_x, start_z, end_x, end_z)
+                    let bbox = start_data.as_ref().map(|s| s.get_bounding_box());
+                    if let (Some(start_data), Some(bb)) = (start_data, bbox)
+                        && bb.intersects_raw_xz(start_x, start_z, end_x, end_z)
                     {
-                        references.push((entry.structure, start_data.collector.clone()));
+                        references.push((entry.structure, bb, start_data.collector.clone()));
                         if prof {
                             if let Some(tbb) = t_bb {
                                 PROF_BBOX_NS.fetch_add(tbb.elapsed().as_nanos() as u64, Ordering::Relaxed);
@@ -2289,10 +2365,11 @@ impl ProtoChunk {
             }
         }
 
-        for (key, pos) in references {
+        for (key, bb, pos) in references {
+            self.structure_references.push((key, pos.clone()));
             self.structure_starts
                 .entry(key)
-                .or_insert_with(|| StructureInstance::Reference(pos));
+                .or_insert_with(|| StructureInstance::Reference(bb, pos));
         }
 
         if prof {
@@ -2358,6 +2435,19 @@ impl BlockPlacer for ProtoChunk {
     #[inline]
     fn add_block_entity(&mut self, nbt: NbtCompound) {
         self.add_block_entity(nbt);
+    }
+
+    fn get_top_y(&self, heightmap: crate::generation::structure::template::processor::HeightmapType, x: i32, z: i32) -> i32 {
+        use crate::generation::structure::template::processor::HeightmapType;
+        let hm = match heightmap {
+            HeightmapType::WorldSurfaceWg => HeightMap::WorldSurfaceWg,
+            HeightmapType::WorldSurface => HeightMap::WorldSurface,
+            HeightmapType::OceanFloorWg => HeightMap::OceanFloorWg,
+            HeightmapType::OceanFloor => HeightMap::OceanFloor,
+            HeightmapType::MotionBlocking => HeightMap::MotionBlocking,
+            HeightmapType::MotionBlockingNoLeaves => HeightMap::MotionBlockingNoLeaves,
+        };
+        self.get_top_y(&hm, x, z)
     }
 }
 

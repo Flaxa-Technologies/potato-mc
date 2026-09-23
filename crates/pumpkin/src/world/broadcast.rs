@@ -254,6 +254,17 @@ impl World {
         );
     }
 
+    pub fn broadcast_bedrock_all<B: BClientPacket>(&self, packet: &B) {
+        let players = self.players.load();
+        Self::broadcast_bedrock_grouped(
+            packet,
+            players.iter().filter_map(|p| match p.client.as_ref() {
+                ClientPlatform::Bedrock(be) => Some(be),
+                ClientPlatform::Java(_) => None,
+            }),
+        );
+    }
+
     pub fn broadcast_chat_message(
         &self,
         message: &crate::net::chat::PlayerChatMessage,

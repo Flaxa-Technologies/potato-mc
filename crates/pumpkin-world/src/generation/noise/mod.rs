@@ -44,6 +44,12 @@ pub struct ChunkDensities {
 }
 
 impl ChunkDensities {
+    #[inline(always)]
+    #[must_use]
+    pub fn veins(&self) -> Option<&[DensityBuffer; 2]> {
+        self.veins.as_ref()
+    }
+
     #[must_use]
     pub fn vein_sample(&self, index: usize) -> Option<VeinSample> {
         self.veins.as_ref().map(|[toggle, ridged]| VeinSample {
@@ -202,12 +208,11 @@ impl<'a> ChunkNoiseGenerator<'a> {
     pub fn sample_density(&mut self) -> ChunkDensities {
         let mut density = DensityBuffer::acquire(&self.volume);
         self.router.final_density_volume(&mut density, &self.volume);
-        let veins = self.ore_veins.then(|| {
-            let mut toggle = DensityBuffer::acquire(&self.volume);
-            let mut ridged = DensityBuffer::acquire(&self.volume);
-            self.router.veins_volume(&mut toggle, &mut ridged, &self.volume);
-            [toggle, ridged]
-        });
+        let veins = if self.ore_veins {
+            self.router.sample_veins(&self.volume)
+        } else {
+            None
+        };
         ChunkDensities { density, veins }
     }
 

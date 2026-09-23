@@ -39,9 +39,9 @@ pub struct GlobalStructureCache {
     /// every other thread that arrives before or after completion receives the
     /// same Arc and blocks on `get_or_init` until the first thread finishes.
     /// Result: each (key, chunk_x, chunk_z) triplet is expanded at most once.
-    structure_starts: OnceLock<DashMap<(StructureKeys, i32, i32), Arc<OnceLock<Option<StructurePosition>>>>>,
+    structure_starts: OnceLock<DashMap<(StructureKeys, i32, i32), Arc<OnceLock<Option<StructurePosition>>>, rustc_hash::FxBuildHasher>>,
     /// Memoized column heights for Jigsaw structures to prevent redundant 3D density sampling.
-    column_heights: OnceLock<DashMap<(i32, i32, bool), i32>>,
+    column_heights: OnceLock<DashMap<(i32, i32, bool), i32, rustc_hash::FxBuildHasher>>,
 }
 impl GlobalStructureCache {
     /// Creates a new, empty global structure cache.
@@ -61,7 +61,9 @@ impl GlobalStructureCache {
         ocean_floor: bool,
         compute: impl FnOnce() -> i32,
     ) -> i32 {
-        let cache = self.column_heights.get_or_init(DashMap::new);
+        let cache = self
+            .column_heights
+            .get_or_init(|| DashMap::with_hasher(rustc_hash::FxBuildHasher));
         let key = (x, z, ocean_floor);
         if let Some(height) = cache.get(&key) {
             return *height;
@@ -93,7 +95,9 @@ impl GlobalStructureCache {
         chunk_z: i32,
         compute: impl FnOnce() -> Option<StructurePosition>,
     ) -> Option<StructurePosition> {
-        let cache = self.structure_starts.get_or_init(DashMap::new);
+        let cache = self
+            .structure_starts
+            .get_or_init(|| DashMap::with_hasher(rustc_hash::FxBuildHasher));
         let map_key = (key, chunk_x, chunk_z);
 
         // Fast path: slot already fully computed (OnceLock already initialised).

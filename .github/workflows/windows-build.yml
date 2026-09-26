@@ -1,0 +1,49 @@
+name: Build Windows Release (Test Artifact)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - '.github/workflows/macos-release.yml'
+      - '.github/workflows/docker.yml'
+      - '.github/workflows/nix.yml'
+
+jobs:
+  build-windows:
+    name: Build Windows Release (x86_64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Remove local toolchain override
+        shell: bash
+        run: rm -f rust-toolchain.toml rust-toolchain
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build Release Binary
+        run: cargo build --release -p pumpkin --bin pumpkin
+
+      - name: Prepare Artifact
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp target/release/pumpkin.exe dist/potato-windows-x86_64.exe
+          ls -la dist/
+
+      - name: Upload Windows Test Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: potato-windows-x86_64
+          path: dist/potato-windows-x86_64.exe
+          retention-days: 14

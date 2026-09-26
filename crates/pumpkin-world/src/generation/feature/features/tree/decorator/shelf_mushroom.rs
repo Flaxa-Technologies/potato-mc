@@ -24,7 +24,7 @@ impl ShelfMushroomTreeDecorator {
         let mut sorted_logs = log_positions.to_vec();
         sorted_logs.sort_by_key(|pos| pos.0.y);
 
-        let is_fallen = sorted_logs.first().unwrap().0.y == sorted_logs.last().unwrap().0.y;
+        let is_fallen = sorted_logs.len() > 1 && sorted_logs.first().unwrap().0.y == sorted_logs.last().unwrap().0.y;
         if is_fallen {
             Self::place_on_fallen_log(chunk, random, &sorted_logs);
         } else {
@@ -100,9 +100,6 @@ impl ShelfMushroomTreeDecorator {
             return;
         }
         if Self::has_horizontally_adjacent_shelf_mushroom(chunk, &mushroom_pos) {
-            return;
-        }
-        if Self::has_horizontally_adjacent_shelf_mushroom(chunk, &log_pos) {
             return;
         }
         Self::place_mushroom(chunk, random, mushroom_pos, dir);

@@ -29,6 +29,10 @@ impl RandomBooleanFeature {
         } else {
             &self.feature_false
         };
+        let child_name = match feature.as_ref() {
+            PlacedFeatureWrapper::Named(n) => *n,
+            PlacedFeatureWrapper::Direct(_) => feature_name,
+        };
         let Some(feature) = feature.get() else {
             return false;
         };
@@ -37,7 +41,7 @@ impl RandomBooleanFeature {
             block_registry,
             min_y,
             height,
-            feature_name,
+            child_name,
             random,
             pos,
         )

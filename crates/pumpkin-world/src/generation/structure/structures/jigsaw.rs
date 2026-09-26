@@ -692,7 +692,7 @@ impl StructurePieceBase for PoolElementStructurePiece {
                     ProcessorListRef::Empty => Vec::new(),
                 };
                 if self.projection == JigsawProjection::TerrainMatching {
-                    processors.push(crate::generation::structure::template::StructureProcessor::Gravity {
+                    processors.insert(0, crate::generation::structure::template::StructureProcessor::Gravity {
                         heightmap: crate::generation::structure::template::processor::HeightmapType::WorldSurfaceWg,
                         offset: -1,
                     });
@@ -759,7 +759,7 @@ pub fn place_pool_element_templates(
                 ProcessorListRef::Empty => Vec::new(),
             };
             if piece.projection == JigsawProjection::TerrainMatching {
-                processors.push(crate::generation::structure::template::StructureProcessor::Gravity {
+                processors.insert(0, crate::generation::structure::template::StructureProcessor::Gravity {
                     heightmap: crate::generation::structure::template::processor::HeightmapType::WorldSurfaceWg,
                     offset: -1,
                 });

@@ -255,7 +255,21 @@ impl TreeFeature {
                 foliage_state,
             ));
         }
-        (logs, root_positions, foliage_positions)
+
+        let mut actual_foliage = Vec::new();
+        let mut extra_logs = Vec::new();
+        for pos in foliage_positions {
+            let state = GenerationCache::get_block_state(chunk, &pos.0);
+            let block = state.to_block_id();
+            if block.has_tag(tag::Block::MINECRAFT_LOGS) {
+                extra_logs.push(pos);
+            } else {
+                actual_foliage.push(pos);
+            }
+        }
+        let mut all_logs = logs;
+        all_logs.extend(extra_logs);
+        (all_logs, root_positions, actual_foliage)
     }
 
     fn get_top<T: GenerationCache>(&self, height: u32, chunk: &T, init_pos: BlockPos) -> u32 {

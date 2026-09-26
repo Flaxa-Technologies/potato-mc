@@ -220,6 +220,37 @@ pub fn place_template_with_options(
 
         placer.set_block_state(&world_pos, state);
 
+        let has_gravity = processors
+            .iter()
+            .any(|p| matches!(p, StructureProcessor::Gravity { .. }));
+        if has_gravity {
+            let final_block_id = state.id.to_block_id();
+            let foundation_block = match final_block_id {
+                pumpkin_data::BlockId::DIRT_PATH
+                | pumpkin_data::BlockId::GRASS_BLOCK
+                | pumpkin_data::BlockId::DIRT
+                | pumpkin_data::BlockId::COBBLESTONE
+                | pumpkin_data::BlockId::GRAVEL => Some(pumpkin_data::Block::DIRT.default_state),
+                pumpkin_data::BlockId::SANDSTONE | pumpkin_data::BlockId::SMOOTH_SANDSTONE => {
+                    Some(pumpkin_data::Block::SANDSTONE.default_state)
+                }
+                pumpkin_data::BlockId::RED_SANDSTONE => {
+                    Some(pumpkin_data::Block::RED_SANDSTONE.default_state)
+                }
+                _ => None,
+            };
+            if let Some(foundation_state) = foundation_block {
+                for dy in 1..=4 {
+                    let fill_pos = Vector3::new(world_pos.x, world_pos.y - dy, world_pos.z);
+                    if placer.get_block_state(&fill_pos).to_block_id() == pumpkin_data::Block::AIR.id {
+                        placer.set_block_state(&fill_pos, foundation_state);
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
         // Create block entities for interactive blocks (furnaces, chests, etc.)
         let final_block = pumpkin_data::Block::from_id(state.id.to_block_id());
         let block_entity_id = get_block_entity_id(final_block.name);

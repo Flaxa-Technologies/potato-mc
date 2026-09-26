@@ -143,7 +143,9 @@ pub struct ProtoChunk {
     pub biome_arc: Option<Arc<[u8]>>,
     pub biome_mask: [u64; 4],
     pub flat_surface_height_map: [i16; CHUNK_AREA],
+    pub flat_world_surface_wg_height_map: [i16; CHUNK_AREA],
     pub flat_ocean_floor_height_map: [i16; CHUNK_AREA],
+    pub flat_ocean_floor_wg_height_map: [i16; CHUNK_AREA],
     pub flat_motion_blocking_height_map: [i16; CHUNK_AREA],
     pub flat_motion_blocking_no_leaves_height_map: [i16; CHUNK_AREA],
     pub structure_starts: FxHashMap<StructureKeys, StructureInstance>,
@@ -346,7 +348,9 @@ impl ProtoChunk {
                 biome_arc,
                 biome_mask: initial_mask,
                 flat_surface_height_map: default_heightmap,
+                flat_world_surface_wg_height_map: default_heightmap,
                 flat_ocean_floor_height_map: default_heightmap,
+                flat_ocean_floor_wg_height_map: default_heightmap,
                 flat_motion_blocking_height_map: default_heightmap,
                 flat_motion_blocking_no_leaves_height_map: default_heightmap,
                 structure_starts: FxHashMap::default(),
@@ -435,7 +439,9 @@ impl ProtoChunk {
             biome_arc: template.biome_arc.clone(),
             biome_mask: template.biome_mask,
             flat_surface_height_map: default_heightmap,
+            flat_world_surface_wg_height_map: default_heightmap,
             flat_ocean_floor_height_map: default_heightmap,
+            flat_ocean_floor_wg_height_map: default_heightmap,
             flat_motion_blocking_height_map: default_heightmap,
             flat_motion_blocking_no_leaves_height_map: default_heightmap,
             structure_starts: rustc_hash::FxHashMap::default(),
@@ -571,9 +577,13 @@ impl ProtoChunk {
                 )
                     as i16;
 
-                proto_chunk.flat_surface_height_map[index] =
+                let surface_y =
                     heightmap_data.get(ChunkHeightmapType::WorldSurface, x, z, section_data.min_y)
                         as i16;
+                proto_chunk.flat_surface_height_map[index] = surface_y;
+                proto_chunk.flat_world_surface_wg_height_map[index] = surface_y;
+                proto_chunk.flat_ocean_floor_wg_height_map[index] =
+                    proto_chunk.flat_ocean_floor_height_map[index];
             }
         }
 
@@ -651,9 +661,19 @@ impl ProtoChunk {
         self.flat_surface_height_map[index] = current_height.max(y);
     }
 
+    fn maybe_update_world_surface_wg_height_map(&mut self, index: usize, y: i16) {
+        let current_height = self.flat_world_surface_wg_height_map[index];
+        self.flat_world_surface_wg_height_map[index] = current_height.max(y);
+    }
+
     fn maybe_update_ocean_floor_height_map(&mut self, index: usize, y: i16) {
         let current_height = self.flat_ocean_floor_height_map[index];
         self.flat_ocean_floor_height_map[index] = current_height.max(y);
+    }
+
+    fn maybe_update_ocean_floor_wg_height_map(&mut self, index: usize, y: i16) {
+        let current_height = self.flat_ocean_floor_wg_height_map[index];
+        self.flat_ocean_floor_wg_height_map[index] = current_height.max(y);
     }
 
     fn maybe_update_motion_blocking_height_map(&mut self, index: usize, y: i16) {
@@ -669,12 +689,10 @@ impl ProtoChunk {
     #[must_use]
     pub const fn get_top_y(&self, heightmap: &HeightMap, x: i32, z: i32) -> i32 {
         match heightmap {
-            HeightMap::WorldSurfaceWg | HeightMap::WorldSurface => {
-                self.top_block_height_exclusive(x, z)
-            }
-            HeightMap::OceanFloorWg | HeightMap::OceanFloor => {
-                self.ocean_floor_height_exclusive(x, z)
-            }
+            HeightMap::WorldSurfaceWg => self.top_block_wg_height_exclusive(x, z),
+            HeightMap::WorldSurface => self.top_block_height_exclusive(x, z),
+            HeightMap::OceanFloorWg => self.ocean_floor_wg_height_exclusive(x, z),
+            HeightMap::OceanFloor => self.ocean_floor_height_exclusive(x, z),
             HeightMap::MotionBlocking => self.top_motion_blocking_block_height_exclusive(x, z),
             HeightMap::MotionBlockingNoLeaves => {
                 self.top_motion_blocking_block_no_leaves_height_exclusive(x, z)
@@ -690,7 +708,8 @@ impl ProtoChunk {
 
     #[must_use]
     pub const fn top_block_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
-        self.top_block_height_exclusive(x, z)
+        let index = Self::local_position_to_height_map_index(x & 15, z & 15);
+        self.flat_world_surface_wg_height_map[index] as i32 + 1
     }
 
     #[must_use]
@@ -701,7 +720,8 @@ impl ProtoChunk {
 
     #[must_use]
     pub const fn ocean_floor_wg_height_exclusive(&self, x: i32, z: i32) -> i32 {
-        self.ocean_floor_height_exclusive(x, z)
+        let index = Self::local_position_to_height_map_index(x & 15, z & 15);
+        self.flat_ocean_floor_wg_height_map[index] as i32 + 1
     }
 
     #[must_use]
@@ -788,11 +808,17 @@ impl ProtoChunk {
             let index = Self::local_position_to_height_map_index(local_x, local_z);
             let y = y as i16;
             self.maybe_update_surface_height_map(index, y);
+            if self.stage <= StagedChunkEnum::Surface {
+                self.maybe_update_world_surface_wg_height_map(index, y);
+            }
             let block = BlockId::from_state_id(block_state.id);
 
             let blocks_movement = blocks_movement(block_state, block);
             if blocks_movement {
                 self.maybe_update_ocean_floor_height_map(index, y);
+                if self.stage <= StagedChunkEnum::Surface {
+                    self.maybe_update_ocean_floor_wg_height_map(index, y);
+                }
             }
             if blocks_movement || block_state.is_liquid() {
                 self.maybe_update_motion_blocking_height_map(index, y);
@@ -1343,12 +1369,14 @@ impl ProtoChunk {
                             let y_i16 = block_y as i16;
                             if !surface_found {
                                 self.flat_surface_height_map[hm_index] = y_i16;
+                                self.flat_world_surface_wg_height_map[hm_index] = y_i16;
                                 surface_found = true;
                             }
                             if !all_hm_found {
                                 if block_state.id == default_state_id {
                                     if !ocean_floor_found {
                                         self.flat_ocean_floor_height_map[hm_index] = y_i16;
+                                        self.flat_ocean_floor_wg_height_map[hm_index] = y_i16;
                                         ocean_floor_found = true;
                                     }
                                     if !motion_blocking_found {

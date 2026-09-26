@@ -33,24 +33,32 @@ impl RandomFeature {
                 continue;
             }
             if let Some(f) = feature.feature.get() {
+                let child_name = match &feature.feature {
+                    PlacedFeatureWrapper::Named(n) => *n,
+                    PlacedFeatureWrapper::Direct(_) => feature_name,
+                };
                 return f.generate(
                     chunk,
                     block_registry,
                     min_y,
                     height,
-                    feature_name,
+                    child_name,
                     random,
                     pos,
                 );
             }
         }
+        let default_name = match self.default.as_ref() {
+            PlacedFeatureWrapper::Named(n) => *n,
+            PlacedFeatureWrapper::Direct(_) => feature_name,
+        };
         self.default.get().is_some_and(|default_feature| {
             default_feature.generate(
                 chunk,
                 block_registry,
                 min_y,
                 height,
-                feature_name,
+                default_name,
                 random,
                 pos,
             )

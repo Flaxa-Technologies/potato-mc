@@ -92,7 +92,7 @@ impl PoplarFoliagePlacer {
         }
 
         // 5. Replace leaves with log at layer total_foliage_height - 4
-        Self::replace_leaves_with_log(
+        let replaced_logs = Self::replace_leaves_with_log(
             chunk,
             center_pos,
             radius,
@@ -102,6 +102,11 @@ impl PoplarFoliagePlacer {
             random_boolean,
             foliage_provider,
         );
+        for log_pos in replaced_logs {
+            if !foliage_positions.contains(&log_pos) {
+                foliage_positions.push(log_pos);
+            }
+        }
 
         // 6. Layer 0 (radius - 1)
         self.place_leaves_row(
@@ -261,7 +266,8 @@ impl PoplarFoliagePlacer {
         total_foliage_height: i32,
         random_boolean: bool,
         foliage_provider: &BlockState,
-    ) {
+    ) -> Vec<BlockPos> {
+        let mut replaced = Vec::new();
         let i = i32::from(giant_trunk);
         let is_partial = Self::should_row_be_partial_rhombus_shape(total_foliage_height, y);
 
@@ -289,10 +295,12 @@ impl PoplarFoliagePlacer {
                         let axis = if abs_z == 0 { Axis::X } else { Axis::Z };
                         let sideways_state = Self::get_sideways_state(trunk_state, axis);
                         chunk.set_block_state(&pos.0, sideways_state);
+                        replaced.push(pos);
                     }
                 }
             }
         }
+        replaced
     }
 
     fn get_sideways_state(trunk_state: &BlockState, axis: Axis) -> &'static BlockState {

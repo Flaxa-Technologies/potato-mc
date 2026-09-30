@@ -42,6 +42,11 @@ impl ShiftableStructurePiece {
         }
     }
 
+    #[inline]
+    pub fn set_h_pos(&mut self, h_pos: i32) {
+        self.h_pos = h_pos;
+    }
+
     pub fn adjust_to_average_height(&mut self, chunk: &ProtoChunk) -> bool {
         let bounding_box = self.piece.bounding_box;
         if self.h_pos >= 0 {

@@ -120,19 +120,32 @@ impl StructureGenerator for IglooGenerator {
         &self,
         mut context: StructureGeneratorContext<'_>,
     ) -> Option<StructurePosition> {
-        let block_pos = Vector3::new(
-            start_block_x(context.chunk_x),
-            GENERATION_HEIGHT,
-            start_block_z(context.chunk_z),
-        );
+        let start_x = start_block_x(context.chunk_x);
+        let start_z = start_block_z(context.chunk_z);
         let rotation_idx = context.random.next_bounded_i32(4) as u8;
         let rotation = Rotation::from_index(rotation_idx);
+
+        let settings = make_settings(rotation, STRUCTURE_LOCATION_IGLOO);
+        let offset = get_offset(STRUCTURE_LOCATION_IGLOO);
+        let entrance_rel = StructureTemplate::calculate_relative_position(
+            &settings,
+            Vector3::new(3 - offset.x, 0, -offset.z),
+        );
+        let entrance_x = start_x + entrance_rel.x;
+        let entrance_z = start_z + entrance_rel.z;
+
+        let height = context
+            .height_sampler
+            .as_deref_mut()
+            .map_or(GENERATION_HEIGHT, |s| s.estimate_height(entrance_x, entrance_z));
+
+        let block_pos = Vector3::new(start_x, height - 1, start_z);
 
         let mut collector = StructurePiecesCollector::default();
         add_pieces(&mut collector, block_pos, rotation, &mut context.random);
 
         Some(StructurePosition::new(
-            BlockPos::new(block_pos.x, block_pos.y, block_pos.z),
+            BlockPos::new(entrance_x, height, entrance_z),
             collector,
         ))
     }
@@ -144,6 +157,7 @@ pub struct IglooPiece {
     pub template_name: String,
     pub place_settings: StructurePlaceSettings,
     pub template_position: Vector3<i32>,
+    pub height_adjusted: bool,
 }
 
 impl IglooPiece {
@@ -165,6 +179,7 @@ impl IglooPiece {
             template_name,
             place_settings,
             template_position,
+            height_adjusted: true,
         }
     }
 
@@ -323,23 +338,26 @@ impl StructurePieceBase for IglooPiece {
         chunk_box: &BlockBox,
     ) {
         let settings = make_settings(self.place_settings.get_rotation(), &self.template_name);
-        let offset = get_offset(&self.template_name);
-        let entrance_rel = StructureTemplate::calculate_relative_position(
-            &settings,
-            Vector3::new(3 - offset.x, 0, -offset.z),
-        );
-        let entrance_pos = self.template_position + entrance_rel;
-        let height = chunk.get_top_y(
-            &pumpkin_util::HeightMap::WorldSurfaceWg,
-            entrance_pos.x,
-            entrance_pos.z,
-        );
 
-        let old_template_pos = self.template_position;
-        self.template_position.y += height - GENERATION_HEIGHT - 1;
-        self.piece.bounding_box = self
-            .template
-            .get_bounding_box(&self.place_settings, self.template_position);
+        if !self.height_adjusted {
+            let offset = get_offset(&self.template_name);
+            let entrance_rel = StructureTemplate::calculate_relative_position(
+                &settings,
+                Vector3::new(3 - offset.x, 0, -offset.z),
+            );
+            let entrance_pos = self.template_position + entrance_rel;
+            let height = chunk.get_top_y(
+                &pumpkin_util::HeightMap::WorldSurfaceWg,
+                entrance_pos.x,
+                entrance_pos.z,
+            );
+
+            self.template_position.y += height - GENERATION_HEIGHT - 1;
+            self.piece.bounding_box = self
+                .template
+                .get_bounding_box(&self.place_settings, self.template_position);
+            self.height_adjusted = true;
+        }
 
         self.place_blocks(chunk, chunk_box, random);
 
@@ -361,8 +379,6 @@ impl StructurePieceBase for IglooPiece {
                 );
             }
         }
-
-        self.template_position = old_template_pos;
     }
 }
 

@@ -2,14 +2,6 @@ name: Build Windows Release (Test Artifact)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
-      - '.github/workflows/macos-release.yml'
-      - '.github/workflows/docker.yml'
-      - '.github/workflows/nix.yml'
 
 jobs:
   build-windows:

@@ -113,29 +113,27 @@ impl StructureGenerator for ShipwreckGenerator {
 
         let mut piece = ShipwreckPiece::new(template, position, rotation, self.is_beached);
 
-        if piece.is_too_big_to_fit_in_world_gen_region() {
-            let bb = piece.piece.bounding_box;
-            let height = if self.is_beached {
-                let min_y = context.height_sampler.as_deref_mut().map_or(64, |sampler| {
-                    let c0 = sampler.estimate_height(bb.min.x, bb.min.z);
-                    let c1 = sampler.estimate_height(bb.min.x, bb.max.z);
-                    let c2 = sampler.estimate_height(bb.max.x, bb.min.z);
-                    let c3 = sampler.estimate_height(bb.max.x, bb.max.z);
-                    c0.min(c1).min(c2).min(c3)
-                });
-                piece.calculate_beached_position(min_y, &mut context.random)
-            } else if let Some(sampler) = context.height_sampler.as_deref_mut() {
+        let bb = piece.piece.bounding_box;
+        let height = if self.is_beached {
+            let min_y = context.height_sampler.as_deref_mut().map_or(64, |sampler| {
                 let c0 = sampler.estimate_height(bb.min.x, bb.min.z);
                 let c1 = sampler.estimate_height(bb.min.x, bb.max.z);
                 let c2 = sampler.estimate_height(bb.max.x, bb.min.z);
                 let c3 = sampler.estimate_height(bb.max.x, bb.max.z);
-                (c0 + c1 + c2 + c3) / 4
-            } else {
-                context.sea_level
-            };
+                c0.min(c1).min(c2).min(c3)
+            });
+            piece.calculate_beached_position(min_y, &mut context.random)
+        } else if let Some(sampler) = context.height_sampler.as_deref_mut() {
+            let c0 = sampler.estimate_ocean_floor_height(bb.min.x, bb.min.z);
+            let c1 = sampler.estimate_ocean_floor_height(bb.min.x, bb.max.z);
+            let c2 = sampler.estimate_ocean_floor_height(bb.max.x, bb.min.z);
+            let c3 = sampler.estimate_ocean_floor_height(bb.max.x, bb.max.z);
+            (c0 + c1 + c2 + c3) / 4
+        } else {
+            context.sea_level
+        };
 
-            piece.adjust_position_height(height);
-        }
+        piece.adjust_position_height(height);
 
         let mut collector = StructurePiecesCollector::default();
         collector.add_piece(Box::new(piece));

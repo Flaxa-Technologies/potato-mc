@@ -35,7 +35,6 @@ const OVERWORLD_BIOMES: &[&Biome] = &[
     &Biome::OLD_GROWTH_SPRUCE_TAIGA,
     &Biome::FLOWER_FOREST,
     &Biome::BIRCH_FOREST,
-    &Biome::DAPPLED_FOREST,
     &Biome::DARK_FOREST,
     &Biome::PALE_GARDEN,
     &Biome::SAVANNA_PLATEAU,
@@ -49,6 +48,7 @@ const OVERWORLD_BIOMES: &[&Biome] = &[
     &Biome::FROZEN_RIVER,
     &Biome::RIVER,
     &Biome::ICE_SPIKES,
+    &Biome::DAPPLED_FOREST,
     &Biome::OLD_GROWTH_PINE_TAIGA,
     &Biome::SUNFLOWER_PLAINS,
     &Biome::OLD_GROWTH_BIRCH_FOREST,
@@ -287,7 +287,7 @@ mod tests {
             .iter()
             .find(|(_, feature)| *feature == PlacedFeature::PatchGrassSavanna)
             .expect("savanna grass must be selected");
-        assert_eq!(savanna_grass.0, 12);
+        assert_eq!(savanna_grass.0, 15);
     }
 
     #[test]

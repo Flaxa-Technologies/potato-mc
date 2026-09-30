@@ -43,9 +43,26 @@ impl StructureGenerator for DesertPyramidGenerator {
 
         let facing = BlockDirection::get_random_horizontal_direction(&mut context.random);
 
+        let lowest_y = if let Some(sampler) = context.height_sampler.as_deref_mut() {
+            let c0 = sampler.estimate_height(x, z);
+            let c1 = sampler.estimate_height(x, z + DEPTH);
+            let c2 = sampler.estimate_height(x + WIDTH, z);
+            let c3 = sampler.estimate_height(x + WIDTH, z + DEPTH);
+            c0.min(c1).min(c2).min(c3)
+        } else {
+            64
+        };
+
+        if lowest_y < context.sea_level {
+            return None;
+        }
+
+        let ground_offset = -(context.random.next_bounded_i32(3));
+        let piece_y = lowest_y + ground_offset;
+
         let mut piece = StructurePiece::new(
             StructurePieceType::DesertTemple,
-            BlockBox::create_box(x, 64, z, facing.get_axis(), WIDTH, HEIGHT, DEPTH),
+            BlockBox::create_box(x, piece_y, z, facing.get_axis(), WIDTH, HEIGHT, DEPTH),
             0,
         );
         piece.set_facing(Some(facing));
@@ -53,12 +70,12 @@ impl StructureGenerator for DesertPyramidGenerator {
         let mut collector = StructurePiecesCollector::default();
         collector.add_piece(Box::new(DesertPyramidPiece {
             piece,
-            height_adjusted: false,
+            height_adjusted: true,
             has_placed_chest: [false; 4],
         }));
 
         Some(StructurePosition::new(
-            BlockPos::new(x + (WIDTH / 2), 64, z + (DEPTH / 2)),
+            BlockPos::new(x + (WIDTH / 2), piece_y, z + (DEPTH / 2)),
             collector,
         ))
     }

@@ -27,7 +27,9 @@ use crate::command::node::{CommandExecutor, CommandExecutorResult};
 use crate::world::block_placer::WorldBlockPlacer;
 use pumpkin_world::generation::feature::configured_features::CONFIGURED_FEATURES;
 use pumpkin_world::generation::feature::placed_features::{Feature, PLACED_FEATURES};
-use pumpkin_world::generation::structure::structures::StructureGeneratorContext;
+use pumpkin_world::generation::structure::structures::{
+    HeightSampler, StructureGeneratorContext,
+};
 use pumpkin_world::generation::structure::structures::jigsaw::{
     PoolElementStructurePiece, place_pool_element_templates,
 };
@@ -285,6 +287,12 @@ impl CommandExecutor for PlaceStructureExecutor {
         let (_piece_count, placer) = {
             let world_gen = context.world().level.world_gen();
             let settings = NoiseSettings::from_dimension(world_gen.dimension());
+            let mut height_sampler = match &*world_gen {
+                pumpkin_world::generation::generator::WorldGenerator::Noise(noise_gen) => {
+                    Some(pumpkin_world::generation::structure::height_sampler::NoiseHeightSampler::new(noise_gen))
+                }
+                _ => None,
+            };
 
             if structure.structure_type == StructureType::Jigsaw {
                 let pool = structure.start_pool.ok_or_else(|| {
@@ -308,7 +316,9 @@ impl CommandExecutor for PlaceStructureExecutor {
                         random,
                         sea_level: settings.sea_level,
                         min_y: world_gen.dimension().min_y,
-                        height_sampler: None,
+                        height_sampler: height_sampler
+                            .as_mut()
+                            .map(|s| s as &mut dyn pumpkin_world::generation::structure::structures::HeightSampler),
                         structure_key: Some(key),
                     },
                     pool,
@@ -356,7 +366,9 @@ impl CommandExecutor for PlaceStructureExecutor {
                         random,
                         sea_level: settings.sea_level,
                         min_y: world_gen.dimension().min_y,
-                        height_sampler: None,
+                        height_sampler: height_sampler
+                            .as_mut()
+                            .map(|s| s as &mut dyn pumpkin_world::generation::structure::structures::HeightSampler),
                         structure_key: Some(key),
                     },
                 )
@@ -419,7 +431,10 @@ impl CommandExecutor for PlaceStructureExecutor {
                             let mut chunk = ProtoChunk::new(cx, cz, &world_gen);
                             let chunk_min_y = chunk.bottom_y() as i32;
                             let chunk_height = chunk.height() as i32;
-                            let surface_y = ground_y(block_pos.0.y, chunk_min_y, chunk_height);
+                            let surface_y = height_sampler.as_mut().map_or_else(
+                                || ground_y(block_pos.0.y, chunk_min_y, chunk_height),
+                                |s| s.estimate_height((cx << 4) + 8, (cz << 4) + 8),
+                            );
 
                             // Seed heightmaps and fill below-surface with stone so
                             // pieces that carve through solid terrain have material

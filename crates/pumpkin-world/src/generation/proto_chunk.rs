@@ -47,7 +47,8 @@ use crate::generation::section_coords::section_to_block;
 use crate::generation::structure::lazily_generate_structure;
 use crate::generation::structure::placement::should_generate_structure;
 use crate::generation::structure::structures::{
-    StructureGeneratorContext, StructureInstance, StructurePiecesCollector, create_chunk_random,
+    HeightSampler, StructureGeneratorContext, StructureInstance, StructurePiecesCollector,
+    create_chunk_random,
 };
 use crate::generation::surface::rule::try_apply_material_rule;
 use crate::{
@@ -2301,21 +2302,37 @@ impl ProtoChunk {
                 let allowed_biomes = &generator.structure_allowed_biomes[&set_index];
                 let base_bx = candidate_chunk_x * 4;
                 let base_bz = candidate_chunk_z * 4;
-                let test_by = biome_coords::from_block(if *dimension == Dimension::THE_NETHER {
+                let test_y = if *dimension == Dimension::THE_NETHER {
                     32
                 } else if set_index == 0 {
                     -27 // ancient_cities
                 } else {
                     settings.sea_level
-                });
+                };
+                let test_by = biome_coords::from_block(test_y);
+                let alt_by = if *dimension == Dimension::OVERWORLD && set_index != 0 {
+                    let center_x = (candidate_chunk_x << 4) + 8;
+                    let center_z = (candidate_chunk_z << 4) + 8;
+                    let surface_y = height_sampler.estimate_height(center_x, center_z);
+                    biome_coords::from_block(surface_y)
+                } else {
+                    test_by
+                };
 
                 let mut has_allowed_biome = false;
                 'biome_check: for dx in 0..4 {
                     for dz in 0..4 {
-                        let b = biome_supplier.biome(base_bx + dx, test_by, base_bz + dz, &mut multi_noise_sampler).id as u16;
-                        if allowed_biomes.contains(&b) {
+                        let b1 = biome_supplier.biome(base_bx + dx, test_by, base_bz + dz, &mut multi_noise_sampler).id as u16;
+                        if allowed_biomes.contains(&b1) {
                             has_allowed_biome = true;
                             break 'biome_check;
+                        }
+                        if alt_by != test_by {
+                            let b2 = biome_supplier.biome(base_bx + dx, alt_by, base_bz + dz, &mut multi_noise_sampler).id as u16;
+                            if allowed_biomes.contains(&b2) {
+                                has_allowed_biome = true;
+                                break 'biome_check;
+                            }
                         }
                     }
                 }
@@ -2327,7 +2344,8 @@ impl ProtoChunk {
                     PROF_SET_HITS[set_index].fetch_add(1, Ordering::Relaxed);
                 }
 
-                for entry in set.structures {
+                if set.structures.len() == 1 {
+                    let entry = &set.structures[0];
                     let structure = Structure::get(&entry.structure);
 
                     let t_comp = if prof { Some(std::time::Instant::now()) } else { None };
@@ -2371,17 +2389,89 @@ impl ProtoChunk {
                         && bb.intersects_raw_xz(start_x, start_z, end_x, end_z)
                     {
                         references.push((entry.structure, bb, start_data.collector.clone()));
-                        if prof {
-                            if let Some(tbb) = t_bb {
-                                PROF_BBOX_NS.fetch_add(tbb.elapsed().as_nanos() as u64, Ordering::Relaxed);
-                            }
-                        }
-                        break;
                     }
                     if prof {
                         if let Some(tbb) = t_bb {
                             PROF_BBOX_NS.fetch_add(tbb.elapsed().as_nanos() as u64, Ordering::Relaxed);
                         }
+                    }
+                } else {
+                    let mut candidates = set.structures.to_vec();
+                    let large_feature_seed = get_large_feature_seed(seed as u64, candidate_chunk_x, candidate_chunk_z);
+                    let mut random = LegacyRand::from_seed(large_feature_seed);
+                    let mut total_weight: u32 = candidates.iter().map(|e| e.weight).sum();
+
+                    while !candidates.is_empty() {
+                        let mut roll = random.next_bounded_i32(total_weight as i32);
+                        let mut selected_idx = 0;
+
+                        for (i, entry) in candidates.iter().enumerate() {
+                            roll -= entry.weight as i32;
+                            if roll < 0 {
+                                selected_idx = i;
+                                break;
+                            }
+                        }
+
+                        let selected_entry = candidates[selected_idx].clone();
+                        let structure = Structure::get(&selected_entry.structure);
+
+                        let t_comp = if prof { Some(std::time::Instant::now()) } else { None };
+                        let start_data = global_cache.get_or_compute_structure_start(
+                            selected_entry.structure,
+                            candidate_chunk_x,
+                            candidate_chunk_z,
+                            || {
+                                let context = StructureGeneratorContext {
+                                    seed,
+                                    chunk_x: candidate_chunk_x,
+                                    chunk_z: candidate_chunk_z,
+                                    random: create_chunk_random(
+                                        seed,
+                                        candidate_chunk_x,
+                                        candidate_chunk_z,
+                                    ),
+                                    sea_level: settings.sea_level,
+                                    min_y: chunk_min_y,
+                                    height_sampler: Some(&mut height_sampler),
+                                    structure_key: Some(selected_entry.structure),
+                                };
+                                lazily_generate_structure(
+                                    &selected_entry.structure,
+                                    structure,
+                                    context,
+                                    &biome_supplier,
+                                    &mut multi_noise_sampler,
+                                )
+                            },
+                        );
+                        if prof {
+                            if let Some(tc) = t_comp {
+                                PROF_COMPUTE_START_NS.fetch_add(tc.elapsed().as_nanos() as u64, Ordering::Relaxed);
+                            }
+                        }
+
+                        let t_bb = if prof { Some(std::time::Instant::now()) } else { None };
+                        let bbox = start_data.as_ref().map(|s| s.get_bounding_box());
+                        if let (Some(start_data), Some(bb)) = (start_data, bbox) {
+                            if bb.intersects_raw_xz(start_x, start_z, end_x, end_z) {
+                                references.push((selected_entry.structure, bb, start_data.collector.clone()));
+                            }
+                            if prof {
+                                if let Some(tbb) = t_bb {
+                                    PROF_BBOX_NS.fetch_add(tbb.elapsed().as_nanos() as u64, Ordering::Relaxed);
+                                }
+                            }
+                            break;
+                        }
+                        if prof {
+                            if let Some(tbb) = t_bb {
+                                PROF_BBOX_NS.fetch_add(tbb.elapsed().as_nanos() as u64, Ordering::Relaxed);
+                            }
+                        }
+
+                        let failed_entry = candidates.remove(selected_idx);
+                        total_weight -= failed_entry.weight;
                     }
                 }
             }

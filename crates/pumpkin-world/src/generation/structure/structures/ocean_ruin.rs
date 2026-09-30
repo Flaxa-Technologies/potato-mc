@@ -122,8 +122,17 @@ impl StructureGenerator for OceanRuinGenerator {
             0.7,
         );
 
+        let center_x = start_x + 8;
+        let center_z = start_z + 8;
+        let center_y = context
+            .height_sampler
+            .as_deref_mut()
+            .map_or(context.sea_level, |s| {
+                s.estimate_ocean_floor_height(center_x, center_z)
+            });
+
         Some(StructurePosition::new(
-            BlockPos::new(start_x + 8, 64, start_z + 8),
+            BlockPos::new(center_x, center_y, center_z),
             collector,
         ))
     }

@@ -24,12 +24,17 @@ pub struct BuriedTreasureGenerator;
 impl StructureGenerator for BuriedTreasureGenerator {
     fn get_structure_position(
         &self,
-        context: StructureGeneratorContext<'_>,
+        mut context: StructureGeneratorContext<'_>,
     ) -> Option<StructurePosition> {
         let x = (context.chunk_x << 4) + 9;
         let z = (context.chunk_z << 4) + 9;
 
-        let bounding_box = BlockBox::new(x, 90, z, x, 90, z);
+        let y = context
+            .height_sampler
+            .as_deref_mut()
+            .map_or(64, |s| s.estimate_ocean_floor_height(x, z));
+
+        let bounding_box = BlockBox::new(x, y, z, x, y, z);
 
         let mut collector = StructurePiecesCollector::default();
         collector.add_piece(Box::new(BuriedTreasurePiece {
@@ -37,7 +42,7 @@ impl StructureGenerator for BuriedTreasureGenerator {
         }));
 
         Some(StructurePosition::new(
-            BlockPos::new(x, 90, z),
+            BlockPos::new(x, y, z),
             collector,
         ))
     }

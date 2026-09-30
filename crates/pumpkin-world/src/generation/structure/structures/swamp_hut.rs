@@ -38,11 +38,21 @@ impl StructureGenerator for SwampHutGenerator {
         let x = start_block_x(context.chunk_x);
         let z = start_block_z(context.chunk_z);
 
+        let center_y = if let Some(sampler) = context.height_sampler.as_deref_mut() {
+            let c0 = sampler.estimate_height(x, z);
+            let c1 = sampler.estimate_height(x, z + 9);
+            let c2 = sampler.estimate_height(x + 7, z);
+            let c3 = sampler.estimate_height(x + 7, z + 9);
+            (c0 + c1 + c2 + c3) / 4
+        } else {
+            64
+        };
+
         let facing = BlockDirection::get_random_horizontal_direction(&mut context.random);
         let mut shiftable_piece = ShiftableStructurePiece::new(
             StructurePieceType::SwampHut,
             x,
-            64,
+            center_y,
             z,
             7,
             7,
@@ -50,6 +60,7 @@ impl StructureGenerator for SwampHutGenerator {
             facing.get_axis(),
         );
         shiftable_piece.piece.set_facing(Some(facing));
+        shiftable_piece.set_h_pos(center_y);
 
         let mut collector = StructurePiecesCollector::default();
         collector.add_piece(Box::new(SwampHutPiece {
@@ -59,7 +70,7 @@ impl StructureGenerator for SwampHutGenerator {
         }));
 
         Some(StructurePosition::new(
-            BlockPos::new(x, 64, z),
+            BlockPos::new(x, center_y, z),
             collector,
         ))
     }

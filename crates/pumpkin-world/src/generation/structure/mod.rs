@@ -209,20 +209,46 @@ pub fn lazily_generate_structure(
     // We scan all 16 quart coordinates (4x4) of the chunk and break immediately on the first match.
     let base_bx = context.chunk_x * 4;
     let base_bz = context.chunk_z * 4;
+    let center_x = crate::generation::positions::chunk_pos::get_center_x(context.chunk_x);
+    let center_z = crate::generation::positions::chunk_pos::get_center_z(context.chunk_z);
+
     let test_y = if *key == StructureKeys::AncientCity {
         -27
+    } else if let Some(sampler) = context.height_sampler.as_deref_mut() {
+        if matches!(
+            key,
+            StructureKeys::Monument
+                | StructureKeys::OceanRuinCold
+                | StructureKeys::OceanRuinWarm
+        ) {
+            sampler.estimate_ocean_floor_height(center_x, center_z)
+        } else {
+            sampler.estimate_height(center_x, center_z)
+        }
     } else {
         context.sea_level
     };
     let test_by = biome_coords::from_block(test_y);
+    let sea_by = biome_coords::from_block(context.sea_level);
 
     let mut has_allowed_biome = false;
     'early_check: for dx in 0..4 {
         for dz in 0..4 {
-            let b = biome_supplier.biome(base_bx + dx, test_by, base_bz + dz, multi_noise_sampler).id as u16;
-            if biomes.contains(&b) {
+            let b1 = biome_supplier
+                .biome(base_bx + dx, test_by, base_bz + dz, multi_noise_sampler)
+                .id as u16;
+            if biomes.contains(&b1) {
                 has_allowed_biome = true;
                 break 'early_check;
+            }
+            if test_by != sea_by {
+                let b2 = biome_supplier
+                    .biome(base_bx + dx, sea_by, base_bz + dz, multi_noise_sampler)
+                    .id as u16;
+                if biomes.contains(&b2) {
+                    has_allowed_biome = true;
+                    break 'early_check;
+                }
             }
         }
     }

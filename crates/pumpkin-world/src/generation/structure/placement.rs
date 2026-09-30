@@ -357,7 +357,12 @@ fn should_generate_frequency(
 ) -> bool {
     match method {
         FrequencyReductionMethod::Default => {
-            let region_seed = get_region_seed(seed as u64, salt as i32, chunk_x, chunk_z as u32);
+            // Vanilla: setLargeFeatureWithSalt(seed, salt, sourceX, sourceZ)
+            // = (long)salt * 341873128712L + (long)sourceX * 132897987541L + seed + (long)sourceZ
+            let region_seed = (i64::from(salt as i32).wrapping_mul(341873128712))
+                .wrapping_add(i64::from(chunk_x).wrapping_mul(132897987541))
+                .wrapping_add(seed)
+                .wrapping_add(i64::from(chunk_z)) as u64;
             let mut random = LegacyRand::from_seed(region_seed);
             random.next_f32() < frequency
         }

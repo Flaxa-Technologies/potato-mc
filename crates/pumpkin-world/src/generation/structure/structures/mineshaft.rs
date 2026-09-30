@@ -92,7 +92,7 @@ impl StructureGenerator for MineshaftGenerator {
             room.child_entrance_boxes = entrances;
         }
 
-        if self.is_mesa {
+        let y_offset = if self.is_mesa {
             let bbox = collector.get_bounding_box();
             let center_x = i32::midpoint(bbox.min.x, bbox.max.x);
             let center_z = i32::midpoint(bbox.min.z, bbox.max.z);
@@ -106,20 +106,18 @@ impl StructureGenerator for MineshaftGenerator {
             let target_y = if surface_height <= context.sea_level {
                 context.sea_level
             } else {
-                let range = surface_height - context.sea_level + 1;
-                context.sea_level + context.random.next_bounded_i32(range)
+                context.random.next_inbetween_i32(context.sea_level, surface_height)
             };
 
-            collector.shift(target_y - center_y);
+            let dy = target_y - center_y;
+            collector.shift(dy);
+            dy
         } else {
-            collector.shift_into(context.sea_level, context.min_y, &mut context.random, 10);
+            collector.shift_into(context.sea_level, context.min_y, &mut context.random, 10)
         };
 
-        // Use post-shift bbox midpoint rather than the hardcoded pre-shift room min (50).
-        let start_y = {
-            let bbox = collector.get_bounding_box();
-            i32::midpoint(bbox.min.y, bbox.max.y)
-        };
+        // Vanilla: startPos = BlockPos(chunkPos.getMiddleBlockX(), 50, chunkPos.getMinBlockZ()).offset(0, yOffset, 0)
+        let start_y = 50 + y_offset;
         Some(StructurePosition::new(
             BlockPos::new(start_x + 8, start_y, start_z),
             collector,

@@ -475,3 +475,59 @@ fn test_diagnose_playtest_structures() {
     }
 }
 
+#[test]
+fn test_ruined_portal_parity() {
+    let seed = 1789322517659391064u64;
+    let world_gen = get_world_gen(Seed(seed), Dimension::OVERWORLD, false, Vec::new(), String::new());
+    let WorldGenerator::Noise(generator) = &*world_gen else { unreachable!() };
+
+    let mut rp_set_index = None;
+    for (i, set) in StructureSet::ALL.iter().enumerate() {
+        if set.structures.iter().any(|s| matches!(s.structure, StructureKeys::RuinedPortal | StructureKeys::RuinedPortalMountain | StructureKeys::RuinedPortalOcean)) {
+            rp_set_index = Some(i);
+            break;
+        }
+    }
+    let rp_idx = rp_set_index.expect("Ruined portal set should exist");
+    let set = &StructureSet::ALL[rp_idx];
+    let pumpkin_data::structures::StructurePlacementType::RandomSpread(spread) = &set.placement.placement_type else { unreachable!() };
+
+    let mut tested = 0;
+    for rx in -3..=3 {
+        for rz in -3..=3 {
+            let (cx, cz) = pumpkin_world::generation::structure::placement::get_structure_chunk_in_region(
+                spread, seed as i64, rx, rz, set.placement.salt,
+            );
+
+            let mut chunk = ProtoChunk::new(cx, cz, &world_gen);
+            chunk.step_to_biomes(generator);
+            chunk.set_structure_starts(generator);
+
+            for entry in set.structures {
+                let key = entry.structure;
+                let structure = Structure::get(&key);
+                let gt = ground_truth_lazily_generate(&key, structure, cx, cz, seed as i64, generator);
+                if let Some(pos) = gt {
+                    println!("[TEST] Ruined portal {:?} ground truth at ({}, {}): {:?}", key, cx, cz, pos.start_pos);
+                    assert!(chunk.structure_starts().contains_key(&key), "Chunk at ({}, {}) should contain {:?}", cx, cz, key);
+                    tested += 1;
+                }
+            }
+        }
+    }
+    println!("[TEST] Successfully tested {} ruined portal candidates!", tested);
+    assert!(tested > 0, "Should have tested at least one ruined portal");
+}
+
+#[test]
+fn test_dappled_forest_biome_tree() {
+    use pumpkin_data::biome::OVERWORLD_BIOME_SOURCE;
+    // Sample point within Dappled Forest parameter range:
+    // temp: -0.3 (-3000), humidity: -0.6 (-6000), continentalness: 0.5 (5000),
+    // erosion: -0.6 (-6000), depth: 0, weirdness: 0, offset: 0
+    let p = [-3000, -6000, 5000, -6000, 0, 0, 0];
+    let biome = OVERWORLD_BIOME_SOURCE.get(&p, &mut None);
+    println!("[TEST] Sampled biome for Dappled Forest parameters: {:?}", biome.registry_id);
+    assert_eq!(biome.registry_id, "dappled_forest");
+}
+

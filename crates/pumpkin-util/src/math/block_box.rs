@@ -232,6 +232,16 @@ impl BlockBox {
         self.max.y - self.min.y + 1
     }
 
+    /// Returns the center coordinates of the box.
+    #[must_use]
+    pub fn center(&self) -> Vector3<i32> {
+        Vector3::new(
+            i32::midpoint(self.min.x, self.max.x),
+            i32::midpoint(self.min.y, self.max.y),
+            i32::midpoint(self.min.z, self.max.z),
+        )
+    }
+
     /// Expands this box to encompass another box.
     ///
     /// # Arguments

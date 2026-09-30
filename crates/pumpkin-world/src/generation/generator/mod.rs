@@ -201,7 +201,7 @@ impl VanillaGenerator {
                 let rz = region_z + dz;
                 let (scx, scz) =
                     crate::generation::structure::placement::get_structure_chunk_in_region(
-                        spread,
+                        &spread,
                         seed,
                         rx,
                         rz,

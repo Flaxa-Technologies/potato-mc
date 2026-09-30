@@ -82,88 +82,145 @@ pub struct RuinedPortalProperties {
     pub replace_with_blackstone: bool,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct RuinedPortalSetup {
+    pub placement: VerticalPlacement,
+    pub air_pocket_probability: f32,
+    pub mossiness: f32,
+    pub overgrown: bool,
+    pub vines: bool,
+    pub can_be_cold: bool,
+    pub replace_with_blackstone: bool,
+    pub weight: f32,
+}
+
+impl RuinedPortalSetup {
+    #[must_use]
+    pub const fn for_variant(variant: StructureKeys) -> &'static [Self] {
+        match variant {
+            StructureKeys::RuinedPortal => &[
+                Self {
+                    placement: VerticalPlacement::Underground,
+                    air_pocket_probability: 1.0,
+                    mossiness: 0.2,
+                    overgrown: false,
+                    vines: false,
+                    can_be_cold: true,
+                    replace_with_blackstone: false,
+                    weight: 0.5,
+                },
+                Self {
+                    placement: VerticalPlacement::OnLandSurface,
+                    air_pocket_probability: 0.5,
+                    mossiness: 0.2,
+                    overgrown: false,
+                    vines: false,
+                    can_be_cold: true,
+                    replace_with_blackstone: false,
+                    weight: 0.5,
+                },
+            ],
+            StructureKeys::RuinedPortalMountain => &[
+                Self {
+                    placement: VerticalPlacement::InMountain,
+                    air_pocket_probability: 1.0,
+                    mossiness: 0.2,
+                    overgrown: false,
+                    vines: false,
+                    can_be_cold: true,
+                    replace_with_blackstone: false,
+                    weight: 0.5,
+                },
+                Self {
+                    placement: VerticalPlacement::OnLandSurface,
+                    air_pocket_probability: 0.5,
+                    mossiness: 0.2,
+                    overgrown: false,
+                    vines: false,
+                    can_be_cold: true,
+                    replace_with_blackstone: false,
+                    weight: 0.5,
+                },
+            ],
+            StructureKeys::RuinedPortalDesert => &[Self {
+                placement: VerticalPlacement::PartlyBuried,
+                air_pocket_probability: 0.0,
+                mossiness: 0.0,
+                overgrown: false,
+                vines: false,
+                can_be_cold: false,
+                replace_with_blackstone: false,
+                weight: 1.0,
+            }],
+            StructureKeys::RuinedPortalJungle => &[Self {
+                placement: VerticalPlacement::OnLandSurface,
+                air_pocket_probability: 0.5,
+                mossiness: 0.8,
+                overgrown: true,
+                vines: true,
+                can_be_cold: false,
+                replace_with_blackstone: false,
+                weight: 1.0,
+            }],
+            StructureKeys::RuinedPortalSwamp => &[Self {
+                placement: VerticalPlacement::OnOceanFloor,
+                air_pocket_probability: 0.0,
+                mossiness: 0.5,
+                overgrown: false,
+                vines: true,
+                can_be_cold: false,
+                replace_with_blackstone: false,
+                weight: 1.0,
+            }],
+            StructureKeys::RuinedPortalOcean => &[Self {
+                placement: VerticalPlacement::OnOceanFloor,
+                air_pocket_probability: 0.0,
+                mossiness: 0.8,
+                overgrown: false,
+                vines: false,
+                can_be_cold: true,
+                replace_with_blackstone: false,
+                weight: 1.0,
+            }],
+            StructureKeys::RuinedPortalNether => &[Self {
+                placement: VerticalPlacement::InNether,
+                air_pocket_probability: 0.5,
+                mossiness: 0.0,
+                overgrown: false,
+                vines: false,
+                can_be_cold: false,
+                replace_with_blackstone: true,
+                weight: 1.0,
+            }],
+            _ => &[Self {
+                placement: VerticalPlacement::OnLandSurface,
+                air_pocket_probability: 0.5,
+                mossiness: 0.2,
+                overgrown: false,
+                vines: false,
+                can_be_cold: true,
+                replace_with_blackstone: false,
+                weight: 1.0,
+            }],
+        }
+    }
+}
+
 impl RuinedPortalProperties {
     #[must_use]
     pub const fn for_variant(variant: StructureKeys) -> (VerticalPlacement, Self) {
-        match variant {
-            StructureKeys::RuinedPortalDesert => (
-                VerticalPlacement::PartlyBuried,
-                Self {
-                    cold: false,
-                    mossiness: 0.0,
-                    air_pocket: false,
-                    overgrown: false,
-                    vines: false,
-                    replace_with_blackstone: false,
-                },
-            ),
-            StructureKeys::RuinedPortalJungle => (
-                VerticalPlacement::OnLandSurface,
-                Self {
-                    cold: false,
-                    mossiness: 0.8,
-                    air_pocket: false,
-                    overgrown: true,
-                    vines: true,
-                    replace_with_blackstone: false,
-                },
-            ),
-            StructureKeys::RuinedPortalSwamp => (
-                VerticalPlacement::OnLandSurface,
-                Self {
-                    cold: false,
-                    mossiness: 0.5,
-                    air_pocket: false,
-                    overgrown: false,
-                    vines: true,
-                    replace_with_blackstone: false,
-                },
-            ),
-            StructureKeys::RuinedPortalMountain => (
-                VerticalPlacement::InMountain,
-                Self {
-                    cold: true,
-                    mossiness: 0.2,
-                    air_pocket: true,
-                    overgrown: false,
-                    vines: false,
-                    replace_with_blackstone: false,
-                },
-            ),
-            StructureKeys::RuinedPortalOcean => (
-                VerticalPlacement::OnOceanFloor,
-                Self {
-                    cold: false,
-                    mossiness: 0.8,
-                    air_pocket: false,
-                    overgrown: false,
-                    vines: false,
-                    replace_with_blackstone: false,
-                },
-            ),
-            StructureKeys::RuinedPortalNether => (
-                VerticalPlacement::InNether,
-                Self {
-                    cold: false,
-                    mossiness: 0.0,
-                    air_pocket: false,
-                    overgrown: false,
-                    vines: false,
-                    replace_with_blackstone: true,
-                },
-            ),
-            _ => (
-                VerticalPlacement::OnLandSurface,
-                Self {
-                    cold: false,
-                    mossiness: 0.2,
-                    air_pocket: false,
-                    overgrown: false,
-                    vines: false,
-                    replace_with_blackstone: false,
-                },
-            ),
-        }
+        let setup = &RuinedPortalSetup::for_variant(variant)[0];
+        (
+            setup.placement,
+            Self {
+                cold: setup.can_be_cold,
+                mossiness: setup.mossiness,
+                air_pocket: setup.air_pocket_probability >= 0.5,
+                overgrown: setup.overgrown,
+                vines: setup.vines,
+                replace_with_blackstone: setup.replace_with_blackstone,
+            },
+        )
     }
 }
 
@@ -176,131 +233,128 @@ impl StructureGenerator for RuinedPortalGenerator {
         &self,
         mut context: StructureGeneratorContext<'_>,
     ) -> Option<StructurePosition> {
-        // Vanilla RNG call order:
-        // 1. airPocket sample (nextFloat if 0 < prob < 1, nothing if 0 or 1)
-        // 2. giant portal check: nextFloat() < 0.05
-        // 3. nextInt(portals.len) — pick template
-        // 4. Rotation.getRandom: nextInt(4)
-        // 5. Mirror: nextFloat() < 0.5
-        let (vertical_placement, mut properties) =
-            RuinedPortalProperties::for_variant(self.variant);
-
-        // Step 1: airPocket probability draw (matches vanilla `sample(random, prob)`).
-        // Only calls nextFloat when 0 < prob < 1; we mirror this by reading the
-        // probability stored per-variant. Currently hardcoded per variant (0.0 or 1.0
-        // for most), so no random draw is needed for most variants.
-        // For the standard RuinedPortal variant (prob == 0.5), we must draw.
-        let air_pocket_prob = match self.variant {
-            StructureKeys::RuinedPortal => 0.5,        // two setups, each with 0.5 weight
-            StructureKeys::RuinedPortalMountain => 0.5, // also two setups
-            _ => if properties.air_pocket { 1.0 } else { 0.0 },
+        let setups = RuinedPortalSetup::for_variant(self.variant);
+        let chosen_setup = if setups.len() > 1 {
+            let total: f32 = setups.iter().map(|s| s.weight).sum();
+            let mut pick = context.random.next_f32();
+            let mut selected = &setups[0];
+            for s in setups {
+                pick -= s.weight / total;
+                if pick < 0.0 {
+                    selected = s;
+                    break;
+                }
+            }
+            selected
+        } else {
+            &setups[0]
         };
-        if air_pocket_prob > 0.0 && air_pocket_prob < 1.0 {
-            properties.air_pocket = context.random.next_f32() < air_pocket_prob;
-        }
 
-        // Step 2: 5% chance for giant portal (always draws nextFloat)
+        // Vanilla sample(random, setup.airPocketProbability()):
+        // limit == 0.0 -> false, limit == 1.0 -> true, otherwise random.nextFloat() < limit.
+        let air_pocket = if chosen_setup.air_pocket_probability == 0.0 {
+            false
+        } else if chosen_setup.air_pocket_probability == 1.0 {
+            true
+        } else {
+            context.random.next_f32() < chosen_setup.air_pocket_probability
+        };
+
+        // 5% chance for giant portal
         let pool = if context.random.next_f32() < 0.05 {
             GIANT_PORTALS
         } else {
             PORTALS
         };
 
-        // Step 3: pick template
         let template_idx = context.random.next_bounded_i32(pool.len() as i32) as usize;
         let template_name = pool[template_idx];
         let template = get_template(template_name)?;
 
-        // Step 4: rotation
         let rotation_idx = context.random.next_bounded_i32(4) as u8;
         let rotation = Rotation::from_index(rotation_idx);
 
-        // Step 5: mirror
         let mirror = if context.random.next_f32() < 0.5 {
             Mirror::None
         } else {
             Mirror::FrontBack
         };
 
-        // Vanilla uses chunkPos.getWorldPosition() = (chunk_x * 16, 0, chunk_z * 16)
-        // as the templatePosition origin, NOT chunk_center minus pivot.
         let base_x = start_block_x(context.chunk_x);
         let base_z = start_block_z(context.chunk_z);
-        let center_x = base_x + 8;
-        let center_z = base_z + 8;
-
         let pivot = Vector3::new(template.size.x / 2, 0, template.size.z / 2);
 
-        let y = match vertical_placement {
+        let bounding_box = template.get_bounding_box_with_pivot(
+            Vector3::new(base_x, 0, base_z),
+            rotation,
+            pivot,
+            mirror,
+        );
+        let center = bounding_box.center();
+
+        let surface_y = match chosen_setup.placement {
             VerticalPlacement::OnOceanFloor => context
                 .height_sampler
                 .as_deref_mut()
                 .map_or(context.sea_level, |s| {
-                    s.estimate_ocean_floor_height(center_x, center_z)
-                }),
+                    s.estimate_ocean_floor_height(center.x, center.z)
+                }) - 1,
+            _ => context
+                .height_sampler
+                .as_deref_mut()
+                .map_or(64, |s| s.estimate_height(center.x, center.z)) - 1,
+        };
+
+        let y_span = template.size.y as i32;
+        let min_y = context.min_y + 15;
+
+        let projected_y = match chosen_setup.placement {
             VerticalPlacement::InNether => {
-                // Vanilla: airPocket ? randomBetweenInclusive(32,100) : (nextFloat<0.5 ? nextInt(3)+27 : nextInt(72)+29)
-                if properties.air_pocket {
-                    context.random.next_bounded_i32(69) + 32
+                if air_pocket {
+                    context.random.next_inbetween_i32(32, 100)
                 } else if context.random.next_f32() < 0.5 {
-                    context.random.next_bounded_i32(3) + 27
+                    context.random.next_inbetween_i32(27, 29)
                 } else {
-                    context.random.next_bounded_i32(72) + 29
+                    context.random.next_inbetween_i32(29, 100)
                 }
             }
             VerticalPlacement::InMountain => {
-                let surface_y = context
-                    .height_sampler
-                    .as_deref_mut()
-                    .map_or(64, |s| s.estimate_height(center_x, center_z));
-                // Vanilla: getRandomWithinInterval(random, 70, surfaceY - ySpan)
-                let max_y = surface_y - (template.size.y as i32);
+                let max_y = surface_y - y_span;
                 if 70 < max_y {
-                    context.random.next_bounded_i32(max_y - 70) + 70
+                    context.random.next_inbetween_i32(70, max_y)
                 } else {
                     max_y
                 }
             }
             VerticalPlacement::Underground => {
-                let surface_y = context
-                    .height_sampler
-                    .as_deref_mut()
-                    .map_or(64, |s| s.estimate_height(center_x, center_z));
-                // Vanilla: getRandomWithinInterval(random, minY, surfaceY - ySpan)
-                let min_y = context.min_y + 15;
-                let max_y = surface_y - (template.size.y as i32);
+                let max_y = surface_y - y_span;
                 if min_y < max_y {
-                    context.random.next_bounded_i32(max_y - min_y) + min_y
+                    context.random.next_inbetween_i32(min_y, max_y)
                 } else {
                     max_y
                 }
             }
             VerticalPlacement::PartlyBuried => {
-                let surface_y = context
-                    .height_sampler
-                    .as_deref_mut()
-                    .map_or(64, |s| s.estimate_height(center_x, center_z));
-                // Vanilla: surfaceYAtCenter - ySpan + randomBetweenInclusive(2, 8)
-                surface_y - (template.size.y as i32) + context.random.next_bounded_i32(7) + 2
+                surface_y - y_span + context.random.next_inbetween_i32(2, 8)
             }
-            _ => {
-                // OnLandSurface / OnOceanFloor already handled above
-                let surface_y = context
-                    .height_sampler
-                    .as_deref_mut()
-                    .map_or(64, |s| s.estimate_height(center_x, center_z));
-                surface_y - 1
-            }
+            _ => surface_y,
         };
 
-        // templatePosition matches Vanilla: base position (chunk min X/Z) at computed Y.
-        let template_position = Vector3::new(base_x, y, base_z);
+        let properties = RuinedPortalProperties {
+            cold: chosen_setup.can_be_cold,
+            mossiness: chosen_setup.mossiness,
+            air_pocket,
+            overgrown: chosen_setup.overgrown,
+            vines: chosen_setup.vines,
+            replace_with_blackstone: chosen_setup.replace_with_blackstone,
+        };
 
+        let template_position = Vector3::new(base_x, projected_y, base_z);
         let piece = RuinedPortalPiece::new(
             template,
             template_name.to_string(),
             template_position,
-            vertical_placement,
+            chosen_setup.placement,
             properties,
             rotation,
             mirror,
@@ -310,8 +364,10 @@ impl StructureGenerator for RuinedPortalGenerator {
         let mut collector = StructurePiecesCollector::default();
         collector.add_piece(Box::new(piece));
 
+        // Vanilla returns BlockPos(basePosition.getX(), projectedY, basePosition.getZ())
+        // which corresponds to (base_x, projected_y, base_z).
         Some(StructurePosition::new(
-            BlockPos::new(center_x, y, center_z),
+            BlockPos::new(base_x, projected_y, base_z),
             collector,
         ))
     }

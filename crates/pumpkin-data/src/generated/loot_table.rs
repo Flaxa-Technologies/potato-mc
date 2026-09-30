@@ -7801,10 +7801,7 @@ static BLOCKS_FERN_POOL0_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::AllOf(&[
-            LootCondition::NoSilkTouchOrShears,
-            LootCondition::RandomChance { chance: 0.125 },
-        ]),
+        condition: LootCondition::NoSilkTouchOrShears,
         bonus_formula: Some(LootBonusFormula::UniformBonusCount(2i32)),
     },
 ];
@@ -9786,10 +9783,7 @@ static BLOCKS_LARGE_FERN_POOL0_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::AllOf(&[
-            LootCondition::NoSilkTouchOrShears,
-            LootCondition::RandomChance { chance: 0.125 },
-        ]),
+        condition: LootCondition::NoSilkTouchOrShears,
         bonus_formula: None,
     },
 ];
@@ -9807,10 +9801,7 @@ static BLOCKS_LARGE_FERN_POOL1_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::AllOf(&[
-            LootCondition::NoSilkTouchOrShears,
-            LootCondition::RandomChance { chance: 0.125 },
-        ]),
+        condition: LootCondition::NoSilkTouchOrShears,
         bonus_formula: None,
     },
 ];
@@ -17573,10 +17564,7 @@ static BLOCKS_SHORT_GRASS_POOL0_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::AllOf(&[
-            LootCondition::NoSilkTouchOrShears,
-            LootCondition::RandomChance { chance: 0.125 },
-        ]),
+        condition: LootCondition::NoSilkTouchOrShears,
         bonus_formula: Some(LootBonusFormula::UniformBonusCount(2i32)),
     },
 ];
@@ -19490,10 +19478,7 @@ static BLOCKS_TALL_GRASS_POOL0_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::AllOf(&[
-            LootCondition::NoSilkTouchOrShears,
-            LootCondition::RandomChance { chance: 0.125 },
-        ]),
+        condition: LootCondition::NoSilkTouchOrShears,
         bonus_formula: None,
     },
 ];
@@ -19511,10 +19496,7 @@ static BLOCKS_TALL_GRASS_POOL1_ENTRIES: &[LootEntry] = &[
         weight: 1i32,
         min_count: 1i32,
         max_count: 1i32,
-        condition: LootCondition::AllOf(&[
-            LootCondition::NoSilkTouchOrShears,
-            LootCondition::RandomChance { chance: 0.125 },
-        ]),
+        condition: LootCondition::NoSilkTouchOrShears,
         bonus_formula: None,
     },
 ];
@@ -35701,2731 +35683,2897 @@ pub static TILL_ROOTED_DIRT: LootTable = LootTable {
 #[must_use]
 pub fn get_loot_table(key: &str) -> Option<&'static LootTable> {
     match key {
-        "minecraft:archaeology/desert_pyramid" | "archaeology/desert_pyramid" => {
+        "minecraft:archaeology\\desert_pyramid" | "archaeology\\desert_pyramid" => {
             Some(&ARCHAEOLOGY_DESERT_PYRAMID)
         }
-        "minecraft:archaeology/desert_well" | "archaeology/desert_well" => {
+        "minecraft:archaeology\\desert_well" | "archaeology\\desert_well" => {
             Some(&ARCHAEOLOGY_DESERT_WELL)
         }
-        "minecraft:archaeology/ocean_ruin_cold" | "archaeology/ocean_ruin_cold" => {
+        "minecraft:archaeology\\ocean_ruin_cold" | "archaeology\\ocean_ruin_cold" => {
             Some(&ARCHAEOLOGY_OCEAN_RUIN_COLD)
         }
-        "minecraft:archaeology/ocean_ruin_warm" | "archaeology/ocean_ruin_warm" => {
+        "minecraft:archaeology\\ocean_ruin_warm" | "archaeology\\ocean_ruin_warm" => {
             Some(&ARCHAEOLOGY_OCEAN_RUIN_WARM)
         }
-        "minecraft:archaeology/trail_ruins_common" | "archaeology/trail_ruins_common" => {
+        "minecraft:archaeology\\trail_ruins_common" | "archaeology\\trail_ruins_common" => {
             Some(&ARCHAEOLOGY_TRAIL_RUINS_COMMON)
         }
-        "minecraft:archaeology/trail_ruins_rare" | "archaeology/trail_ruins_rare" => {
+        "minecraft:archaeology\\trail_ruins_rare" | "archaeology\\trail_ruins_rare" => {
             Some(&ARCHAEOLOGY_TRAIL_RUINS_RARE)
         }
-        "minecraft:blocks/acacia_button" | "blocks/acacia_button" => Some(&BLOCKS_ACACIA_BUTTON),
-        "minecraft:blocks/acacia_door" | "blocks/acacia_door" => Some(&BLOCKS_ACACIA_DOOR),
-        "minecraft:blocks/acacia_fence" | "blocks/acacia_fence" => Some(&BLOCKS_ACACIA_FENCE),
-        "minecraft:blocks/acacia_fence_gate" | "blocks/acacia_fence_gate" => {
+        "minecraft:blocks\\acacia_button" | "blocks\\acacia_button" => Some(&BLOCKS_ACACIA_BUTTON),
+        "minecraft:blocks\\acacia_door" | "blocks\\acacia_door" => Some(&BLOCKS_ACACIA_DOOR),
+        "minecraft:blocks\\acacia_fence" | "blocks\\acacia_fence" => Some(&BLOCKS_ACACIA_FENCE),
+        "minecraft:blocks\\acacia_fence_gate" | "blocks\\acacia_fence_gate" => {
             Some(&BLOCKS_ACACIA_FENCE_GATE)
         }
-        "minecraft:blocks/acacia_hanging_sign" | "blocks/acacia_hanging_sign" => {
+        "minecraft:blocks\\acacia_hanging_sign" | "blocks\\acacia_hanging_sign" => {
             Some(&BLOCKS_ACACIA_HANGING_SIGN)
         }
-        "minecraft:blocks/acacia_leaves" | "blocks/acacia_leaves" => Some(&BLOCKS_ACACIA_LEAVES),
-        "minecraft:blocks/acacia_log" | "blocks/acacia_log" => Some(&BLOCKS_ACACIA_LOG),
-        "minecraft:blocks/acacia_planks" | "blocks/acacia_planks" => Some(&BLOCKS_ACACIA_PLANKS),
-        "minecraft:blocks/acacia_pressure_plate" | "blocks/acacia_pressure_plate" => {
+        "minecraft:blocks\\acacia_leaves" | "blocks\\acacia_leaves" => Some(&BLOCKS_ACACIA_LEAVES),
+        "minecraft:blocks\\acacia_log" | "blocks\\acacia_log" => Some(&BLOCKS_ACACIA_LOG),
+        "minecraft:blocks\\acacia_planks" | "blocks\\acacia_planks" => Some(&BLOCKS_ACACIA_PLANKS),
+        "minecraft:blocks\\acacia_pressure_plate" | "blocks\\acacia_pressure_plate" => {
             Some(&BLOCKS_ACACIA_PRESSURE_PLATE)
         }
-        "minecraft:blocks/acacia_sapling" | "blocks/acacia_sapling" => Some(&BLOCKS_ACACIA_SAPLING),
-        "minecraft:blocks/acacia_shelf" | "blocks/acacia_shelf" => Some(&BLOCKS_ACACIA_SHELF),
-        "minecraft:blocks/acacia_sign" | "blocks/acacia_sign" => Some(&BLOCKS_ACACIA_SIGN),
-        "minecraft:blocks/acacia_slab" | "blocks/acacia_slab" => Some(&BLOCKS_ACACIA_SLAB),
-        "minecraft:blocks/acacia_stairs" | "blocks/acacia_stairs" => Some(&BLOCKS_ACACIA_STAIRS),
-        "minecraft:blocks/acacia_trapdoor" | "blocks/acacia_trapdoor" => {
+        "minecraft:blocks\\acacia_sapling" | "blocks\\acacia_sapling" => {
+            Some(&BLOCKS_ACACIA_SAPLING)
+        }
+        "minecraft:blocks\\acacia_shelf" | "blocks\\acacia_shelf" => Some(&BLOCKS_ACACIA_SHELF),
+        "minecraft:blocks\\acacia_sign" | "blocks\\acacia_sign" => Some(&BLOCKS_ACACIA_SIGN),
+        "minecraft:blocks\\acacia_slab" | "blocks\\acacia_slab" => Some(&BLOCKS_ACACIA_SLAB),
+        "minecraft:blocks\\acacia_stairs" | "blocks\\acacia_stairs" => Some(&BLOCKS_ACACIA_STAIRS),
+        "minecraft:blocks\\acacia_trapdoor" | "blocks\\acacia_trapdoor" => {
             Some(&BLOCKS_ACACIA_TRAPDOOR)
         }
-        "minecraft:blocks/acacia_wood" | "blocks/acacia_wood" => Some(&BLOCKS_ACACIA_WOOD),
-        "minecraft:blocks/activator_rail" | "blocks/activator_rail" => Some(&BLOCKS_ACTIVATOR_RAIL),
-        "minecraft:blocks/allium" | "blocks/allium" => Some(&BLOCKS_ALLIUM),
-        "minecraft:blocks/amethyst_block" | "blocks/amethyst_block" => Some(&BLOCKS_AMETHYST_BLOCK),
-        "minecraft:blocks/amethyst_cluster" | "blocks/amethyst_cluster" => {
+        "minecraft:blocks\\acacia_wood" | "blocks\\acacia_wood" => Some(&BLOCKS_ACACIA_WOOD),
+        "minecraft:blocks\\activator_rail" | "blocks\\activator_rail" => {
+            Some(&BLOCKS_ACTIVATOR_RAIL)
+        }
+        "minecraft:blocks\\allium" | "blocks\\allium" => Some(&BLOCKS_ALLIUM),
+        "minecraft:blocks\\amethyst_block" | "blocks\\amethyst_block" => {
+            Some(&BLOCKS_AMETHYST_BLOCK)
+        }
+        "minecraft:blocks\\amethyst_cluster" | "blocks\\amethyst_cluster" => {
             Some(&BLOCKS_AMETHYST_CLUSTER)
         }
-        "minecraft:blocks/ancient_debris" | "blocks/ancient_debris" => Some(&BLOCKS_ANCIENT_DEBRIS),
-        "minecraft:blocks/andesite" | "blocks/andesite" => Some(&BLOCKS_ANDESITE),
-        "minecraft:blocks/andesite_slab" | "blocks/andesite_slab" => Some(&BLOCKS_ANDESITE_SLAB),
-        "minecraft:blocks/andesite_stairs" | "blocks/andesite_stairs" => {
+        "minecraft:blocks\\ancient_debris" | "blocks\\ancient_debris" => {
+            Some(&BLOCKS_ANCIENT_DEBRIS)
+        }
+        "minecraft:blocks\\andesite" | "blocks\\andesite" => Some(&BLOCKS_ANDESITE),
+        "minecraft:blocks\\andesite_slab" | "blocks\\andesite_slab" => Some(&BLOCKS_ANDESITE_SLAB),
+        "minecraft:blocks\\andesite_stairs" | "blocks\\andesite_stairs" => {
             Some(&BLOCKS_ANDESITE_STAIRS)
         }
-        "minecraft:blocks/andesite_wall" | "blocks/andesite_wall" => Some(&BLOCKS_ANDESITE_WALL),
-        "minecraft:blocks/anvil" | "blocks/anvil" => Some(&BLOCKS_ANVIL),
-        "minecraft:blocks/attached_melon_stem" | "blocks/attached_melon_stem" => {
+        "minecraft:blocks\\andesite_wall" | "blocks\\andesite_wall" => Some(&BLOCKS_ANDESITE_WALL),
+        "minecraft:blocks\\anvil" | "blocks\\anvil" => Some(&BLOCKS_ANVIL),
+        "minecraft:blocks\\attached_melon_stem" | "blocks\\attached_melon_stem" => {
             Some(&BLOCKS_ATTACHED_MELON_STEM)
         }
-        "minecraft:blocks/attached_pumpkin_stem" | "blocks/attached_pumpkin_stem" => {
+        "minecraft:blocks\\attached_pumpkin_stem" | "blocks\\attached_pumpkin_stem" => {
             Some(&BLOCKS_ATTACHED_PUMPKIN_STEM)
         }
-        "minecraft:blocks/azalea" | "blocks/azalea" => Some(&BLOCKS_AZALEA),
-        "minecraft:blocks/azalea_leaves" | "blocks/azalea_leaves" => Some(&BLOCKS_AZALEA_LEAVES),
-        "minecraft:blocks/azure_bluet" | "blocks/azure_bluet" => Some(&BLOCKS_AZURE_BLUET),
-        "minecraft:blocks/bamboo" | "blocks/bamboo" => Some(&BLOCKS_BAMBOO),
-        "minecraft:blocks/bamboo_block" | "blocks/bamboo_block" => Some(&BLOCKS_BAMBOO_BLOCK),
-        "minecraft:blocks/bamboo_button" | "blocks/bamboo_button" => Some(&BLOCKS_BAMBOO_BUTTON),
-        "minecraft:blocks/bamboo_door" | "blocks/bamboo_door" => Some(&BLOCKS_BAMBOO_DOOR),
-        "minecraft:blocks/bamboo_fence" | "blocks/bamboo_fence" => Some(&BLOCKS_BAMBOO_FENCE),
-        "minecraft:blocks/bamboo_fence_gate" | "blocks/bamboo_fence_gate" => {
+        "minecraft:blocks\\azalea" | "blocks\\azalea" => Some(&BLOCKS_AZALEA),
+        "minecraft:blocks\\azalea_leaves" | "blocks\\azalea_leaves" => Some(&BLOCKS_AZALEA_LEAVES),
+        "minecraft:blocks\\azure_bluet" | "blocks\\azure_bluet" => Some(&BLOCKS_AZURE_BLUET),
+        "minecraft:blocks\\bamboo" | "blocks\\bamboo" => Some(&BLOCKS_BAMBOO),
+        "minecraft:blocks\\bamboo_block" | "blocks\\bamboo_block" => Some(&BLOCKS_BAMBOO_BLOCK),
+        "minecraft:blocks\\bamboo_button" | "blocks\\bamboo_button" => Some(&BLOCKS_BAMBOO_BUTTON),
+        "minecraft:blocks\\bamboo_door" | "blocks\\bamboo_door" => Some(&BLOCKS_BAMBOO_DOOR),
+        "minecraft:blocks\\bamboo_fence" | "blocks\\bamboo_fence" => Some(&BLOCKS_BAMBOO_FENCE),
+        "minecraft:blocks\\bamboo_fence_gate" | "blocks\\bamboo_fence_gate" => {
             Some(&BLOCKS_BAMBOO_FENCE_GATE)
         }
-        "minecraft:blocks/bamboo_hanging_sign" | "blocks/bamboo_hanging_sign" => {
+        "minecraft:blocks\\bamboo_hanging_sign" | "blocks\\bamboo_hanging_sign" => {
             Some(&BLOCKS_BAMBOO_HANGING_SIGN)
         }
-        "minecraft:blocks/bamboo_mosaic" | "blocks/bamboo_mosaic" => Some(&BLOCKS_BAMBOO_MOSAIC),
-        "minecraft:blocks/bamboo_mosaic_slab" | "blocks/bamboo_mosaic_slab" => {
+        "minecraft:blocks\\bamboo_mosaic" | "blocks\\bamboo_mosaic" => Some(&BLOCKS_BAMBOO_MOSAIC),
+        "minecraft:blocks\\bamboo_mosaic_slab" | "blocks\\bamboo_mosaic_slab" => {
             Some(&BLOCKS_BAMBOO_MOSAIC_SLAB)
         }
-        "minecraft:blocks/bamboo_mosaic_stairs" | "blocks/bamboo_mosaic_stairs" => {
+        "minecraft:blocks\\bamboo_mosaic_stairs" | "blocks\\bamboo_mosaic_stairs" => {
             Some(&BLOCKS_BAMBOO_MOSAIC_STAIRS)
         }
-        "minecraft:blocks/bamboo_planks" | "blocks/bamboo_planks" => Some(&BLOCKS_BAMBOO_PLANKS),
-        "minecraft:blocks/bamboo_pressure_plate" | "blocks/bamboo_pressure_plate" => {
+        "minecraft:blocks\\bamboo_planks" | "blocks\\bamboo_planks" => Some(&BLOCKS_BAMBOO_PLANKS),
+        "minecraft:blocks\\bamboo_pressure_plate" | "blocks\\bamboo_pressure_plate" => {
             Some(&BLOCKS_BAMBOO_PRESSURE_PLATE)
         }
-        "minecraft:blocks/bamboo_sapling" | "blocks/bamboo_sapling" => Some(&BLOCKS_BAMBOO_SAPLING),
-        "minecraft:blocks/bamboo_shelf" | "blocks/bamboo_shelf" => Some(&BLOCKS_BAMBOO_SHELF),
-        "minecraft:blocks/bamboo_sign" | "blocks/bamboo_sign" => Some(&BLOCKS_BAMBOO_SIGN),
-        "minecraft:blocks/bamboo_slab" | "blocks/bamboo_slab" => Some(&BLOCKS_BAMBOO_SLAB),
-        "minecraft:blocks/bamboo_stairs" | "blocks/bamboo_stairs" => Some(&BLOCKS_BAMBOO_STAIRS),
-        "minecraft:blocks/bamboo_trapdoor" | "blocks/bamboo_trapdoor" => {
+        "minecraft:blocks\\bamboo_sapling" | "blocks\\bamboo_sapling" => {
+            Some(&BLOCKS_BAMBOO_SAPLING)
+        }
+        "minecraft:blocks\\bamboo_shelf" | "blocks\\bamboo_shelf" => Some(&BLOCKS_BAMBOO_SHELF),
+        "minecraft:blocks\\bamboo_sign" | "blocks\\bamboo_sign" => Some(&BLOCKS_BAMBOO_SIGN),
+        "minecraft:blocks\\bamboo_slab" | "blocks\\bamboo_slab" => Some(&BLOCKS_BAMBOO_SLAB),
+        "minecraft:blocks\\bamboo_stairs" | "blocks\\bamboo_stairs" => Some(&BLOCKS_BAMBOO_STAIRS),
+        "minecraft:blocks\\bamboo_trapdoor" | "blocks\\bamboo_trapdoor" => {
             Some(&BLOCKS_BAMBOO_TRAPDOOR)
         }
-        "minecraft:blocks/barrel" | "blocks/barrel" => Some(&BLOCKS_BARREL),
-        "minecraft:blocks/basalt" | "blocks/basalt" => Some(&BLOCKS_BASALT),
-        "minecraft:blocks/beacon" | "blocks/beacon" => Some(&BLOCKS_BEACON),
-        "minecraft:blocks/bee_nest" | "blocks/bee_nest" => Some(&BLOCKS_BEE_NEST),
-        "minecraft:blocks/beehive" | "blocks/beehive" => Some(&BLOCKS_BEEHIVE),
-        "minecraft:blocks/beetroots" | "blocks/beetroots" => Some(&BLOCKS_BEETROOTS),
-        "minecraft:blocks/bell" | "blocks/bell" => Some(&BLOCKS_BELL),
-        "minecraft:blocks/big_dripleaf" | "blocks/big_dripleaf" => Some(&BLOCKS_BIG_DRIPLEAF),
-        "minecraft:blocks/big_dripleaf_stem" | "blocks/big_dripleaf_stem" => {
+        "minecraft:blocks\\barrel" | "blocks\\barrel" => Some(&BLOCKS_BARREL),
+        "minecraft:blocks\\basalt" | "blocks\\basalt" => Some(&BLOCKS_BASALT),
+        "minecraft:blocks\\beacon" | "blocks\\beacon" => Some(&BLOCKS_BEACON),
+        "minecraft:blocks\\bee_nest" | "blocks\\bee_nest" => Some(&BLOCKS_BEE_NEST),
+        "minecraft:blocks\\beehive" | "blocks\\beehive" => Some(&BLOCKS_BEEHIVE),
+        "minecraft:blocks\\beetroots" | "blocks\\beetroots" => Some(&BLOCKS_BEETROOTS),
+        "minecraft:blocks\\bell" | "blocks\\bell" => Some(&BLOCKS_BELL),
+        "minecraft:blocks\\big_dripleaf" | "blocks\\big_dripleaf" => Some(&BLOCKS_BIG_DRIPLEAF),
+        "minecraft:blocks\\big_dripleaf_stem" | "blocks\\big_dripleaf_stem" => {
             Some(&BLOCKS_BIG_DRIPLEAF_STEM)
         }
-        "minecraft:blocks/birch_button" | "blocks/birch_button" => Some(&BLOCKS_BIRCH_BUTTON),
-        "minecraft:blocks/birch_door" | "blocks/birch_door" => Some(&BLOCKS_BIRCH_DOOR),
-        "minecraft:blocks/birch_fence" | "blocks/birch_fence" => Some(&BLOCKS_BIRCH_FENCE),
-        "minecraft:blocks/birch_fence_gate" | "blocks/birch_fence_gate" => {
+        "minecraft:blocks\\birch_button" | "blocks\\birch_button" => Some(&BLOCKS_BIRCH_BUTTON),
+        "minecraft:blocks\\birch_door" | "blocks\\birch_door" => Some(&BLOCKS_BIRCH_DOOR),
+        "minecraft:blocks\\birch_fence" | "blocks\\birch_fence" => Some(&BLOCKS_BIRCH_FENCE),
+        "minecraft:blocks\\birch_fence_gate" | "blocks\\birch_fence_gate" => {
             Some(&BLOCKS_BIRCH_FENCE_GATE)
         }
-        "minecraft:blocks/birch_hanging_sign" | "blocks/birch_hanging_sign" => {
+        "minecraft:blocks\\birch_hanging_sign" | "blocks\\birch_hanging_sign" => {
             Some(&BLOCKS_BIRCH_HANGING_SIGN)
         }
-        "minecraft:blocks/birch_leaves" | "blocks/birch_leaves" => Some(&BLOCKS_BIRCH_LEAVES),
-        "minecraft:blocks/birch_log" | "blocks/birch_log" => Some(&BLOCKS_BIRCH_LOG),
-        "minecraft:blocks/birch_planks" | "blocks/birch_planks" => Some(&BLOCKS_BIRCH_PLANKS),
-        "minecraft:blocks/birch_pressure_plate" | "blocks/birch_pressure_plate" => {
+        "minecraft:blocks\\birch_leaves" | "blocks\\birch_leaves" => Some(&BLOCKS_BIRCH_LEAVES),
+        "minecraft:blocks\\birch_log" | "blocks\\birch_log" => Some(&BLOCKS_BIRCH_LOG),
+        "minecraft:blocks\\birch_planks" | "blocks\\birch_planks" => Some(&BLOCKS_BIRCH_PLANKS),
+        "minecraft:blocks\\birch_pressure_plate" | "blocks\\birch_pressure_plate" => {
             Some(&BLOCKS_BIRCH_PRESSURE_PLATE)
         }
-        "minecraft:blocks/birch_sapling" | "blocks/birch_sapling" => Some(&BLOCKS_BIRCH_SAPLING),
-        "minecraft:blocks/birch_shelf" | "blocks/birch_shelf" => Some(&BLOCKS_BIRCH_SHELF),
-        "minecraft:blocks/birch_sign" | "blocks/birch_sign" => Some(&BLOCKS_BIRCH_SIGN),
-        "minecraft:blocks/birch_slab" | "blocks/birch_slab" => Some(&BLOCKS_BIRCH_SLAB),
-        "minecraft:blocks/birch_stairs" | "blocks/birch_stairs" => Some(&BLOCKS_BIRCH_STAIRS),
-        "minecraft:blocks/birch_trapdoor" | "blocks/birch_trapdoor" => Some(&BLOCKS_BIRCH_TRAPDOOR),
-        "minecraft:blocks/birch_wood" | "blocks/birch_wood" => Some(&BLOCKS_BIRCH_WOOD),
-        "minecraft:blocks/black_banner" | "blocks/black_banner" => Some(&BLOCKS_BLACK_BANNER),
-        "minecraft:blocks/black_bed" | "blocks/black_bed" => Some(&BLOCKS_BLACK_BED),
-        "minecraft:blocks/black_candle" | "blocks/black_candle" => Some(&BLOCKS_BLACK_CANDLE),
-        "minecraft:blocks/black_candle_cake" | "blocks/black_candle_cake" => {
+        "minecraft:blocks\\birch_sapling" | "blocks\\birch_sapling" => Some(&BLOCKS_BIRCH_SAPLING),
+        "minecraft:blocks\\birch_shelf" | "blocks\\birch_shelf" => Some(&BLOCKS_BIRCH_SHELF),
+        "minecraft:blocks\\birch_sign" | "blocks\\birch_sign" => Some(&BLOCKS_BIRCH_SIGN),
+        "minecraft:blocks\\birch_slab" | "blocks\\birch_slab" => Some(&BLOCKS_BIRCH_SLAB),
+        "minecraft:blocks\\birch_stairs" | "blocks\\birch_stairs" => Some(&BLOCKS_BIRCH_STAIRS),
+        "minecraft:blocks\\birch_trapdoor" | "blocks\\birch_trapdoor" => {
+            Some(&BLOCKS_BIRCH_TRAPDOOR)
+        }
+        "minecraft:blocks\\birch_wood" | "blocks\\birch_wood" => Some(&BLOCKS_BIRCH_WOOD),
+        "minecraft:blocks\\black_banner" | "blocks\\black_banner" => Some(&BLOCKS_BLACK_BANNER),
+        "minecraft:blocks\\black_bed" | "blocks\\black_bed" => Some(&BLOCKS_BLACK_BED),
+        "minecraft:blocks\\black_candle" | "blocks\\black_candle" => Some(&BLOCKS_BLACK_CANDLE),
+        "minecraft:blocks\\black_candle_cake" | "blocks\\black_candle_cake" => {
             Some(&BLOCKS_BLACK_CANDLE_CAKE)
         }
-        "minecraft:blocks/black_carpet" | "blocks/black_carpet" => Some(&BLOCKS_BLACK_CARPET),
-        "minecraft:blocks/black_concrete" | "blocks/black_concrete" => Some(&BLOCKS_BLACK_CONCRETE),
-        "minecraft:blocks/black_concrete_powder" | "blocks/black_concrete_powder" => {
+        "minecraft:blocks\\black_carpet" | "blocks\\black_carpet" => Some(&BLOCKS_BLACK_CARPET),
+        "minecraft:blocks\\black_concrete" | "blocks\\black_concrete" => {
+            Some(&BLOCKS_BLACK_CONCRETE)
+        }
+        "minecraft:blocks\\black_concrete_powder" | "blocks\\black_concrete_powder" => {
             Some(&BLOCKS_BLACK_CONCRETE_POWDER)
         }
-        "minecraft:blocks/black_glazed_terracotta" | "blocks/black_glazed_terracotta" => {
+        "minecraft:blocks\\black_glazed_terracotta" | "blocks\\black_glazed_terracotta" => {
             Some(&BLOCKS_BLACK_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/black_shulker_box" | "blocks/black_shulker_box" => {
+        "minecraft:blocks\\black_shulker_box" | "blocks\\black_shulker_box" => {
             Some(&BLOCKS_BLACK_SHULKER_BOX)
         }
-        "minecraft:blocks/black_stained_glass" | "blocks/black_stained_glass" => {
+        "minecraft:blocks\\black_stained_glass" | "blocks\\black_stained_glass" => {
             Some(&BLOCKS_BLACK_STAINED_GLASS)
         }
-        "minecraft:blocks/black_stained_glass_pane" | "blocks/black_stained_glass_pane" => {
+        "minecraft:blocks\\black_stained_glass_pane" | "blocks\\black_stained_glass_pane" => {
             Some(&BLOCKS_BLACK_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/black_terracotta" | "blocks/black_terracotta" => {
+        "minecraft:blocks\\black_terracotta" | "blocks\\black_terracotta" => {
             Some(&BLOCKS_BLACK_TERRACOTTA)
         }
-        "minecraft:blocks/black_wool" | "blocks/black_wool" => Some(&BLOCKS_BLACK_WOOL),
-        "minecraft:blocks/blackstone" | "blocks/blackstone" => Some(&BLOCKS_BLACKSTONE),
-        "minecraft:blocks/blackstone_slab" | "blocks/blackstone_slab" => {
+        "minecraft:blocks\\black_wool" | "blocks\\black_wool" => Some(&BLOCKS_BLACK_WOOL),
+        "minecraft:blocks\\blackstone" | "blocks\\blackstone" => Some(&BLOCKS_BLACKSTONE),
+        "minecraft:blocks\\blackstone_slab" | "blocks\\blackstone_slab" => {
             Some(&BLOCKS_BLACKSTONE_SLAB)
         }
-        "minecraft:blocks/blackstone_stairs" | "blocks/blackstone_stairs" => {
+        "minecraft:blocks\\blackstone_stairs" | "blocks\\blackstone_stairs" => {
             Some(&BLOCKS_BLACKSTONE_STAIRS)
         }
-        "minecraft:blocks/blackstone_wall" | "blocks/blackstone_wall" => {
+        "minecraft:blocks\\blackstone_wall" | "blocks\\blackstone_wall" => {
             Some(&BLOCKS_BLACKSTONE_WALL)
         }
-        "minecraft:blocks/blast_furnace" | "blocks/blast_furnace" => Some(&BLOCKS_BLAST_FURNACE),
-        "minecraft:blocks/blue_banner" | "blocks/blue_banner" => Some(&BLOCKS_BLUE_BANNER),
-        "minecraft:blocks/blue_bed" | "blocks/blue_bed" => Some(&BLOCKS_BLUE_BED),
-        "minecraft:blocks/blue_candle" | "blocks/blue_candle" => Some(&BLOCKS_BLUE_CANDLE),
-        "minecraft:blocks/blue_candle_cake" | "blocks/blue_candle_cake" => {
+        "minecraft:blocks\\blast_furnace" | "blocks\\blast_furnace" => Some(&BLOCKS_BLAST_FURNACE),
+        "minecraft:blocks\\blue_banner" | "blocks\\blue_banner" => Some(&BLOCKS_BLUE_BANNER),
+        "minecraft:blocks\\blue_bed" | "blocks\\blue_bed" => Some(&BLOCKS_BLUE_BED),
+        "minecraft:blocks\\blue_candle" | "blocks\\blue_candle" => Some(&BLOCKS_BLUE_CANDLE),
+        "minecraft:blocks\\blue_candle_cake" | "blocks\\blue_candle_cake" => {
             Some(&BLOCKS_BLUE_CANDLE_CAKE)
         }
-        "minecraft:blocks/blue_carpet" | "blocks/blue_carpet" => Some(&BLOCKS_BLUE_CARPET),
-        "minecraft:blocks/blue_concrete" | "blocks/blue_concrete" => Some(&BLOCKS_BLUE_CONCRETE),
-        "minecraft:blocks/blue_concrete_powder" | "blocks/blue_concrete_powder" => {
+        "minecraft:blocks\\blue_carpet" | "blocks\\blue_carpet" => Some(&BLOCKS_BLUE_CARPET),
+        "minecraft:blocks\\blue_concrete" | "blocks\\blue_concrete" => Some(&BLOCKS_BLUE_CONCRETE),
+        "minecraft:blocks\\blue_concrete_powder" | "blocks\\blue_concrete_powder" => {
             Some(&BLOCKS_BLUE_CONCRETE_POWDER)
         }
-        "minecraft:blocks/blue_glazed_terracotta" | "blocks/blue_glazed_terracotta" => {
+        "minecraft:blocks\\blue_glazed_terracotta" | "blocks\\blue_glazed_terracotta" => {
             Some(&BLOCKS_BLUE_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/blue_ice" | "blocks/blue_ice" => Some(&BLOCKS_BLUE_ICE),
-        "minecraft:blocks/blue_orchid" | "blocks/blue_orchid" => Some(&BLOCKS_BLUE_ORCHID),
-        "minecraft:blocks/blue_shulker_box" | "blocks/blue_shulker_box" => {
+        "minecraft:blocks\\blue_ice" | "blocks\\blue_ice" => Some(&BLOCKS_BLUE_ICE),
+        "minecraft:blocks\\blue_orchid" | "blocks\\blue_orchid" => Some(&BLOCKS_BLUE_ORCHID),
+        "minecraft:blocks\\blue_shulker_box" | "blocks\\blue_shulker_box" => {
             Some(&BLOCKS_BLUE_SHULKER_BOX)
         }
-        "minecraft:blocks/blue_stained_glass" | "blocks/blue_stained_glass" => {
+        "minecraft:blocks\\blue_stained_glass" | "blocks\\blue_stained_glass" => {
             Some(&BLOCKS_BLUE_STAINED_GLASS)
         }
-        "minecraft:blocks/blue_stained_glass_pane" | "blocks/blue_stained_glass_pane" => {
+        "minecraft:blocks\\blue_stained_glass_pane" | "blocks\\blue_stained_glass_pane" => {
             Some(&BLOCKS_BLUE_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/blue_terracotta" | "blocks/blue_terracotta" => {
+        "minecraft:blocks\\blue_terracotta" | "blocks\\blue_terracotta" => {
             Some(&BLOCKS_BLUE_TERRACOTTA)
         }
-        "minecraft:blocks/blue_wool" | "blocks/blue_wool" => Some(&BLOCKS_BLUE_WOOL),
-        "minecraft:blocks/bone_block" | "blocks/bone_block" => Some(&BLOCKS_BONE_BLOCK),
-        "minecraft:blocks/bookshelf" | "blocks/bookshelf" => Some(&BLOCKS_BOOKSHELF),
-        "minecraft:blocks/brain_coral" | "blocks/brain_coral" => Some(&BLOCKS_BRAIN_CORAL),
-        "minecraft:blocks/brain_coral_block" | "blocks/brain_coral_block" => {
+        "minecraft:blocks\\blue_wool" | "blocks\\blue_wool" => Some(&BLOCKS_BLUE_WOOL),
+        "minecraft:blocks\\bone_block" | "blocks\\bone_block" => Some(&BLOCKS_BONE_BLOCK),
+        "minecraft:blocks\\bookshelf" | "blocks\\bookshelf" => Some(&BLOCKS_BOOKSHELF),
+        "minecraft:blocks\\brain_coral" | "blocks\\brain_coral" => Some(&BLOCKS_BRAIN_CORAL),
+        "minecraft:blocks\\brain_coral_block" | "blocks\\brain_coral_block" => {
             Some(&BLOCKS_BRAIN_CORAL_BLOCK)
         }
-        "minecraft:blocks/brain_coral_fan" | "blocks/brain_coral_fan" => {
+        "minecraft:blocks\\brain_coral_fan" | "blocks\\brain_coral_fan" => {
             Some(&BLOCKS_BRAIN_CORAL_FAN)
         }
-        "minecraft:blocks/brewing_stand" | "blocks/brewing_stand" => Some(&BLOCKS_BREWING_STAND),
-        "minecraft:blocks/brick_slab" | "blocks/brick_slab" => Some(&BLOCKS_BRICK_SLAB),
-        "minecraft:blocks/brick_stairs" | "blocks/brick_stairs" => Some(&BLOCKS_BRICK_STAIRS),
-        "minecraft:blocks/brick_wall" | "blocks/brick_wall" => Some(&BLOCKS_BRICK_WALL),
-        "minecraft:blocks/bricks" | "blocks/bricks" => Some(&BLOCKS_BRICKS),
-        "minecraft:blocks/brown_banner" | "blocks/brown_banner" => Some(&BLOCKS_BROWN_BANNER),
-        "minecraft:blocks/brown_bed" | "blocks/brown_bed" => Some(&BLOCKS_BROWN_BED),
-        "minecraft:blocks/brown_candle" | "blocks/brown_candle" => Some(&BLOCKS_BROWN_CANDLE),
-        "minecraft:blocks/brown_candle_cake" | "blocks/brown_candle_cake" => {
+        "minecraft:blocks\\brewing_stand" | "blocks\\brewing_stand" => Some(&BLOCKS_BREWING_STAND),
+        "minecraft:blocks\\brick_slab" | "blocks\\brick_slab" => Some(&BLOCKS_BRICK_SLAB),
+        "minecraft:blocks\\brick_stairs" | "blocks\\brick_stairs" => Some(&BLOCKS_BRICK_STAIRS),
+        "minecraft:blocks\\brick_wall" | "blocks\\brick_wall" => Some(&BLOCKS_BRICK_WALL),
+        "minecraft:blocks\\bricks" | "blocks\\bricks" => Some(&BLOCKS_BRICKS),
+        "minecraft:blocks\\brown_banner" | "blocks\\brown_banner" => Some(&BLOCKS_BROWN_BANNER),
+        "minecraft:blocks\\brown_bed" | "blocks\\brown_bed" => Some(&BLOCKS_BROWN_BED),
+        "minecraft:blocks\\brown_candle" | "blocks\\brown_candle" => Some(&BLOCKS_BROWN_CANDLE),
+        "minecraft:blocks\\brown_candle_cake" | "blocks\\brown_candle_cake" => {
             Some(&BLOCKS_BROWN_CANDLE_CAKE)
         }
-        "minecraft:blocks/brown_carpet" | "blocks/brown_carpet" => Some(&BLOCKS_BROWN_CARPET),
-        "minecraft:blocks/brown_concrete" | "blocks/brown_concrete" => Some(&BLOCKS_BROWN_CONCRETE),
-        "minecraft:blocks/brown_concrete_powder" | "blocks/brown_concrete_powder" => {
+        "minecraft:blocks\\brown_carpet" | "blocks\\brown_carpet" => Some(&BLOCKS_BROWN_CARPET),
+        "minecraft:blocks\\brown_concrete" | "blocks\\brown_concrete" => {
+            Some(&BLOCKS_BROWN_CONCRETE)
+        }
+        "minecraft:blocks\\brown_concrete_powder" | "blocks\\brown_concrete_powder" => {
             Some(&BLOCKS_BROWN_CONCRETE_POWDER)
         }
-        "minecraft:blocks/brown_glazed_terracotta" | "blocks/brown_glazed_terracotta" => {
+        "minecraft:blocks\\brown_glazed_terracotta" | "blocks\\brown_glazed_terracotta" => {
             Some(&BLOCKS_BROWN_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/brown_mushroom" | "blocks/brown_mushroom" => Some(&BLOCKS_BROWN_MUSHROOM),
-        "minecraft:blocks/brown_mushroom_block" | "blocks/brown_mushroom_block" => {
+        "minecraft:blocks\\brown_mushroom" | "blocks\\brown_mushroom" => {
+            Some(&BLOCKS_BROWN_MUSHROOM)
+        }
+        "minecraft:blocks\\brown_mushroom_block" | "blocks\\brown_mushroom_block" => {
             Some(&BLOCKS_BROWN_MUSHROOM_BLOCK)
         }
-        "minecraft:blocks/brown_shulker_box" | "blocks/brown_shulker_box" => {
+        "minecraft:blocks\\brown_shulker_box" | "blocks\\brown_shulker_box" => {
             Some(&BLOCKS_BROWN_SHULKER_BOX)
         }
-        "minecraft:blocks/brown_stained_glass" | "blocks/brown_stained_glass" => {
+        "minecraft:blocks\\brown_stained_glass" | "blocks\\brown_stained_glass" => {
             Some(&BLOCKS_BROWN_STAINED_GLASS)
         }
-        "minecraft:blocks/brown_stained_glass_pane" | "blocks/brown_stained_glass_pane" => {
+        "minecraft:blocks\\brown_stained_glass_pane" | "blocks\\brown_stained_glass_pane" => {
             Some(&BLOCKS_BROWN_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/brown_terracotta" | "blocks/brown_terracotta" => {
+        "minecraft:blocks\\brown_terracotta" | "blocks\\brown_terracotta" => {
             Some(&BLOCKS_BROWN_TERRACOTTA)
         }
-        "minecraft:blocks/brown_wool" | "blocks/brown_wool" => Some(&BLOCKS_BROWN_WOOL),
-        "minecraft:blocks/bubble_coral" | "blocks/bubble_coral" => Some(&BLOCKS_BUBBLE_CORAL),
-        "minecraft:blocks/bubble_coral_block" | "blocks/bubble_coral_block" => {
+        "minecraft:blocks\\brown_wool" | "blocks\\brown_wool" => Some(&BLOCKS_BROWN_WOOL),
+        "minecraft:blocks\\bubble_coral" | "blocks\\bubble_coral" => Some(&BLOCKS_BUBBLE_CORAL),
+        "minecraft:blocks\\bubble_coral_block" | "blocks\\bubble_coral_block" => {
             Some(&BLOCKS_BUBBLE_CORAL_BLOCK)
         }
-        "minecraft:blocks/bubble_coral_fan" | "blocks/bubble_coral_fan" => {
+        "minecraft:blocks\\bubble_coral_fan" | "blocks\\bubble_coral_fan" => {
             Some(&BLOCKS_BUBBLE_CORAL_FAN)
         }
-        "minecraft:blocks/budding_amethyst" | "blocks/budding_amethyst" => {
+        "minecraft:blocks\\budding_amethyst" | "blocks\\budding_amethyst" => {
             Some(&BLOCKS_BUDDING_AMETHYST)
         }
-        "minecraft:blocks/bush" | "blocks/bush" => Some(&BLOCKS_BUSH),
-        "minecraft:blocks/cactus" | "blocks/cactus" => Some(&BLOCKS_CACTUS),
-        "minecraft:blocks/cactus_flower" | "blocks/cactus_flower" => Some(&BLOCKS_CACTUS_FLOWER),
-        "minecraft:blocks/cake" | "blocks/cake" => Some(&BLOCKS_CAKE),
-        "minecraft:blocks/calcite" | "blocks/calcite" => Some(&BLOCKS_CALCITE),
-        "minecraft:blocks/calibrated_sculk_sensor" | "blocks/calibrated_sculk_sensor" => {
+        "minecraft:blocks\\bush" | "blocks\\bush" => Some(&BLOCKS_BUSH),
+        "minecraft:blocks\\cactus" | "blocks\\cactus" => Some(&BLOCKS_CACTUS),
+        "minecraft:blocks\\cactus_flower" | "blocks\\cactus_flower" => Some(&BLOCKS_CACTUS_FLOWER),
+        "minecraft:blocks\\cake" | "blocks\\cake" => Some(&BLOCKS_CAKE),
+        "minecraft:blocks\\calcite" | "blocks\\calcite" => Some(&BLOCKS_CALCITE),
+        "minecraft:blocks\\calibrated_sculk_sensor" | "blocks\\calibrated_sculk_sensor" => {
             Some(&BLOCKS_CALIBRATED_SCULK_SENSOR)
         }
-        "minecraft:blocks/campfire" | "blocks/campfire" => Some(&BLOCKS_CAMPFIRE),
-        "minecraft:blocks/candle" | "blocks/candle" => Some(&BLOCKS_CANDLE),
-        "minecraft:blocks/candle_cake" | "blocks/candle_cake" => Some(&BLOCKS_CANDLE_CAKE),
-        "minecraft:blocks/carrots" | "blocks/carrots" => Some(&BLOCKS_CARROTS),
-        "minecraft:blocks/cartography_table" | "blocks/cartography_table" => {
+        "minecraft:blocks\\campfire" | "blocks\\campfire" => Some(&BLOCKS_CAMPFIRE),
+        "minecraft:blocks\\candle" | "blocks\\candle" => Some(&BLOCKS_CANDLE),
+        "minecraft:blocks\\candle_cake" | "blocks\\candle_cake" => Some(&BLOCKS_CANDLE_CAKE),
+        "minecraft:blocks\\carrots" | "blocks\\carrots" => Some(&BLOCKS_CARROTS),
+        "minecraft:blocks\\cartography_table" | "blocks\\cartography_table" => {
             Some(&BLOCKS_CARTOGRAPHY_TABLE)
         }
-        "minecraft:blocks/carved_pumpkin" | "blocks/carved_pumpkin" => Some(&BLOCKS_CARVED_PUMPKIN),
-        "minecraft:blocks/cauldron" | "blocks/cauldron" => Some(&BLOCKS_CAULDRON),
-        "minecraft:blocks/cave_vines" | "blocks/cave_vines" => Some(&BLOCKS_CAVE_VINES),
-        "minecraft:blocks/cave_vines_plant" | "blocks/cave_vines_plant" => {
+        "minecraft:blocks\\carved_pumpkin" | "blocks\\carved_pumpkin" => {
+            Some(&BLOCKS_CARVED_PUMPKIN)
+        }
+        "minecraft:blocks\\cauldron" | "blocks\\cauldron" => Some(&BLOCKS_CAULDRON),
+        "minecraft:blocks\\cave_vines" | "blocks\\cave_vines" => Some(&BLOCKS_CAVE_VINES),
+        "minecraft:blocks\\cave_vines_plant" | "blocks\\cave_vines_plant" => {
             Some(&BLOCKS_CAVE_VINES_PLANT)
         }
-        "minecraft:blocks/cherry_button" | "blocks/cherry_button" => Some(&BLOCKS_CHERRY_BUTTON),
-        "minecraft:blocks/cherry_door" | "blocks/cherry_door" => Some(&BLOCKS_CHERRY_DOOR),
-        "minecraft:blocks/cherry_fence" | "blocks/cherry_fence" => Some(&BLOCKS_CHERRY_FENCE),
-        "minecraft:blocks/cherry_fence_gate" | "blocks/cherry_fence_gate" => {
+        "minecraft:blocks\\cherry_button" | "blocks\\cherry_button" => Some(&BLOCKS_CHERRY_BUTTON),
+        "minecraft:blocks\\cherry_door" | "blocks\\cherry_door" => Some(&BLOCKS_CHERRY_DOOR),
+        "minecraft:blocks\\cherry_fence" | "blocks\\cherry_fence" => Some(&BLOCKS_CHERRY_FENCE),
+        "minecraft:blocks\\cherry_fence_gate" | "blocks\\cherry_fence_gate" => {
             Some(&BLOCKS_CHERRY_FENCE_GATE)
         }
-        "minecraft:blocks/cherry_hanging_sign" | "blocks/cherry_hanging_sign" => {
+        "minecraft:blocks\\cherry_hanging_sign" | "blocks\\cherry_hanging_sign" => {
             Some(&BLOCKS_CHERRY_HANGING_SIGN)
         }
-        "minecraft:blocks/cherry_leaves" | "blocks/cherry_leaves" => Some(&BLOCKS_CHERRY_LEAVES),
-        "minecraft:blocks/cherry_log" | "blocks/cherry_log" => Some(&BLOCKS_CHERRY_LOG),
-        "minecraft:blocks/cherry_planks" | "blocks/cherry_planks" => Some(&BLOCKS_CHERRY_PLANKS),
-        "minecraft:blocks/cherry_pressure_plate" | "blocks/cherry_pressure_plate" => {
+        "minecraft:blocks\\cherry_leaves" | "blocks\\cherry_leaves" => Some(&BLOCKS_CHERRY_LEAVES),
+        "minecraft:blocks\\cherry_log" | "blocks\\cherry_log" => Some(&BLOCKS_CHERRY_LOG),
+        "minecraft:blocks\\cherry_planks" | "blocks\\cherry_planks" => Some(&BLOCKS_CHERRY_PLANKS),
+        "minecraft:blocks\\cherry_pressure_plate" | "blocks\\cherry_pressure_plate" => {
             Some(&BLOCKS_CHERRY_PRESSURE_PLATE)
         }
-        "minecraft:blocks/cherry_sapling" | "blocks/cherry_sapling" => Some(&BLOCKS_CHERRY_SAPLING),
-        "minecraft:blocks/cherry_shelf" | "blocks/cherry_shelf" => Some(&BLOCKS_CHERRY_SHELF),
-        "minecraft:blocks/cherry_sign" | "blocks/cherry_sign" => Some(&BLOCKS_CHERRY_SIGN),
-        "minecraft:blocks/cherry_slab" | "blocks/cherry_slab" => Some(&BLOCKS_CHERRY_SLAB),
-        "minecraft:blocks/cherry_stairs" | "blocks/cherry_stairs" => Some(&BLOCKS_CHERRY_STAIRS),
-        "minecraft:blocks/cherry_trapdoor" | "blocks/cherry_trapdoor" => {
+        "minecraft:blocks\\cherry_sapling" | "blocks\\cherry_sapling" => {
+            Some(&BLOCKS_CHERRY_SAPLING)
+        }
+        "minecraft:blocks\\cherry_shelf" | "blocks\\cherry_shelf" => Some(&BLOCKS_CHERRY_SHELF),
+        "minecraft:blocks\\cherry_sign" | "blocks\\cherry_sign" => Some(&BLOCKS_CHERRY_SIGN),
+        "minecraft:blocks\\cherry_slab" | "blocks\\cherry_slab" => Some(&BLOCKS_CHERRY_SLAB),
+        "minecraft:blocks\\cherry_stairs" | "blocks\\cherry_stairs" => Some(&BLOCKS_CHERRY_STAIRS),
+        "minecraft:blocks\\cherry_trapdoor" | "blocks\\cherry_trapdoor" => {
             Some(&BLOCKS_CHERRY_TRAPDOOR)
         }
-        "minecraft:blocks/cherry_wood" | "blocks/cherry_wood" => Some(&BLOCKS_CHERRY_WOOD),
-        "minecraft:blocks/chest" | "blocks/chest" => Some(&BLOCKS_CHEST),
-        "minecraft:blocks/chipped_anvil" | "blocks/chipped_anvil" => Some(&BLOCKS_CHIPPED_ANVIL),
-        "minecraft:blocks/chiseled_bookshelf" | "blocks/chiseled_bookshelf" => {
+        "minecraft:blocks\\cherry_wood" | "blocks\\cherry_wood" => Some(&BLOCKS_CHERRY_WOOD),
+        "minecraft:blocks\\chest" | "blocks\\chest" => Some(&BLOCKS_CHEST),
+        "minecraft:blocks\\chipped_anvil" | "blocks\\chipped_anvil" => Some(&BLOCKS_CHIPPED_ANVIL),
+        "minecraft:blocks\\chiseled_bookshelf" | "blocks\\chiseled_bookshelf" => {
             Some(&BLOCKS_CHISELED_BOOKSHELF)
         }
-        "minecraft:blocks/chiseled_cinnabar" | "blocks/chiseled_cinnabar" => {
+        "minecraft:blocks\\chiseled_cinnabar" | "blocks\\chiseled_cinnabar" => {
             Some(&BLOCKS_CHISELED_CINNABAR)
         }
-        "minecraft:blocks/chiseled_copper" | "blocks/chiseled_copper" => {
+        "minecraft:blocks\\chiseled_copper" | "blocks\\chiseled_copper" => {
             Some(&BLOCKS_CHISELED_COPPER)
         }
-        "minecraft:blocks/chiseled_deepslate" | "blocks/chiseled_deepslate" => {
+        "minecraft:blocks\\chiseled_deepslate" | "blocks\\chiseled_deepslate" => {
             Some(&BLOCKS_CHISELED_DEEPSLATE)
         }
-        "minecraft:blocks/chiseled_nether_bricks" | "blocks/chiseled_nether_bricks" => {
+        "minecraft:blocks\\chiseled_nether_bricks" | "blocks\\chiseled_nether_bricks" => {
             Some(&BLOCKS_CHISELED_NETHER_BRICKS)
         }
-        "minecraft:blocks/chiseled_polished_blackstone" | "blocks/chiseled_polished_blackstone" => {
-            Some(&BLOCKS_CHISELED_POLISHED_BLACKSTONE)
-        }
-        "minecraft:blocks/chiseled_quartz_block" | "blocks/chiseled_quartz_block" => {
+        "minecraft:blocks\\chiseled_polished_blackstone"
+        | "blocks\\chiseled_polished_blackstone" => Some(&BLOCKS_CHISELED_POLISHED_BLACKSTONE),
+        "minecraft:blocks\\chiseled_quartz_block" | "blocks\\chiseled_quartz_block" => {
             Some(&BLOCKS_CHISELED_QUARTZ_BLOCK)
         }
-        "minecraft:blocks/chiseled_red_sandstone" | "blocks/chiseled_red_sandstone" => {
+        "minecraft:blocks\\chiseled_red_sandstone" | "blocks\\chiseled_red_sandstone" => {
             Some(&BLOCKS_CHISELED_RED_SANDSTONE)
         }
-        "minecraft:blocks/chiseled_resin_bricks" | "blocks/chiseled_resin_bricks" => {
+        "minecraft:blocks\\chiseled_resin_bricks" | "blocks\\chiseled_resin_bricks" => {
             Some(&BLOCKS_CHISELED_RESIN_BRICKS)
         }
-        "minecraft:blocks/chiseled_sandstone" | "blocks/chiseled_sandstone" => {
+        "minecraft:blocks\\chiseled_sandstone" | "blocks\\chiseled_sandstone" => {
             Some(&BLOCKS_CHISELED_SANDSTONE)
         }
-        "minecraft:blocks/chiseled_stone_bricks" | "blocks/chiseled_stone_bricks" => {
+        "minecraft:blocks\\chiseled_stone_bricks" | "blocks\\chiseled_stone_bricks" => {
             Some(&BLOCKS_CHISELED_STONE_BRICKS)
         }
-        "minecraft:blocks/chiseled_sulfur" | "blocks/chiseled_sulfur" => {
+        "minecraft:blocks\\chiseled_sulfur" | "blocks\\chiseled_sulfur" => {
             Some(&BLOCKS_CHISELED_SULFUR)
         }
-        "minecraft:blocks/chiseled_tuff" | "blocks/chiseled_tuff" => Some(&BLOCKS_CHISELED_TUFF),
-        "minecraft:blocks/chiseled_tuff_bricks" | "blocks/chiseled_tuff_bricks" => {
+        "minecraft:blocks\\chiseled_tuff" | "blocks\\chiseled_tuff" => Some(&BLOCKS_CHISELED_TUFF),
+        "minecraft:blocks\\chiseled_tuff_bricks" | "blocks\\chiseled_tuff_bricks" => {
             Some(&BLOCKS_CHISELED_TUFF_BRICKS)
         }
-        "minecraft:blocks/chorus_flower" | "blocks/chorus_flower" => Some(&BLOCKS_CHORUS_FLOWER),
-        "minecraft:blocks/chorus_plant" | "blocks/chorus_plant" => Some(&BLOCKS_CHORUS_PLANT),
-        "minecraft:blocks/cinnabar" | "blocks/cinnabar" => Some(&BLOCKS_CINNABAR),
-        "minecraft:blocks/cinnabar_brick_slab" | "blocks/cinnabar_brick_slab" => {
+        "minecraft:blocks\\chorus_flower" | "blocks\\chorus_flower" => Some(&BLOCKS_CHORUS_FLOWER),
+        "minecraft:blocks\\chorus_plant" | "blocks\\chorus_plant" => Some(&BLOCKS_CHORUS_PLANT),
+        "minecraft:blocks\\cinnabar" | "blocks\\cinnabar" => Some(&BLOCKS_CINNABAR),
+        "minecraft:blocks\\cinnabar_brick_slab" | "blocks\\cinnabar_brick_slab" => {
             Some(&BLOCKS_CINNABAR_BRICK_SLAB)
         }
-        "minecraft:blocks/cinnabar_brick_stairs" | "blocks/cinnabar_brick_stairs" => {
+        "minecraft:blocks\\cinnabar_brick_stairs" | "blocks\\cinnabar_brick_stairs" => {
             Some(&BLOCKS_CINNABAR_BRICK_STAIRS)
         }
-        "minecraft:blocks/cinnabar_brick_wall" | "blocks/cinnabar_brick_wall" => {
+        "minecraft:blocks\\cinnabar_brick_wall" | "blocks\\cinnabar_brick_wall" => {
             Some(&BLOCKS_CINNABAR_BRICK_WALL)
         }
-        "minecraft:blocks/cinnabar_bricks" | "blocks/cinnabar_bricks" => {
+        "minecraft:blocks\\cinnabar_bricks" | "blocks\\cinnabar_bricks" => {
             Some(&BLOCKS_CINNABAR_BRICKS)
         }
-        "minecraft:blocks/cinnabar_slab" | "blocks/cinnabar_slab" => Some(&BLOCKS_CINNABAR_SLAB),
-        "minecraft:blocks/cinnabar_stairs" | "blocks/cinnabar_stairs" => {
+        "minecraft:blocks\\cinnabar_slab" | "blocks\\cinnabar_slab" => Some(&BLOCKS_CINNABAR_SLAB),
+        "minecraft:blocks\\cinnabar_stairs" | "blocks\\cinnabar_stairs" => {
             Some(&BLOCKS_CINNABAR_STAIRS)
         }
-        "minecraft:blocks/cinnabar_wall" | "blocks/cinnabar_wall" => Some(&BLOCKS_CINNABAR_WALL),
-        "minecraft:blocks/clay" | "blocks/clay" => Some(&BLOCKS_CLAY),
-        "minecraft:blocks/closed_eyeblossom" | "blocks/closed_eyeblossom" => {
+        "minecraft:blocks\\cinnabar_wall" | "blocks\\cinnabar_wall" => Some(&BLOCKS_CINNABAR_WALL),
+        "minecraft:blocks\\clay" | "blocks\\clay" => Some(&BLOCKS_CLAY),
+        "minecraft:blocks\\closed_eyeblossom" | "blocks\\closed_eyeblossom" => {
             Some(&BLOCKS_CLOSED_EYEBLOSSOM)
         }
-        "minecraft:blocks/coal_block" | "blocks/coal_block" => Some(&BLOCKS_COAL_BLOCK),
-        "minecraft:blocks/coal_ore" | "blocks/coal_ore" => Some(&BLOCKS_COAL_ORE),
-        "minecraft:blocks/coarse_dirt" | "blocks/coarse_dirt" => Some(&BLOCKS_COARSE_DIRT),
-        "minecraft:blocks/cobbled_deepslate" | "blocks/cobbled_deepslate" => {
+        "minecraft:blocks\\coal_block" | "blocks\\coal_block" => Some(&BLOCKS_COAL_BLOCK),
+        "minecraft:blocks\\coal_ore" | "blocks\\coal_ore" => Some(&BLOCKS_COAL_ORE),
+        "minecraft:blocks\\coarse_dirt" | "blocks\\coarse_dirt" => Some(&BLOCKS_COARSE_DIRT),
+        "minecraft:blocks\\cobbled_deepslate" | "blocks\\cobbled_deepslate" => {
             Some(&BLOCKS_COBBLED_DEEPSLATE)
         }
-        "minecraft:blocks/cobbled_deepslate_slab" | "blocks/cobbled_deepslate_slab" => {
+        "minecraft:blocks\\cobbled_deepslate_slab" | "blocks\\cobbled_deepslate_slab" => {
             Some(&BLOCKS_COBBLED_DEEPSLATE_SLAB)
         }
-        "minecraft:blocks/cobbled_deepslate_stairs" | "blocks/cobbled_deepslate_stairs" => {
+        "minecraft:blocks\\cobbled_deepslate_stairs" | "blocks\\cobbled_deepslate_stairs" => {
             Some(&BLOCKS_COBBLED_DEEPSLATE_STAIRS)
         }
-        "minecraft:blocks/cobbled_deepslate_wall" | "blocks/cobbled_deepslate_wall" => {
+        "minecraft:blocks\\cobbled_deepslate_wall" | "blocks\\cobbled_deepslate_wall" => {
             Some(&BLOCKS_COBBLED_DEEPSLATE_WALL)
         }
-        "minecraft:blocks/cobblestone" | "blocks/cobblestone" => Some(&BLOCKS_COBBLESTONE),
-        "minecraft:blocks/cobblestone_slab" | "blocks/cobblestone_slab" => {
+        "minecraft:blocks\\cobblestone" | "blocks\\cobblestone" => Some(&BLOCKS_COBBLESTONE),
+        "minecraft:blocks\\cobblestone_slab" | "blocks\\cobblestone_slab" => {
             Some(&BLOCKS_COBBLESTONE_SLAB)
         }
-        "minecraft:blocks/cobblestone_stairs" | "blocks/cobblestone_stairs" => {
+        "minecraft:blocks\\cobblestone_stairs" | "blocks\\cobblestone_stairs" => {
             Some(&BLOCKS_COBBLESTONE_STAIRS)
         }
-        "minecraft:blocks/cobblestone_wall" | "blocks/cobblestone_wall" => {
+        "minecraft:blocks\\cobblestone_wall" | "blocks\\cobblestone_wall" => {
             Some(&BLOCKS_COBBLESTONE_WALL)
         }
-        "minecraft:blocks/cobweb" | "blocks/cobweb" => Some(&BLOCKS_COBWEB),
-        "minecraft:blocks/cocoa" | "blocks/cocoa" => Some(&BLOCKS_COCOA),
-        "minecraft:blocks/comparator" | "blocks/comparator" => Some(&BLOCKS_COMPARATOR),
-        "minecraft:blocks/composter" | "blocks/composter" => Some(&BLOCKS_COMPOSTER),
-        "minecraft:blocks/conduit" | "blocks/conduit" => Some(&BLOCKS_CONDUIT),
-        "minecraft:blocks/copper_bars" | "blocks/copper_bars" => Some(&BLOCKS_COPPER_BARS),
-        "minecraft:blocks/copper_block" | "blocks/copper_block" => Some(&BLOCKS_COPPER_BLOCK),
-        "minecraft:blocks/copper_bulb" | "blocks/copper_bulb" => Some(&BLOCKS_COPPER_BULB),
-        "minecraft:blocks/copper_chain" | "blocks/copper_chain" => Some(&BLOCKS_COPPER_CHAIN),
-        "minecraft:blocks/copper_chest" | "blocks/copper_chest" => Some(&BLOCKS_COPPER_CHEST),
-        "minecraft:blocks/copper_door" | "blocks/copper_door" => Some(&BLOCKS_COPPER_DOOR),
-        "minecraft:blocks/copper_golem_statue" | "blocks/copper_golem_statue" => {
+        "minecraft:blocks\\cobweb" | "blocks\\cobweb" => Some(&BLOCKS_COBWEB),
+        "minecraft:blocks\\cocoa" | "blocks\\cocoa" => Some(&BLOCKS_COCOA),
+        "minecraft:blocks\\comparator" | "blocks\\comparator" => Some(&BLOCKS_COMPARATOR),
+        "minecraft:blocks\\composter" | "blocks\\composter" => Some(&BLOCKS_COMPOSTER),
+        "minecraft:blocks\\conduit" | "blocks\\conduit" => Some(&BLOCKS_CONDUIT),
+        "minecraft:blocks\\copper_bars" | "blocks\\copper_bars" => Some(&BLOCKS_COPPER_BARS),
+        "minecraft:blocks\\copper_block" | "blocks\\copper_block" => Some(&BLOCKS_COPPER_BLOCK),
+        "minecraft:blocks\\copper_bulb" | "blocks\\copper_bulb" => Some(&BLOCKS_COPPER_BULB),
+        "minecraft:blocks\\copper_chain" | "blocks\\copper_chain" => Some(&BLOCKS_COPPER_CHAIN),
+        "minecraft:blocks\\copper_chest" | "blocks\\copper_chest" => Some(&BLOCKS_COPPER_CHEST),
+        "minecraft:blocks\\copper_door" | "blocks\\copper_door" => Some(&BLOCKS_COPPER_DOOR),
+        "minecraft:blocks\\copper_golem_statue" | "blocks\\copper_golem_statue" => {
             Some(&BLOCKS_COPPER_GOLEM_STATUE)
         }
-        "minecraft:blocks/copper_grate" | "blocks/copper_grate" => Some(&BLOCKS_COPPER_GRATE),
-        "minecraft:blocks/copper_lantern" | "blocks/copper_lantern" => Some(&BLOCKS_COPPER_LANTERN),
-        "minecraft:blocks/copper_ore" | "blocks/copper_ore" => Some(&BLOCKS_COPPER_ORE),
-        "minecraft:blocks/copper_torch" | "blocks/copper_torch" => Some(&BLOCKS_COPPER_TORCH),
-        "minecraft:blocks/copper_trapdoor" | "blocks/copper_trapdoor" => {
+        "minecraft:blocks\\copper_grate" | "blocks\\copper_grate" => Some(&BLOCKS_COPPER_GRATE),
+        "minecraft:blocks\\copper_lantern" | "blocks\\copper_lantern" => {
+            Some(&BLOCKS_COPPER_LANTERN)
+        }
+        "minecraft:blocks\\copper_ore" | "blocks\\copper_ore" => Some(&BLOCKS_COPPER_ORE),
+        "minecraft:blocks\\copper_torch" | "blocks\\copper_torch" => Some(&BLOCKS_COPPER_TORCH),
+        "minecraft:blocks\\copper_trapdoor" | "blocks\\copper_trapdoor" => {
             Some(&BLOCKS_COPPER_TRAPDOOR)
         }
-        "minecraft:blocks/cornflower" | "blocks/cornflower" => Some(&BLOCKS_CORNFLOWER),
-        "minecraft:blocks/cracked_deepslate_bricks" | "blocks/cracked_deepslate_bricks" => {
+        "minecraft:blocks\\cornflower" | "blocks\\cornflower" => Some(&BLOCKS_CORNFLOWER),
+        "minecraft:blocks\\cracked_deepslate_bricks" | "blocks\\cracked_deepslate_bricks" => {
             Some(&BLOCKS_CRACKED_DEEPSLATE_BRICKS)
         }
-        "minecraft:blocks/cracked_deepslate_tiles" | "blocks/cracked_deepslate_tiles" => {
+        "minecraft:blocks\\cracked_deepslate_tiles" | "blocks\\cracked_deepslate_tiles" => {
             Some(&BLOCKS_CRACKED_DEEPSLATE_TILES)
         }
-        "minecraft:blocks/cracked_nether_bricks" | "blocks/cracked_nether_bricks" => {
+        "minecraft:blocks\\cracked_nether_bricks" | "blocks\\cracked_nether_bricks" => {
             Some(&BLOCKS_CRACKED_NETHER_BRICKS)
         }
-        "minecraft:blocks/cracked_polished_blackstone_bricks"
-        | "blocks/cracked_polished_blackstone_bricks" => {
+        "minecraft:blocks\\cracked_polished_blackstone_bricks"
+        | "blocks\\cracked_polished_blackstone_bricks" => {
             Some(&BLOCKS_CRACKED_POLISHED_BLACKSTONE_BRICKS)
         }
-        "minecraft:blocks/cracked_stone_bricks" | "blocks/cracked_stone_bricks" => {
+        "minecraft:blocks\\cracked_stone_bricks" | "blocks\\cracked_stone_bricks" => {
             Some(&BLOCKS_CRACKED_STONE_BRICKS)
         }
-        "minecraft:blocks/crafter" | "blocks/crafter" => Some(&BLOCKS_CRAFTER),
-        "minecraft:blocks/crafting_table" | "blocks/crafting_table" => Some(&BLOCKS_CRAFTING_TABLE),
-        "minecraft:blocks/creaking_heart" | "blocks/creaking_heart" => Some(&BLOCKS_CREAKING_HEART),
-        "minecraft:blocks/creeper_head" | "blocks/creeper_head" => Some(&BLOCKS_CREEPER_HEAD),
-        "minecraft:blocks/crimson_button" | "blocks/crimson_button" => Some(&BLOCKS_CRIMSON_BUTTON),
-        "minecraft:blocks/crimson_door" | "blocks/crimson_door" => Some(&BLOCKS_CRIMSON_DOOR),
-        "minecraft:blocks/crimson_fence" | "blocks/crimson_fence" => Some(&BLOCKS_CRIMSON_FENCE),
-        "minecraft:blocks/crimson_fence_gate" | "blocks/crimson_fence_gate" => {
+        "minecraft:blocks\\crafter" | "blocks\\crafter" => Some(&BLOCKS_CRAFTER),
+        "minecraft:blocks\\crafting_table" | "blocks\\crafting_table" => {
+            Some(&BLOCKS_CRAFTING_TABLE)
+        }
+        "minecraft:blocks\\creaking_heart" | "blocks\\creaking_heart" => {
+            Some(&BLOCKS_CREAKING_HEART)
+        }
+        "minecraft:blocks\\creeper_head" | "blocks\\creeper_head" => Some(&BLOCKS_CREEPER_HEAD),
+        "minecraft:blocks\\crimson_button" | "blocks\\crimson_button" => {
+            Some(&BLOCKS_CRIMSON_BUTTON)
+        }
+        "minecraft:blocks\\crimson_door" | "blocks\\crimson_door" => Some(&BLOCKS_CRIMSON_DOOR),
+        "minecraft:blocks\\crimson_fence" | "blocks\\crimson_fence" => Some(&BLOCKS_CRIMSON_FENCE),
+        "minecraft:blocks\\crimson_fence_gate" | "blocks\\crimson_fence_gate" => {
             Some(&BLOCKS_CRIMSON_FENCE_GATE)
         }
-        "minecraft:blocks/crimson_fungus" | "blocks/crimson_fungus" => Some(&BLOCKS_CRIMSON_FUNGUS),
-        "minecraft:blocks/crimson_hanging_sign" | "blocks/crimson_hanging_sign" => {
+        "minecraft:blocks\\crimson_fungus" | "blocks\\crimson_fungus" => {
+            Some(&BLOCKS_CRIMSON_FUNGUS)
+        }
+        "minecraft:blocks\\crimson_hanging_sign" | "blocks\\crimson_hanging_sign" => {
             Some(&BLOCKS_CRIMSON_HANGING_SIGN)
         }
-        "minecraft:blocks/crimson_hyphae" | "blocks/crimson_hyphae" => Some(&BLOCKS_CRIMSON_HYPHAE),
-        "minecraft:blocks/crimson_nylium" | "blocks/crimson_nylium" => Some(&BLOCKS_CRIMSON_NYLIUM),
-        "minecraft:blocks/crimson_planks" | "blocks/crimson_planks" => Some(&BLOCKS_CRIMSON_PLANKS),
-        "minecraft:blocks/crimson_pressure_plate" | "blocks/crimson_pressure_plate" => {
+        "minecraft:blocks\\crimson_hyphae" | "blocks\\crimson_hyphae" => {
+            Some(&BLOCKS_CRIMSON_HYPHAE)
+        }
+        "minecraft:blocks\\crimson_nylium" | "blocks\\crimson_nylium" => {
+            Some(&BLOCKS_CRIMSON_NYLIUM)
+        }
+        "minecraft:blocks\\crimson_planks" | "blocks\\crimson_planks" => {
+            Some(&BLOCKS_CRIMSON_PLANKS)
+        }
+        "minecraft:blocks\\crimson_pressure_plate" | "blocks\\crimson_pressure_plate" => {
             Some(&BLOCKS_CRIMSON_PRESSURE_PLATE)
         }
-        "minecraft:blocks/crimson_roots" | "blocks/crimson_roots" => Some(&BLOCKS_CRIMSON_ROOTS),
-        "minecraft:blocks/crimson_shelf" | "blocks/crimson_shelf" => Some(&BLOCKS_CRIMSON_SHELF),
-        "minecraft:blocks/crimson_sign" | "blocks/crimson_sign" => Some(&BLOCKS_CRIMSON_SIGN),
-        "minecraft:blocks/crimson_slab" | "blocks/crimson_slab" => Some(&BLOCKS_CRIMSON_SLAB),
-        "minecraft:blocks/crimson_stairs" | "blocks/crimson_stairs" => Some(&BLOCKS_CRIMSON_STAIRS),
-        "minecraft:blocks/crimson_stem" | "blocks/crimson_stem" => Some(&BLOCKS_CRIMSON_STEM),
-        "minecraft:blocks/crimson_trapdoor" | "blocks/crimson_trapdoor" => {
+        "minecraft:blocks\\crimson_roots" | "blocks\\crimson_roots" => Some(&BLOCKS_CRIMSON_ROOTS),
+        "minecraft:blocks\\crimson_shelf" | "blocks\\crimson_shelf" => Some(&BLOCKS_CRIMSON_SHELF),
+        "minecraft:blocks\\crimson_sign" | "blocks\\crimson_sign" => Some(&BLOCKS_CRIMSON_SIGN),
+        "minecraft:blocks\\crimson_slab" | "blocks\\crimson_slab" => Some(&BLOCKS_CRIMSON_SLAB),
+        "minecraft:blocks\\crimson_stairs" | "blocks\\crimson_stairs" => {
+            Some(&BLOCKS_CRIMSON_STAIRS)
+        }
+        "minecraft:blocks\\crimson_stem" | "blocks\\crimson_stem" => Some(&BLOCKS_CRIMSON_STEM),
+        "minecraft:blocks\\crimson_trapdoor" | "blocks\\crimson_trapdoor" => {
             Some(&BLOCKS_CRIMSON_TRAPDOOR)
         }
-        "minecraft:blocks/crying_obsidian" | "blocks/crying_obsidian" => {
+        "minecraft:blocks\\crying_obsidian" | "blocks\\crying_obsidian" => {
             Some(&BLOCKS_CRYING_OBSIDIAN)
         }
-        "minecraft:blocks/cut_copper" | "blocks/cut_copper" => Some(&BLOCKS_CUT_COPPER),
-        "minecraft:blocks/cut_copper_slab" | "blocks/cut_copper_slab" => {
+        "minecraft:blocks\\cut_copper" | "blocks\\cut_copper" => Some(&BLOCKS_CUT_COPPER),
+        "minecraft:blocks\\cut_copper_slab" | "blocks\\cut_copper_slab" => {
             Some(&BLOCKS_CUT_COPPER_SLAB)
         }
-        "minecraft:blocks/cut_copper_stairs" | "blocks/cut_copper_stairs" => {
+        "minecraft:blocks\\cut_copper_stairs" | "blocks\\cut_copper_stairs" => {
             Some(&BLOCKS_CUT_COPPER_STAIRS)
         }
-        "minecraft:blocks/cut_red_sandstone" | "blocks/cut_red_sandstone" => {
+        "minecraft:blocks\\cut_red_sandstone" | "blocks\\cut_red_sandstone" => {
             Some(&BLOCKS_CUT_RED_SANDSTONE)
         }
-        "minecraft:blocks/cut_red_sandstone_slab" | "blocks/cut_red_sandstone_slab" => {
+        "minecraft:blocks\\cut_red_sandstone_slab" | "blocks\\cut_red_sandstone_slab" => {
             Some(&BLOCKS_CUT_RED_SANDSTONE_SLAB)
         }
-        "minecraft:blocks/cut_sandstone" | "blocks/cut_sandstone" => Some(&BLOCKS_CUT_SANDSTONE),
-        "minecraft:blocks/cut_sandstone_slab" | "blocks/cut_sandstone_slab" => {
+        "minecraft:blocks\\cut_sandstone" | "blocks\\cut_sandstone" => Some(&BLOCKS_CUT_SANDSTONE),
+        "minecraft:blocks\\cut_sandstone_slab" | "blocks\\cut_sandstone_slab" => {
             Some(&BLOCKS_CUT_SANDSTONE_SLAB)
         }
-        "minecraft:blocks/cyan_banner" | "blocks/cyan_banner" => Some(&BLOCKS_CYAN_BANNER),
-        "minecraft:blocks/cyan_bed" | "blocks/cyan_bed" => Some(&BLOCKS_CYAN_BED),
-        "minecraft:blocks/cyan_candle" | "blocks/cyan_candle" => Some(&BLOCKS_CYAN_CANDLE),
-        "minecraft:blocks/cyan_candle_cake" | "blocks/cyan_candle_cake" => {
+        "minecraft:blocks\\cyan_banner" | "blocks\\cyan_banner" => Some(&BLOCKS_CYAN_BANNER),
+        "minecraft:blocks\\cyan_bed" | "blocks\\cyan_bed" => Some(&BLOCKS_CYAN_BED),
+        "minecraft:blocks\\cyan_candle" | "blocks\\cyan_candle" => Some(&BLOCKS_CYAN_CANDLE),
+        "minecraft:blocks\\cyan_candle_cake" | "blocks\\cyan_candle_cake" => {
             Some(&BLOCKS_CYAN_CANDLE_CAKE)
         }
-        "minecraft:blocks/cyan_carpet" | "blocks/cyan_carpet" => Some(&BLOCKS_CYAN_CARPET),
-        "minecraft:blocks/cyan_concrete" | "blocks/cyan_concrete" => Some(&BLOCKS_CYAN_CONCRETE),
-        "minecraft:blocks/cyan_concrete_powder" | "blocks/cyan_concrete_powder" => {
+        "minecraft:blocks\\cyan_carpet" | "blocks\\cyan_carpet" => Some(&BLOCKS_CYAN_CARPET),
+        "minecraft:blocks\\cyan_concrete" | "blocks\\cyan_concrete" => Some(&BLOCKS_CYAN_CONCRETE),
+        "minecraft:blocks\\cyan_concrete_powder" | "blocks\\cyan_concrete_powder" => {
             Some(&BLOCKS_CYAN_CONCRETE_POWDER)
         }
-        "minecraft:blocks/cyan_glazed_terracotta" | "blocks/cyan_glazed_terracotta" => {
+        "minecraft:blocks\\cyan_glazed_terracotta" | "blocks\\cyan_glazed_terracotta" => {
             Some(&BLOCKS_CYAN_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/cyan_shulker_box" | "blocks/cyan_shulker_box" => {
+        "minecraft:blocks\\cyan_shulker_box" | "blocks\\cyan_shulker_box" => {
             Some(&BLOCKS_CYAN_SHULKER_BOX)
         }
-        "minecraft:blocks/cyan_stained_glass" | "blocks/cyan_stained_glass" => {
+        "minecraft:blocks\\cyan_stained_glass" | "blocks\\cyan_stained_glass" => {
             Some(&BLOCKS_CYAN_STAINED_GLASS)
         }
-        "minecraft:blocks/cyan_stained_glass_pane" | "blocks/cyan_stained_glass_pane" => {
+        "minecraft:blocks\\cyan_stained_glass_pane" | "blocks\\cyan_stained_glass_pane" => {
             Some(&BLOCKS_CYAN_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/cyan_terracotta" | "blocks/cyan_terracotta" => {
+        "minecraft:blocks\\cyan_terracotta" | "blocks\\cyan_terracotta" => {
             Some(&BLOCKS_CYAN_TERRACOTTA)
         }
-        "minecraft:blocks/cyan_wool" | "blocks/cyan_wool" => Some(&BLOCKS_CYAN_WOOL),
-        "minecraft:blocks/damaged_anvil" | "blocks/damaged_anvil" => Some(&BLOCKS_DAMAGED_ANVIL),
-        "minecraft:blocks/dandelion" | "blocks/dandelion" => Some(&BLOCKS_DANDELION),
-        "minecraft:blocks/dark_oak_button" | "blocks/dark_oak_button" => {
+        "minecraft:blocks\\cyan_wool" | "blocks\\cyan_wool" => Some(&BLOCKS_CYAN_WOOL),
+        "minecraft:blocks\\damaged_anvil" | "blocks\\damaged_anvil" => Some(&BLOCKS_DAMAGED_ANVIL),
+        "minecraft:blocks\\dandelion" | "blocks\\dandelion" => Some(&BLOCKS_DANDELION),
+        "minecraft:blocks\\dark_oak_button" | "blocks\\dark_oak_button" => {
             Some(&BLOCKS_DARK_OAK_BUTTON)
         }
-        "minecraft:blocks/dark_oak_door" | "blocks/dark_oak_door" => Some(&BLOCKS_DARK_OAK_DOOR),
-        "minecraft:blocks/dark_oak_fence" | "blocks/dark_oak_fence" => Some(&BLOCKS_DARK_OAK_FENCE),
-        "minecraft:blocks/dark_oak_fence_gate" | "blocks/dark_oak_fence_gate" => {
+        "minecraft:blocks\\dark_oak_door" | "blocks\\dark_oak_door" => Some(&BLOCKS_DARK_OAK_DOOR),
+        "minecraft:blocks\\dark_oak_fence" | "blocks\\dark_oak_fence" => {
+            Some(&BLOCKS_DARK_OAK_FENCE)
+        }
+        "minecraft:blocks\\dark_oak_fence_gate" | "blocks\\dark_oak_fence_gate" => {
             Some(&BLOCKS_DARK_OAK_FENCE_GATE)
         }
-        "minecraft:blocks/dark_oak_hanging_sign" | "blocks/dark_oak_hanging_sign" => {
+        "minecraft:blocks\\dark_oak_hanging_sign" | "blocks\\dark_oak_hanging_sign" => {
             Some(&BLOCKS_DARK_OAK_HANGING_SIGN)
         }
-        "minecraft:blocks/dark_oak_leaves" | "blocks/dark_oak_leaves" => {
+        "minecraft:blocks\\dark_oak_leaves" | "blocks\\dark_oak_leaves" => {
             Some(&BLOCKS_DARK_OAK_LEAVES)
         }
-        "minecraft:blocks/dark_oak_log" | "blocks/dark_oak_log" => Some(&BLOCKS_DARK_OAK_LOG),
-        "minecraft:blocks/dark_oak_planks" | "blocks/dark_oak_planks" => {
+        "minecraft:blocks\\dark_oak_log" | "blocks\\dark_oak_log" => Some(&BLOCKS_DARK_OAK_LOG),
+        "minecraft:blocks\\dark_oak_planks" | "blocks\\dark_oak_planks" => {
             Some(&BLOCKS_DARK_OAK_PLANKS)
         }
-        "minecraft:blocks/dark_oak_pressure_plate" | "blocks/dark_oak_pressure_plate" => {
+        "minecraft:blocks\\dark_oak_pressure_plate" | "blocks\\dark_oak_pressure_plate" => {
             Some(&BLOCKS_DARK_OAK_PRESSURE_PLATE)
         }
-        "minecraft:blocks/dark_oak_sapling" | "blocks/dark_oak_sapling" => {
+        "minecraft:blocks\\dark_oak_sapling" | "blocks\\dark_oak_sapling" => {
             Some(&BLOCKS_DARK_OAK_SAPLING)
         }
-        "minecraft:blocks/dark_oak_shelf" | "blocks/dark_oak_shelf" => Some(&BLOCKS_DARK_OAK_SHELF),
-        "minecraft:blocks/dark_oak_sign" | "blocks/dark_oak_sign" => Some(&BLOCKS_DARK_OAK_SIGN),
-        "minecraft:blocks/dark_oak_slab" | "blocks/dark_oak_slab" => Some(&BLOCKS_DARK_OAK_SLAB),
-        "minecraft:blocks/dark_oak_stairs" | "blocks/dark_oak_stairs" => {
+        "minecraft:blocks\\dark_oak_shelf" | "blocks\\dark_oak_shelf" => {
+            Some(&BLOCKS_DARK_OAK_SHELF)
+        }
+        "minecraft:blocks\\dark_oak_sign" | "blocks\\dark_oak_sign" => Some(&BLOCKS_DARK_OAK_SIGN),
+        "minecraft:blocks\\dark_oak_slab" | "blocks\\dark_oak_slab" => Some(&BLOCKS_DARK_OAK_SLAB),
+        "minecraft:blocks\\dark_oak_stairs" | "blocks\\dark_oak_stairs" => {
             Some(&BLOCKS_DARK_OAK_STAIRS)
         }
-        "minecraft:blocks/dark_oak_trapdoor" | "blocks/dark_oak_trapdoor" => {
+        "minecraft:blocks\\dark_oak_trapdoor" | "blocks\\dark_oak_trapdoor" => {
             Some(&BLOCKS_DARK_OAK_TRAPDOOR)
         }
-        "minecraft:blocks/dark_oak_wood" | "blocks/dark_oak_wood" => Some(&BLOCKS_DARK_OAK_WOOD),
-        "minecraft:blocks/dark_prismarine" | "blocks/dark_prismarine" => {
+        "minecraft:blocks\\dark_oak_wood" | "blocks\\dark_oak_wood" => Some(&BLOCKS_DARK_OAK_WOOD),
+        "minecraft:blocks\\dark_prismarine" | "blocks\\dark_prismarine" => {
             Some(&BLOCKS_DARK_PRISMARINE)
         }
-        "minecraft:blocks/dark_prismarine_slab" | "blocks/dark_prismarine_slab" => {
+        "minecraft:blocks\\dark_prismarine_slab" | "blocks\\dark_prismarine_slab" => {
             Some(&BLOCKS_DARK_PRISMARINE_SLAB)
         }
-        "minecraft:blocks/dark_prismarine_stairs" | "blocks/dark_prismarine_stairs" => {
+        "minecraft:blocks\\dark_prismarine_stairs" | "blocks\\dark_prismarine_stairs" => {
             Some(&BLOCKS_DARK_PRISMARINE_STAIRS)
         }
-        "minecraft:blocks/daylight_detector" | "blocks/daylight_detector" => {
+        "minecraft:blocks\\daylight_detector" | "blocks\\daylight_detector" => {
             Some(&BLOCKS_DAYLIGHT_DETECTOR)
         }
-        "minecraft:blocks/dead_brain_coral" | "blocks/dead_brain_coral" => {
+        "minecraft:blocks\\dead_brain_coral" | "blocks\\dead_brain_coral" => {
             Some(&BLOCKS_DEAD_BRAIN_CORAL)
         }
-        "minecraft:blocks/dead_brain_coral_block" | "blocks/dead_brain_coral_block" => {
+        "minecraft:blocks\\dead_brain_coral_block" | "blocks\\dead_brain_coral_block" => {
             Some(&BLOCKS_DEAD_BRAIN_CORAL_BLOCK)
         }
-        "minecraft:blocks/dead_brain_coral_fan" | "blocks/dead_brain_coral_fan" => {
+        "minecraft:blocks\\dead_brain_coral_fan" | "blocks\\dead_brain_coral_fan" => {
             Some(&BLOCKS_DEAD_BRAIN_CORAL_FAN)
         }
-        "minecraft:blocks/dead_bubble_coral" | "blocks/dead_bubble_coral" => {
+        "minecraft:blocks\\dead_bubble_coral" | "blocks\\dead_bubble_coral" => {
             Some(&BLOCKS_DEAD_BUBBLE_CORAL)
         }
-        "minecraft:blocks/dead_bubble_coral_block" | "blocks/dead_bubble_coral_block" => {
+        "minecraft:blocks\\dead_bubble_coral_block" | "blocks\\dead_bubble_coral_block" => {
             Some(&BLOCKS_DEAD_BUBBLE_CORAL_BLOCK)
         }
-        "minecraft:blocks/dead_bubble_coral_fan" | "blocks/dead_bubble_coral_fan" => {
+        "minecraft:blocks\\dead_bubble_coral_fan" | "blocks\\dead_bubble_coral_fan" => {
             Some(&BLOCKS_DEAD_BUBBLE_CORAL_FAN)
         }
-        "minecraft:blocks/dead_bush" | "blocks/dead_bush" => Some(&BLOCKS_DEAD_BUSH),
-        "minecraft:blocks/dead_fire_coral" | "blocks/dead_fire_coral" => {
+        "minecraft:blocks\\dead_bush" | "blocks\\dead_bush" => Some(&BLOCKS_DEAD_BUSH),
+        "minecraft:blocks\\dead_fire_coral" | "blocks\\dead_fire_coral" => {
             Some(&BLOCKS_DEAD_FIRE_CORAL)
         }
-        "minecraft:blocks/dead_fire_coral_block" | "blocks/dead_fire_coral_block" => {
+        "minecraft:blocks\\dead_fire_coral_block" | "blocks\\dead_fire_coral_block" => {
             Some(&BLOCKS_DEAD_FIRE_CORAL_BLOCK)
         }
-        "minecraft:blocks/dead_fire_coral_fan" | "blocks/dead_fire_coral_fan" => {
+        "minecraft:blocks\\dead_fire_coral_fan" | "blocks\\dead_fire_coral_fan" => {
             Some(&BLOCKS_DEAD_FIRE_CORAL_FAN)
         }
-        "minecraft:blocks/dead_horn_coral" | "blocks/dead_horn_coral" => {
+        "minecraft:blocks\\dead_horn_coral" | "blocks\\dead_horn_coral" => {
             Some(&BLOCKS_DEAD_HORN_CORAL)
         }
-        "minecraft:blocks/dead_horn_coral_block" | "blocks/dead_horn_coral_block" => {
+        "minecraft:blocks\\dead_horn_coral_block" | "blocks\\dead_horn_coral_block" => {
             Some(&BLOCKS_DEAD_HORN_CORAL_BLOCK)
         }
-        "minecraft:blocks/dead_horn_coral_fan" | "blocks/dead_horn_coral_fan" => {
+        "minecraft:blocks\\dead_horn_coral_fan" | "blocks\\dead_horn_coral_fan" => {
             Some(&BLOCKS_DEAD_HORN_CORAL_FAN)
         }
-        "minecraft:blocks/dead_tube_coral" | "blocks/dead_tube_coral" => {
+        "minecraft:blocks\\dead_tube_coral" | "blocks\\dead_tube_coral" => {
             Some(&BLOCKS_DEAD_TUBE_CORAL)
         }
-        "minecraft:blocks/dead_tube_coral_block" | "blocks/dead_tube_coral_block" => {
+        "minecraft:blocks\\dead_tube_coral_block" | "blocks\\dead_tube_coral_block" => {
             Some(&BLOCKS_DEAD_TUBE_CORAL_BLOCK)
         }
-        "minecraft:blocks/dead_tube_coral_fan" | "blocks/dead_tube_coral_fan" => {
+        "minecraft:blocks\\dead_tube_coral_fan" | "blocks\\dead_tube_coral_fan" => {
             Some(&BLOCKS_DEAD_TUBE_CORAL_FAN)
         }
-        "minecraft:blocks/decorated_pot" | "blocks/decorated_pot" => Some(&BLOCKS_DECORATED_POT),
-        "minecraft:blocks/deepslate" | "blocks/deepslate" => Some(&BLOCKS_DEEPSLATE),
-        "minecraft:blocks/deepslate_brick_slab" | "blocks/deepslate_brick_slab" => {
+        "minecraft:blocks\\decorated_pot" | "blocks\\decorated_pot" => Some(&BLOCKS_DECORATED_POT),
+        "minecraft:blocks\\deepslate" | "blocks\\deepslate" => Some(&BLOCKS_DEEPSLATE),
+        "minecraft:blocks\\deepslate_brick_slab" | "blocks\\deepslate_brick_slab" => {
             Some(&BLOCKS_DEEPSLATE_BRICK_SLAB)
         }
-        "minecraft:blocks/deepslate_brick_stairs" | "blocks/deepslate_brick_stairs" => {
+        "minecraft:blocks\\deepslate_brick_stairs" | "blocks\\deepslate_brick_stairs" => {
             Some(&BLOCKS_DEEPSLATE_BRICK_STAIRS)
         }
-        "minecraft:blocks/deepslate_brick_wall" | "blocks/deepslate_brick_wall" => {
+        "minecraft:blocks\\deepslate_brick_wall" | "blocks\\deepslate_brick_wall" => {
             Some(&BLOCKS_DEEPSLATE_BRICK_WALL)
         }
-        "minecraft:blocks/deepslate_bricks" | "blocks/deepslate_bricks" => {
+        "minecraft:blocks\\deepslate_bricks" | "blocks\\deepslate_bricks" => {
             Some(&BLOCKS_DEEPSLATE_BRICKS)
         }
-        "minecraft:blocks/deepslate_coal_ore" | "blocks/deepslate_coal_ore" => {
+        "minecraft:blocks\\deepslate_coal_ore" | "blocks\\deepslate_coal_ore" => {
             Some(&BLOCKS_DEEPSLATE_COAL_ORE)
         }
-        "minecraft:blocks/deepslate_copper_ore" | "blocks/deepslate_copper_ore" => {
+        "minecraft:blocks\\deepslate_copper_ore" | "blocks\\deepslate_copper_ore" => {
             Some(&BLOCKS_DEEPSLATE_COPPER_ORE)
         }
-        "minecraft:blocks/deepslate_diamond_ore" | "blocks/deepslate_diamond_ore" => {
+        "minecraft:blocks\\deepslate_diamond_ore" | "blocks\\deepslate_diamond_ore" => {
             Some(&BLOCKS_DEEPSLATE_DIAMOND_ORE)
         }
-        "minecraft:blocks/deepslate_emerald_ore" | "blocks/deepslate_emerald_ore" => {
+        "minecraft:blocks\\deepslate_emerald_ore" | "blocks\\deepslate_emerald_ore" => {
             Some(&BLOCKS_DEEPSLATE_EMERALD_ORE)
         }
-        "minecraft:blocks/deepslate_gold_ore" | "blocks/deepslate_gold_ore" => {
+        "minecraft:blocks\\deepslate_gold_ore" | "blocks\\deepslate_gold_ore" => {
             Some(&BLOCKS_DEEPSLATE_GOLD_ORE)
         }
-        "minecraft:blocks/deepslate_iron_ore" | "blocks/deepslate_iron_ore" => {
+        "minecraft:blocks\\deepslate_iron_ore" | "blocks\\deepslate_iron_ore" => {
             Some(&BLOCKS_DEEPSLATE_IRON_ORE)
         }
-        "minecraft:blocks/deepslate_lapis_ore" | "blocks/deepslate_lapis_ore" => {
+        "minecraft:blocks\\deepslate_lapis_ore" | "blocks\\deepslate_lapis_ore" => {
             Some(&BLOCKS_DEEPSLATE_LAPIS_ORE)
         }
-        "minecraft:blocks/deepslate_redstone_ore" | "blocks/deepslate_redstone_ore" => {
+        "minecraft:blocks\\deepslate_redstone_ore" | "blocks\\deepslate_redstone_ore" => {
             Some(&BLOCKS_DEEPSLATE_REDSTONE_ORE)
         }
-        "minecraft:blocks/deepslate_tile_slab" | "blocks/deepslate_tile_slab" => {
+        "minecraft:blocks\\deepslate_tile_slab" | "blocks\\deepslate_tile_slab" => {
             Some(&BLOCKS_DEEPSLATE_TILE_SLAB)
         }
-        "minecraft:blocks/deepslate_tile_stairs" | "blocks/deepslate_tile_stairs" => {
+        "minecraft:blocks\\deepslate_tile_stairs" | "blocks\\deepslate_tile_stairs" => {
             Some(&BLOCKS_DEEPSLATE_TILE_STAIRS)
         }
-        "minecraft:blocks/deepslate_tile_wall" | "blocks/deepslate_tile_wall" => {
+        "minecraft:blocks\\deepslate_tile_wall" | "blocks\\deepslate_tile_wall" => {
             Some(&BLOCKS_DEEPSLATE_TILE_WALL)
         }
-        "minecraft:blocks/deepslate_tiles" | "blocks/deepslate_tiles" => {
+        "minecraft:blocks\\deepslate_tiles" | "blocks\\deepslate_tiles" => {
             Some(&BLOCKS_DEEPSLATE_TILES)
         }
-        "minecraft:blocks/detector_rail" | "blocks/detector_rail" => Some(&BLOCKS_DETECTOR_RAIL),
-        "minecraft:blocks/diamond_block" | "blocks/diamond_block" => Some(&BLOCKS_DIAMOND_BLOCK),
-        "minecraft:blocks/diamond_ore" | "blocks/diamond_ore" => Some(&BLOCKS_DIAMOND_ORE),
-        "minecraft:blocks/diorite" | "blocks/diorite" => Some(&BLOCKS_DIORITE),
-        "minecraft:blocks/diorite_slab" | "blocks/diorite_slab" => Some(&BLOCKS_DIORITE_SLAB),
-        "minecraft:blocks/diorite_stairs" | "blocks/diorite_stairs" => Some(&BLOCKS_DIORITE_STAIRS),
-        "minecraft:blocks/diorite_wall" | "blocks/diorite_wall" => Some(&BLOCKS_DIORITE_WALL),
-        "minecraft:blocks/dirt" | "blocks/dirt" => Some(&BLOCKS_DIRT),
-        "minecraft:blocks/dirt_path" | "blocks/dirt_path" => Some(&BLOCKS_DIRT_PATH),
-        "minecraft:blocks/dispenser" | "blocks/dispenser" => Some(&BLOCKS_DISPENSER),
-        "minecraft:blocks/dragon_egg" | "blocks/dragon_egg" => Some(&BLOCKS_DRAGON_EGG),
-        "minecraft:blocks/dragon_head" | "blocks/dragon_head" => Some(&BLOCKS_DRAGON_HEAD),
-        "minecraft:blocks/dried_ghast" | "blocks/dried_ghast" => Some(&BLOCKS_DRIED_GHAST),
-        "minecraft:blocks/dried_kelp_block" | "blocks/dried_kelp_block" => {
+        "minecraft:blocks\\detector_rail" | "blocks\\detector_rail" => Some(&BLOCKS_DETECTOR_RAIL),
+        "minecraft:blocks\\diamond_block" | "blocks\\diamond_block" => Some(&BLOCKS_DIAMOND_BLOCK),
+        "minecraft:blocks\\diamond_ore" | "blocks\\diamond_ore" => Some(&BLOCKS_DIAMOND_ORE),
+        "minecraft:blocks\\diorite" | "blocks\\diorite" => Some(&BLOCKS_DIORITE),
+        "minecraft:blocks\\diorite_slab" | "blocks\\diorite_slab" => Some(&BLOCKS_DIORITE_SLAB),
+        "minecraft:blocks\\diorite_stairs" | "blocks\\diorite_stairs" => {
+            Some(&BLOCKS_DIORITE_STAIRS)
+        }
+        "minecraft:blocks\\diorite_wall" | "blocks\\diorite_wall" => Some(&BLOCKS_DIORITE_WALL),
+        "minecraft:blocks\\dirt" | "blocks\\dirt" => Some(&BLOCKS_DIRT),
+        "minecraft:blocks\\dirt_path" | "blocks\\dirt_path" => Some(&BLOCKS_DIRT_PATH),
+        "minecraft:blocks\\dispenser" | "blocks\\dispenser" => Some(&BLOCKS_DISPENSER),
+        "minecraft:blocks\\dragon_egg" | "blocks\\dragon_egg" => Some(&BLOCKS_DRAGON_EGG),
+        "minecraft:blocks\\dragon_head" | "blocks\\dragon_head" => Some(&BLOCKS_DRAGON_HEAD),
+        "minecraft:blocks\\dried_ghast" | "blocks\\dried_ghast" => Some(&BLOCKS_DRIED_GHAST),
+        "minecraft:blocks\\dried_kelp_block" | "blocks\\dried_kelp_block" => {
             Some(&BLOCKS_DRIED_KELP_BLOCK)
         }
-        "minecraft:blocks/dripstone_block" | "blocks/dripstone_block" => {
+        "minecraft:blocks\\dripstone_block" | "blocks\\dripstone_block" => {
             Some(&BLOCKS_DRIPSTONE_BLOCK)
         }
-        "minecraft:blocks/dropper" | "blocks/dropper" => Some(&BLOCKS_DROPPER),
-        "minecraft:blocks/emerald_block" | "blocks/emerald_block" => Some(&BLOCKS_EMERALD_BLOCK),
-        "minecraft:blocks/emerald_ore" | "blocks/emerald_ore" => Some(&BLOCKS_EMERALD_ORE),
-        "minecraft:blocks/enchanting_table" | "blocks/enchanting_table" => {
+        "minecraft:blocks\\dropper" | "blocks\\dropper" => Some(&BLOCKS_DROPPER),
+        "minecraft:blocks\\emerald_block" | "blocks\\emerald_block" => Some(&BLOCKS_EMERALD_BLOCK),
+        "minecraft:blocks\\emerald_ore" | "blocks\\emerald_ore" => Some(&BLOCKS_EMERALD_ORE),
+        "minecraft:blocks\\enchanting_table" | "blocks\\enchanting_table" => {
             Some(&BLOCKS_ENCHANTING_TABLE)
         }
-        "minecraft:blocks/end_rod" | "blocks/end_rod" => Some(&BLOCKS_END_ROD),
-        "minecraft:blocks/end_stone" | "blocks/end_stone" => Some(&BLOCKS_END_STONE),
-        "minecraft:blocks/end_stone_brick_slab" | "blocks/end_stone_brick_slab" => {
+        "minecraft:blocks\\end_rod" | "blocks\\end_rod" => Some(&BLOCKS_END_ROD),
+        "minecraft:blocks\\end_stone" | "blocks\\end_stone" => Some(&BLOCKS_END_STONE),
+        "minecraft:blocks\\end_stone_brick_slab" | "blocks\\end_stone_brick_slab" => {
             Some(&BLOCKS_END_STONE_BRICK_SLAB)
         }
-        "minecraft:blocks/end_stone_brick_stairs" | "blocks/end_stone_brick_stairs" => {
+        "minecraft:blocks\\end_stone_brick_stairs" | "blocks\\end_stone_brick_stairs" => {
             Some(&BLOCKS_END_STONE_BRICK_STAIRS)
         }
-        "minecraft:blocks/end_stone_brick_wall" | "blocks/end_stone_brick_wall" => {
+        "minecraft:blocks\\end_stone_brick_wall" | "blocks\\end_stone_brick_wall" => {
             Some(&BLOCKS_END_STONE_BRICK_WALL)
         }
-        "minecraft:blocks/end_stone_bricks" | "blocks/end_stone_bricks" => {
+        "minecraft:blocks\\end_stone_bricks" | "blocks\\end_stone_bricks" => {
             Some(&BLOCKS_END_STONE_BRICKS)
         }
-        "minecraft:blocks/ender_chest" | "blocks/ender_chest" => Some(&BLOCKS_ENDER_CHEST),
-        "minecraft:blocks/exposed_chiseled_copper" | "blocks/exposed_chiseled_copper" => {
+        "minecraft:blocks\\ender_chest" | "blocks\\ender_chest" => Some(&BLOCKS_ENDER_CHEST),
+        "minecraft:blocks\\exposed_chiseled_copper" | "blocks\\exposed_chiseled_copper" => {
             Some(&BLOCKS_EXPOSED_CHISELED_COPPER)
         }
-        "minecraft:blocks/exposed_copper" | "blocks/exposed_copper" => Some(&BLOCKS_EXPOSED_COPPER),
-        "minecraft:blocks/exposed_copper_bars" | "blocks/exposed_copper_bars" => {
+        "minecraft:blocks\\exposed_copper" | "blocks\\exposed_copper" => {
+            Some(&BLOCKS_EXPOSED_COPPER)
+        }
+        "minecraft:blocks\\exposed_copper_bars" | "blocks\\exposed_copper_bars" => {
             Some(&BLOCKS_EXPOSED_COPPER_BARS)
         }
-        "minecraft:blocks/exposed_copper_bulb" | "blocks/exposed_copper_bulb" => {
+        "minecraft:blocks\\exposed_copper_bulb" | "blocks\\exposed_copper_bulb" => {
             Some(&BLOCKS_EXPOSED_COPPER_BULB)
         }
-        "minecraft:blocks/exposed_copper_chain" | "blocks/exposed_copper_chain" => {
+        "minecraft:blocks\\exposed_copper_chain" | "blocks\\exposed_copper_chain" => {
             Some(&BLOCKS_EXPOSED_COPPER_CHAIN)
         }
-        "minecraft:blocks/exposed_copper_chest" | "blocks/exposed_copper_chest" => {
+        "minecraft:blocks\\exposed_copper_chest" | "blocks\\exposed_copper_chest" => {
             Some(&BLOCKS_EXPOSED_COPPER_CHEST)
         }
-        "minecraft:blocks/exposed_copper_door" | "blocks/exposed_copper_door" => {
+        "minecraft:blocks\\exposed_copper_door" | "blocks\\exposed_copper_door" => {
             Some(&BLOCKS_EXPOSED_COPPER_DOOR)
         }
-        "minecraft:blocks/exposed_copper_golem_statue" | "blocks/exposed_copper_golem_statue" => {
+        "minecraft:blocks\\exposed_copper_golem_statue" | "blocks\\exposed_copper_golem_statue" => {
             Some(&BLOCKS_EXPOSED_COPPER_GOLEM_STATUE)
         }
-        "minecraft:blocks/exposed_copper_grate" | "blocks/exposed_copper_grate" => {
+        "minecraft:blocks\\exposed_copper_grate" | "blocks\\exposed_copper_grate" => {
             Some(&BLOCKS_EXPOSED_COPPER_GRATE)
         }
-        "minecraft:blocks/exposed_copper_lantern" | "blocks/exposed_copper_lantern" => {
+        "minecraft:blocks\\exposed_copper_lantern" | "blocks\\exposed_copper_lantern" => {
             Some(&BLOCKS_EXPOSED_COPPER_LANTERN)
         }
-        "minecraft:blocks/exposed_copper_trapdoor" | "blocks/exposed_copper_trapdoor" => {
+        "minecraft:blocks\\exposed_copper_trapdoor" | "blocks\\exposed_copper_trapdoor" => {
             Some(&BLOCKS_EXPOSED_COPPER_TRAPDOOR)
         }
-        "minecraft:blocks/exposed_cut_copper" | "blocks/exposed_cut_copper" => {
+        "minecraft:blocks\\exposed_cut_copper" | "blocks\\exposed_cut_copper" => {
             Some(&BLOCKS_EXPOSED_CUT_COPPER)
         }
-        "minecraft:blocks/exposed_cut_copper_slab" | "blocks/exposed_cut_copper_slab" => {
+        "minecraft:blocks\\exposed_cut_copper_slab" | "blocks\\exposed_cut_copper_slab" => {
             Some(&BLOCKS_EXPOSED_CUT_COPPER_SLAB)
         }
-        "minecraft:blocks/exposed_cut_copper_stairs" | "blocks/exposed_cut_copper_stairs" => {
+        "minecraft:blocks\\exposed_cut_copper_stairs" | "blocks\\exposed_cut_copper_stairs" => {
             Some(&BLOCKS_EXPOSED_CUT_COPPER_STAIRS)
         }
-        "minecraft:blocks/exposed_lightning_rod" | "blocks/exposed_lightning_rod" => {
+        "minecraft:blocks\\exposed_lightning_rod" | "blocks\\exposed_lightning_rod" => {
             Some(&BLOCKS_EXPOSED_LIGHTNING_ROD)
         }
-        "minecraft:blocks/farmland" | "blocks/farmland" => Some(&BLOCKS_FARMLAND),
-        "minecraft:blocks/fern" | "blocks/fern" => Some(&BLOCKS_FERN),
-        "minecraft:blocks/fire" | "blocks/fire" => Some(&BLOCKS_FIRE),
-        "minecraft:blocks/fire_coral" | "blocks/fire_coral" => Some(&BLOCKS_FIRE_CORAL),
-        "minecraft:blocks/fire_coral_block" | "blocks/fire_coral_block" => {
+        "minecraft:blocks\\farmland" | "blocks\\farmland" => Some(&BLOCKS_FARMLAND),
+        "minecraft:blocks\\fern" | "blocks\\fern" => Some(&BLOCKS_FERN),
+        "minecraft:blocks\\fire" | "blocks\\fire" => Some(&BLOCKS_FIRE),
+        "minecraft:blocks\\fire_coral" | "blocks\\fire_coral" => Some(&BLOCKS_FIRE_CORAL),
+        "minecraft:blocks\\fire_coral_block" | "blocks\\fire_coral_block" => {
             Some(&BLOCKS_FIRE_CORAL_BLOCK)
         }
-        "minecraft:blocks/fire_coral_fan" | "blocks/fire_coral_fan" => Some(&BLOCKS_FIRE_CORAL_FAN),
-        "minecraft:blocks/firefly_bush" | "blocks/firefly_bush" => Some(&BLOCKS_FIREFLY_BUSH),
-        "minecraft:blocks/fletching_table" | "blocks/fletching_table" => {
+        "minecraft:blocks\\fire_coral_fan" | "blocks\\fire_coral_fan" => {
+            Some(&BLOCKS_FIRE_CORAL_FAN)
+        }
+        "minecraft:blocks\\firefly_bush" | "blocks\\firefly_bush" => Some(&BLOCKS_FIREFLY_BUSH),
+        "minecraft:blocks\\fletching_table" | "blocks\\fletching_table" => {
             Some(&BLOCKS_FLETCHING_TABLE)
         }
-        "minecraft:blocks/flower_pot" | "blocks/flower_pot" => Some(&BLOCKS_FLOWER_POT),
-        "minecraft:blocks/flowering_azalea" | "blocks/flowering_azalea" => {
+        "minecraft:blocks\\flower_pot" | "blocks\\flower_pot" => Some(&BLOCKS_FLOWER_POT),
+        "minecraft:blocks\\flowering_azalea" | "blocks\\flowering_azalea" => {
             Some(&BLOCKS_FLOWERING_AZALEA)
         }
-        "minecraft:blocks/flowering_azalea_leaves" | "blocks/flowering_azalea_leaves" => {
+        "minecraft:blocks\\flowering_azalea_leaves" | "blocks\\flowering_azalea_leaves" => {
             Some(&BLOCKS_FLOWERING_AZALEA_LEAVES)
         }
-        "minecraft:blocks/frogspawn" | "blocks/frogspawn" => Some(&BLOCKS_FROGSPAWN),
-        "minecraft:blocks/frosted_ice" | "blocks/frosted_ice" => Some(&BLOCKS_FROSTED_ICE),
-        "minecraft:blocks/furnace" | "blocks/furnace" => Some(&BLOCKS_FURNACE),
-        "minecraft:blocks/gilded_blackstone" | "blocks/gilded_blackstone" => {
+        "minecraft:blocks\\frogspawn" | "blocks\\frogspawn" => Some(&BLOCKS_FROGSPAWN),
+        "minecraft:blocks\\frosted_ice" | "blocks\\frosted_ice" => Some(&BLOCKS_FROSTED_ICE),
+        "minecraft:blocks\\furnace" | "blocks\\furnace" => Some(&BLOCKS_FURNACE),
+        "minecraft:blocks\\gilded_blackstone" | "blocks\\gilded_blackstone" => {
             Some(&BLOCKS_GILDED_BLACKSTONE)
         }
-        "minecraft:blocks/glass" | "blocks/glass" => Some(&BLOCKS_GLASS),
-        "minecraft:blocks/glass_pane" | "blocks/glass_pane" => Some(&BLOCKS_GLASS_PANE),
-        "minecraft:blocks/glow_lichen" | "blocks/glow_lichen" => Some(&BLOCKS_GLOW_LICHEN),
-        "minecraft:blocks/glowstone" | "blocks/glowstone" => Some(&BLOCKS_GLOWSTONE),
-        "minecraft:blocks/gold_block" | "blocks/gold_block" => Some(&BLOCKS_GOLD_BLOCK),
-        "minecraft:blocks/gold_ore" | "blocks/gold_ore" => Some(&BLOCKS_GOLD_ORE),
-        "minecraft:blocks/golden_dandelion" | "blocks/golden_dandelion" => {
+        "minecraft:blocks\\glass" | "blocks\\glass" => Some(&BLOCKS_GLASS),
+        "minecraft:blocks\\glass_pane" | "blocks\\glass_pane" => Some(&BLOCKS_GLASS_PANE),
+        "minecraft:blocks\\glow_lichen" | "blocks\\glow_lichen" => Some(&BLOCKS_GLOW_LICHEN),
+        "minecraft:blocks\\glowstone" | "blocks\\glowstone" => Some(&BLOCKS_GLOWSTONE),
+        "minecraft:blocks\\gold_block" | "blocks\\gold_block" => Some(&BLOCKS_GOLD_BLOCK),
+        "minecraft:blocks\\gold_ore" | "blocks\\gold_ore" => Some(&BLOCKS_GOLD_ORE),
+        "minecraft:blocks\\golden_dandelion" | "blocks\\golden_dandelion" => {
             Some(&BLOCKS_GOLDEN_DANDELION)
         }
-        "minecraft:blocks/granite" | "blocks/granite" => Some(&BLOCKS_GRANITE),
-        "minecraft:blocks/granite_slab" | "blocks/granite_slab" => Some(&BLOCKS_GRANITE_SLAB),
-        "minecraft:blocks/granite_stairs" | "blocks/granite_stairs" => Some(&BLOCKS_GRANITE_STAIRS),
-        "minecraft:blocks/granite_wall" | "blocks/granite_wall" => Some(&BLOCKS_GRANITE_WALL),
-        "minecraft:blocks/grass_block" | "blocks/grass_block" => Some(&BLOCKS_GRASS_BLOCK),
-        "minecraft:blocks/gravel" | "blocks/gravel" => Some(&BLOCKS_GRAVEL),
-        "minecraft:blocks/gray_banner" | "blocks/gray_banner" => Some(&BLOCKS_GRAY_BANNER),
-        "minecraft:blocks/gray_bed" | "blocks/gray_bed" => Some(&BLOCKS_GRAY_BED),
-        "minecraft:blocks/gray_candle" | "blocks/gray_candle" => Some(&BLOCKS_GRAY_CANDLE),
-        "minecraft:blocks/gray_candle_cake" | "blocks/gray_candle_cake" => {
+        "minecraft:blocks\\granite" | "blocks\\granite" => Some(&BLOCKS_GRANITE),
+        "minecraft:blocks\\granite_slab" | "blocks\\granite_slab" => Some(&BLOCKS_GRANITE_SLAB),
+        "minecraft:blocks\\granite_stairs" | "blocks\\granite_stairs" => {
+            Some(&BLOCKS_GRANITE_STAIRS)
+        }
+        "minecraft:blocks\\granite_wall" | "blocks\\granite_wall" => Some(&BLOCKS_GRANITE_WALL),
+        "minecraft:blocks\\grass_block" | "blocks\\grass_block" => Some(&BLOCKS_GRASS_BLOCK),
+        "minecraft:blocks\\gravel" | "blocks\\gravel" => Some(&BLOCKS_GRAVEL),
+        "minecraft:blocks\\gray_banner" | "blocks\\gray_banner" => Some(&BLOCKS_GRAY_BANNER),
+        "minecraft:blocks\\gray_bed" | "blocks\\gray_bed" => Some(&BLOCKS_GRAY_BED),
+        "minecraft:blocks\\gray_candle" | "blocks\\gray_candle" => Some(&BLOCKS_GRAY_CANDLE),
+        "minecraft:blocks\\gray_candle_cake" | "blocks\\gray_candle_cake" => {
             Some(&BLOCKS_GRAY_CANDLE_CAKE)
         }
-        "minecraft:blocks/gray_carpet" | "blocks/gray_carpet" => Some(&BLOCKS_GRAY_CARPET),
-        "minecraft:blocks/gray_concrete" | "blocks/gray_concrete" => Some(&BLOCKS_GRAY_CONCRETE),
-        "minecraft:blocks/gray_concrete_powder" | "blocks/gray_concrete_powder" => {
+        "minecraft:blocks\\gray_carpet" | "blocks\\gray_carpet" => Some(&BLOCKS_GRAY_CARPET),
+        "minecraft:blocks\\gray_concrete" | "blocks\\gray_concrete" => Some(&BLOCKS_GRAY_CONCRETE),
+        "minecraft:blocks\\gray_concrete_powder" | "blocks\\gray_concrete_powder" => {
             Some(&BLOCKS_GRAY_CONCRETE_POWDER)
         }
-        "minecraft:blocks/gray_glazed_terracotta" | "blocks/gray_glazed_terracotta" => {
+        "minecraft:blocks\\gray_glazed_terracotta" | "blocks\\gray_glazed_terracotta" => {
             Some(&BLOCKS_GRAY_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/gray_shulker_box" | "blocks/gray_shulker_box" => {
+        "minecraft:blocks\\gray_shulker_box" | "blocks\\gray_shulker_box" => {
             Some(&BLOCKS_GRAY_SHULKER_BOX)
         }
-        "minecraft:blocks/gray_stained_glass" | "blocks/gray_stained_glass" => {
+        "minecraft:blocks\\gray_stained_glass" | "blocks\\gray_stained_glass" => {
             Some(&BLOCKS_GRAY_STAINED_GLASS)
         }
-        "minecraft:blocks/gray_stained_glass_pane" | "blocks/gray_stained_glass_pane" => {
+        "minecraft:blocks\\gray_stained_glass_pane" | "blocks\\gray_stained_glass_pane" => {
             Some(&BLOCKS_GRAY_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/gray_terracotta" | "blocks/gray_terracotta" => {
+        "minecraft:blocks\\gray_terracotta" | "blocks\\gray_terracotta" => {
             Some(&BLOCKS_GRAY_TERRACOTTA)
         }
-        "minecraft:blocks/gray_wool" | "blocks/gray_wool" => Some(&BLOCKS_GRAY_WOOL),
-        "minecraft:blocks/green_banner" | "blocks/green_banner" => Some(&BLOCKS_GREEN_BANNER),
-        "minecraft:blocks/green_bed" | "blocks/green_bed" => Some(&BLOCKS_GREEN_BED),
-        "minecraft:blocks/green_candle" | "blocks/green_candle" => Some(&BLOCKS_GREEN_CANDLE),
-        "minecraft:blocks/green_candle_cake" | "blocks/green_candle_cake" => {
+        "minecraft:blocks\\gray_wool" | "blocks\\gray_wool" => Some(&BLOCKS_GRAY_WOOL),
+        "minecraft:blocks\\green_banner" | "blocks\\green_banner" => Some(&BLOCKS_GREEN_BANNER),
+        "minecraft:blocks\\green_bed" | "blocks\\green_bed" => Some(&BLOCKS_GREEN_BED),
+        "minecraft:blocks\\green_candle" | "blocks\\green_candle" => Some(&BLOCKS_GREEN_CANDLE),
+        "minecraft:blocks\\green_candle_cake" | "blocks\\green_candle_cake" => {
             Some(&BLOCKS_GREEN_CANDLE_CAKE)
         }
-        "minecraft:blocks/green_carpet" | "blocks/green_carpet" => Some(&BLOCKS_GREEN_CARPET),
-        "minecraft:blocks/green_concrete" | "blocks/green_concrete" => Some(&BLOCKS_GREEN_CONCRETE),
-        "minecraft:blocks/green_concrete_powder" | "blocks/green_concrete_powder" => {
+        "minecraft:blocks\\green_carpet" | "blocks\\green_carpet" => Some(&BLOCKS_GREEN_CARPET),
+        "minecraft:blocks\\green_concrete" | "blocks\\green_concrete" => {
+            Some(&BLOCKS_GREEN_CONCRETE)
+        }
+        "minecraft:blocks\\green_concrete_powder" | "blocks\\green_concrete_powder" => {
             Some(&BLOCKS_GREEN_CONCRETE_POWDER)
         }
-        "minecraft:blocks/green_glazed_terracotta" | "blocks/green_glazed_terracotta" => {
+        "minecraft:blocks\\green_glazed_terracotta" | "blocks\\green_glazed_terracotta" => {
             Some(&BLOCKS_GREEN_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/green_shulker_box" | "blocks/green_shulker_box" => {
+        "minecraft:blocks\\green_shulker_box" | "blocks\\green_shulker_box" => {
             Some(&BLOCKS_GREEN_SHULKER_BOX)
         }
-        "minecraft:blocks/green_stained_glass" | "blocks/green_stained_glass" => {
+        "minecraft:blocks\\green_stained_glass" | "blocks\\green_stained_glass" => {
             Some(&BLOCKS_GREEN_STAINED_GLASS)
         }
-        "minecraft:blocks/green_stained_glass_pane" | "blocks/green_stained_glass_pane" => {
+        "minecraft:blocks\\green_stained_glass_pane" | "blocks\\green_stained_glass_pane" => {
             Some(&BLOCKS_GREEN_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/green_terracotta" | "blocks/green_terracotta" => {
+        "minecraft:blocks\\green_terracotta" | "blocks\\green_terracotta" => {
             Some(&BLOCKS_GREEN_TERRACOTTA)
         }
-        "minecraft:blocks/green_wool" | "blocks/green_wool" => Some(&BLOCKS_GREEN_WOOL),
-        "minecraft:blocks/grindstone" | "blocks/grindstone" => Some(&BLOCKS_GRINDSTONE),
-        "minecraft:blocks/hanging_roots" | "blocks/hanging_roots" => Some(&BLOCKS_HANGING_ROOTS),
-        "minecraft:blocks/hay_block" | "blocks/hay_block" => Some(&BLOCKS_HAY_BLOCK),
-        "minecraft:blocks/heavy_core" | "blocks/heavy_core" => Some(&BLOCKS_HEAVY_CORE),
-        "minecraft:blocks/heavy_weighted_pressure_plate"
-        | "blocks/heavy_weighted_pressure_plate" => Some(&BLOCKS_HEAVY_WEIGHTED_PRESSURE_PLATE),
-        "minecraft:blocks/honey_block" | "blocks/honey_block" => Some(&BLOCKS_HONEY_BLOCK),
-        "minecraft:blocks/honeycomb_block" | "blocks/honeycomb_block" => {
+        "minecraft:blocks\\green_wool" | "blocks\\green_wool" => Some(&BLOCKS_GREEN_WOOL),
+        "minecraft:blocks\\grindstone" | "blocks\\grindstone" => Some(&BLOCKS_GRINDSTONE),
+        "minecraft:blocks\\hanging_roots" | "blocks\\hanging_roots" => Some(&BLOCKS_HANGING_ROOTS),
+        "minecraft:blocks\\hay_block" | "blocks\\hay_block" => Some(&BLOCKS_HAY_BLOCK),
+        "minecraft:blocks\\heavy_core" | "blocks\\heavy_core" => Some(&BLOCKS_HEAVY_CORE),
+        "minecraft:blocks\\heavy_weighted_pressure_plate"
+        | "blocks\\heavy_weighted_pressure_plate" => Some(&BLOCKS_HEAVY_WEIGHTED_PRESSURE_PLATE),
+        "minecraft:blocks\\honey_block" | "blocks\\honey_block" => Some(&BLOCKS_HONEY_BLOCK),
+        "minecraft:blocks\\honeycomb_block" | "blocks\\honeycomb_block" => {
             Some(&BLOCKS_HONEYCOMB_BLOCK)
         }
-        "minecraft:blocks/hopper" | "blocks/hopper" => Some(&BLOCKS_HOPPER),
-        "minecraft:blocks/horn_coral" | "blocks/horn_coral" => Some(&BLOCKS_HORN_CORAL),
-        "minecraft:blocks/horn_coral_block" | "blocks/horn_coral_block" => {
+        "minecraft:blocks\\hopper" | "blocks\\hopper" => Some(&BLOCKS_HOPPER),
+        "minecraft:blocks\\horn_coral" | "blocks\\horn_coral" => Some(&BLOCKS_HORN_CORAL),
+        "minecraft:blocks\\horn_coral_block" | "blocks\\horn_coral_block" => {
             Some(&BLOCKS_HORN_CORAL_BLOCK)
         }
-        "minecraft:blocks/horn_coral_fan" | "blocks/horn_coral_fan" => Some(&BLOCKS_HORN_CORAL_FAN),
-        "minecraft:blocks/ice" | "blocks/ice" => Some(&BLOCKS_ICE),
-        "minecraft:blocks/infested_chiseled_stone_bricks"
-        | "blocks/infested_chiseled_stone_bricks" => Some(&BLOCKS_INFESTED_CHISELED_STONE_BRICKS),
-        "minecraft:blocks/infested_cobblestone" | "blocks/infested_cobblestone" => {
+        "minecraft:blocks\\horn_coral_fan" | "blocks\\horn_coral_fan" => {
+            Some(&BLOCKS_HORN_CORAL_FAN)
+        }
+        "minecraft:blocks\\ice" | "blocks\\ice" => Some(&BLOCKS_ICE),
+        "minecraft:blocks\\infested_chiseled_stone_bricks"
+        | "blocks\\infested_chiseled_stone_bricks" => Some(&BLOCKS_INFESTED_CHISELED_STONE_BRICKS),
+        "minecraft:blocks\\infested_cobblestone" | "blocks\\infested_cobblestone" => {
             Some(&BLOCKS_INFESTED_COBBLESTONE)
         }
-        "minecraft:blocks/infested_cracked_stone_bricks"
-        | "blocks/infested_cracked_stone_bricks" => Some(&BLOCKS_INFESTED_CRACKED_STONE_BRICKS),
-        "minecraft:blocks/infested_deepslate" | "blocks/infested_deepslate" => {
+        "minecraft:blocks\\infested_cracked_stone_bricks"
+        | "blocks\\infested_cracked_stone_bricks" => Some(&BLOCKS_INFESTED_CRACKED_STONE_BRICKS),
+        "minecraft:blocks\\infested_deepslate" | "blocks\\infested_deepslate" => {
             Some(&BLOCKS_INFESTED_DEEPSLATE)
         }
-        "minecraft:blocks/infested_mossy_stone_bricks" | "blocks/infested_mossy_stone_bricks" => {
+        "minecraft:blocks\\infested_mossy_stone_bricks" | "blocks\\infested_mossy_stone_bricks" => {
             Some(&BLOCKS_INFESTED_MOSSY_STONE_BRICKS)
         }
-        "minecraft:blocks/infested_stone" | "blocks/infested_stone" => Some(&BLOCKS_INFESTED_STONE),
-        "minecraft:blocks/infested_stone_bricks" | "blocks/infested_stone_bricks" => {
+        "minecraft:blocks\\infested_stone" | "blocks\\infested_stone" => {
+            Some(&BLOCKS_INFESTED_STONE)
+        }
+        "minecraft:blocks\\infested_stone_bricks" | "blocks\\infested_stone_bricks" => {
             Some(&BLOCKS_INFESTED_STONE_BRICKS)
         }
-        "minecraft:blocks/iron_bars" | "blocks/iron_bars" => Some(&BLOCKS_IRON_BARS),
-        "minecraft:blocks/iron_block" | "blocks/iron_block" => Some(&BLOCKS_IRON_BLOCK),
-        "minecraft:blocks/iron_chain" | "blocks/iron_chain" => Some(&BLOCKS_IRON_CHAIN),
-        "minecraft:blocks/iron_door" | "blocks/iron_door" => Some(&BLOCKS_IRON_DOOR),
-        "minecraft:blocks/iron_ore" | "blocks/iron_ore" => Some(&BLOCKS_IRON_ORE),
-        "minecraft:blocks/iron_trapdoor" | "blocks/iron_trapdoor" => Some(&BLOCKS_IRON_TRAPDOOR),
-        "minecraft:blocks/jack_o_lantern" | "blocks/jack_o_lantern" => Some(&BLOCKS_JACK_O_LANTERN),
-        "minecraft:blocks/jukebox" | "blocks/jukebox" => Some(&BLOCKS_JUKEBOX),
-        "minecraft:blocks/jungle_button" | "blocks/jungle_button" => Some(&BLOCKS_JUNGLE_BUTTON),
-        "minecraft:blocks/jungle_door" | "blocks/jungle_door" => Some(&BLOCKS_JUNGLE_DOOR),
-        "minecraft:blocks/jungle_fence" | "blocks/jungle_fence" => Some(&BLOCKS_JUNGLE_FENCE),
-        "minecraft:blocks/jungle_fence_gate" | "blocks/jungle_fence_gate" => {
+        "minecraft:blocks\\iron_bars" | "blocks\\iron_bars" => Some(&BLOCKS_IRON_BARS),
+        "minecraft:blocks\\iron_block" | "blocks\\iron_block" => Some(&BLOCKS_IRON_BLOCK),
+        "minecraft:blocks\\iron_chain" | "blocks\\iron_chain" => Some(&BLOCKS_IRON_CHAIN),
+        "minecraft:blocks\\iron_door" | "blocks\\iron_door" => Some(&BLOCKS_IRON_DOOR),
+        "minecraft:blocks\\iron_ore" | "blocks\\iron_ore" => Some(&BLOCKS_IRON_ORE),
+        "minecraft:blocks\\iron_trapdoor" | "blocks\\iron_trapdoor" => Some(&BLOCKS_IRON_TRAPDOOR),
+        "minecraft:blocks\\jack_o_lantern" | "blocks\\jack_o_lantern" => {
+            Some(&BLOCKS_JACK_O_LANTERN)
+        }
+        "minecraft:blocks\\jukebox" | "blocks\\jukebox" => Some(&BLOCKS_JUKEBOX),
+        "minecraft:blocks\\jungle_button" | "blocks\\jungle_button" => Some(&BLOCKS_JUNGLE_BUTTON),
+        "minecraft:blocks\\jungle_door" | "blocks\\jungle_door" => Some(&BLOCKS_JUNGLE_DOOR),
+        "minecraft:blocks\\jungle_fence" | "blocks\\jungle_fence" => Some(&BLOCKS_JUNGLE_FENCE),
+        "minecraft:blocks\\jungle_fence_gate" | "blocks\\jungle_fence_gate" => {
             Some(&BLOCKS_JUNGLE_FENCE_GATE)
         }
-        "minecraft:blocks/jungle_hanging_sign" | "blocks/jungle_hanging_sign" => {
+        "minecraft:blocks\\jungle_hanging_sign" | "blocks\\jungle_hanging_sign" => {
             Some(&BLOCKS_JUNGLE_HANGING_SIGN)
         }
-        "minecraft:blocks/jungle_leaves" | "blocks/jungle_leaves" => Some(&BLOCKS_JUNGLE_LEAVES),
-        "minecraft:blocks/jungle_log" | "blocks/jungle_log" => Some(&BLOCKS_JUNGLE_LOG),
-        "minecraft:blocks/jungle_planks" | "blocks/jungle_planks" => Some(&BLOCKS_JUNGLE_PLANKS),
-        "minecraft:blocks/jungle_pressure_plate" | "blocks/jungle_pressure_plate" => {
+        "minecraft:blocks\\jungle_leaves" | "blocks\\jungle_leaves" => Some(&BLOCKS_JUNGLE_LEAVES),
+        "minecraft:blocks\\jungle_log" | "blocks\\jungle_log" => Some(&BLOCKS_JUNGLE_LOG),
+        "minecraft:blocks\\jungle_planks" | "blocks\\jungle_planks" => Some(&BLOCKS_JUNGLE_PLANKS),
+        "minecraft:blocks\\jungle_pressure_plate" | "blocks\\jungle_pressure_plate" => {
             Some(&BLOCKS_JUNGLE_PRESSURE_PLATE)
         }
-        "minecraft:blocks/jungle_sapling" | "blocks/jungle_sapling" => Some(&BLOCKS_JUNGLE_SAPLING),
-        "minecraft:blocks/jungle_shelf" | "blocks/jungle_shelf" => Some(&BLOCKS_JUNGLE_SHELF),
-        "minecraft:blocks/jungle_sign" | "blocks/jungle_sign" => Some(&BLOCKS_JUNGLE_SIGN),
-        "minecraft:blocks/jungle_slab" | "blocks/jungle_slab" => Some(&BLOCKS_JUNGLE_SLAB),
-        "minecraft:blocks/jungle_stairs" | "blocks/jungle_stairs" => Some(&BLOCKS_JUNGLE_STAIRS),
-        "minecraft:blocks/jungle_trapdoor" | "blocks/jungle_trapdoor" => {
+        "minecraft:blocks\\jungle_sapling" | "blocks\\jungle_sapling" => {
+            Some(&BLOCKS_JUNGLE_SAPLING)
+        }
+        "minecraft:blocks\\jungle_shelf" | "blocks\\jungle_shelf" => Some(&BLOCKS_JUNGLE_SHELF),
+        "minecraft:blocks\\jungle_sign" | "blocks\\jungle_sign" => Some(&BLOCKS_JUNGLE_SIGN),
+        "minecraft:blocks\\jungle_slab" | "blocks\\jungle_slab" => Some(&BLOCKS_JUNGLE_SLAB),
+        "minecraft:blocks\\jungle_stairs" | "blocks\\jungle_stairs" => Some(&BLOCKS_JUNGLE_STAIRS),
+        "minecraft:blocks\\jungle_trapdoor" | "blocks\\jungle_trapdoor" => {
             Some(&BLOCKS_JUNGLE_TRAPDOOR)
         }
-        "minecraft:blocks/jungle_wood" | "blocks/jungle_wood" => Some(&BLOCKS_JUNGLE_WOOD),
-        "minecraft:blocks/kelp" | "blocks/kelp" => Some(&BLOCKS_KELP),
-        "minecraft:blocks/kelp_plant" | "blocks/kelp_plant" => Some(&BLOCKS_KELP_PLANT),
-        "minecraft:blocks/ladder" | "blocks/ladder" => Some(&BLOCKS_LADDER),
-        "minecraft:blocks/lantern" | "blocks/lantern" => Some(&BLOCKS_LANTERN),
-        "minecraft:blocks/lapis_block" | "blocks/lapis_block" => Some(&BLOCKS_LAPIS_BLOCK),
-        "minecraft:blocks/lapis_ore" | "blocks/lapis_ore" => Some(&BLOCKS_LAPIS_ORE),
-        "minecraft:blocks/large_amethyst_bud" | "blocks/large_amethyst_bud" => {
+        "minecraft:blocks\\jungle_wood" | "blocks\\jungle_wood" => Some(&BLOCKS_JUNGLE_WOOD),
+        "minecraft:blocks\\kelp" | "blocks\\kelp" => Some(&BLOCKS_KELP),
+        "minecraft:blocks\\kelp_plant" | "blocks\\kelp_plant" => Some(&BLOCKS_KELP_PLANT),
+        "minecraft:blocks\\ladder" | "blocks\\ladder" => Some(&BLOCKS_LADDER),
+        "minecraft:blocks\\lantern" | "blocks\\lantern" => Some(&BLOCKS_LANTERN),
+        "minecraft:blocks\\lapis_block" | "blocks\\lapis_block" => Some(&BLOCKS_LAPIS_BLOCK),
+        "minecraft:blocks\\lapis_ore" | "blocks\\lapis_ore" => Some(&BLOCKS_LAPIS_ORE),
+        "minecraft:blocks\\large_amethyst_bud" | "blocks\\large_amethyst_bud" => {
             Some(&BLOCKS_LARGE_AMETHYST_BUD)
         }
-        "minecraft:blocks/large_fern" | "blocks/large_fern" => Some(&BLOCKS_LARGE_FERN),
-        "minecraft:blocks/lava_cauldron" | "blocks/lava_cauldron" => Some(&BLOCKS_LAVA_CAULDRON),
-        "minecraft:blocks/leaf_litter" | "blocks/leaf_litter" => Some(&BLOCKS_LEAF_LITTER),
-        "minecraft:blocks/lectern" | "blocks/lectern" => Some(&BLOCKS_LECTERN),
-        "minecraft:blocks/lever" | "blocks/lever" => Some(&BLOCKS_LEVER),
-        "minecraft:blocks/light_blue_banner" | "blocks/light_blue_banner" => {
+        "minecraft:blocks\\large_fern" | "blocks\\large_fern" => Some(&BLOCKS_LARGE_FERN),
+        "minecraft:blocks\\lava_cauldron" | "blocks\\lava_cauldron" => Some(&BLOCKS_LAVA_CAULDRON),
+        "minecraft:blocks\\leaf_litter" | "blocks\\leaf_litter" => Some(&BLOCKS_LEAF_LITTER),
+        "minecraft:blocks\\lectern" | "blocks\\lectern" => Some(&BLOCKS_LECTERN),
+        "minecraft:blocks\\lever" | "blocks\\lever" => Some(&BLOCKS_LEVER),
+        "minecraft:blocks\\light_blue_banner" | "blocks\\light_blue_banner" => {
             Some(&BLOCKS_LIGHT_BLUE_BANNER)
         }
-        "minecraft:blocks/light_blue_bed" | "blocks/light_blue_bed" => Some(&BLOCKS_LIGHT_BLUE_BED),
-        "minecraft:blocks/light_blue_candle" | "blocks/light_blue_candle" => {
+        "minecraft:blocks\\light_blue_bed" | "blocks\\light_blue_bed" => {
+            Some(&BLOCKS_LIGHT_BLUE_BED)
+        }
+        "minecraft:blocks\\light_blue_candle" | "blocks\\light_blue_candle" => {
             Some(&BLOCKS_LIGHT_BLUE_CANDLE)
         }
-        "minecraft:blocks/light_blue_candle_cake" | "blocks/light_blue_candle_cake" => {
+        "minecraft:blocks\\light_blue_candle_cake" | "blocks\\light_blue_candle_cake" => {
             Some(&BLOCKS_LIGHT_BLUE_CANDLE_CAKE)
         }
-        "minecraft:blocks/light_blue_carpet" | "blocks/light_blue_carpet" => {
+        "minecraft:blocks\\light_blue_carpet" | "blocks\\light_blue_carpet" => {
             Some(&BLOCKS_LIGHT_BLUE_CARPET)
         }
-        "minecraft:blocks/light_blue_concrete" | "blocks/light_blue_concrete" => {
+        "minecraft:blocks\\light_blue_concrete" | "blocks\\light_blue_concrete" => {
             Some(&BLOCKS_LIGHT_BLUE_CONCRETE)
         }
-        "minecraft:blocks/light_blue_concrete_powder" | "blocks/light_blue_concrete_powder" => {
+        "minecraft:blocks\\light_blue_concrete_powder" | "blocks\\light_blue_concrete_powder" => {
             Some(&BLOCKS_LIGHT_BLUE_CONCRETE_POWDER)
         }
-        "minecraft:blocks/light_blue_glazed_terracotta" | "blocks/light_blue_glazed_terracotta" => {
-            Some(&BLOCKS_LIGHT_BLUE_GLAZED_TERRACOTTA)
-        }
-        "minecraft:blocks/light_blue_shulker_box" | "blocks/light_blue_shulker_box" => {
+        "minecraft:blocks\\light_blue_glazed_terracotta"
+        | "blocks\\light_blue_glazed_terracotta" => Some(&BLOCKS_LIGHT_BLUE_GLAZED_TERRACOTTA),
+        "minecraft:blocks\\light_blue_shulker_box" | "blocks\\light_blue_shulker_box" => {
             Some(&BLOCKS_LIGHT_BLUE_SHULKER_BOX)
         }
-        "minecraft:blocks/light_blue_stained_glass" | "blocks/light_blue_stained_glass" => {
+        "minecraft:blocks\\light_blue_stained_glass" | "blocks\\light_blue_stained_glass" => {
             Some(&BLOCKS_LIGHT_BLUE_STAINED_GLASS)
         }
-        "minecraft:blocks/light_blue_stained_glass_pane"
-        | "blocks/light_blue_stained_glass_pane" => Some(&BLOCKS_LIGHT_BLUE_STAINED_GLASS_PANE),
-        "minecraft:blocks/light_blue_terracotta" | "blocks/light_blue_terracotta" => {
+        "minecraft:blocks\\light_blue_stained_glass_pane"
+        | "blocks\\light_blue_stained_glass_pane" => Some(&BLOCKS_LIGHT_BLUE_STAINED_GLASS_PANE),
+        "minecraft:blocks\\light_blue_terracotta" | "blocks\\light_blue_terracotta" => {
             Some(&BLOCKS_LIGHT_BLUE_TERRACOTTA)
         }
-        "minecraft:blocks/light_blue_wool" | "blocks/light_blue_wool" => {
+        "minecraft:blocks\\light_blue_wool" | "blocks\\light_blue_wool" => {
             Some(&BLOCKS_LIGHT_BLUE_WOOL)
         }
-        "minecraft:blocks/light_gray_banner" | "blocks/light_gray_banner" => {
+        "minecraft:blocks\\light_gray_banner" | "blocks\\light_gray_banner" => {
             Some(&BLOCKS_LIGHT_GRAY_BANNER)
         }
-        "minecraft:blocks/light_gray_bed" | "blocks/light_gray_bed" => Some(&BLOCKS_LIGHT_GRAY_BED),
-        "minecraft:blocks/light_gray_candle" | "blocks/light_gray_candle" => {
+        "minecraft:blocks\\light_gray_bed" | "blocks\\light_gray_bed" => {
+            Some(&BLOCKS_LIGHT_GRAY_BED)
+        }
+        "minecraft:blocks\\light_gray_candle" | "blocks\\light_gray_candle" => {
             Some(&BLOCKS_LIGHT_GRAY_CANDLE)
         }
-        "minecraft:blocks/light_gray_candle_cake" | "blocks/light_gray_candle_cake" => {
+        "minecraft:blocks\\light_gray_candle_cake" | "blocks\\light_gray_candle_cake" => {
             Some(&BLOCKS_LIGHT_GRAY_CANDLE_CAKE)
         }
-        "minecraft:blocks/light_gray_carpet" | "blocks/light_gray_carpet" => {
+        "minecraft:blocks\\light_gray_carpet" | "blocks\\light_gray_carpet" => {
             Some(&BLOCKS_LIGHT_GRAY_CARPET)
         }
-        "minecraft:blocks/light_gray_concrete" | "blocks/light_gray_concrete" => {
+        "minecraft:blocks\\light_gray_concrete" | "blocks\\light_gray_concrete" => {
             Some(&BLOCKS_LIGHT_GRAY_CONCRETE)
         }
-        "minecraft:blocks/light_gray_concrete_powder" | "blocks/light_gray_concrete_powder" => {
+        "minecraft:blocks\\light_gray_concrete_powder" | "blocks\\light_gray_concrete_powder" => {
             Some(&BLOCKS_LIGHT_GRAY_CONCRETE_POWDER)
         }
-        "minecraft:blocks/light_gray_glazed_terracotta" | "blocks/light_gray_glazed_terracotta" => {
-            Some(&BLOCKS_LIGHT_GRAY_GLAZED_TERRACOTTA)
-        }
-        "minecraft:blocks/light_gray_shulker_box" | "blocks/light_gray_shulker_box" => {
+        "minecraft:blocks\\light_gray_glazed_terracotta"
+        | "blocks\\light_gray_glazed_terracotta" => Some(&BLOCKS_LIGHT_GRAY_GLAZED_TERRACOTTA),
+        "minecraft:blocks\\light_gray_shulker_box" | "blocks\\light_gray_shulker_box" => {
             Some(&BLOCKS_LIGHT_GRAY_SHULKER_BOX)
         }
-        "minecraft:blocks/light_gray_stained_glass" | "blocks/light_gray_stained_glass" => {
+        "minecraft:blocks\\light_gray_stained_glass" | "blocks\\light_gray_stained_glass" => {
             Some(&BLOCKS_LIGHT_GRAY_STAINED_GLASS)
         }
-        "minecraft:blocks/light_gray_stained_glass_pane"
-        | "blocks/light_gray_stained_glass_pane" => Some(&BLOCKS_LIGHT_GRAY_STAINED_GLASS_PANE),
-        "minecraft:blocks/light_gray_terracotta" | "blocks/light_gray_terracotta" => {
+        "minecraft:blocks\\light_gray_stained_glass_pane"
+        | "blocks\\light_gray_stained_glass_pane" => Some(&BLOCKS_LIGHT_GRAY_STAINED_GLASS_PANE),
+        "minecraft:blocks\\light_gray_terracotta" | "blocks\\light_gray_terracotta" => {
             Some(&BLOCKS_LIGHT_GRAY_TERRACOTTA)
         }
-        "minecraft:blocks/light_gray_wool" | "blocks/light_gray_wool" => {
+        "minecraft:blocks\\light_gray_wool" | "blocks\\light_gray_wool" => {
             Some(&BLOCKS_LIGHT_GRAY_WOOL)
         }
-        "minecraft:blocks/light_weighted_pressure_plate"
-        | "blocks/light_weighted_pressure_plate" => Some(&BLOCKS_LIGHT_WEIGHTED_PRESSURE_PLATE),
-        "minecraft:blocks/lightning_rod" | "blocks/lightning_rod" => Some(&BLOCKS_LIGHTNING_ROD),
-        "minecraft:blocks/lilac" | "blocks/lilac" => Some(&BLOCKS_LILAC),
-        "minecraft:blocks/lily_of_the_valley" | "blocks/lily_of_the_valley" => {
+        "minecraft:blocks\\light_weighted_pressure_plate"
+        | "blocks\\light_weighted_pressure_plate" => Some(&BLOCKS_LIGHT_WEIGHTED_PRESSURE_PLATE),
+        "minecraft:blocks\\lightning_rod" | "blocks\\lightning_rod" => Some(&BLOCKS_LIGHTNING_ROD),
+        "minecraft:blocks\\lilac" | "blocks\\lilac" => Some(&BLOCKS_LILAC),
+        "minecraft:blocks\\lily_of_the_valley" | "blocks\\lily_of_the_valley" => {
             Some(&BLOCKS_LILY_OF_THE_VALLEY)
         }
-        "minecraft:blocks/lily_pad" | "blocks/lily_pad" => Some(&BLOCKS_LILY_PAD),
-        "minecraft:blocks/lime_banner" | "blocks/lime_banner" => Some(&BLOCKS_LIME_BANNER),
-        "minecraft:blocks/lime_bed" | "blocks/lime_bed" => Some(&BLOCKS_LIME_BED),
-        "minecraft:blocks/lime_candle" | "blocks/lime_candle" => Some(&BLOCKS_LIME_CANDLE),
-        "minecraft:blocks/lime_candle_cake" | "blocks/lime_candle_cake" => {
+        "minecraft:blocks\\lily_pad" | "blocks\\lily_pad" => Some(&BLOCKS_LILY_PAD),
+        "minecraft:blocks\\lime_banner" | "blocks\\lime_banner" => Some(&BLOCKS_LIME_BANNER),
+        "minecraft:blocks\\lime_bed" | "blocks\\lime_bed" => Some(&BLOCKS_LIME_BED),
+        "minecraft:blocks\\lime_candle" | "blocks\\lime_candle" => Some(&BLOCKS_LIME_CANDLE),
+        "minecraft:blocks\\lime_candle_cake" | "blocks\\lime_candle_cake" => {
             Some(&BLOCKS_LIME_CANDLE_CAKE)
         }
-        "minecraft:blocks/lime_carpet" | "blocks/lime_carpet" => Some(&BLOCKS_LIME_CARPET),
-        "minecraft:blocks/lime_concrete" | "blocks/lime_concrete" => Some(&BLOCKS_LIME_CONCRETE),
-        "minecraft:blocks/lime_concrete_powder" | "blocks/lime_concrete_powder" => {
+        "minecraft:blocks\\lime_carpet" | "blocks\\lime_carpet" => Some(&BLOCKS_LIME_CARPET),
+        "minecraft:blocks\\lime_concrete" | "blocks\\lime_concrete" => Some(&BLOCKS_LIME_CONCRETE),
+        "minecraft:blocks\\lime_concrete_powder" | "blocks\\lime_concrete_powder" => {
             Some(&BLOCKS_LIME_CONCRETE_POWDER)
         }
-        "minecraft:blocks/lime_glazed_terracotta" | "blocks/lime_glazed_terracotta" => {
+        "minecraft:blocks\\lime_glazed_terracotta" | "blocks\\lime_glazed_terracotta" => {
             Some(&BLOCKS_LIME_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/lime_shulker_box" | "blocks/lime_shulker_box" => {
+        "minecraft:blocks\\lime_shulker_box" | "blocks\\lime_shulker_box" => {
             Some(&BLOCKS_LIME_SHULKER_BOX)
         }
-        "minecraft:blocks/lime_stained_glass" | "blocks/lime_stained_glass" => {
+        "minecraft:blocks\\lime_stained_glass" | "blocks\\lime_stained_glass" => {
             Some(&BLOCKS_LIME_STAINED_GLASS)
         }
-        "minecraft:blocks/lime_stained_glass_pane" | "blocks/lime_stained_glass_pane" => {
+        "minecraft:blocks\\lime_stained_glass_pane" | "blocks\\lime_stained_glass_pane" => {
             Some(&BLOCKS_LIME_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/lime_terracotta" | "blocks/lime_terracotta" => {
+        "minecraft:blocks\\lime_terracotta" | "blocks\\lime_terracotta" => {
             Some(&BLOCKS_LIME_TERRACOTTA)
         }
-        "minecraft:blocks/lime_wool" | "blocks/lime_wool" => Some(&BLOCKS_LIME_WOOL),
-        "minecraft:blocks/lodestone" | "blocks/lodestone" => Some(&BLOCKS_LODESTONE),
-        "minecraft:blocks/loom" | "blocks/loom" => Some(&BLOCKS_LOOM),
-        "minecraft:blocks/magenta_banner" | "blocks/magenta_banner" => Some(&BLOCKS_MAGENTA_BANNER),
-        "minecraft:blocks/magenta_bed" | "blocks/magenta_bed" => Some(&BLOCKS_MAGENTA_BED),
-        "minecraft:blocks/magenta_candle" | "blocks/magenta_candle" => Some(&BLOCKS_MAGENTA_CANDLE),
-        "minecraft:blocks/magenta_candle_cake" | "blocks/magenta_candle_cake" => {
+        "minecraft:blocks\\lime_wool" | "blocks\\lime_wool" => Some(&BLOCKS_LIME_WOOL),
+        "minecraft:blocks\\lodestone" | "blocks\\lodestone" => Some(&BLOCKS_LODESTONE),
+        "minecraft:blocks\\loom" | "blocks\\loom" => Some(&BLOCKS_LOOM),
+        "minecraft:blocks\\magenta_banner" | "blocks\\magenta_banner" => {
+            Some(&BLOCKS_MAGENTA_BANNER)
+        }
+        "minecraft:blocks\\magenta_bed" | "blocks\\magenta_bed" => Some(&BLOCKS_MAGENTA_BED),
+        "minecraft:blocks\\magenta_candle" | "blocks\\magenta_candle" => {
+            Some(&BLOCKS_MAGENTA_CANDLE)
+        }
+        "minecraft:blocks\\magenta_candle_cake" | "blocks\\magenta_candle_cake" => {
             Some(&BLOCKS_MAGENTA_CANDLE_CAKE)
         }
-        "minecraft:blocks/magenta_carpet" | "blocks/magenta_carpet" => Some(&BLOCKS_MAGENTA_CARPET),
-        "minecraft:blocks/magenta_concrete" | "blocks/magenta_concrete" => {
+        "minecraft:blocks\\magenta_carpet" | "blocks\\magenta_carpet" => {
+            Some(&BLOCKS_MAGENTA_CARPET)
+        }
+        "minecraft:blocks\\magenta_concrete" | "blocks\\magenta_concrete" => {
             Some(&BLOCKS_MAGENTA_CONCRETE)
         }
-        "minecraft:blocks/magenta_concrete_powder" | "blocks/magenta_concrete_powder" => {
+        "minecraft:blocks\\magenta_concrete_powder" | "blocks\\magenta_concrete_powder" => {
             Some(&BLOCKS_MAGENTA_CONCRETE_POWDER)
         }
-        "minecraft:blocks/magenta_glazed_terracotta" | "blocks/magenta_glazed_terracotta" => {
+        "minecraft:blocks\\magenta_glazed_terracotta" | "blocks\\magenta_glazed_terracotta" => {
             Some(&BLOCKS_MAGENTA_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/magenta_shulker_box" | "blocks/magenta_shulker_box" => {
+        "minecraft:blocks\\magenta_shulker_box" | "blocks\\magenta_shulker_box" => {
             Some(&BLOCKS_MAGENTA_SHULKER_BOX)
         }
-        "minecraft:blocks/magenta_stained_glass" | "blocks/magenta_stained_glass" => {
+        "minecraft:blocks\\magenta_stained_glass" | "blocks\\magenta_stained_glass" => {
             Some(&BLOCKS_MAGENTA_STAINED_GLASS)
         }
-        "minecraft:blocks/magenta_stained_glass_pane" | "blocks/magenta_stained_glass_pane" => {
+        "minecraft:blocks\\magenta_stained_glass_pane" | "blocks\\magenta_stained_glass_pane" => {
             Some(&BLOCKS_MAGENTA_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/magenta_terracotta" | "blocks/magenta_terracotta" => {
+        "minecraft:blocks\\magenta_terracotta" | "blocks\\magenta_terracotta" => {
             Some(&BLOCKS_MAGENTA_TERRACOTTA)
         }
-        "minecraft:blocks/magenta_wool" | "blocks/magenta_wool" => Some(&BLOCKS_MAGENTA_WOOL),
-        "minecraft:blocks/magma_block" | "blocks/magma_block" => Some(&BLOCKS_MAGMA_BLOCK),
-        "minecraft:blocks/mangrove_button" | "blocks/mangrove_button" => {
+        "minecraft:blocks\\magenta_wool" | "blocks\\magenta_wool" => Some(&BLOCKS_MAGENTA_WOOL),
+        "minecraft:blocks\\magma_block" | "blocks\\magma_block" => Some(&BLOCKS_MAGMA_BLOCK),
+        "minecraft:blocks\\mangrove_button" | "blocks\\mangrove_button" => {
             Some(&BLOCKS_MANGROVE_BUTTON)
         }
-        "minecraft:blocks/mangrove_door" | "blocks/mangrove_door" => Some(&BLOCKS_MANGROVE_DOOR),
-        "minecraft:blocks/mangrove_fence" | "blocks/mangrove_fence" => Some(&BLOCKS_MANGROVE_FENCE),
-        "minecraft:blocks/mangrove_fence_gate" | "blocks/mangrove_fence_gate" => {
+        "minecraft:blocks\\mangrove_door" | "blocks\\mangrove_door" => Some(&BLOCKS_MANGROVE_DOOR),
+        "minecraft:blocks\\mangrove_fence" | "blocks\\mangrove_fence" => {
+            Some(&BLOCKS_MANGROVE_FENCE)
+        }
+        "minecraft:blocks\\mangrove_fence_gate" | "blocks\\mangrove_fence_gate" => {
             Some(&BLOCKS_MANGROVE_FENCE_GATE)
         }
-        "minecraft:blocks/mangrove_hanging_sign" | "blocks/mangrove_hanging_sign" => {
+        "minecraft:blocks\\mangrove_hanging_sign" | "blocks\\mangrove_hanging_sign" => {
             Some(&BLOCKS_MANGROVE_HANGING_SIGN)
         }
-        "minecraft:blocks/mangrove_leaves" | "blocks/mangrove_leaves" => {
+        "minecraft:blocks\\mangrove_leaves" | "blocks\\mangrove_leaves" => {
             Some(&BLOCKS_MANGROVE_LEAVES)
         }
-        "minecraft:blocks/mangrove_log" | "blocks/mangrove_log" => Some(&BLOCKS_MANGROVE_LOG),
-        "minecraft:blocks/mangrove_planks" | "blocks/mangrove_planks" => {
+        "minecraft:blocks\\mangrove_log" | "blocks\\mangrove_log" => Some(&BLOCKS_MANGROVE_LOG),
+        "minecraft:blocks\\mangrove_planks" | "blocks\\mangrove_planks" => {
             Some(&BLOCKS_MANGROVE_PLANKS)
         }
-        "minecraft:blocks/mangrove_pressure_plate" | "blocks/mangrove_pressure_plate" => {
+        "minecraft:blocks\\mangrove_pressure_plate" | "blocks\\mangrove_pressure_plate" => {
             Some(&BLOCKS_MANGROVE_PRESSURE_PLATE)
         }
-        "minecraft:blocks/mangrove_propagule" | "blocks/mangrove_propagule" => {
+        "minecraft:blocks\\mangrove_propagule" | "blocks\\mangrove_propagule" => {
             Some(&BLOCKS_MANGROVE_PROPAGULE)
         }
-        "minecraft:blocks/mangrove_roots" | "blocks/mangrove_roots" => Some(&BLOCKS_MANGROVE_ROOTS),
-        "minecraft:blocks/mangrove_shelf" | "blocks/mangrove_shelf" => Some(&BLOCKS_MANGROVE_SHELF),
-        "minecraft:blocks/mangrove_sign" | "blocks/mangrove_sign" => Some(&BLOCKS_MANGROVE_SIGN),
-        "minecraft:blocks/mangrove_slab" | "blocks/mangrove_slab" => Some(&BLOCKS_MANGROVE_SLAB),
-        "minecraft:blocks/mangrove_stairs" | "blocks/mangrove_stairs" => {
+        "minecraft:blocks\\mangrove_roots" | "blocks\\mangrove_roots" => {
+            Some(&BLOCKS_MANGROVE_ROOTS)
+        }
+        "minecraft:blocks\\mangrove_shelf" | "blocks\\mangrove_shelf" => {
+            Some(&BLOCKS_MANGROVE_SHELF)
+        }
+        "minecraft:blocks\\mangrove_sign" | "blocks\\mangrove_sign" => Some(&BLOCKS_MANGROVE_SIGN),
+        "minecraft:blocks\\mangrove_slab" | "blocks\\mangrove_slab" => Some(&BLOCKS_MANGROVE_SLAB),
+        "minecraft:blocks\\mangrove_stairs" | "blocks\\mangrove_stairs" => {
             Some(&BLOCKS_MANGROVE_STAIRS)
         }
-        "minecraft:blocks/mangrove_trapdoor" | "blocks/mangrove_trapdoor" => {
+        "minecraft:blocks\\mangrove_trapdoor" | "blocks\\mangrove_trapdoor" => {
             Some(&BLOCKS_MANGROVE_TRAPDOOR)
         }
-        "minecraft:blocks/mangrove_wood" | "blocks/mangrove_wood" => Some(&BLOCKS_MANGROVE_WOOD),
-        "minecraft:blocks/medium_amethyst_bud" | "blocks/medium_amethyst_bud" => {
+        "minecraft:blocks\\mangrove_wood" | "blocks\\mangrove_wood" => Some(&BLOCKS_MANGROVE_WOOD),
+        "minecraft:blocks\\medium_amethyst_bud" | "blocks\\medium_amethyst_bud" => {
             Some(&BLOCKS_MEDIUM_AMETHYST_BUD)
         }
-        "minecraft:blocks/melon" | "blocks/melon" => Some(&BLOCKS_MELON),
-        "minecraft:blocks/melon_stem" | "blocks/melon_stem" => Some(&BLOCKS_MELON_STEM),
-        "minecraft:blocks/moss_block" | "blocks/moss_block" => Some(&BLOCKS_MOSS_BLOCK),
-        "minecraft:blocks/moss_carpet" | "blocks/moss_carpet" => Some(&BLOCKS_MOSS_CARPET),
-        "minecraft:blocks/mossy_cobblestone" | "blocks/mossy_cobblestone" => {
+        "minecraft:blocks\\melon" | "blocks\\melon" => Some(&BLOCKS_MELON),
+        "minecraft:blocks\\melon_stem" | "blocks\\melon_stem" => Some(&BLOCKS_MELON_STEM),
+        "minecraft:blocks\\moss_block" | "blocks\\moss_block" => Some(&BLOCKS_MOSS_BLOCK),
+        "minecraft:blocks\\moss_carpet" | "blocks\\moss_carpet" => Some(&BLOCKS_MOSS_CARPET),
+        "minecraft:blocks\\mossy_cobblestone" | "blocks\\mossy_cobblestone" => {
             Some(&BLOCKS_MOSSY_COBBLESTONE)
         }
-        "minecraft:blocks/mossy_cobblestone_slab" | "blocks/mossy_cobblestone_slab" => {
+        "minecraft:blocks\\mossy_cobblestone_slab" | "blocks\\mossy_cobblestone_slab" => {
             Some(&BLOCKS_MOSSY_COBBLESTONE_SLAB)
         }
-        "minecraft:blocks/mossy_cobblestone_stairs" | "blocks/mossy_cobblestone_stairs" => {
+        "minecraft:blocks\\mossy_cobblestone_stairs" | "blocks\\mossy_cobblestone_stairs" => {
             Some(&BLOCKS_MOSSY_COBBLESTONE_STAIRS)
         }
-        "minecraft:blocks/mossy_cobblestone_wall" | "blocks/mossy_cobblestone_wall" => {
+        "minecraft:blocks\\mossy_cobblestone_wall" | "blocks\\mossy_cobblestone_wall" => {
             Some(&BLOCKS_MOSSY_COBBLESTONE_WALL)
         }
-        "minecraft:blocks/mossy_stone_brick_slab" | "blocks/mossy_stone_brick_slab" => {
+        "minecraft:blocks\\mossy_stone_brick_slab" | "blocks\\mossy_stone_brick_slab" => {
             Some(&BLOCKS_MOSSY_STONE_BRICK_SLAB)
         }
-        "minecraft:blocks/mossy_stone_brick_stairs" | "blocks/mossy_stone_brick_stairs" => {
+        "minecraft:blocks\\mossy_stone_brick_stairs" | "blocks\\mossy_stone_brick_stairs" => {
             Some(&BLOCKS_MOSSY_STONE_BRICK_STAIRS)
         }
-        "minecraft:blocks/mossy_stone_brick_wall" | "blocks/mossy_stone_brick_wall" => {
+        "minecraft:blocks\\mossy_stone_brick_wall" | "blocks\\mossy_stone_brick_wall" => {
             Some(&BLOCKS_MOSSY_STONE_BRICK_WALL)
         }
-        "minecraft:blocks/mossy_stone_bricks" | "blocks/mossy_stone_bricks" => {
+        "minecraft:blocks\\mossy_stone_bricks" | "blocks\\mossy_stone_bricks" => {
             Some(&BLOCKS_MOSSY_STONE_BRICKS)
         }
-        "minecraft:blocks/mud" | "blocks/mud" => Some(&BLOCKS_MUD),
-        "minecraft:blocks/mud_brick_slab" | "blocks/mud_brick_slab" => Some(&BLOCKS_MUD_BRICK_SLAB),
-        "minecraft:blocks/mud_brick_stairs" | "blocks/mud_brick_stairs" => {
+        "minecraft:blocks\\mud" | "blocks\\mud" => Some(&BLOCKS_MUD),
+        "minecraft:blocks\\mud_brick_slab" | "blocks\\mud_brick_slab" => {
+            Some(&BLOCKS_MUD_BRICK_SLAB)
+        }
+        "minecraft:blocks\\mud_brick_stairs" | "blocks\\mud_brick_stairs" => {
             Some(&BLOCKS_MUD_BRICK_STAIRS)
         }
-        "minecraft:blocks/mud_brick_wall" | "blocks/mud_brick_wall" => Some(&BLOCKS_MUD_BRICK_WALL),
-        "minecraft:blocks/mud_bricks" | "blocks/mud_bricks" => Some(&BLOCKS_MUD_BRICKS),
-        "minecraft:blocks/muddy_mangrove_roots" | "blocks/muddy_mangrove_roots" => {
+        "minecraft:blocks\\mud_brick_wall" | "blocks\\mud_brick_wall" => {
+            Some(&BLOCKS_MUD_BRICK_WALL)
+        }
+        "minecraft:blocks\\mud_bricks" | "blocks\\mud_bricks" => Some(&BLOCKS_MUD_BRICKS),
+        "minecraft:blocks\\muddy_mangrove_roots" | "blocks\\muddy_mangrove_roots" => {
             Some(&BLOCKS_MUDDY_MANGROVE_ROOTS)
         }
-        "minecraft:blocks/mushroom_stem" | "blocks/mushroom_stem" => Some(&BLOCKS_MUSHROOM_STEM),
-        "minecraft:blocks/mycelium" | "blocks/mycelium" => Some(&BLOCKS_MYCELIUM),
-        "minecraft:blocks/nether_brick_fence" | "blocks/nether_brick_fence" => {
+        "minecraft:blocks\\mushroom_stem" | "blocks\\mushroom_stem" => Some(&BLOCKS_MUSHROOM_STEM),
+        "minecraft:blocks\\mycelium" | "blocks\\mycelium" => Some(&BLOCKS_MYCELIUM),
+        "minecraft:blocks\\nether_brick_fence" | "blocks\\nether_brick_fence" => {
             Some(&BLOCKS_NETHER_BRICK_FENCE)
         }
-        "minecraft:blocks/nether_brick_slab" | "blocks/nether_brick_slab" => {
+        "minecraft:blocks\\nether_brick_slab" | "blocks\\nether_brick_slab" => {
             Some(&BLOCKS_NETHER_BRICK_SLAB)
         }
-        "minecraft:blocks/nether_brick_stairs" | "blocks/nether_brick_stairs" => {
+        "minecraft:blocks\\nether_brick_stairs" | "blocks\\nether_brick_stairs" => {
             Some(&BLOCKS_NETHER_BRICK_STAIRS)
         }
-        "minecraft:blocks/nether_brick_wall" | "blocks/nether_brick_wall" => {
+        "minecraft:blocks\\nether_brick_wall" | "blocks\\nether_brick_wall" => {
             Some(&BLOCKS_NETHER_BRICK_WALL)
         }
-        "minecraft:blocks/nether_bricks" | "blocks/nether_bricks" => Some(&BLOCKS_NETHER_BRICKS),
-        "minecraft:blocks/nether_gold_ore" | "blocks/nether_gold_ore" => {
+        "minecraft:blocks\\nether_bricks" | "blocks\\nether_bricks" => Some(&BLOCKS_NETHER_BRICKS),
+        "minecraft:blocks\\nether_gold_ore" | "blocks\\nether_gold_ore" => {
             Some(&BLOCKS_NETHER_GOLD_ORE)
         }
-        "minecraft:blocks/nether_portal" | "blocks/nether_portal" => Some(&BLOCKS_NETHER_PORTAL),
-        "minecraft:blocks/nether_quartz_ore" | "blocks/nether_quartz_ore" => {
+        "minecraft:blocks\\nether_portal" | "blocks\\nether_portal" => Some(&BLOCKS_NETHER_PORTAL),
+        "minecraft:blocks\\nether_quartz_ore" | "blocks\\nether_quartz_ore" => {
             Some(&BLOCKS_NETHER_QUARTZ_ORE)
         }
-        "minecraft:blocks/nether_sprouts" | "blocks/nether_sprouts" => Some(&BLOCKS_NETHER_SPROUTS),
-        "minecraft:blocks/nether_wart" | "blocks/nether_wart" => Some(&BLOCKS_NETHER_WART),
-        "minecraft:blocks/nether_wart_block" | "blocks/nether_wart_block" => {
+        "minecraft:blocks\\nether_sprouts" | "blocks\\nether_sprouts" => {
+            Some(&BLOCKS_NETHER_SPROUTS)
+        }
+        "minecraft:blocks\\nether_wart" | "blocks\\nether_wart" => Some(&BLOCKS_NETHER_WART),
+        "minecraft:blocks\\nether_wart_block" | "blocks\\nether_wart_block" => {
             Some(&BLOCKS_NETHER_WART_BLOCK)
         }
-        "minecraft:blocks/netherite_block" | "blocks/netherite_block" => {
+        "minecraft:blocks\\netherite_block" | "blocks\\netherite_block" => {
             Some(&BLOCKS_NETHERITE_BLOCK)
         }
-        "minecraft:blocks/netherrack" | "blocks/netherrack" => Some(&BLOCKS_NETHERRACK),
-        "minecraft:blocks/note_block" | "blocks/note_block" => Some(&BLOCKS_NOTE_BLOCK),
-        "minecraft:blocks/oak_button" | "blocks/oak_button" => Some(&BLOCKS_OAK_BUTTON),
-        "minecraft:blocks/oak_door" | "blocks/oak_door" => Some(&BLOCKS_OAK_DOOR),
-        "minecraft:blocks/oak_fence" | "blocks/oak_fence" => Some(&BLOCKS_OAK_FENCE),
-        "minecraft:blocks/oak_fence_gate" | "blocks/oak_fence_gate" => Some(&BLOCKS_OAK_FENCE_GATE),
-        "minecraft:blocks/oak_hanging_sign" | "blocks/oak_hanging_sign" => {
+        "minecraft:blocks\\netherrack" | "blocks\\netherrack" => Some(&BLOCKS_NETHERRACK),
+        "minecraft:blocks\\note_block" | "blocks\\note_block" => Some(&BLOCKS_NOTE_BLOCK),
+        "minecraft:blocks\\oak_button" | "blocks\\oak_button" => Some(&BLOCKS_OAK_BUTTON),
+        "minecraft:blocks\\oak_door" | "blocks\\oak_door" => Some(&BLOCKS_OAK_DOOR),
+        "minecraft:blocks\\oak_fence" | "blocks\\oak_fence" => Some(&BLOCKS_OAK_FENCE),
+        "minecraft:blocks\\oak_fence_gate" | "blocks\\oak_fence_gate" => {
+            Some(&BLOCKS_OAK_FENCE_GATE)
+        }
+        "minecraft:blocks\\oak_hanging_sign" | "blocks\\oak_hanging_sign" => {
             Some(&BLOCKS_OAK_HANGING_SIGN)
         }
-        "minecraft:blocks/oak_leaves" | "blocks/oak_leaves" => Some(&BLOCKS_OAK_LEAVES),
-        "minecraft:blocks/oak_log" | "blocks/oak_log" => Some(&BLOCKS_OAK_LOG),
-        "minecraft:blocks/oak_planks" | "blocks/oak_planks" => Some(&BLOCKS_OAK_PLANKS),
-        "minecraft:blocks/oak_pressure_plate" | "blocks/oak_pressure_plate" => {
+        "minecraft:blocks\\oak_leaves" | "blocks\\oak_leaves" => Some(&BLOCKS_OAK_LEAVES),
+        "minecraft:blocks\\oak_log" | "blocks\\oak_log" => Some(&BLOCKS_OAK_LOG),
+        "minecraft:blocks\\oak_planks" | "blocks\\oak_planks" => Some(&BLOCKS_OAK_PLANKS),
+        "minecraft:blocks\\oak_pressure_plate" | "blocks\\oak_pressure_plate" => {
             Some(&BLOCKS_OAK_PRESSURE_PLATE)
         }
-        "minecraft:blocks/oak_sapling" | "blocks/oak_sapling" => Some(&BLOCKS_OAK_SAPLING),
-        "minecraft:blocks/oak_shelf" | "blocks/oak_shelf" => Some(&BLOCKS_OAK_SHELF),
-        "minecraft:blocks/oak_sign" | "blocks/oak_sign" => Some(&BLOCKS_OAK_SIGN),
-        "minecraft:blocks/oak_slab" | "blocks/oak_slab" => Some(&BLOCKS_OAK_SLAB),
-        "minecraft:blocks/oak_stairs" | "blocks/oak_stairs" => Some(&BLOCKS_OAK_STAIRS),
-        "minecraft:blocks/oak_trapdoor" | "blocks/oak_trapdoor" => Some(&BLOCKS_OAK_TRAPDOOR),
-        "minecraft:blocks/oak_wood" | "blocks/oak_wood" => Some(&BLOCKS_OAK_WOOD),
-        "minecraft:blocks/observer" | "blocks/observer" => Some(&BLOCKS_OBSERVER),
-        "minecraft:blocks/obsidian" | "blocks/obsidian" => Some(&BLOCKS_OBSIDIAN),
-        "minecraft:blocks/ochre_froglight" | "blocks/ochre_froglight" => {
+        "minecraft:blocks\\oak_sapling" | "blocks\\oak_sapling" => Some(&BLOCKS_OAK_SAPLING),
+        "minecraft:blocks\\oak_shelf" | "blocks\\oak_shelf" => Some(&BLOCKS_OAK_SHELF),
+        "minecraft:blocks\\oak_sign" | "blocks\\oak_sign" => Some(&BLOCKS_OAK_SIGN),
+        "minecraft:blocks\\oak_slab" | "blocks\\oak_slab" => Some(&BLOCKS_OAK_SLAB),
+        "minecraft:blocks\\oak_stairs" | "blocks\\oak_stairs" => Some(&BLOCKS_OAK_STAIRS),
+        "minecraft:blocks\\oak_trapdoor" | "blocks\\oak_trapdoor" => Some(&BLOCKS_OAK_TRAPDOOR),
+        "minecraft:blocks\\oak_wood" | "blocks\\oak_wood" => Some(&BLOCKS_OAK_WOOD),
+        "minecraft:blocks\\observer" | "blocks\\observer" => Some(&BLOCKS_OBSERVER),
+        "minecraft:blocks\\obsidian" | "blocks\\obsidian" => Some(&BLOCKS_OBSIDIAN),
+        "minecraft:blocks\\ochre_froglight" | "blocks\\ochre_froglight" => {
             Some(&BLOCKS_OCHRE_FROGLIGHT)
         }
-        "minecraft:blocks/open_eyeblossom" | "blocks/open_eyeblossom" => {
+        "minecraft:blocks\\open_eyeblossom" | "blocks\\open_eyeblossom" => {
             Some(&BLOCKS_OPEN_EYEBLOSSOM)
         }
-        "minecraft:blocks/orange_banner" | "blocks/orange_banner" => Some(&BLOCKS_ORANGE_BANNER),
-        "minecraft:blocks/orange_bed" | "blocks/orange_bed" => Some(&BLOCKS_ORANGE_BED),
-        "minecraft:blocks/orange_candle" | "blocks/orange_candle" => Some(&BLOCKS_ORANGE_CANDLE),
-        "minecraft:blocks/orange_candle_cake" | "blocks/orange_candle_cake" => {
+        "minecraft:blocks\\orange_banner" | "blocks\\orange_banner" => Some(&BLOCKS_ORANGE_BANNER),
+        "minecraft:blocks\\orange_bed" | "blocks\\orange_bed" => Some(&BLOCKS_ORANGE_BED),
+        "minecraft:blocks\\orange_candle" | "blocks\\orange_candle" => Some(&BLOCKS_ORANGE_CANDLE),
+        "minecraft:blocks\\orange_candle_cake" | "blocks\\orange_candle_cake" => {
             Some(&BLOCKS_ORANGE_CANDLE_CAKE)
         }
-        "minecraft:blocks/orange_carpet" | "blocks/orange_carpet" => Some(&BLOCKS_ORANGE_CARPET),
-        "minecraft:blocks/orange_concrete" | "blocks/orange_concrete" => {
+        "minecraft:blocks\\orange_carpet" | "blocks\\orange_carpet" => Some(&BLOCKS_ORANGE_CARPET),
+        "minecraft:blocks\\orange_concrete" | "blocks\\orange_concrete" => {
             Some(&BLOCKS_ORANGE_CONCRETE)
         }
-        "minecraft:blocks/orange_concrete_powder" | "blocks/orange_concrete_powder" => {
+        "minecraft:blocks\\orange_concrete_powder" | "blocks\\orange_concrete_powder" => {
             Some(&BLOCKS_ORANGE_CONCRETE_POWDER)
         }
-        "minecraft:blocks/orange_glazed_terracotta" | "blocks/orange_glazed_terracotta" => {
+        "minecraft:blocks\\orange_glazed_terracotta" | "blocks\\orange_glazed_terracotta" => {
             Some(&BLOCKS_ORANGE_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/orange_shulker_box" | "blocks/orange_shulker_box" => {
+        "minecraft:blocks\\orange_shulker_box" | "blocks\\orange_shulker_box" => {
             Some(&BLOCKS_ORANGE_SHULKER_BOX)
         }
-        "minecraft:blocks/orange_stained_glass" | "blocks/orange_stained_glass" => {
+        "minecraft:blocks\\orange_stained_glass" | "blocks\\orange_stained_glass" => {
             Some(&BLOCKS_ORANGE_STAINED_GLASS)
         }
-        "minecraft:blocks/orange_stained_glass_pane" | "blocks/orange_stained_glass_pane" => {
+        "minecraft:blocks\\orange_stained_glass_pane" | "blocks\\orange_stained_glass_pane" => {
             Some(&BLOCKS_ORANGE_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/orange_terracotta" | "blocks/orange_terracotta" => {
+        "minecraft:blocks\\orange_terracotta" | "blocks\\orange_terracotta" => {
             Some(&BLOCKS_ORANGE_TERRACOTTA)
         }
-        "minecraft:blocks/orange_tulip" | "blocks/orange_tulip" => Some(&BLOCKS_ORANGE_TULIP),
-        "minecraft:blocks/orange_wool" | "blocks/orange_wool" => Some(&BLOCKS_ORANGE_WOOL),
-        "minecraft:blocks/oxeye_daisy" | "blocks/oxeye_daisy" => Some(&BLOCKS_OXEYE_DAISY),
-        "minecraft:blocks/oxidized_chiseled_copper" | "blocks/oxidized_chiseled_copper" => {
+        "minecraft:blocks\\orange_tulip" | "blocks\\orange_tulip" => Some(&BLOCKS_ORANGE_TULIP),
+        "minecraft:blocks\\orange_wool" | "blocks\\orange_wool" => Some(&BLOCKS_ORANGE_WOOL),
+        "minecraft:blocks\\oxeye_daisy" | "blocks\\oxeye_daisy" => Some(&BLOCKS_OXEYE_DAISY),
+        "minecraft:blocks\\oxidized_chiseled_copper" | "blocks\\oxidized_chiseled_copper" => {
             Some(&BLOCKS_OXIDIZED_CHISELED_COPPER)
         }
-        "minecraft:blocks/oxidized_copper" | "blocks/oxidized_copper" => {
+        "minecraft:blocks\\oxidized_copper" | "blocks\\oxidized_copper" => {
             Some(&BLOCKS_OXIDIZED_COPPER)
         }
-        "minecraft:blocks/oxidized_copper_bars" | "blocks/oxidized_copper_bars" => {
+        "minecraft:blocks\\oxidized_copper_bars" | "blocks\\oxidized_copper_bars" => {
             Some(&BLOCKS_OXIDIZED_COPPER_BARS)
         }
-        "minecraft:blocks/oxidized_copper_bulb" | "blocks/oxidized_copper_bulb" => {
+        "minecraft:blocks\\oxidized_copper_bulb" | "blocks\\oxidized_copper_bulb" => {
             Some(&BLOCKS_OXIDIZED_COPPER_BULB)
         }
-        "minecraft:blocks/oxidized_copper_chain" | "blocks/oxidized_copper_chain" => {
+        "minecraft:blocks\\oxidized_copper_chain" | "blocks\\oxidized_copper_chain" => {
             Some(&BLOCKS_OXIDIZED_COPPER_CHAIN)
         }
-        "minecraft:blocks/oxidized_copper_chest" | "blocks/oxidized_copper_chest" => {
+        "minecraft:blocks\\oxidized_copper_chest" | "blocks\\oxidized_copper_chest" => {
             Some(&BLOCKS_OXIDIZED_COPPER_CHEST)
         }
-        "minecraft:blocks/oxidized_copper_door" | "blocks/oxidized_copper_door" => {
+        "minecraft:blocks\\oxidized_copper_door" | "blocks\\oxidized_copper_door" => {
             Some(&BLOCKS_OXIDIZED_COPPER_DOOR)
         }
-        "minecraft:blocks/oxidized_copper_golem_statue" | "blocks/oxidized_copper_golem_statue" => {
-            Some(&BLOCKS_OXIDIZED_COPPER_GOLEM_STATUE)
-        }
-        "minecraft:blocks/oxidized_copper_grate" | "blocks/oxidized_copper_grate" => {
+        "minecraft:blocks\\oxidized_copper_golem_statue"
+        | "blocks\\oxidized_copper_golem_statue" => Some(&BLOCKS_OXIDIZED_COPPER_GOLEM_STATUE),
+        "minecraft:blocks\\oxidized_copper_grate" | "blocks\\oxidized_copper_grate" => {
             Some(&BLOCKS_OXIDIZED_COPPER_GRATE)
         }
-        "minecraft:blocks/oxidized_copper_lantern" | "blocks/oxidized_copper_lantern" => {
+        "minecraft:blocks\\oxidized_copper_lantern" | "blocks\\oxidized_copper_lantern" => {
             Some(&BLOCKS_OXIDIZED_COPPER_LANTERN)
         }
-        "minecraft:blocks/oxidized_copper_trapdoor" | "blocks/oxidized_copper_trapdoor" => {
+        "minecraft:blocks\\oxidized_copper_trapdoor" | "blocks\\oxidized_copper_trapdoor" => {
             Some(&BLOCKS_OXIDIZED_COPPER_TRAPDOOR)
         }
-        "minecraft:blocks/oxidized_cut_copper" | "blocks/oxidized_cut_copper" => {
+        "minecraft:blocks\\oxidized_cut_copper" | "blocks\\oxidized_cut_copper" => {
             Some(&BLOCKS_OXIDIZED_CUT_COPPER)
         }
-        "minecraft:blocks/oxidized_cut_copper_slab" | "blocks/oxidized_cut_copper_slab" => {
+        "minecraft:blocks\\oxidized_cut_copper_slab" | "blocks\\oxidized_cut_copper_slab" => {
             Some(&BLOCKS_OXIDIZED_CUT_COPPER_SLAB)
         }
-        "minecraft:blocks/oxidized_cut_copper_stairs" | "blocks/oxidized_cut_copper_stairs" => {
+        "minecraft:blocks\\oxidized_cut_copper_stairs" | "blocks\\oxidized_cut_copper_stairs" => {
             Some(&BLOCKS_OXIDIZED_CUT_COPPER_STAIRS)
         }
-        "minecraft:blocks/oxidized_lightning_rod" | "blocks/oxidized_lightning_rod" => {
+        "minecraft:blocks\\oxidized_lightning_rod" | "blocks\\oxidized_lightning_rod" => {
             Some(&BLOCKS_OXIDIZED_LIGHTNING_ROD)
         }
-        "minecraft:blocks/packed_ice" | "blocks/packed_ice" => Some(&BLOCKS_PACKED_ICE),
-        "minecraft:blocks/packed_mud" | "blocks/packed_mud" => Some(&BLOCKS_PACKED_MUD),
-        "minecraft:blocks/pale_hanging_moss" | "blocks/pale_hanging_moss" => {
+        "minecraft:blocks\\packed_ice" | "blocks\\packed_ice" => Some(&BLOCKS_PACKED_ICE),
+        "minecraft:blocks\\packed_mud" | "blocks\\packed_mud" => Some(&BLOCKS_PACKED_MUD),
+        "minecraft:blocks\\pale_hanging_moss" | "blocks\\pale_hanging_moss" => {
             Some(&BLOCKS_PALE_HANGING_MOSS)
         }
-        "minecraft:blocks/pale_moss_block" | "blocks/pale_moss_block" => {
+        "minecraft:blocks\\pale_moss_block" | "blocks\\pale_moss_block" => {
             Some(&BLOCKS_PALE_MOSS_BLOCK)
         }
-        "minecraft:blocks/pale_moss_carpet" | "blocks/pale_moss_carpet" => {
+        "minecraft:blocks\\pale_moss_carpet" | "blocks\\pale_moss_carpet" => {
             Some(&BLOCKS_PALE_MOSS_CARPET)
         }
-        "minecraft:blocks/pale_oak_button" | "blocks/pale_oak_button" => {
+        "minecraft:blocks\\pale_oak_button" | "blocks\\pale_oak_button" => {
             Some(&BLOCKS_PALE_OAK_BUTTON)
         }
-        "minecraft:blocks/pale_oak_door" | "blocks/pale_oak_door" => Some(&BLOCKS_PALE_OAK_DOOR),
-        "minecraft:blocks/pale_oak_fence" | "blocks/pale_oak_fence" => Some(&BLOCKS_PALE_OAK_FENCE),
-        "minecraft:blocks/pale_oak_fence_gate" | "blocks/pale_oak_fence_gate" => {
+        "minecraft:blocks\\pale_oak_door" | "blocks\\pale_oak_door" => Some(&BLOCKS_PALE_OAK_DOOR),
+        "minecraft:blocks\\pale_oak_fence" | "blocks\\pale_oak_fence" => {
+            Some(&BLOCKS_PALE_OAK_FENCE)
+        }
+        "minecraft:blocks\\pale_oak_fence_gate" | "blocks\\pale_oak_fence_gate" => {
             Some(&BLOCKS_PALE_OAK_FENCE_GATE)
         }
-        "minecraft:blocks/pale_oak_hanging_sign" | "blocks/pale_oak_hanging_sign" => {
+        "minecraft:blocks\\pale_oak_hanging_sign" | "blocks\\pale_oak_hanging_sign" => {
             Some(&BLOCKS_PALE_OAK_HANGING_SIGN)
         }
-        "minecraft:blocks/pale_oak_leaves" | "blocks/pale_oak_leaves" => {
+        "minecraft:blocks\\pale_oak_leaves" | "blocks\\pale_oak_leaves" => {
             Some(&BLOCKS_PALE_OAK_LEAVES)
         }
-        "minecraft:blocks/pale_oak_log" | "blocks/pale_oak_log" => Some(&BLOCKS_PALE_OAK_LOG),
-        "minecraft:blocks/pale_oak_planks" | "blocks/pale_oak_planks" => {
+        "minecraft:blocks\\pale_oak_log" | "blocks\\pale_oak_log" => Some(&BLOCKS_PALE_OAK_LOG),
+        "minecraft:blocks\\pale_oak_planks" | "blocks\\pale_oak_planks" => {
             Some(&BLOCKS_PALE_OAK_PLANKS)
         }
-        "minecraft:blocks/pale_oak_pressure_plate" | "blocks/pale_oak_pressure_plate" => {
+        "minecraft:blocks\\pale_oak_pressure_plate" | "blocks\\pale_oak_pressure_plate" => {
             Some(&BLOCKS_PALE_OAK_PRESSURE_PLATE)
         }
-        "minecraft:blocks/pale_oak_sapling" | "blocks/pale_oak_sapling" => {
+        "minecraft:blocks\\pale_oak_sapling" | "blocks\\pale_oak_sapling" => {
             Some(&BLOCKS_PALE_OAK_SAPLING)
         }
-        "minecraft:blocks/pale_oak_shelf" | "blocks/pale_oak_shelf" => Some(&BLOCKS_PALE_OAK_SHELF),
-        "minecraft:blocks/pale_oak_sign" | "blocks/pale_oak_sign" => Some(&BLOCKS_PALE_OAK_SIGN),
-        "minecraft:blocks/pale_oak_slab" | "blocks/pale_oak_slab" => Some(&BLOCKS_PALE_OAK_SLAB),
-        "minecraft:blocks/pale_oak_stairs" | "blocks/pale_oak_stairs" => {
+        "minecraft:blocks\\pale_oak_shelf" | "blocks\\pale_oak_shelf" => {
+            Some(&BLOCKS_PALE_OAK_SHELF)
+        }
+        "minecraft:blocks\\pale_oak_sign" | "blocks\\pale_oak_sign" => Some(&BLOCKS_PALE_OAK_SIGN),
+        "minecraft:blocks\\pale_oak_slab" | "blocks\\pale_oak_slab" => Some(&BLOCKS_PALE_OAK_SLAB),
+        "minecraft:blocks\\pale_oak_stairs" | "blocks\\pale_oak_stairs" => {
             Some(&BLOCKS_PALE_OAK_STAIRS)
         }
-        "minecraft:blocks/pale_oak_trapdoor" | "blocks/pale_oak_trapdoor" => {
+        "minecraft:blocks\\pale_oak_trapdoor" | "blocks\\pale_oak_trapdoor" => {
             Some(&BLOCKS_PALE_OAK_TRAPDOOR)
         }
-        "minecraft:blocks/pale_oak_wood" | "blocks/pale_oak_wood" => Some(&BLOCKS_PALE_OAK_WOOD),
-        "minecraft:blocks/pearlescent_froglight" | "blocks/pearlescent_froglight" => {
+        "minecraft:blocks\\pale_oak_wood" | "blocks\\pale_oak_wood" => Some(&BLOCKS_PALE_OAK_WOOD),
+        "minecraft:blocks\\pearlescent_froglight" | "blocks\\pearlescent_froglight" => {
             Some(&BLOCKS_PEARLESCENT_FROGLIGHT)
         }
-        "minecraft:blocks/peony" | "blocks/peony" => Some(&BLOCKS_PEONY),
-        "minecraft:blocks/petrified_oak_slab" | "blocks/petrified_oak_slab" => {
+        "minecraft:blocks\\peony" | "blocks\\peony" => Some(&BLOCKS_PEONY),
+        "minecraft:blocks\\petrified_oak_slab" | "blocks\\petrified_oak_slab" => {
             Some(&BLOCKS_PETRIFIED_OAK_SLAB)
         }
-        "minecraft:blocks/piglin_head" | "blocks/piglin_head" => Some(&BLOCKS_PIGLIN_HEAD),
-        "minecraft:blocks/pink_banner" | "blocks/pink_banner" => Some(&BLOCKS_PINK_BANNER),
-        "minecraft:blocks/pink_bed" | "blocks/pink_bed" => Some(&BLOCKS_PINK_BED),
-        "minecraft:blocks/pink_candle" | "blocks/pink_candle" => Some(&BLOCKS_PINK_CANDLE),
-        "minecraft:blocks/pink_candle_cake" | "blocks/pink_candle_cake" => {
+        "minecraft:blocks\\piglin_head" | "blocks\\piglin_head" => Some(&BLOCKS_PIGLIN_HEAD),
+        "minecraft:blocks\\pink_banner" | "blocks\\pink_banner" => Some(&BLOCKS_PINK_BANNER),
+        "minecraft:blocks\\pink_bed" | "blocks\\pink_bed" => Some(&BLOCKS_PINK_BED),
+        "minecraft:blocks\\pink_candle" | "blocks\\pink_candle" => Some(&BLOCKS_PINK_CANDLE),
+        "minecraft:blocks\\pink_candle_cake" | "blocks\\pink_candle_cake" => {
             Some(&BLOCKS_PINK_CANDLE_CAKE)
         }
-        "minecraft:blocks/pink_carpet" | "blocks/pink_carpet" => Some(&BLOCKS_PINK_CARPET),
-        "minecraft:blocks/pink_concrete" | "blocks/pink_concrete" => Some(&BLOCKS_PINK_CONCRETE),
-        "minecraft:blocks/pink_concrete_powder" | "blocks/pink_concrete_powder" => {
+        "minecraft:blocks\\pink_carpet" | "blocks\\pink_carpet" => Some(&BLOCKS_PINK_CARPET),
+        "minecraft:blocks\\pink_concrete" | "blocks\\pink_concrete" => Some(&BLOCKS_PINK_CONCRETE),
+        "minecraft:blocks\\pink_concrete_powder" | "blocks\\pink_concrete_powder" => {
             Some(&BLOCKS_PINK_CONCRETE_POWDER)
         }
-        "minecraft:blocks/pink_glazed_terracotta" | "blocks/pink_glazed_terracotta" => {
+        "minecraft:blocks\\pink_glazed_terracotta" | "blocks\\pink_glazed_terracotta" => {
             Some(&BLOCKS_PINK_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/pink_petals" | "blocks/pink_petals" => Some(&BLOCKS_PINK_PETALS),
-        "minecraft:blocks/pink_shulker_box" | "blocks/pink_shulker_box" => {
+        "minecraft:blocks\\pink_petals" | "blocks\\pink_petals" => Some(&BLOCKS_PINK_PETALS),
+        "minecraft:blocks\\pink_shulker_box" | "blocks\\pink_shulker_box" => {
             Some(&BLOCKS_PINK_SHULKER_BOX)
         }
-        "minecraft:blocks/pink_stained_glass" | "blocks/pink_stained_glass" => {
+        "minecraft:blocks\\pink_stained_glass" | "blocks\\pink_stained_glass" => {
             Some(&BLOCKS_PINK_STAINED_GLASS)
         }
-        "minecraft:blocks/pink_stained_glass_pane" | "blocks/pink_stained_glass_pane" => {
+        "minecraft:blocks\\pink_stained_glass_pane" | "blocks\\pink_stained_glass_pane" => {
             Some(&BLOCKS_PINK_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/pink_terracotta" | "blocks/pink_terracotta" => {
+        "minecraft:blocks\\pink_terracotta" | "blocks\\pink_terracotta" => {
             Some(&BLOCKS_PINK_TERRACOTTA)
         }
-        "minecraft:blocks/pink_tulip" | "blocks/pink_tulip" => Some(&BLOCKS_PINK_TULIP),
-        "minecraft:blocks/pink_wool" | "blocks/pink_wool" => Some(&BLOCKS_PINK_WOOL),
-        "minecraft:blocks/piston" | "blocks/piston" => Some(&BLOCKS_PISTON),
-        "minecraft:blocks/pitcher_crop" | "blocks/pitcher_crop" => Some(&BLOCKS_PITCHER_CROP),
-        "minecraft:blocks/pitcher_plant" | "blocks/pitcher_plant" => Some(&BLOCKS_PITCHER_PLANT),
-        "minecraft:blocks/player_head" | "blocks/player_head" => Some(&BLOCKS_PLAYER_HEAD),
-        "minecraft:blocks/podzol" | "blocks/podzol" => Some(&BLOCKS_PODZOL),
-        "minecraft:blocks/pointed_dripstone" | "blocks/pointed_dripstone" => {
+        "minecraft:blocks\\pink_tulip" | "blocks\\pink_tulip" => Some(&BLOCKS_PINK_TULIP),
+        "minecraft:blocks\\pink_wool" | "blocks\\pink_wool" => Some(&BLOCKS_PINK_WOOL),
+        "minecraft:blocks\\piston" | "blocks\\piston" => Some(&BLOCKS_PISTON),
+        "minecraft:blocks\\pitcher_crop" | "blocks\\pitcher_crop" => Some(&BLOCKS_PITCHER_CROP),
+        "minecraft:blocks\\pitcher_plant" | "blocks\\pitcher_plant" => Some(&BLOCKS_PITCHER_PLANT),
+        "minecraft:blocks\\player_head" | "blocks\\player_head" => Some(&BLOCKS_PLAYER_HEAD),
+        "minecraft:blocks\\podzol" | "blocks\\podzol" => Some(&BLOCKS_PODZOL),
+        "minecraft:blocks\\pointed_dripstone" | "blocks\\pointed_dripstone" => {
             Some(&BLOCKS_POINTED_DRIPSTONE)
         }
-        "minecraft:blocks/polished_andesite" | "blocks/polished_andesite" => {
+        "minecraft:blocks\\polished_andesite" | "blocks\\polished_andesite" => {
             Some(&BLOCKS_POLISHED_ANDESITE)
         }
-        "minecraft:blocks/polished_andesite_slab" | "blocks/polished_andesite_slab" => {
+        "minecraft:blocks\\polished_andesite_slab" | "blocks\\polished_andesite_slab" => {
             Some(&BLOCKS_POLISHED_ANDESITE_SLAB)
         }
-        "minecraft:blocks/polished_andesite_stairs" | "blocks/polished_andesite_stairs" => {
+        "minecraft:blocks\\polished_andesite_stairs" | "blocks\\polished_andesite_stairs" => {
             Some(&BLOCKS_POLISHED_ANDESITE_STAIRS)
         }
-        "minecraft:blocks/polished_basalt" | "blocks/polished_basalt" => {
+        "minecraft:blocks\\polished_basalt" | "blocks\\polished_basalt" => {
             Some(&BLOCKS_POLISHED_BASALT)
         }
-        "minecraft:blocks/polished_blackstone" | "blocks/polished_blackstone" => {
+        "minecraft:blocks\\polished_blackstone" | "blocks\\polished_blackstone" => {
             Some(&BLOCKS_POLISHED_BLACKSTONE)
         }
-        "minecraft:blocks/polished_blackstone_brick_slab"
-        | "blocks/polished_blackstone_brick_slab" => Some(&BLOCKS_POLISHED_BLACKSTONE_BRICK_SLAB),
-        "minecraft:blocks/polished_blackstone_brick_stairs"
-        | "blocks/polished_blackstone_brick_stairs" => {
+        "minecraft:blocks\\polished_blackstone_brick_slab"
+        | "blocks\\polished_blackstone_brick_slab" => Some(&BLOCKS_POLISHED_BLACKSTONE_BRICK_SLAB),
+        "minecraft:blocks\\polished_blackstone_brick_stairs"
+        | "blocks\\polished_blackstone_brick_stairs" => {
             Some(&BLOCKS_POLISHED_BLACKSTONE_BRICK_STAIRS)
         }
-        "minecraft:blocks/polished_blackstone_brick_wall"
-        | "blocks/polished_blackstone_brick_wall" => Some(&BLOCKS_POLISHED_BLACKSTONE_BRICK_WALL),
-        "minecraft:blocks/polished_blackstone_bricks" | "blocks/polished_blackstone_bricks" => {
+        "minecraft:blocks\\polished_blackstone_brick_wall"
+        | "blocks\\polished_blackstone_brick_wall" => Some(&BLOCKS_POLISHED_BLACKSTONE_BRICK_WALL),
+        "minecraft:blocks\\polished_blackstone_bricks" | "blocks\\polished_blackstone_bricks" => {
             Some(&BLOCKS_POLISHED_BLACKSTONE_BRICKS)
         }
-        "minecraft:blocks/polished_blackstone_button" | "blocks/polished_blackstone_button" => {
+        "minecraft:blocks\\polished_blackstone_button" | "blocks\\polished_blackstone_button" => {
             Some(&BLOCKS_POLISHED_BLACKSTONE_BUTTON)
         }
-        "minecraft:blocks/polished_blackstone_pressure_plate"
-        | "blocks/polished_blackstone_pressure_plate" => {
+        "minecraft:blocks\\polished_blackstone_pressure_plate"
+        | "blocks\\polished_blackstone_pressure_plate" => {
             Some(&BLOCKS_POLISHED_BLACKSTONE_PRESSURE_PLATE)
         }
-        "minecraft:blocks/polished_blackstone_slab" | "blocks/polished_blackstone_slab" => {
+        "minecraft:blocks\\polished_blackstone_slab" | "blocks\\polished_blackstone_slab" => {
             Some(&BLOCKS_POLISHED_BLACKSTONE_SLAB)
         }
-        "minecraft:blocks/polished_blackstone_stairs" | "blocks/polished_blackstone_stairs" => {
+        "minecraft:blocks\\polished_blackstone_stairs" | "blocks\\polished_blackstone_stairs" => {
             Some(&BLOCKS_POLISHED_BLACKSTONE_STAIRS)
         }
-        "minecraft:blocks/polished_blackstone_wall" | "blocks/polished_blackstone_wall" => {
+        "minecraft:blocks\\polished_blackstone_wall" | "blocks\\polished_blackstone_wall" => {
             Some(&BLOCKS_POLISHED_BLACKSTONE_WALL)
         }
-        "minecraft:blocks/polished_cinnabar" | "blocks/polished_cinnabar" => {
+        "minecraft:blocks\\polished_cinnabar" | "blocks\\polished_cinnabar" => {
             Some(&BLOCKS_POLISHED_CINNABAR)
         }
-        "minecraft:blocks/polished_cinnabar_slab" | "blocks/polished_cinnabar_slab" => {
+        "minecraft:blocks\\polished_cinnabar_slab" | "blocks\\polished_cinnabar_slab" => {
             Some(&BLOCKS_POLISHED_CINNABAR_SLAB)
         }
-        "minecraft:blocks/polished_cinnabar_stairs" | "blocks/polished_cinnabar_stairs" => {
+        "minecraft:blocks\\polished_cinnabar_stairs" | "blocks\\polished_cinnabar_stairs" => {
             Some(&BLOCKS_POLISHED_CINNABAR_STAIRS)
         }
-        "minecraft:blocks/polished_cinnabar_wall" | "blocks/polished_cinnabar_wall" => {
+        "minecraft:blocks\\polished_cinnabar_wall" | "blocks\\polished_cinnabar_wall" => {
             Some(&BLOCKS_POLISHED_CINNABAR_WALL)
         }
-        "minecraft:blocks/polished_deepslate" | "blocks/polished_deepslate" => {
+        "minecraft:blocks\\polished_deepslate" | "blocks\\polished_deepslate" => {
             Some(&BLOCKS_POLISHED_DEEPSLATE)
         }
-        "minecraft:blocks/polished_deepslate_slab" | "blocks/polished_deepslate_slab" => {
+        "minecraft:blocks\\polished_deepslate_slab" | "blocks\\polished_deepslate_slab" => {
             Some(&BLOCKS_POLISHED_DEEPSLATE_SLAB)
         }
-        "minecraft:blocks/polished_deepslate_stairs" | "blocks/polished_deepslate_stairs" => {
+        "minecraft:blocks\\polished_deepslate_stairs" | "blocks\\polished_deepslate_stairs" => {
             Some(&BLOCKS_POLISHED_DEEPSLATE_STAIRS)
         }
-        "minecraft:blocks/polished_deepslate_wall" | "blocks/polished_deepslate_wall" => {
+        "minecraft:blocks\\polished_deepslate_wall" | "blocks\\polished_deepslate_wall" => {
             Some(&BLOCKS_POLISHED_DEEPSLATE_WALL)
         }
-        "minecraft:blocks/polished_diorite" | "blocks/polished_diorite" => {
+        "minecraft:blocks\\polished_diorite" | "blocks\\polished_diorite" => {
             Some(&BLOCKS_POLISHED_DIORITE)
         }
-        "minecraft:blocks/polished_diorite_slab" | "blocks/polished_diorite_slab" => {
+        "minecraft:blocks\\polished_diorite_slab" | "blocks\\polished_diorite_slab" => {
             Some(&BLOCKS_POLISHED_DIORITE_SLAB)
         }
-        "minecraft:blocks/polished_diorite_stairs" | "blocks/polished_diorite_stairs" => {
+        "minecraft:blocks\\polished_diorite_stairs" | "blocks\\polished_diorite_stairs" => {
             Some(&BLOCKS_POLISHED_DIORITE_STAIRS)
         }
-        "minecraft:blocks/polished_granite" | "blocks/polished_granite" => {
+        "minecraft:blocks\\polished_granite" | "blocks\\polished_granite" => {
             Some(&BLOCKS_POLISHED_GRANITE)
         }
-        "minecraft:blocks/polished_granite_slab" | "blocks/polished_granite_slab" => {
+        "minecraft:blocks\\polished_granite_slab" | "blocks\\polished_granite_slab" => {
             Some(&BLOCKS_POLISHED_GRANITE_SLAB)
         }
-        "minecraft:blocks/polished_granite_stairs" | "blocks/polished_granite_stairs" => {
+        "minecraft:blocks\\polished_granite_stairs" | "blocks\\polished_granite_stairs" => {
             Some(&BLOCKS_POLISHED_GRANITE_STAIRS)
         }
-        "minecraft:blocks/polished_sulfur" | "blocks/polished_sulfur" => {
+        "minecraft:blocks\\polished_sulfur" | "blocks\\polished_sulfur" => {
             Some(&BLOCKS_POLISHED_SULFUR)
         }
-        "minecraft:blocks/polished_sulfur_slab" | "blocks/polished_sulfur_slab" => {
+        "minecraft:blocks\\polished_sulfur_slab" | "blocks\\polished_sulfur_slab" => {
             Some(&BLOCKS_POLISHED_SULFUR_SLAB)
         }
-        "minecraft:blocks/polished_sulfur_stairs" | "blocks/polished_sulfur_stairs" => {
+        "minecraft:blocks\\polished_sulfur_stairs" | "blocks\\polished_sulfur_stairs" => {
             Some(&BLOCKS_POLISHED_SULFUR_STAIRS)
         }
-        "minecraft:blocks/polished_sulfur_wall" | "blocks/polished_sulfur_wall" => {
+        "minecraft:blocks\\polished_sulfur_wall" | "blocks\\polished_sulfur_wall" => {
             Some(&BLOCKS_POLISHED_SULFUR_WALL)
         }
-        "minecraft:blocks/polished_tuff" | "blocks/polished_tuff" => Some(&BLOCKS_POLISHED_TUFF),
-        "minecraft:blocks/polished_tuff_slab" | "blocks/polished_tuff_slab" => {
+        "minecraft:blocks\\polished_tuff" | "blocks\\polished_tuff" => Some(&BLOCKS_POLISHED_TUFF),
+        "minecraft:blocks\\polished_tuff_slab" | "blocks\\polished_tuff_slab" => {
             Some(&BLOCKS_POLISHED_TUFF_SLAB)
         }
-        "minecraft:blocks/polished_tuff_stairs" | "blocks/polished_tuff_stairs" => {
+        "minecraft:blocks\\polished_tuff_stairs" | "blocks\\polished_tuff_stairs" => {
             Some(&BLOCKS_POLISHED_TUFF_STAIRS)
         }
-        "minecraft:blocks/polished_tuff_wall" | "blocks/polished_tuff_wall" => {
+        "minecraft:blocks\\polished_tuff_wall" | "blocks\\polished_tuff_wall" => {
             Some(&BLOCKS_POLISHED_TUFF_WALL)
         }
-        "minecraft:blocks/poppy" | "blocks/poppy" => Some(&BLOCKS_POPPY),
-        "minecraft:blocks/potatoes" | "blocks/potatoes" => Some(&BLOCKS_POTATOES),
-        "minecraft:blocks/potent_sulfur" | "blocks/potent_sulfur" => Some(&BLOCKS_POTENT_SULFUR),
-        "minecraft:blocks/potted_acacia_sapling" | "blocks/potted_acacia_sapling" => {
+        "minecraft:blocks\\poppy" | "blocks\\poppy" => Some(&BLOCKS_POPPY),
+        "minecraft:blocks\\potatoes" | "blocks\\potatoes" => Some(&BLOCKS_POTATOES),
+        "minecraft:blocks\\potent_sulfur" | "blocks\\potent_sulfur" => Some(&BLOCKS_POTENT_SULFUR),
+        "minecraft:blocks\\potted_acacia_sapling" | "blocks\\potted_acacia_sapling" => {
             Some(&BLOCKS_POTTED_ACACIA_SAPLING)
         }
-        "minecraft:blocks/potted_allium" | "blocks/potted_allium" => Some(&BLOCKS_POTTED_ALLIUM),
-        "minecraft:blocks/potted_azalea_bush" | "blocks/potted_azalea_bush" => {
+        "minecraft:blocks\\potted_allium" | "blocks\\potted_allium" => Some(&BLOCKS_POTTED_ALLIUM),
+        "minecraft:blocks\\potted_azalea_bush" | "blocks\\potted_azalea_bush" => {
             Some(&BLOCKS_POTTED_AZALEA_BUSH)
         }
-        "minecraft:blocks/potted_azure_bluet" | "blocks/potted_azure_bluet" => {
+        "minecraft:blocks\\potted_azure_bluet" | "blocks\\potted_azure_bluet" => {
             Some(&BLOCKS_POTTED_AZURE_BLUET)
         }
-        "minecraft:blocks/potted_bamboo" | "blocks/potted_bamboo" => Some(&BLOCKS_POTTED_BAMBOO),
-        "minecraft:blocks/potted_birch_sapling" | "blocks/potted_birch_sapling" => {
+        "minecraft:blocks\\potted_bamboo" | "blocks\\potted_bamboo" => Some(&BLOCKS_POTTED_BAMBOO),
+        "minecraft:blocks\\potted_birch_sapling" | "blocks\\potted_birch_sapling" => {
             Some(&BLOCKS_POTTED_BIRCH_SAPLING)
         }
-        "minecraft:blocks/potted_blue_orchid" | "blocks/potted_blue_orchid" => {
+        "minecraft:blocks\\potted_blue_orchid" | "blocks\\potted_blue_orchid" => {
             Some(&BLOCKS_POTTED_BLUE_ORCHID)
         }
-        "minecraft:blocks/potted_brown_mushroom" | "blocks/potted_brown_mushroom" => {
+        "minecraft:blocks\\potted_brown_mushroom" | "blocks\\potted_brown_mushroom" => {
             Some(&BLOCKS_POTTED_BROWN_MUSHROOM)
         }
-        "minecraft:blocks/potted_cactus" | "blocks/potted_cactus" => Some(&BLOCKS_POTTED_CACTUS),
-        "minecraft:blocks/potted_cherry_sapling" | "blocks/potted_cherry_sapling" => {
+        "minecraft:blocks\\potted_cactus" | "blocks\\potted_cactus" => Some(&BLOCKS_POTTED_CACTUS),
+        "minecraft:blocks\\potted_cherry_sapling" | "blocks\\potted_cherry_sapling" => {
             Some(&BLOCKS_POTTED_CHERRY_SAPLING)
         }
-        "minecraft:blocks/potted_closed_eyeblossom" | "blocks/potted_closed_eyeblossom" => {
+        "minecraft:blocks\\potted_closed_eyeblossom" | "blocks\\potted_closed_eyeblossom" => {
             Some(&BLOCKS_POTTED_CLOSED_EYEBLOSSOM)
         }
-        "minecraft:blocks/potted_cornflower" | "blocks/potted_cornflower" => {
+        "minecraft:blocks\\potted_cornflower" | "blocks\\potted_cornflower" => {
             Some(&BLOCKS_POTTED_CORNFLOWER)
         }
-        "minecraft:blocks/potted_crimson_fungus" | "blocks/potted_crimson_fungus" => {
+        "minecraft:blocks\\potted_crimson_fungus" | "blocks\\potted_crimson_fungus" => {
             Some(&BLOCKS_POTTED_CRIMSON_FUNGUS)
         }
-        "minecraft:blocks/potted_crimson_roots" | "blocks/potted_crimson_roots" => {
+        "minecraft:blocks\\potted_crimson_roots" | "blocks\\potted_crimson_roots" => {
             Some(&BLOCKS_POTTED_CRIMSON_ROOTS)
         }
-        "minecraft:blocks/potted_dandelion" | "blocks/potted_dandelion" => {
+        "minecraft:blocks\\potted_dandelion" | "blocks\\potted_dandelion" => {
             Some(&BLOCKS_POTTED_DANDELION)
         }
-        "minecraft:blocks/potted_dark_oak_sapling" | "blocks/potted_dark_oak_sapling" => {
+        "minecraft:blocks\\potted_dark_oak_sapling" | "blocks\\potted_dark_oak_sapling" => {
             Some(&BLOCKS_POTTED_DARK_OAK_SAPLING)
         }
-        "minecraft:blocks/potted_dead_bush" | "blocks/potted_dead_bush" => {
+        "minecraft:blocks\\potted_dead_bush" | "blocks\\potted_dead_bush" => {
             Some(&BLOCKS_POTTED_DEAD_BUSH)
         }
-        "minecraft:blocks/potted_fern" | "blocks/potted_fern" => Some(&BLOCKS_POTTED_FERN),
-        "minecraft:blocks/potted_flowering_azalea_bush" | "blocks/potted_flowering_azalea_bush" => {
-            Some(&BLOCKS_POTTED_FLOWERING_AZALEA_BUSH)
-        }
-        "minecraft:blocks/potted_golden_dandelion" | "blocks/potted_golden_dandelion" => {
+        "minecraft:blocks\\potted_fern" | "blocks\\potted_fern" => Some(&BLOCKS_POTTED_FERN),
+        "minecraft:blocks\\potted_flowering_azalea_bush"
+        | "blocks\\potted_flowering_azalea_bush" => Some(&BLOCKS_POTTED_FLOWERING_AZALEA_BUSH),
+        "minecraft:blocks\\potted_golden_dandelion" | "blocks\\potted_golden_dandelion" => {
             Some(&BLOCKS_POTTED_GOLDEN_DANDELION)
         }
-        "minecraft:blocks/potted_jungle_sapling" | "blocks/potted_jungle_sapling" => {
+        "minecraft:blocks\\potted_jungle_sapling" | "blocks\\potted_jungle_sapling" => {
             Some(&BLOCKS_POTTED_JUNGLE_SAPLING)
         }
-        "minecraft:blocks/potted_lily_of_the_valley" | "blocks/potted_lily_of_the_valley" => {
+        "minecraft:blocks\\potted_lily_of_the_valley" | "blocks\\potted_lily_of_the_valley" => {
             Some(&BLOCKS_POTTED_LILY_OF_THE_VALLEY)
         }
-        "minecraft:blocks/potted_mangrove_propagule" | "blocks/potted_mangrove_propagule" => {
+        "minecraft:blocks\\potted_mangrove_propagule" | "blocks\\potted_mangrove_propagule" => {
             Some(&BLOCKS_POTTED_MANGROVE_PROPAGULE)
         }
-        "minecraft:blocks/potted_oak_sapling" | "blocks/potted_oak_sapling" => {
+        "minecraft:blocks\\potted_oak_sapling" | "blocks\\potted_oak_sapling" => {
             Some(&BLOCKS_POTTED_OAK_SAPLING)
         }
-        "minecraft:blocks/potted_open_eyeblossom" | "blocks/potted_open_eyeblossom" => {
+        "minecraft:blocks\\potted_open_eyeblossom" | "blocks\\potted_open_eyeblossom" => {
             Some(&BLOCKS_POTTED_OPEN_EYEBLOSSOM)
         }
-        "minecraft:blocks/potted_orange_tulip" | "blocks/potted_orange_tulip" => {
+        "minecraft:blocks\\potted_orange_tulip" | "blocks\\potted_orange_tulip" => {
             Some(&BLOCKS_POTTED_ORANGE_TULIP)
         }
-        "minecraft:blocks/potted_oxeye_daisy" | "blocks/potted_oxeye_daisy" => {
+        "minecraft:blocks\\potted_oxeye_daisy" | "blocks\\potted_oxeye_daisy" => {
             Some(&BLOCKS_POTTED_OXEYE_DAISY)
         }
-        "minecraft:blocks/potted_pale_oak_sapling" | "blocks/potted_pale_oak_sapling" => {
+        "minecraft:blocks\\potted_pale_oak_sapling" | "blocks\\potted_pale_oak_sapling" => {
             Some(&BLOCKS_POTTED_PALE_OAK_SAPLING)
         }
-        "minecraft:blocks/potted_pink_tulip" | "blocks/potted_pink_tulip" => {
+        "minecraft:blocks\\potted_pink_tulip" | "blocks\\potted_pink_tulip" => {
             Some(&BLOCKS_POTTED_PINK_TULIP)
         }
-        "minecraft:blocks/potted_poppy" | "blocks/potted_poppy" => Some(&BLOCKS_POTTED_POPPY),
-        "minecraft:blocks/potted_red_mushroom" | "blocks/potted_red_mushroom" => {
+        "minecraft:blocks\\potted_poppy" | "blocks\\potted_poppy" => Some(&BLOCKS_POTTED_POPPY),
+        "minecraft:blocks\\potted_red_mushroom" | "blocks\\potted_red_mushroom" => {
             Some(&BLOCKS_POTTED_RED_MUSHROOM)
         }
-        "minecraft:blocks/potted_red_tulip" | "blocks/potted_red_tulip" => {
+        "minecraft:blocks\\potted_red_tulip" | "blocks\\potted_red_tulip" => {
             Some(&BLOCKS_POTTED_RED_TULIP)
         }
-        "minecraft:blocks/potted_spruce_sapling" | "blocks/potted_spruce_sapling" => {
+        "minecraft:blocks\\potted_spruce_sapling" | "blocks\\potted_spruce_sapling" => {
             Some(&BLOCKS_POTTED_SPRUCE_SAPLING)
         }
-        "minecraft:blocks/potted_torchflower" | "blocks/potted_torchflower" => {
+        "minecraft:blocks\\potted_torchflower" | "blocks\\potted_torchflower" => {
             Some(&BLOCKS_POTTED_TORCHFLOWER)
         }
-        "minecraft:blocks/potted_warped_fungus" | "blocks/potted_warped_fungus" => {
+        "minecraft:blocks\\potted_warped_fungus" | "blocks\\potted_warped_fungus" => {
             Some(&BLOCKS_POTTED_WARPED_FUNGUS)
         }
-        "minecraft:blocks/potted_warped_roots" | "blocks/potted_warped_roots" => {
+        "minecraft:blocks\\potted_warped_roots" | "blocks\\potted_warped_roots" => {
             Some(&BLOCKS_POTTED_WARPED_ROOTS)
         }
-        "minecraft:blocks/potted_white_tulip" | "blocks/potted_white_tulip" => {
+        "minecraft:blocks\\potted_white_tulip" | "blocks\\potted_white_tulip" => {
             Some(&BLOCKS_POTTED_WHITE_TULIP)
         }
-        "minecraft:blocks/potted_wither_rose" | "blocks/potted_wither_rose" => {
+        "minecraft:blocks\\potted_wither_rose" | "blocks\\potted_wither_rose" => {
             Some(&BLOCKS_POTTED_WITHER_ROSE)
         }
-        "minecraft:blocks/powder_snow" | "blocks/powder_snow" => Some(&BLOCKS_POWDER_SNOW),
-        "minecraft:blocks/powder_snow_cauldron" | "blocks/powder_snow_cauldron" => {
+        "minecraft:blocks\\powder_snow" | "blocks\\powder_snow" => Some(&BLOCKS_POWDER_SNOW),
+        "minecraft:blocks\\powder_snow_cauldron" | "blocks\\powder_snow_cauldron" => {
             Some(&BLOCKS_POWDER_SNOW_CAULDRON)
         }
-        "minecraft:blocks/powered_rail" | "blocks/powered_rail" => Some(&BLOCKS_POWERED_RAIL),
-        "minecraft:blocks/prismarine" | "blocks/prismarine" => Some(&BLOCKS_PRISMARINE),
-        "minecraft:blocks/prismarine_brick_slab" | "blocks/prismarine_brick_slab" => {
+        "minecraft:blocks\\powered_rail" | "blocks\\powered_rail" => Some(&BLOCKS_POWERED_RAIL),
+        "minecraft:blocks\\prismarine" | "blocks\\prismarine" => Some(&BLOCKS_PRISMARINE),
+        "minecraft:blocks\\prismarine_brick_slab" | "blocks\\prismarine_brick_slab" => {
             Some(&BLOCKS_PRISMARINE_BRICK_SLAB)
         }
-        "minecraft:blocks/prismarine_brick_stairs" | "blocks/prismarine_brick_stairs" => {
+        "minecraft:blocks\\prismarine_brick_stairs" | "blocks\\prismarine_brick_stairs" => {
             Some(&BLOCKS_PRISMARINE_BRICK_STAIRS)
         }
-        "minecraft:blocks/prismarine_bricks" | "blocks/prismarine_bricks" => {
+        "minecraft:blocks\\prismarine_bricks" | "blocks\\prismarine_bricks" => {
             Some(&BLOCKS_PRISMARINE_BRICKS)
         }
-        "minecraft:blocks/prismarine_slab" | "blocks/prismarine_slab" => {
+        "minecraft:blocks\\prismarine_slab" | "blocks\\prismarine_slab" => {
             Some(&BLOCKS_PRISMARINE_SLAB)
         }
-        "minecraft:blocks/prismarine_stairs" | "blocks/prismarine_stairs" => {
+        "minecraft:blocks\\prismarine_stairs" | "blocks\\prismarine_stairs" => {
             Some(&BLOCKS_PRISMARINE_STAIRS)
         }
-        "minecraft:blocks/prismarine_wall" | "blocks/prismarine_wall" => {
+        "minecraft:blocks\\prismarine_wall" | "blocks\\prismarine_wall" => {
             Some(&BLOCKS_PRISMARINE_WALL)
         }
-        "minecraft:blocks/pumpkin" | "blocks/pumpkin" => Some(&BLOCKS_PUMPKIN),
-        "minecraft:blocks/pumpkin_stem" | "blocks/pumpkin_stem" => Some(&BLOCKS_PUMPKIN_STEM),
-        "minecraft:blocks/purple_banner" | "blocks/purple_banner" => Some(&BLOCKS_PURPLE_BANNER),
-        "minecraft:blocks/purple_bed" | "blocks/purple_bed" => Some(&BLOCKS_PURPLE_BED),
-        "minecraft:blocks/purple_candle" | "blocks/purple_candle" => Some(&BLOCKS_PURPLE_CANDLE),
-        "minecraft:blocks/purple_candle_cake" | "blocks/purple_candle_cake" => {
+        "minecraft:blocks\\pumpkin" | "blocks\\pumpkin" => Some(&BLOCKS_PUMPKIN),
+        "minecraft:blocks\\pumpkin_stem" | "blocks\\pumpkin_stem" => Some(&BLOCKS_PUMPKIN_STEM),
+        "minecraft:blocks\\purple_banner" | "blocks\\purple_banner" => Some(&BLOCKS_PURPLE_BANNER),
+        "minecraft:blocks\\purple_bed" | "blocks\\purple_bed" => Some(&BLOCKS_PURPLE_BED),
+        "minecraft:blocks\\purple_candle" | "blocks\\purple_candle" => Some(&BLOCKS_PURPLE_CANDLE),
+        "minecraft:blocks\\purple_candle_cake" | "blocks\\purple_candle_cake" => {
             Some(&BLOCKS_PURPLE_CANDLE_CAKE)
         }
-        "minecraft:blocks/purple_carpet" | "blocks/purple_carpet" => Some(&BLOCKS_PURPLE_CARPET),
-        "minecraft:blocks/purple_concrete" | "blocks/purple_concrete" => {
+        "minecraft:blocks\\purple_carpet" | "blocks\\purple_carpet" => Some(&BLOCKS_PURPLE_CARPET),
+        "minecraft:blocks\\purple_concrete" | "blocks\\purple_concrete" => {
             Some(&BLOCKS_PURPLE_CONCRETE)
         }
-        "minecraft:blocks/purple_concrete_powder" | "blocks/purple_concrete_powder" => {
+        "minecraft:blocks\\purple_concrete_powder" | "blocks\\purple_concrete_powder" => {
             Some(&BLOCKS_PURPLE_CONCRETE_POWDER)
         }
-        "minecraft:blocks/purple_glazed_terracotta" | "blocks/purple_glazed_terracotta" => {
+        "minecraft:blocks\\purple_glazed_terracotta" | "blocks\\purple_glazed_terracotta" => {
             Some(&BLOCKS_PURPLE_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/purple_shulker_box" | "blocks/purple_shulker_box" => {
+        "minecraft:blocks\\purple_shulker_box" | "blocks\\purple_shulker_box" => {
             Some(&BLOCKS_PURPLE_SHULKER_BOX)
         }
-        "minecraft:blocks/purple_stained_glass" | "blocks/purple_stained_glass" => {
+        "minecraft:blocks\\purple_stained_glass" | "blocks\\purple_stained_glass" => {
             Some(&BLOCKS_PURPLE_STAINED_GLASS)
         }
-        "minecraft:blocks/purple_stained_glass_pane" | "blocks/purple_stained_glass_pane" => {
+        "minecraft:blocks\\purple_stained_glass_pane" | "blocks\\purple_stained_glass_pane" => {
             Some(&BLOCKS_PURPLE_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/purple_terracotta" | "blocks/purple_terracotta" => {
+        "minecraft:blocks\\purple_terracotta" | "blocks\\purple_terracotta" => {
             Some(&BLOCKS_PURPLE_TERRACOTTA)
         }
-        "minecraft:blocks/purple_wool" | "blocks/purple_wool" => Some(&BLOCKS_PURPLE_WOOL),
-        "minecraft:blocks/purpur_block" | "blocks/purpur_block" => Some(&BLOCKS_PURPUR_BLOCK),
-        "minecraft:blocks/purpur_pillar" | "blocks/purpur_pillar" => Some(&BLOCKS_PURPUR_PILLAR),
-        "minecraft:blocks/purpur_slab" | "blocks/purpur_slab" => Some(&BLOCKS_PURPUR_SLAB),
-        "minecraft:blocks/purpur_stairs" | "blocks/purpur_stairs" => Some(&BLOCKS_PURPUR_STAIRS),
-        "minecraft:blocks/quartz_block" | "blocks/quartz_block" => Some(&BLOCKS_QUARTZ_BLOCK),
-        "minecraft:blocks/quartz_bricks" | "blocks/quartz_bricks" => Some(&BLOCKS_QUARTZ_BRICKS),
-        "minecraft:blocks/quartz_pillar" | "blocks/quartz_pillar" => Some(&BLOCKS_QUARTZ_PILLAR),
-        "minecraft:blocks/quartz_slab" | "blocks/quartz_slab" => Some(&BLOCKS_QUARTZ_SLAB),
-        "minecraft:blocks/quartz_stairs" | "blocks/quartz_stairs" => Some(&BLOCKS_QUARTZ_STAIRS),
-        "minecraft:blocks/rail" | "blocks/rail" => Some(&BLOCKS_RAIL),
-        "minecraft:blocks/raw_copper_block" | "blocks/raw_copper_block" => {
+        "minecraft:blocks\\purple_wool" | "blocks\\purple_wool" => Some(&BLOCKS_PURPLE_WOOL),
+        "minecraft:blocks\\purpur_block" | "blocks\\purpur_block" => Some(&BLOCKS_PURPUR_BLOCK),
+        "minecraft:blocks\\purpur_pillar" | "blocks\\purpur_pillar" => Some(&BLOCKS_PURPUR_PILLAR),
+        "minecraft:blocks\\purpur_slab" | "blocks\\purpur_slab" => Some(&BLOCKS_PURPUR_SLAB),
+        "minecraft:blocks\\purpur_stairs" | "blocks\\purpur_stairs" => Some(&BLOCKS_PURPUR_STAIRS),
+        "minecraft:blocks\\quartz_block" | "blocks\\quartz_block" => Some(&BLOCKS_QUARTZ_BLOCK),
+        "minecraft:blocks\\quartz_bricks" | "blocks\\quartz_bricks" => Some(&BLOCKS_QUARTZ_BRICKS),
+        "minecraft:blocks\\quartz_pillar" | "blocks\\quartz_pillar" => Some(&BLOCKS_QUARTZ_PILLAR),
+        "minecraft:blocks\\quartz_slab" | "blocks\\quartz_slab" => Some(&BLOCKS_QUARTZ_SLAB),
+        "minecraft:blocks\\quartz_stairs" | "blocks\\quartz_stairs" => Some(&BLOCKS_QUARTZ_STAIRS),
+        "minecraft:blocks\\rail" | "blocks\\rail" => Some(&BLOCKS_RAIL),
+        "minecraft:blocks\\raw_copper_block" | "blocks\\raw_copper_block" => {
             Some(&BLOCKS_RAW_COPPER_BLOCK)
         }
-        "minecraft:blocks/raw_gold_block" | "blocks/raw_gold_block" => Some(&BLOCKS_RAW_GOLD_BLOCK),
-        "minecraft:blocks/raw_iron_block" | "blocks/raw_iron_block" => Some(&BLOCKS_RAW_IRON_BLOCK),
-        "minecraft:blocks/red_banner" | "blocks/red_banner" => Some(&BLOCKS_RED_BANNER),
-        "minecraft:blocks/red_bed" | "blocks/red_bed" => Some(&BLOCKS_RED_BED),
-        "minecraft:blocks/red_candle" | "blocks/red_candle" => Some(&BLOCKS_RED_CANDLE),
-        "minecraft:blocks/red_candle_cake" | "blocks/red_candle_cake" => {
+        "minecraft:blocks\\raw_gold_block" | "blocks\\raw_gold_block" => {
+            Some(&BLOCKS_RAW_GOLD_BLOCK)
+        }
+        "minecraft:blocks\\raw_iron_block" | "blocks\\raw_iron_block" => {
+            Some(&BLOCKS_RAW_IRON_BLOCK)
+        }
+        "minecraft:blocks\\red_banner" | "blocks\\red_banner" => Some(&BLOCKS_RED_BANNER),
+        "minecraft:blocks\\red_bed" | "blocks\\red_bed" => Some(&BLOCKS_RED_BED),
+        "minecraft:blocks\\red_candle" | "blocks\\red_candle" => Some(&BLOCKS_RED_CANDLE),
+        "minecraft:blocks\\red_candle_cake" | "blocks\\red_candle_cake" => {
             Some(&BLOCKS_RED_CANDLE_CAKE)
         }
-        "minecraft:blocks/red_carpet" | "blocks/red_carpet" => Some(&BLOCKS_RED_CARPET),
-        "minecraft:blocks/red_concrete" | "blocks/red_concrete" => Some(&BLOCKS_RED_CONCRETE),
-        "minecraft:blocks/red_concrete_powder" | "blocks/red_concrete_powder" => {
+        "minecraft:blocks\\red_carpet" | "blocks\\red_carpet" => Some(&BLOCKS_RED_CARPET),
+        "minecraft:blocks\\red_concrete" | "blocks\\red_concrete" => Some(&BLOCKS_RED_CONCRETE),
+        "minecraft:blocks\\red_concrete_powder" | "blocks\\red_concrete_powder" => {
             Some(&BLOCKS_RED_CONCRETE_POWDER)
         }
-        "minecraft:blocks/red_glazed_terracotta" | "blocks/red_glazed_terracotta" => {
+        "minecraft:blocks\\red_glazed_terracotta" | "blocks\\red_glazed_terracotta" => {
             Some(&BLOCKS_RED_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/red_mushroom" | "blocks/red_mushroom" => Some(&BLOCKS_RED_MUSHROOM),
-        "minecraft:blocks/red_mushroom_block" | "blocks/red_mushroom_block" => {
+        "minecraft:blocks\\red_mushroom" | "blocks\\red_mushroom" => Some(&BLOCKS_RED_MUSHROOM),
+        "minecraft:blocks\\red_mushroom_block" | "blocks\\red_mushroom_block" => {
             Some(&BLOCKS_RED_MUSHROOM_BLOCK)
         }
-        "minecraft:blocks/red_nether_brick_slab" | "blocks/red_nether_brick_slab" => {
+        "minecraft:blocks\\red_nether_brick_slab" | "blocks\\red_nether_brick_slab" => {
             Some(&BLOCKS_RED_NETHER_BRICK_SLAB)
         }
-        "minecraft:blocks/red_nether_brick_stairs" | "blocks/red_nether_brick_stairs" => {
+        "minecraft:blocks\\red_nether_brick_stairs" | "blocks\\red_nether_brick_stairs" => {
             Some(&BLOCKS_RED_NETHER_BRICK_STAIRS)
         }
-        "minecraft:blocks/red_nether_brick_wall" | "blocks/red_nether_brick_wall" => {
+        "minecraft:blocks\\red_nether_brick_wall" | "blocks\\red_nether_brick_wall" => {
             Some(&BLOCKS_RED_NETHER_BRICK_WALL)
         }
-        "minecraft:blocks/red_nether_bricks" | "blocks/red_nether_bricks" => {
+        "minecraft:blocks\\red_nether_bricks" | "blocks\\red_nether_bricks" => {
             Some(&BLOCKS_RED_NETHER_BRICKS)
         }
-        "minecraft:blocks/red_sand" | "blocks/red_sand" => Some(&BLOCKS_RED_SAND),
-        "minecraft:blocks/red_sandstone" | "blocks/red_sandstone" => Some(&BLOCKS_RED_SANDSTONE),
-        "minecraft:blocks/red_sandstone_slab" | "blocks/red_sandstone_slab" => {
+        "minecraft:blocks\\red_sand" | "blocks\\red_sand" => Some(&BLOCKS_RED_SAND),
+        "minecraft:blocks\\red_sandstone" | "blocks\\red_sandstone" => Some(&BLOCKS_RED_SANDSTONE),
+        "minecraft:blocks\\red_sandstone_slab" | "blocks\\red_sandstone_slab" => {
             Some(&BLOCKS_RED_SANDSTONE_SLAB)
         }
-        "minecraft:blocks/red_sandstone_stairs" | "blocks/red_sandstone_stairs" => {
+        "minecraft:blocks\\red_sandstone_stairs" | "blocks\\red_sandstone_stairs" => {
             Some(&BLOCKS_RED_SANDSTONE_STAIRS)
         }
-        "minecraft:blocks/red_sandstone_wall" | "blocks/red_sandstone_wall" => {
+        "minecraft:blocks\\red_sandstone_wall" | "blocks\\red_sandstone_wall" => {
             Some(&BLOCKS_RED_SANDSTONE_WALL)
         }
-        "minecraft:blocks/red_shulker_box" | "blocks/red_shulker_box" => {
+        "minecraft:blocks\\red_shulker_box" | "blocks\\red_shulker_box" => {
             Some(&BLOCKS_RED_SHULKER_BOX)
         }
-        "minecraft:blocks/red_stained_glass" | "blocks/red_stained_glass" => {
+        "minecraft:blocks\\red_stained_glass" | "blocks\\red_stained_glass" => {
             Some(&BLOCKS_RED_STAINED_GLASS)
         }
-        "minecraft:blocks/red_stained_glass_pane" | "blocks/red_stained_glass_pane" => {
+        "minecraft:blocks\\red_stained_glass_pane" | "blocks\\red_stained_glass_pane" => {
             Some(&BLOCKS_RED_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/red_terracotta" | "blocks/red_terracotta" => Some(&BLOCKS_RED_TERRACOTTA),
-        "minecraft:blocks/red_tulip" | "blocks/red_tulip" => Some(&BLOCKS_RED_TULIP),
-        "minecraft:blocks/red_wool" | "blocks/red_wool" => Some(&BLOCKS_RED_WOOL),
-        "minecraft:blocks/redstone_block" | "blocks/redstone_block" => Some(&BLOCKS_REDSTONE_BLOCK),
-        "minecraft:blocks/redstone_lamp" | "blocks/redstone_lamp" => Some(&BLOCKS_REDSTONE_LAMP),
-        "minecraft:blocks/redstone_ore" | "blocks/redstone_ore" => Some(&BLOCKS_REDSTONE_ORE),
-        "minecraft:blocks/redstone_torch" | "blocks/redstone_torch" => Some(&BLOCKS_REDSTONE_TORCH),
-        "minecraft:blocks/redstone_wire" | "blocks/redstone_wire" => Some(&BLOCKS_REDSTONE_WIRE),
-        "minecraft:blocks/reinforced_deepslate" | "blocks/reinforced_deepslate" => {
+        "minecraft:blocks\\red_terracotta" | "blocks\\red_terracotta" => {
+            Some(&BLOCKS_RED_TERRACOTTA)
+        }
+        "minecraft:blocks\\red_tulip" | "blocks\\red_tulip" => Some(&BLOCKS_RED_TULIP),
+        "minecraft:blocks\\red_wool" | "blocks\\red_wool" => Some(&BLOCKS_RED_WOOL),
+        "minecraft:blocks\\redstone_block" | "blocks\\redstone_block" => {
+            Some(&BLOCKS_REDSTONE_BLOCK)
+        }
+        "minecraft:blocks\\redstone_lamp" | "blocks\\redstone_lamp" => Some(&BLOCKS_REDSTONE_LAMP),
+        "minecraft:blocks\\redstone_ore" | "blocks\\redstone_ore" => Some(&BLOCKS_REDSTONE_ORE),
+        "minecraft:blocks\\redstone_torch" | "blocks\\redstone_torch" => {
+            Some(&BLOCKS_REDSTONE_TORCH)
+        }
+        "minecraft:blocks\\redstone_wire" | "blocks\\redstone_wire" => Some(&BLOCKS_REDSTONE_WIRE),
+        "minecraft:blocks\\reinforced_deepslate" | "blocks\\reinforced_deepslate" => {
             Some(&BLOCKS_REINFORCED_DEEPSLATE)
         }
-        "minecraft:blocks/repeater" | "blocks/repeater" => Some(&BLOCKS_REPEATER),
-        "minecraft:blocks/resin_block" | "blocks/resin_block" => Some(&BLOCKS_RESIN_BLOCK),
-        "minecraft:blocks/resin_brick_slab" | "blocks/resin_brick_slab" => {
+        "minecraft:blocks\\repeater" | "blocks\\repeater" => Some(&BLOCKS_REPEATER),
+        "minecraft:blocks\\resin_block" | "blocks\\resin_block" => Some(&BLOCKS_RESIN_BLOCK),
+        "minecraft:blocks\\resin_brick_slab" | "blocks\\resin_brick_slab" => {
             Some(&BLOCKS_RESIN_BRICK_SLAB)
         }
-        "minecraft:blocks/resin_brick_stairs" | "blocks/resin_brick_stairs" => {
+        "minecraft:blocks\\resin_brick_stairs" | "blocks\\resin_brick_stairs" => {
             Some(&BLOCKS_RESIN_BRICK_STAIRS)
         }
-        "minecraft:blocks/resin_brick_wall" | "blocks/resin_brick_wall" => {
+        "minecraft:blocks\\resin_brick_wall" | "blocks\\resin_brick_wall" => {
             Some(&BLOCKS_RESIN_BRICK_WALL)
         }
-        "minecraft:blocks/resin_bricks" | "blocks/resin_bricks" => Some(&BLOCKS_RESIN_BRICKS),
-        "minecraft:blocks/resin_clump" | "blocks/resin_clump" => Some(&BLOCKS_RESIN_CLUMP),
-        "minecraft:blocks/respawn_anchor" | "blocks/respawn_anchor" => Some(&BLOCKS_RESPAWN_ANCHOR),
-        "minecraft:blocks/rooted_dirt" | "blocks/rooted_dirt" => Some(&BLOCKS_ROOTED_DIRT),
-        "minecraft:blocks/rose_bush" | "blocks/rose_bush" => Some(&BLOCKS_ROSE_BUSH),
-        "minecraft:blocks/sand" | "blocks/sand" => Some(&BLOCKS_SAND),
-        "minecraft:blocks/sandstone" | "blocks/sandstone" => Some(&BLOCKS_SANDSTONE),
-        "minecraft:blocks/sandstone_slab" | "blocks/sandstone_slab" => Some(&BLOCKS_SANDSTONE_SLAB),
-        "minecraft:blocks/sandstone_stairs" | "blocks/sandstone_stairs" => {
+        "minecraft:blocks\\resin_bricks" | "blocks\\resin_bricks" => Some(&BLOCKS_RESIN_BRICKS),
+        "minecraft:blocks\\resin_clump" | "blocks\\resin_clump" => Some(&BLOCKS_RESIN_CLUMP),
+        "minecraft:blocks\\respawn_anchor" | "blocks\\respawn_anchor" => {
+            Some(&BLOCKS_RESPAWN_ANCHOR)
+        }
+        "minecraft:blocks\\rooted_dirt" | "blocks\\rooted_dirt" => Some(&BLOCKS_ROOTED_DIRT),
+        "minecraft:blocks\\rose_bush" | "blocks\\rose_bush" => Some(&BLOCKS_ROSE_BUSH),
+        "minecraft:blocks\\sand" | "blocks\\sand" => Some(&BLOCKS_SAND),
+        "minecraft:blocks\\sandstone" | "blocks\\sandstone" => Some(&BLOCKS_SANDSTONE),
+        "minecraft:blocks\\sandstone_slab" | "blocks\\sandstone_slab" => {
+            Some(&BLOCKS_SANDSTONE_SLAB)
+        }
+        "minecraft:blocks\\sandstone_stairs" | "blocks\\sandstone_stairs" => {
             Some(&BLOCKS_SANDSTONE_STAIRS)
         }
-        "minecraft:blocks/sandstone_wall" | "blocks/sandstone_wall" => Some(&BLOCKS_SANDSTONE_WALL),
-        "minecraft:blocks/scaffolding" | "blocks/scaffolding" => Some(&BLOCKS_SCAFFOLDING),
-        "minecraft:blocks/sculk" | "blocks/sculk" => Some(&BLOCKS_SCULK),
-        "minecraft:blocks/sculk_catalyst" | "blocks/sculk_catalyst" => Some(&BLOCKS_SCULK_CATALYST),
-        "minecraft:blocks/sculk_sensor" | "blocks/sculk_sensor" => Some(&BLOCKS_SCULK_SENSOR),
-        "minecraft:blocks/sculk_shrieker" | "blocks/sculk_shrieker" => Some(&BLOCKS_SCULK_SHRIEKER),
-        "minecraft:blocks/sculk_vein" | "blocks/sculk_vein" => Some(&BLOCKS_SCULK_VEIN),
-        "minecraft:blocks/sea_lantern" | "blocks/sea_lantern" => Some(&BLOCKS_SEA_LANTERN),
-        "minecraft:blocks/sea_pickle" | "blocks/sea_pickle" => Some(&BLOCKS_SEA_PICKLE),
-        "minecraft:blocks/seagrass" | "blocks/seagrass" => Some(&BLOCKS_SEAGRASS),
-        "minecraft:blocks/short_dry_grass" | "blocks/short_dry_grass" => {
+        "minecraft:blocks\\sandstone_wall" | "blocks\\sandstone_wall" => {
+            Some(&BLOCKS_SANDSTONE_WALL)
+        }
+        "minecraft:blocks\\scaffolding" | "blocks\\scaffolding" => Some(&BLOCKS_SCAFFOLDING),
+        "minecraft:blocks\\sculk" | "blocks\\sculk" => Some(&BLOCKS_SCULK),
+        "minecraft:blocks\\sculk_catalyst" | "blocks\\sculk_catalyst" => {
+            Some(&BLOCKS_SCULK_CATALYST)
+        }
+        "minecraft:blocks\\sculk_sensor" | "blocks\\sculk_sensor" => Some(&BLOCKS_SCULK_SENSOR),
+        "minecraft:blocks\\sculk_shrieker" | "blocks\\sculk_shrieker" => {
+            Some(&BLOCKS_SCULK_SHRIEKER)
+        }
+        "minecraft:blocks\\sculk_vein" | "blocks\\sculk_vein" => Some(&BLOCKS_SCULK_VEIN),
+        "minecraft:blocks\\sea_lantern" | "blocks\\sea_lantern" => Some(&BLOCKS_SEA_LANTERN),
+        "minecraft:blocks\\sea_pickle" | "blocks\\sea_pickle" => Some(&BLOCKS_SEA_PICKLE),
+        "minecraft:blocks\\seagrass" | "blocks\\seagrass" => Some(&BLOCKS_SEAGRASS),
+        "minecraft:blocks\\short_dry_grass" | "blocks\\short_dry_grass" => {
             Some(&BLOCKS_SHORT_DRY_GRASS)
         }
-        "minecraft:blocks/short_grass" | "blocks/short_grass" => Some(&BLOCKS_SHORT_GRASS),
-        "minecraft:blocks/shroomlight" | "blocks/shroomlight" => Some(&BLOCKS_SHROOMLIGHT),
-        "minecraft:blocks/shulker_box" | "blocks/shulker_box" => Some(&BLOCKS_SHULKER_BOX),
-        "minecraft:blocks/skeleton_skull" | "blocks/skeleton_skull" => Some(&BLOCKS_SKELETON_SKULL),
-        "minecraft:blocks/slime_block" | "blocks/slime_block" => Some(&BLOCKS_SLIME_BLOCK),
-        "minecraft:blocks/small_amethyst_bud" | "blocks/small_amethyst_bud" => {
+        "minecraft:blocks\\short_grass" | "blocks\\short_grass" => Some(&BLOCKS_SHORT_GRASS),
+        "minecraft:blocks\\shroomlight" | "blocks\\shroomlight" => Some(&BLOCKS_SHROOMLIGHT),
+        "minecraft:blocks\\shulker_box" | "blocks\\shulker_box" => Some(&BLOCKS_SHULKER_BOX),
+        "minecraft:blocks\\skeleton_skull" | "blocks\\skeleton_skull" => {
+            Some(&BLOCKS_SKELETON_SKULL)
+        }
+        "minecraft:blocks\\slime_block" | "blocks\\slime_block" => Some(&BLOCKS_SLIME_BLOCK),
+        "minecraft:blocks\\small_amethyst_bud" | "blocks\\small_amethyst_bud" => {
             Some(&BLOCKS_SMALL_AMETHYST_BUD)
         }
-        "minecraft:blocks/small_dripleaf" | "blocks/small_dripleaf" => Some(&BLOCKS_SMALL_DRIPLEAF),
-        "minecraft:blocks/smithing_table" | "blocks/smithing_table" => Some(&BLOCKS_SMITHING_TABLE),
-        "minecraft:blocks/smoker" | "blocks/smoker" => Some(&BLOCKS_SMOKER),
-        "minecraft:blocks/smooth_basalt" | "blocks/smooth_basalt" => Some(&BLOCKS_SMOOTH_BASALT),
-        "minecraft:blocks/smooth_quartz" | "blocks/smooth_quartz" => Some(&BLOCKS_SMOOTH_QUARTZ),
-        "minecraft:blocks/smooth_quartz_slab" | "blocks/smooth_quartz_slab" => {
+        "minecraft:blocks\\small_dripleaf" | "blocks\\small_dripleaf" => {
+            Some(&BLOCKS_SMALL_DRIPLEAF)
+        }
+        "minecraft:blocks\\smithing_table" | "blocks\\smithing_table" => {
+            Some(&BLOCKS_SMITHING_TABLE)
+        }
+        "minecraft:blocks\\smoker" | "blocks\\smoker" => Some(&BLOCKS_SMOKER),
+        "minecraft:blocks\\smooth_basalt" | "blocks\\smooth_basalt" => Some(&BLOCKS_SMOOTH_BASALT),
+        "minecraft:blocks\\smooth_quartz" | "blocks\\smooth_quartz" => Some(&BLOCKS_SMOOTH_QUARTZ),
+        "minecraft:blocks\\smooth_quartz_slab" | "blocks\\smooth_quartz_slab" => {
             Some(&BLOCKS_SMOOTH_QUARTZ_SLAB)
         }
-        "minecraft:blocks/smooth_quartz_stairs" | "blocks/smooth_quartz_stairs" => {
+        "minecraft:blocks\\smooth_quartz_stairs" | "blocks\\smooth_quartz_stairs" => {
             Some(&BLOCKS_SMOOTH_QUARTZ_STAIRS)
         }
-        "minecraft:blocks/smooth_red_sandstone" | "blocks/smooth_red_sandstone" => {
+        "minecraft:blocks\\smooth_red_sandstone" | "blocks\\smooth_red_sandstone" => {
             Some(&BLOCKS_SMOOTH_RED_SANDSTONE)
         }
-        "minecraft:blocks/smooth_red_sandstone_slab" | "blocks/smooth_red_sandstone_slab" => {
+        "minecraft:blocks\\smooth_red_sandstone_slab" | "blocks\\smooth_red_sandstone_slab" => {
             Some(&BLOCKS_SMOOTH_RED_SANDSTONE_SLAB)
         }
-        "minecraft:blocks/smooth_red_sandstone_stairs" | "blocks/smooth_red_sandstone_stairs" => {
+        "minecraft:blocks\\smooth_red_sandstone_stairs" | "blocks\\smooth_red_sandstone_stairs" => {
             Some(&BLOCKS_SMOOTH_RED_SANDSTONE_STAIRS)
         }
-        "minecraft:blocks/smooth_sandstone" | "blocks/smooth_sandstone" => {
+        "minecraft:blocks\\smooth_sandstone" | "blocks\\smooth_sandstone" => {
             Some(&BLOCKS_SMOOTH_SANDSTONE)
         }
-        "minecraft:blocks/smooth_sandstone_slab" | "blocks/smooth_sandstone_slab" => {
+        "minecraft:blocks\\smooth_sandstone_slab" | "blocks\\smooth_sandstone_slab" => {
             Some(&BLOCKS_SMOOTH_SANDSTONE_SLAB)
         }
-        "minecraft:blocks/smooth_sandstone_stairs" | "blocks/smooth_sandstone_stairs" => {
+        "minecraft:blocks\\smooth_sandstone_stairs" | "blocks\\smooth_sandstone_stairs" => {
             Some(&BLOCKS_SMOOTH_SANDSTONE_STAIRS)
         }
-        "minecraft:blocks/smooth_stone" | "blocks/smooth_stone" => Some(&BLOCKS_SMOOTH_STONE),
-        "minecraft:blocks/smooth_stone_slab" | "blocks/smooth_stone_slab" => {
+        "minecraft:blocks\\smooth_stone" | "blocks\\smooth_stone" => Some(&BLOCKS_SMOOTH_STONE),
+        "minecraft:blocks\\smooth_stone_slab" | "blocks\\smooth_stone_slab" => {
             Some(&BLOCKS_SMOOTH_STONE_SLAB)
         }
-        "minecraft:blocks/sniffer_egg" | "blocks/sniffer_egg" => Some(&BLOCKS_SNIFFER_EGG),
-        "minecraft:blocks/snow" | "blocks/snow" => Some(&BLOCKS_SNOW),
-        "minecraft:blocks/snow_block" | "blocks/snow_block" => Some(&BLOCKS_SNOW_BLOCK),
-        "minecraft:blocks/soul_campfire" | "blocks/soul_campfire" => Some(&BLOCKS_SOUL_CAMPFIRE),
-        "minecraft:blocks/soul_fire" | "blocks/soul_fire" => Some(&BLOCKS_SOUL_FIRE),
-        "minecraft:blocks/soul_lantern" | "blocks/soul_lantern" => Some(&BLOCKS_SOUL_LANTERN),
-        "minecraft:blocks/soul_sand" | "blocks/soul_sand" => Some(&BLOCKS_SOUL_SAND),
-        "minecraft:blocks/soul_soil" | "blocks/soul_soil" => Some(&BLOCKS_SOUL_SOIL),
-        "minecraft:blocks/soul_torch" | "blocks/soul_torch" => Some(&BLOCKS_SOUL_TORCH),
-        "minecraft:blocks/spawner" | "blocks/spawner" => Some(&BLOCKS_SPAWNER),
-        "minecraft:blocks/sponge" | "blocks/sponge" => Some(&BLOCKS_SPONGE),
-        "minecraft:blocks/spore_blossom" | "blocks/spore_blossom" => Some(&BLOCKS_SPORE_BLOSSOM),
-        "minecraft:blocks/spruce_button" | "blocks/spruce_button" => Some(&BLOCKS_SPRUCE_BUTTON),
-        "minecraft:blocks/spruce_door" | "blocks/spruce_door" => Some(&BLOCKS_SPRUCE_DOOR),
-        "minecraft:blocks/spruce_fence" | "blocks/spruce_fence" => Some(&BLOCKS_SPRUCE_FENCE),
-        "minecraft:blocks/spruce_fence_gate" | "blocks/spruce_fence_gate" => {
+        "minecraft:blocks\\sniffer_egg" | "blocks\\sniffer_egg" => Some(&BLOCKS_SNIFFER_EGG),
+        "minecraft:blocks\\snow" | "blocks\\snow" => Some(&BLOCKS_SNOW),
+        "minecraft:blocks\\snow_block" | "blocks\\snow_block" => Some(&BLOCKS_SNOW_BLOCK),
+        "minecraft:blocks\\soul_campfire" | "blocks\\soul_campfire" => Some(&BLOCKS_SOUL_CAMPFIRE),
+        "minecraft:blocks\\soul_fire" | "blocks\\soul_fire" => Some(&BLOCKS_SOUL_FIRE),
+        "minecraft:blocks\\soul_lantern" | "blocks\\soul_lantern" => Some(&BLOCKS_SOUL_LANTERN),
+        "minecraft:blocks\\soul_sand" | "blocks\\soul_sand" => Some(&BLOCKS_SOUL_SAND),
+        "minecraft:blocks\\soul_soil" | "blocks\\soul_soil" => Some(&BLOCKS_SOUL_SOIL),
+        "minecraft:blocks\\soul_torch" | "blocks\\soul_torch" => Some(&BLOCKS_SOUL_TORCH),
+        "minecraft:blocks\\spawner" | "blocks\\spawner" => Some(&BLOCKS_SPAWNER),
+        "minecraft:blocks\\sponge" | "blocks\\sponge" => Some(&BLOCKS_SPONGE),
+        "minecraft:blocks\\spore_blossom" | "blocks\\spore_blossom" => Some(&BLOCKS_SPORE_BLOSSOM),
+        "minecraft:blocks\\spruce_button" | "blocks\\spruce_button" => Some(&BLOCKS_SPRUCE_BUTTON),
+        "minecraft:blocks\\spruce_door" | "blocks\\spruce_door" => Some(&BLOCKS_SPRUCE_DOOR),
+        "minecraft:blocks\\spruce_fence" | "blocks\\spruce_fence" => Some(&BLOCKS_SPRUCE_FENCE),
+        "minecraft:blocks\\spruce_fence_gate" | "blocks\\spruce_fence_gate" => {
             Some(&BLOCKS_SPRUCE_FENCE_GATE)
         }
-        "minecraft:blocks/spruce_hanging_sign" | "blocks/spruce_hanging_sign" => {
+        "minecraft:blocks\\spruce_hanging_sign" | "blocks\\spruce_hanging_sign" => {
             Some(&BLOCKS_SPRUCE_HANGING_SIGN)
         }
-        "minecraft:blocks/spruce_leaves" | "blocks/spruce_leaves" => Some(&BLOCKS_SPRUCE_LEAVES),
-        "minecraft:blocks/spruce_log" | "blocks/spruce_log" => Some(&BLOCKS_SPRUCE_LOG),
-        "minecraft:blocks/spruce_planks" | "blocks/spruce_planks" => Some(&BLOCKS_SPRUCE_PLANKS),
-        "minecraft:blocks/spruce_pressure_plate" | "blocks/spruce_pressure_plate" => {
+        "minecraft:blocks\\spruce_leaves" | "blocks\\spruce_leaves" => Some(&BLOCKS_SPRUCE_LEAVES),
+        "minecraft:blocks\\spruce_log" | "blocks\\spruce_log" => Some(&BLOCKS_SPRUCE_LOG),
+        "minecraft:blocks\\spruce_planks" | "blocks\\spruce_planks" => Some(&BLOCKS_SPRUCE_PLANKS),
+        "minecraft:blocks\\spruce_pressure_plate" | "blocks\\spruce_pressure_plate" => {
             Some(&BLOCKS_SPRUCE_PRESSURE_PLATE)
         }
-        "minecraft:blocks/spruce_sapling" | "blocks/spruce_sapling" => Some(&BLOCKS_SPRUCE_SAPLING),
-        "minecraft:blocks/spruce_shelf" | "blocks/spruce_shelf" => Some(&BLOCKS_SPRUCE_SHELF),
-        "minecraft:blocks/spruce_sign" | "blocks/spruce_sign" => Some(&BLOCKS_SPRUCE_SIGN),
-        "minecraft:blocks/spruce_slab" | "blocks/spruce_slab" => Some(&BLOCKS_SPRUCE_SLAB),
-        "minecraft:blocks/spruce_stairs" | "blocks/spruce_stairs" => Some(&BLOCKS_SPRUCE_STAIRS),
-        "minecraft:blocks/spruce_trapdoor" | "blocks/spruce_trapdoor" => {
+        "minecraft:blocks\\spruce_sapling" | "blocks\\spruce_sapling" => {
+            Some(&BLOCKS_SPRUCE_SAPLING)
+        }
+        "minecraft:blocks\\spruce_shelf" | "blocks\\spruce_shelf" => Some(&BLOCKS_SPRUCE_SHELF),
+        "minecraft:blocks\\spruce_sign" | "blocks\\spruce_sign" => Some(&BLOCKS_SPRUCE_SIGN),
+        "minecraft:blocks\\spruce_slab" | "blocks\\spruce_slab" => Some(&BLOCKS_SPRUCE_SLAB),
+        "minecraft:blocks\\spruce_stairs" | "blocks\\spruce_stairs" => Some(&BLOCKS_SPRUCE_STAIRS),
+        "minecraft:blocks\\spruce_trapdoor" | "blocks\\spruce_trapdoor" => {
             Some(&BLOCKS_SPRUCE_TRAPDOOR)
         }
-        "minecraft:blocks/spruce_wood" | "blocks/spruce_wood" => Some(&BLOCKS_SPRUCE_WOOD),
-        "minecraft:blocks/sticky_piston" | "blocks/sticky_piston" => Some(&BLOCKS_STICKY_PISTON),
-        "minecraft:blocks/stone" | "blocks/stone" => Some(&BLOCKS_STONE),
-        "minecraft:blocks/stone_brick_slab" | "blocks/stone_brick_slab" => {
+        "minecraft:blocks\\spruce_wood" | "blocks\\spruce_wood" => Some(&BLOCKS_SPRUCE_WOOD),
+        "minecraft:blocks\\sticky_piston" | "blocks\\sticky_piston" => Some(&BLOCKS_STICKY_PISTON),
+        "minecraft:blocks\\stone" | "blocks\\stone" => Some(&BLOCKS_STONE),
+        "minecraft:blocks\\stone_brick_slab" | "blocks\\stone_brick_slab" => {
             Some(&BLOCKS_STONE_BRICK_SLAB)
         }
-        "minecraft:blocks/stone_brick_stairs" | "blocks/stone_brick_stairs" => {
+        "minecraft:blocks\\stone_brick_stairs" | "blocks\\stone_brick_stairs" => {
             Some(&BLOCKS_STONE_BRICK_STAIRS)
         }
-        "minecraft:blocks/stone_brick_wall" | "blocks/stone_brick_wall" => {
+        "minecraft:blocks\\stone_brick_wall" | "blocks\\stone_brick_wall" => {
             Some(&BLOCKS_STONE_BRICK_WALL)
         }
-        "minecraft:blocks/stone_bricks" | "blocks/stone_bricks" => Some(&BLOCKS_STONE_BRICKS),
-        "minecraft:blocks/stone_button" | "blocks/stone_button" => Some(&BLOCKS_STONE_BUTTON),
-        "minecraft:blocks/stone_pressure_plate" | "blocks/stone_pressure_plate" => {
+        "minecraft:blocks\\stone_bricks" | "blocks\\stone_bricks" => Some(&BLOCKS_STONE_BRICKS),
+        "minecraft:blocks\\stone_button" | "blocks\\stone_button" => Some(&BLOCKS_STONE_BUTTON),
+        "minecraft:blocks\\stone_pressure_plate" | "blocks\\stone_pressure_plate" => {
             Some(&BLOCKS_STONE_PRESSURE_PLATE)
         }
-        "minecraft:blocks/stone_slab" | "blocks/stone_slab" => Some(&BLOCKS_STONE_SLAB),
-        "minecraft:blocks/stone_stairs" | "blocks/stone_stairs" => Some(&BLOCKS_STONE_STAIRS),
-        "minecraft:blocks/stonecutter" | "blocks/stonecutter" => Some(&BLOCKS_STONECUTTER),
-        "minecraft:blocks/stripped_acacia_log" | "blocks/stripped_acacia_log" => {
+        "minecraft:blocks\\stone_slab" | "blocks\\stone_slab" => Some(&BLOCKS_STONE_SLAB),
+        "minecraft:blocks\\stone_stairs" | "blocks\\stone_stairs" => Some(&BLOCKS_STONE_STAIRS),
+        "minecraft:blocks\\stonecutter" | "blocks\\stonecutter" => Some(&BLOCKS_STONECUTTER),
+        "minecraft:blocks\\stripped_acacia_log" | "blocks\\stripped_acacia_log" => {
             Some(&BLOCKS_STRIPPED_ACACIA_LOG)
         }
-        "minecraft:blocks/stripped_acacia_wood" | "blocks/stripped_acacia_wood" => {
+        "minecraft:blocks\\stripped_acacia_wood" | "blocks\\stripped_acacia_wood" => {
             Some(&BLOCKS_STRIPPED_ACACIA_WOOD)
         }
-        "minecraft:blocks/stripped_bamboo_block" | "blocks/stripped_bamboo_block" => {
+        "minecraft:blocks\\stripped_bamboo_block" | "blocks\\stripped_bamboo_block" => {
             Some(&BLOCKS_STRIPPED_BAMBOO_BLOCK)
         }
-        "minecraft:blocks/stripped_birch_log" | "blocks/stripped_birch_log" => {
+        "minecraft:blocks\\stripped_birch_log" | "blocks\\stripped_birch_log" => {
             Some(&BLOCKS_STRIPPED_BIRCH_LOG)
         }
-        "minecraft:blocks/stripped_birch_wood" | "blocks/stripped_birch_wood" => {
+        "minecraft:blocks\\stripped_birch_wood" | "blocks\\stripped_birch_wood" => {
             Some(&BLOCKS_STRIPPED_BIRCH_WOOD)
         }
-        "minecraft:blocks/stripped_cherry_log" | "blocks/stripped_cherry_log" => {
+        "minecraft:blocks\\stripped_cherry_log" | "blocks\\stripped_cherry_log" => {
             Some(&BLOCKS_STRIPPED_CHERRY_LOG)
         }
-        "minecraft:blocks/stripped_cherry_wood" | "blocks/stripped_cherry_wood" => {
+        "minecraft:blocks\\stripped_cherry_wood" | "blocks\\stripped_cherry_wood" => {
             Some(&BLOCKS_STRIPPED_CHERRY_WOOD)
         }
-        "minecraft:blocks/stripped_crimson_hyphae" | "blocks/stripped_crimson_hyphae" => {
+        "minecraft:blocks\\stripped_crimson_hyphae" | "blocks\\stripped_crimson_hyphae" => {
             Some(&BLOCKS_STRIPPED_CRIMSON_HYPHAE)
         }
-        "minecraft:blocks/stripped_crimson_stem" | "blocks/stripped_crimson_stem" => {
+        "minecraft:blocks\\stripped_crimson_stem" | "blocks\\stripped_crimson_stem" => {
             Some(&BLOCKS_STRIPPED_CRIMSON_STEM)
         }
-        "minecraft:blocks/stripped_dark_oak_log" | "blocks/stripped_dark_oak_log" => {
+        "minecraft:blocks\\stripped_dark_oak_log" | "blocks\\stripped_dark_oak_log" => {
             Some(&BLOCKS_STRIPPED_DARK_OAK_LOG)
         }
-        "minecraft:blocks/stripped_dark_oak_wood" | "blocks/stripped_dark_oak_wood" => {
+        "minecraft:blocks\\stripped_dark_oak_wood" | "blocks\\stripped_dark_oak_wood" => {
             Some(&BLOCKS_STRIPPED_DARK_OAK_WOOD)
         }
-        "minecraft:blocks/stripped_jungle_log" | "blocks/stripped_jungle_log" => {
+        "minecraft:blocks\\stripped_jungle_log" | "blocks\\stripped_jungle_log" => {
             Some(&BLOCKS_STRIPPED_JUNGLE_LOG)
         }
-        "minecraft:blocks/stripped_jungle_wood" | "blocks/stripped_jungle_wood" => {
+        "minecraft:blocks\\stripped_jungle_wood" | "blocks\\stripped_jungle_wood" => {
             Some(&BLOCKS_STRIPPED_JUNGLE_WOOD)
         }
-        "minecraft:blocks/stripped_mangrove_log" | "blocks/stripped_mangrove_log" => {
+        "minecraft:blocks\\stripped_mangrove_log" | "blocks\\stripped_mangrove_log" => {
             Some(&BLOCKS_STRIPPED_MANGROVE_LOG)
         }
-        "minecraft:blocks/stripped_mangrove_wood" | "blocks/stripped_mangrove_wood" => {
+        "minecraft:blocks\\stripped_mangrove_wood" | "blocks\\stripped_mangrove_wood" => {
             Some(&BLOCKS_STRIPPED_MANGROVE_WOOD)
         }
-        "minecraft:blocks/stripped_oak_log" | "blocks/stripped_oak_log" => {
+        "minecraft:blocks\\stripped_oak_log" | "blocks\\stripped_oak_log" => {
             Some(&BLOCKS_STRIPPED_OAK_LOG)
         }
-        "minecraft:blocks/stripped_oak_wood" | "blocks/stripped_oak_wood" => {
+        "minecraft:blocks\\stripped_oak_wood" | "blocks\\stripped_oak_wood" => {
             Some(&BLOCKS_STRIPPED_OAK_WOOD)
         }
-        "minecraft:blocks/stripped_pale_oak_log" | "blocks/stripped_pale_oak_log" => {
+        "minecraft:blocks\\stripped_pale_oak_log" | "blocks\\stripped_pale_oak_log" => {
             Some(&BLOCKS_STRIPPED_PALE_OAK_LOG)
         }
-        "minecraft:blocks/stripped_pale_oak_wood" | "blocks/stripped_pale_oak_wood" => {
+        "minecraft:blocks\\stripped_pale_oak_wood" | "blocks\\stripped_pale_oak_wood" => {
             Some(&BLOCKS_STRIPPED_PALE_OAK_WOOD)
         }
-        "minecraft:blocks/stripped_spruce_log" | "blocks/stripped_spruce_log" => {
+        "minecraft:blocks\\stripped_spruce_log" | "blocks\\stripped_spruce_log" => {
             Some(&BLOCKS_STRIPPED_SPRUCE_LOG)
         }
-        "minecraft:blocks/stripped_spruce_wood" | "blocks/stripped_spruce_wood" => {
+        "minecraft:blocks\\stripped_spruce_wood" | "blocks\\stripped_spruce_wood" => {
             Some(&BLOCKS_STRIPPED_SPRUCE_WOOD)
         }
-        "minecraft:blocks/stripped_warped_hyphae" | "blocks/stripped_warped_hyphae" => {
+        "minecraft:blocks\\stripped_warped_hyphae" | "blocks\\stripped_warped_hyphae" => {
             Some(&BLOCKS_STRIPPED_WARPED_HYPHAE)
         }
-        "minecraft:blocks/stripped_warped_stem" | "blocks/stripped_warped_stem" => {
+        "minecraft:blocks\\stripped_warped_stem" | "blocks\\stripped_warped_stem" => {
             Some(&BLOCKS_STRIPPED_WARPED_STEM)
         }
-        "minecraft:blocks/sugar_cane" | "blocks/sugar_cane" => Some(&BLOCKS_SUGAR_CANE),
-        "minecraft:blocks/sulfur" | "blocks/sulfur" => Some(&BLOCKS_SULFUR),
-        "minecraft:blocks/sulfur_brick_slab" | "blocks/sulfur_brick_slab" => {
+        "minecraft:blocks\\sugar_cane" | "blocks\\sugar_cane" => Some(&BLOCKS_SUGAR_CANE),
+        "minecraft:blocks\\sulfur" | "blocks\\sulfur" => Some(&BLOCKS_SULFUR),
+        "minecraft:blocks\\sulfur_brick_slab" | "blocks\\sulfur_brick_slab" => {
             Some(&BLOCKS_SULFUR_BRICK_SLAB)
         }
-        "minecraft:blocks/sulfur_brick_stairs" | "blocks/sulfur_brick_stairs" => {
+        "minecraft:blocks\\sulfur_brick_stairs" | "blocks\\sulfur_brick_stairs" => {
             Some(&BLOCKS_SULFUR_BRICK_STAIRS)
         }
-        "minecraft:blocks/sulfur_brick_wall" | "blocks/sulfur_brick_wall" => {
+        "minecraft:blocks\\sulfur_brick_wall" | "blocks\\sulfur_brick_wall" => {
             Some(&BLOCKS_SULFUR_BRICK_WALL)
         }
-        "minecraft:blocks/sulfur_bricks" | "blocks/sulfur_bricks" => Some(&BLOCKS_SULFUR_BRICKS),
-        "minecraft:blocks/sulfur_slab" | "blocks/sulfur_slab" => Some(&BLOCKS_SULFUR_SLAB),
-        "minecraft:blocks/sulfur_spike" | "blocks/sulfur_spike" => Some(&BLOCKS_SULFUR_SPIKE),
-        "minecraft:blocks/sulfur_stairs" | "blocks/sulfur_stairs" => Some(&BLOCKS_SULFUR_STAIRS),
-        "minecraft:blocks/sulfur_wall" | "blocks/sulfur_wall" => Some(&BLOCKS_SULFUR_WALL),
-        "minecraft:blocks/sunflower" | "blocks/sunflower" => Some(&BLOCKS_SUNFLOWER),
-        "minecraft:blocks/suspicious_gravel" | "blocks/suspicious_gravel" => {
+        "minecraft:blocks\\sulfur_bricks" | "blocks\\sulfur_bricks" => Some(&BLOCKS_SULFUR_BRICKS),
+        "minecraft:blocks\\sulfur_slab" | "blocks\\sulfur_slab" => Some(&BLOCKS_SULFUR_SLAB),
+        "minecraft:blocks\\sulfur_spike" | "blocks\\sulfur_spike" => Some(&BLOCKS_SULFUR_SPIKE),
+        "minecraft:blocks\\sulfur_stairs" | "blocks\\sulfur_stairs" => Some(&BLOCKS_SULFUR_STAIRS),
+        "minecraft:blocks\\sulfur_wall" | "blocks\\sulfur_wall" => Some(&BLOCKS_SULFUR_WALL),
+        "minecraft:blocks\\sunflower" | "blocks\\sunflower" => Some(&BLOCKS_SUNFLOWER),
+        "minecraft:blocks\\suspicious_gravel" | "blocks\\suspicious_gravel" => {
             Some(&BLOCKS_SUSPICIOUS_GRAVEL)
         }
-        "minecraft:blocks/suspicious_sand" | "blocks/suspicious_sand" => {
+        "minecraft:blocks\\suspicious_sand" | "blocks\\suspicious_sand" => {
             Some(&BLOCKS_SUSPICIOUS_SAND)
         }
-        "minecraft:blocks/sweet_berry_bush" | "blocks/sweet_berry_bush" => {
+        "minecraft:blocks\\sweet_berry_bush" | "blocks\\sweet_berry_bush" => {
             Some(&BLOCKS_SWEET_BERRY_BUSH)
         }
-        "minecraft:blocks/tall_dry_grass" | "blocks/tall_dry_grass" => Some(&BLOCKS_TALL_DRY_GRASS),
-        "minecraft:blocks/tall_grass" | "blocks/tall_grass" => Some(&BLOCKS_TALL_GRASS),
-        "minecraft:blocks/tall_seagrass" | "blocks/tall_seagrass" => Some(&BLOCKS_TALL_SEAGRASS),
-        "minecraft:blocks/target" | "blocks/target" => Some(&BLOCKS_TARGET),
-        "minecraft:blocks/terracotta" | "blocks/terracotta" => Some(&BLOCKS_TERRACOTTA),
-        "minecraft:blocks/tinted_glass" | "blocks/tinted_glass" => Some(&BLOCKS_TINTED_GLASS),
-        "minecraft:blocks/tnt" | "blocks/tnt" => Some(&BLOCKS_TNT),
-        "minecraft:blocks/torch" | "blocks/torch" => Some(&BLOCKS_TORCH),
-        "minecraft:blocks/torchflower" | "blocks/torchflower" => Some(&BLOCKS_TORCHFLOWER),
-        "minecraft:blocks/torchflower_crop" | "blocks/torchflower_crop" => {
+        "minecraft:blocks\\tall_dry_grass" | "blocks\\tall_dry_grass" => {
+            Some(&BLOCKS_TALL_DRY_GRASS)
+        }
+        "minecraft:blocks\\tall_grass" | "blocks\\tall_grass" => Some(&BLOCKS_TALL_GRASS),
+        "minecraft:blocks\\tall_seagrass" | "blocks\\tall_seagrass" => Some(&BLOCKS_TALL_SEAGRASS),
+        "minecraft:blocks\\target" | "blocks\\target" => Some(&BLOCKS_TARGET),
+        "minecraft:blocks\\terracotta" | "blocks\\terracotta" => Some(&BLOCKS_TERRACOTTA),
+        "minecraft:blocks\\tinted_glass" | "blocks\\tinted_glass" => Some(&BLOCKS_TINTED_GLASS),
+        "minecraft:blocks\\tnt" | "blocks\\tnt" => Some(&BLOCKS_TNT),
+        "minecraft:blocks\\torch" | "blocks\\torch" => Some(&BLOCKS_TORCH),
+        "minecraft:blocks\\torchflower" | "blocks\\torchflower" => Some(&BLOCKS_TORCHFLOWER),
+        "minecraft:blocks\\torchflower_crop" | "blocks\\torchflower_crop" => {
             Some(&BLOCKS_TORCHFLOWER_CROP)
         }
-        "minecraft:blocks/trapped_chest" | "blocks/trapped_chest" => Some(&BLOCKS_TRAPPED_CHEST),
-        "minecraft:blocks/trial_spawner" | "blocks/trial_spawner" => Some(&BLOCKS_TRIAL_SPAWNER),
-        "minecraft:blocks/tripwire" | "blocks/tripwire" => Some(&BLOCKS_TRIPWIRE),
-        "minecraft:blocks/tripwire_hook" | "blocks/tripwire_hook" => Some(&BLOCKS_TRIPWIRE_HOOK),
-        "minecraft:blocks/tube_coral" | "blocks/tube_coral" => Some(&BLOCKS_TUBE_CORAL),
-        "minecraft:blocks/tube_coral_block" | "blocks/tube_coral_block" => {
+        "minecraft:blocks\\trapped_chest" | "blocks\\trapped_chest" => Some(&BLOCKS_TRAPPED_CHEST),
+        "minecraft:blocks\\trial_spawner" | "blocks\\trial_spawner" => Some(&BLOCKS_TRIAL_SPAWNER),
+        "minecraft:blocks\\tripwire" | "blocks\\tripwire" => Some(&BLOCKS_TRIPWIRE),
+        "minecraft:blocks\\tripwire_hook" | "blocks\\tripwire_hook" => Some(&BLOCKS_TRIPWIRE_HOOK),
+        "minecraft:blocks\\tube_coral" | "blocks\\tube_coral" => Some(&BLOCKS_TUBE_CORAL),
+        "minecraft:blocks\\tube_coral_block" | "blocks\\tube_coral_block" => {
             Some(&BLOCKS_TUBE_CORAL_BLOCK)
         }
-        "minecraft:blocks/tube_coral_fan" | "blocks/tube_coral_fan" => Some(&BLOCKS_TUBE_CORAL_FAN),
-        "minecraft:blocks/tuff" | "blocks/tuff" => Some(&BLOCKS_TUFF),
-        "minecraft:blocks/tuff_brick_slab" | "blocks/tuff_brick_slab" => {
+        "minecraft:blocks\\tube_coral_fan" | "blocks\\tube_coral_fan" => {
+            Some(&BLOCKS_TUBE_CORAL_FAN)
+        }
+        "minecraft:blocks\\tuff" | "blocks\\tuff" => Some(&BLOCKS_TUFF),
+        "minecraft:blocks\\tuff_brick_slab" | "blocks\\tuff_brick_slab" => {
             Some(&BLOCKS_TUFF_BRICK_SLAB)
         }
-        "minecraft:blocks/tuff_brick_stairs" | "blocks/tuff_brick_stairs" => {
+        "minecraft:blocks\\tuff_brick_stairs" | "blocks\\tuff_brick_stairs" => {
             Some(&BLOCKS_TUFF_BRICK_STAIRS)
         }
-        "minecraft:blocks/tuff_brick_wall" | "blocks/tuff_brick_wall" => {
+        "minecraft:blocks\\tuff_brick_wall" | "blocks\\tuff_brick_wall" => {
             Some(&BLOCKS_TUFF_BRICK_WALL)
         }
-        "minecraft:blocks/tuff_bricks" | "blocks/tuff_bricks" => Some(&BLOCKS_TUFF_BRICKS),
-        "minecraft:blocks/tuff_slab" | "blocks/tuff_slab" => Some(&BLOCKS_TUFF_SLAB),
-        "minecraft:blocks/tuff_stairs" | "blocks/tuff_stairs" => Some(&BLOCKS_TUFF_STAIRS),
-        "minecraft:blocks/tuff_wall" | "blocks/tuff_wall" => Some(&BLOCKS_TUFF_WALL),
-        "minecraft:blocks/turtle_egg" | "blocks/turtle_egg" => Some(&BLOCKS_TURTLE_EGG),
-        "minecraft:blocks/twisting_vines" | "blocks/twisting_vines" => Some(&BLOCKS_TWISTING_VINES),
-        "minecraft:blocks/twisting_vines_plant" | "blocks/twisting_vines_plant" => {
+        "minecraft:blocks\\tuff_bricks" | "blocks\\tuff_bricks" => Some(&BLOCKS_TUFF_BRICKS),
+        "minecraft:blocks\\tuff_slab" | "blocks\\tuff_slab" => Some(&BLOCKS_TUFF_SLAB),
+        "minecraft:blocks\\tuff_stairs" | "blocks\\tuff_stairs" => Some(&BLOCKS_TUFF_STAIRS),
+        "minecraft:blocks\\tuff_wall" | "blocks\\tuff_wall" => Some(&BLOCKS_TUFF_WALL),
+        "minecraft:blocks\\turtle_egg" | "blocks\\turtle_egg" => Some(&BLOCKS_TURTLE_EGG),
+        "minecraft:blocks\\twisting_vines" | "blocks\\twisting_vines" => {
+            Some(&BLOCKS_TWISTING_VINES)
+        }
+        "minecraft:blocks\\twisting_vines_plant" | "blocks\\twisting_vines_plant" => {
             Some(&BLOCKS_TWISTING_VINES_PLANT)
         }
-        "minecraft:blocks/vault" | "blocks/vault" => Some(&BLOCKS_VAULT),
-        "minecraft:blocks/verdant_froglight" | "blocks/verdant_froglight" => {
+        "minecraft:blocks\\vault" | "blocks\\vault" => Some(&BLOCKS_VAULT),
+        "minecraft:blocks\\verdant_froglight" | "blocks\\verdant_froglight" => {
             Some(&BLOCKS_VERDANT_FROGLIGHT)
         }
-        "minecraft:blocks/vine" | "blocks/vine" => Some(&BLOCKS_VINE),
-        "minecraft:blocks/warped_button" | "blocks/warped_button" => Some(&BLOCKS_WARPED_BUTTON),
-        "minecraft:blocks/warped_door" | "blocks/warped_door" => Some(&BLOCKS_WARPED_DOOR),
-        "minecraft:blocks/warped_fence" | "blocks/warped_fence" => Some(&BLOCKS_WARPED_FENCE),
-        "minecraft:blocks/warped_fence_gate" | "blocks/warped_fence_gate" => {
+        "minecraft:blocks\\vine" | "blocks\\vine" => Some(&BLOCKS_VINE),
+        "minecraft:blocks\\warped_button" | "blocks\\warped_button" => Some(&BLOCKS_WARPED_BUTTON),
+        "minecraft:blocks\\warped_door" | "blocks\\warped_door" => Some(&BLOCKS_WARPED_DOOR),
+        "minecraft:blocks\\warped_fence" | "blocks\\warped_fence" => Some(&BLOCKS_WARPED_FENCE),
+        "minecraft:blocks\\warped_fence_gate" | "blocks\\warped_fence_gate" => {
             Some(&BLOCKS_WARPED_FENCE_GATE)
         }
-        "minecraft:blocks/warped_fungus" | "blocks/warped_fungus" => Some(&BLOCKS_WARPED_FUNGUS),
-        "minecraft:blocks/warped_hanging_sign" | "blocks/warped_hanging_sign" => {
+        "minecraft:blocks\\warped_fungus" | "blocks\\warped_fungus" => Some(&BLOCKS_WARPED_FUNGUS),
+        "minecraft:blocks\\warped_hanging_sign" | "blocks\\warped_hanging_sign" => {
             Some(&BLOCKS_WARPED_HANGING_SIGN)
         }
-        "minecraft:blocks/warped_hyphae" | "blocks/warped_hyphae" => Some(&BLOCKS_WARPED_HYPHAE),
-        "minecraft:blocks/warped_nylium" | "blocks/warped_nylium" => Some(&BLOCKS_WARPED_NYLIUM),
-        "minecraft:blocks/warped_planks" | "blocks/warped_planks" => Some(&BLOCKS_WARPED_PLANKS),
-        "minecraft:blocks/warped_pressure_plate" | "blocks/warped_pressure_plate" => {
+        "minecraft:blocks\\warped_hyphae" | "blocks\\warped_hyphae" => Some(&BLOCKS_WARPED_HYPHAE),
+        "minecraft:blocks\\warped_nylium" | "blocks\\warped_nylium" => Some(&BLOCKS_WARPED_NYLIUM),
+        "minecraft:blocks\\warped_planks" | "blocks\\warped_planks" => Some(&BLOCKS_WARPED_PLANKS),
+        "minecraft:blocks\\warped_pressure_plate" | "blocks\\warped_pressure_plate" => {
             Some(&BLOCKS_WARPED_PRESSURE_PLATE)
         }
-        "minecraft:blocks/warped_roots" | "blocks/warped_roots" => Some(&BLOCKS_WARPED_ROOTS),
-        "minecraft:blocks/warped_shelf" | "blocks/warped_shelf" => Some(&BLOCKS_WARPED_SHELF),
-        "minecraft:blocks/warped_sign" | "blocks/warped_sign" => Some(&BLOCKS_WARPED_SIGN),
-        "minecraft:blocks/warped_slab" | "blocks/warped_slab" => Some(&BLOCKS_WARPED_SLAB),
-        "minecraft:blocks/warped_stairs" | "blocks/warped_stairs" => Some(&BLOCKS_WARPED_STAIRS),
-        "minecraft:blocks/warped_stem" | "blocks/warped_stem" => Some(&BLOCKS_WARPED_STEM),
-        "minecraft:blocks/warped_trapdoor" | "blocks/warped_trapdoor" => {
+        "minecraft:blocks\\warped_roots" | "blocks\\warped_roots" => Some(&BLOCKS_WARPED_ROOTS),
+        "minecraft:blocks\\warped_shelf" | "blocks\\warped_shelf" => Some(&BLOCKS_WARPED_SHELF),
+        "minecraft:blocks\\warped_sign" | "blocks\\warped_sign" => Some(&BLOCKS_WARPED_SIGN),
+        "minecraft:blocks\\warped_slab" | "blocks\\warped_slab" => Some(&BLOCKS_WARPED_SLAB),
+        "minecraft:blocks\\warped_stairs" | "blocks\\warped_stairs" => Some(&BLOCKS_WARPED_STAIRS),
+        "minecraft:blocks\\warped_stem" | "blocks\\warped_stem" => Some(&BLOCKS_WARPED_STEM),
+        "minecraft:blocks\\warped_trapdoor" | "blocks\\warped_trapdoor" => {
             Some(&BLOCKS_WARPED_TRAPDOOR)
         }
-        "minecraft:blocks/warped_wart_block" | "blocks/warped_wart_block" => {
+        "minecraft:blocks\\warped_wart_block" | "blocks\\warped_wart_block" => {
             Some(&BLOCKS_WARPED_WART_BLOCK)
         }
-        "minecraft:blocks/water_cauldron" | "blocks/water_cauldron" => Some(&BLOCKS_WATER_CAULDRON),
-        "minecraft:blocks/waxed_chiseled_copper" | "blocks/waxed_chiseled_copper" => {
+        "minecraft:blocks\\water_cauldron" | "blocks\\water_cauldron" => {
+            Some(&BLOCKS_WATER_CAULDRON)
+        }
+        "minecraft:blocks\\waxed_chiseled_copper" | "blocks\\waxed_chiseled_copper" => {
             Some(&BLOCKS_WAXED_CHISELED_COPPER)
         }
-        "minecraft:blocks/waxed_copper_bars" | "blocks/waxed_copper_bars" => {
+        "minecraft:blocks\\waxed_copper_bars" | "blocks\\waxed_copper_bars" => {
             Some(&BLOCKS_WAXED_COPPER_BARS)
         }
-        "minecraft:blocks/waxed_copper_block" | "blocks/waxed_copper_block" => {
+        "minecraft:blocks\\waxed_copper_block" | "blocks\\waxed_copper_block" => {
             Some(&BLOCKS_WAXED_COPPER_BLOCK)
         }
-        "minecraft:blocks/waxed_copper_bulb" | "blocks/waxed_copper_bulb" => {
+        "minecraft:blocks\\waxed_copper_bulb" | "blocks\\waxed_copper_bulb" => {
             Some(&BLOCKS_WAXED_COPPER_BULB)
         }
-        "minecraft:blocks/waxed_copper_chain" | "blocks/waxed_copper_chain" => {
+        "minecraft:blocks\\waxed_copper_chain" | "blocks\\waxed_copper_chain" => {
             Some(&BLOCKS_WAXED_COPPER_CHAIN)
         }
-        "minecraft:blocks/waxed_copper_chest" | "blocks/waxed_copper_chest" => {
+        "minecraft:blocks\\waxed_copper_chest" | "blocks\\waxed_copper_chest" => {
             Some(&BLOCKS_WAXED_COPPER_CHEST)
         }
-        "minecraft:blocks/waxed_copper_door" | "blocks/waxed_copper_door" => {
+        "minecraft:blocks\\waxed_copper_door" | "blocks\\waxed_copper_door" => {
             Some(&BLOCKS_WAXED_COPPER_DOOR)
         }
-        "minecraft:blocks/waxed_copper_golem_statue" | "blocks/waxed_copper_golem_statue" => {
+        "minecraft:blocks\\waxed_copper_golem_statue" | "blocks\\waxed_copper_golem_statue" => {
             Some(&BLOCKS_WAXED_COPPER_GOLEM_STATUE)
         }
-        "minecraft:blocks/waxed_copper_grate" | "blocks/waxed_copper_grate" => {
+        "minecraft:blocks\\waxed_copper_grate" | "blocks\\waxed_copper_grate" => {
             Some(&BLOCKS_WAXED_COPPER_GRATE)
         }
-        "minecraft:blocks/waxed_copper_lantern" | "blocks/waxed_copper_lantern" => {
+        "minecraft:blocks\\waxed_copper_lantern" | "blocks\\waxed_copper_lantern" => {
             Some(&BLOCKS_WAXED_COPPER_LANTERN)
         }
-        "minecraft:blocks/waxed_copper_trapdoor" | "blocks/waxed_copper_trapdoor" => {
+        "minecraft:blocks\\waxed_copper_trapdoor" | "blocks\\waxed_copper_trapdoor" => {
             Some(&BLOCKS_WAXED_COPPER_TRAPDOOR)
         }
-        "minecraft:blocks/waxed_cut_copper" | "blocks/waxed_cut_copper" => {
+        "minecraft:blocks\\waxed_cut_copper" | "blocks\\waxed_cut_copper" => {
             Some(&BLOCKS_WAXED_CUT_COPPER)
         }
-        "minecraft:blocks/waxed_cut_copper_slab" | "blocks/waxed_cut_copper_slab" => {
+        "minecraft:blocks\\waxed_cut_copper_slab" | "blocks\\waxed_cut_copper_slab" => {
             Some(&BLOCKS_WAXED_CUT_COPPER_SLAB)
         }
-        "minecraft:blocks/waxed_cut_copper_stairs" | "blocks/waxed_cut_copper_stairs" => {
+        "minecraft:blocks\\waxed_cut_copper_stairs" | "blocks\\waxed_cut_copper_stairs" => {
             Some(&BLOCKS_WAXED_CUT_COPPER_STAIRS)
         }
-        "minecraft:blocks/waxed_exposed_chiseled_copper"
-        | "blocks/waxed_exposed_chiseled_copper" => Some(&BLOCKS_WAXED_EXPOSED_CHISELED_COPPER),
-        "minecraft:blocks/waxed_exposed_copper" | "blocks/waxed_exposed_copper" => {
+        "minecraft:blocks\\waxed_exposed_chiseled_copper"
+        | "blocks\\waxed_exposed_chiseled_copper" => Some(&BLOCKS_WAXED_EXPOSED_CHISELED_COPPER),
+        "minecraft:blocks\\waxed_exposed_copper" | "blocks\\waxed_exposed_copper" => {
             Some(&BLOCKS_WAXED_EXPOSED_COPPER)
         }
-        "minecraft:blocks/waxed_exposed_copper_bars" | "blocks/waxed_exposed_copper_bars" => {
+        "minecraft:blocks\\waxed_exposed_copper_bars" | "blocks\\waxed_exposed_copper_bars" => {
             Some(&BLOCKS_WAXED_EXPOSED_COPPER_BARS)
         }
-        "minecraft:blocks/waxed_exposed_copper_bulb" | "blocks/waxed_exposed_copper_bulb" => {
+        "minecraft:blocks\\waxed_exposed_copper_bulb" | "blocks\\waxed_exposed_copper_bulb" => {
             Some(&BLOCKS_WAXED_EXPOSED_COPPER_BULB)
         }
-        "minecraft:blocks/waxed_exposed_copper_chain" | "blocks/waxed_exposed_copper_chain" => {
+        "minecraft:blocks\\waxed_exposed_copper_chain" | "blocks\\waxed_exposed_copper_chain" => {
             Some(&BLOCKS_WAXED_EXPOSED_COPPER_CHAIN)
         }
-        "minecraft:blocks/waxed_exposed_copper_chest" | "blocks/waxed_exposed_copper_chest" => {
+        "minecraft:blocks\\waxed_exposed_copper_chest" | "blocks\\waxed_exposed_copper_chest" => {
             Some(&BLOCKS_WAXED_EXPOSED_COPPER_CHEST)
         }
-        "minecraft:blocks/waxed_exposed_copper_door" | "blocks/waxed_exposed_copper_door" => {
+        "minecraft:blocks\\waxed_exposed_copper_door" | "blocks\\waxed_exposed_copper_door" => {
             Some(&BLOCKS_WAXED_EXPOSED_COPPER_DOOR)
         }
-        "minecraft:blocks/waxed_exposed_copper_golem_statue"
-        | "blocks/waxed_exposed_copper_golem_statue" => {
+        "minecraft:blocks\\waxed_exposed_copper_golem_statue"
+        | "blocks\\waxed_exposed_copper_golem_statue" => {
             Some(&BLOCKS_WAXED_EXPOSED_COPPER_GOLEM_STATUE)
         }
-        "minecraft:blocks/waxed_exposed_copper_grate" | "blocks/waxed_exposed_copper_grate" => {
+        "minecraft:blocks\\waxed_exposed_copper_grate" | "blocks\\waxed_exposed_copper_grate" => {
             Some(&BLOCKS_WAXED_EXPOSED_COPPER_GRATE)
         }
-        "minecraft:blocks/waxed_exposed_copper_lantern" | "blocks/waxed_exposed_copper_lantern" => {
-            Some(&BLOCKS_WAXED_EXPOSED_COPPER_LANTERN)
-        }
-        "minecraft:blocks/waxed_exposed_copper_trapdoor"
-        | "blocks/waxed_exposed_copper_trapdoor" => Some(&BLOCKS_WAXED_EXPOSED_COPPER_TRAPDOOR),
-        "minecraft:blocks/waxed_exposed_cut_copper" | "blocks/waxed_exposed_cut_copper" => {
+        "minecraft:blocks\\waxed_exposed_copper_lantern"
+        | "blocks\\waxed_exposed_copper_lantern" => Some(&BLOCKS_WAXED_EXPOSED_COPPER_LANTERN),
+        "minecraft:blocks\\waxed_exposed_copper_trapdoor"
+        | "blocks\\waxed_exposed_copper_trapdoor" => Some(&BLOCKS_WAXED_EXPOSED_COPPER_TRAPDOOR),
+        "minecraft:blocks\\waxed_exposed_cut_copper" | "blocks\\waxed_exposed_cut_copper" => {
             Some(&BLOCKS_WAXED_EXPOSED_CUT_COPPER)
         }
-        "minecraft:blocks/waxed_exposed_cut_copper_slab"
-        | "blocks/waxed_exposed_cut_copper_slab" => Some(&BLOCKS_WAXED_EXPOSED_CUT_COPPER_SLAB),
-        "minecraft:blocks/waxed_exposed_cut_copper_stairs"
-        | "blocks/waxed_exposed_cut_copper_stairs" => Some(&BLOCKS_WAXED_EXPOSED_CUT_COPPER_STAIRS),
-        "minecraft:blocks/waxed_exposed_lightning_rod" | "blocks/waxed_exposed_lightning_rod" => {
+        "minecraft:blocks\\waxed_exposed_cut_copper_slab"
+        | "blocks\\waxed_exposed_cut_copper_slab" => Some(&BLOCKS_WAXED_EXPOSED_CUT_COPPER_SLAB),
+        "minecraft:blocks\\waxed_exposed_cut_copper_stairs"
+        | "blocks\\waxed_exposed_cut_copper_stairs" => {
+            Some(&BLOCKS_WAXED_EXPOSED_CUT_COPPER_STAIRS)
+        }
+        "minecraft:blocks\\waxed_exposed_lightning_rod" | "blocks\\waxed_exposed_lightning_rod" => {
             Some(&BLOCKS_WAXED_EXPOSED_LIGHTNING_ROD)
         }
-        "minecraft:blocks/waxed_lightning_rod" | "blocks/waxed_lightning_rod" => {
+        "minecraft:blocks\\waxed_lightning_rod" | "blocks\\waxed_lightning_rod" => {
             Some(&BLOCKS_WAXED_LIGHTNING_ROD)
         }
-        "minecraft:blocks/waxed_oxidized_chiseled_copper"
-        | "blocks/waxed_oxidized_chiseled_copper" => Some(&BLOCKS_WAXED_OXIDIZED_CHISELED_COPPER),
-        "minecraft:blocks/waxed_oxidized_copper" | "blocks/waxed_oxidized_copper" => {
+        "minecraft:blocks\\waxed_oxidized_chiseled_copper"
+        | "blocks\\waxed_oxidized_chiseled_copper" => Some(&BLOCKS_WAXED_OXIDIZED_CHISELED_COPPER),
+        "minecraft:blocks\\waxed_oxidized_copper" | "blocks\\waxed_oxidized_copper" => {
             Some(&BLOCKS_WAXED_OXIDIZED_COPPER)
         }
-        "minecraft:blocks/waxed_oxidized_copper_bars" | "blocks/waxed_oxidized_copper_bars" => {
+        "minecraft:blocks\\waxed_oxidized_copper_bars" | "blocks\\waxed_oxidized_copper_bars" => {
             Some(&BLOCKS_WAXED_OXIDIZED_COPPER_BARS)
         }
-        "minecraft:blocks/waxed_oxidized_copper_bulb" | "blocks/waxed_oxidized_copper_bulb" => {
+        "minecraft:blocks\\waxed_oxidized_copper_bulb" | "blocks\\waxed_oxidized_copper_bulb" => {
             Some(&BLOCKS_WAXED_OXIDIZED_COPPER_BULB)
         }
-        "minecraft:blocks/waxed_oxidized_copper_chain" | "blocks/waxed_oxidized_copper_chain" => {
+        "minecraft:blocks\\waxed_oxidized_copper_chain" | "blocks\\waxed_oxidized_copper_chain" => {
             Some(&BLOCKS_WAXED_OXIDIZED_COPPER_CHAIN)
         }
-        "minecraft:blocks/waxed_oxidized_copper_chest" | "blocks/waxed_oxidized_copper_chest" => {
+        "minecraft:blocks\\waxed_oxidized_copper_chest" | "blocks\\waxed_oxidized_copper_chest" => {
             Some(&BLOCKS_WAXED_OXIDIZED_COPPER_CHEST)
         }
-        "minecraft:blocks/waxed_oxidized_copper_door" | "blocks/waxed_oxidized_copper_door" => {
+        "minecraft:blocks\\waxed_oxidized_copper_door" | "blocks\\waxed_oxidized_copper_door" => {
             Some(&BLOCKS_WAXED_OXIDIZED_COPPER_DOOR)
         }
-        "minecraft:blocks/waxed_oxidized_copper_golem_statue"
-        | "blocks/waxed_oxidized_copper_golem_statue" => {
+        "minecraft:blocks\\waxed_oxidized_copper_golem_statue"
+        | "blocks\\waxed_oxidized_copper_golem_statue" => {
             Some(&BLOCKS_WAXED_OXIDIZED_COPPER_GOLEM_STATUE)
         }
-        "minecraft:blocks/waxed_oxidized_copper_grate" | "blocks/waxed_oxidized_copper_grate" => {
+        "minecraft:blocks\\waxed_oxidized_copper_grate" | "blocks\\waxed_oxidized_copper_grate" => {
             Some(&BLOCKS_WAXED_OXIDIZED_COPPER_GRATE)
         }
-        "minecraft:blocks/waxed_oxidized_copper_lantern"
-        | "blocks/waxed_oxidized_copper_lantern" => Some(&BLOCKS_WAXED_OXIDIZED_COPPER_LANTERN),
-        "minecraft:blocks/waxed_oxidized_copper_trapdoor"
-        | "blocks/waxed_oxidized_copper_trapdoor" => Some(&BLOCKS_WAXED_OXIDIZED_COPPER_TRAPDOOR),
-        "minecraft:blocks/waxed_oxidized_cut_copper" | "blocks/waxed_oxidized_cut_copper" => {
+        "minecraft:blocks\\waxed_oxidized_copper_lantern"
+        | "blocks\\waxed_oxidized_copper_lantern" => Some(&BLOCKS_WAXED_OXIDIZED_COPPER_LANTERN),
+        "minecraft:blocks\\waxed_oxidized_copper_trapdoor"
+        | "blocks\\waxed_oxidized_copper_trapdoor" => Some(&BLOCKS_WAXED_OXIDIZED_COPPER_TRAPDOOR),
+        "minecraft:blocks\\waxed_oxidized_cut_copper" | "blocks\\waxed_oxidized_cut_copper" => {
             Some(&BLOCKS_WAXED_OXIDIZED_CUT_COPPER)
         }
-        "minecraft:blocks/waxed_oxidized_cut_copper_slab"
-        | "blocks/waxed_oxidized_cut_copper_slab" => Some(&BLOCKS_WAXED_OXIDIZED_CUT_COPPER_SLAB),
-        "minecraft:blocks/waxed_oxidized_cut_copper_stairs"
-        | "blocks/waxed_oxidized_cut_copper_stairs" => {
+        "minecraft:blocks\\waxed_oxidized_cut_copper_slab"
+        | "blocks\\waxed_oxidized_cut_copper_slab" => Some(&BLOCKS_WAXED_OXIDIZED_CUT_COPPER_SLAB),
+        "minecraft:blocks\\waxed_oxidized_cut_copper_stairs"
+        | "blocks\\waxed_oxidized_cut_copper_stairs" => {
             Some(&BLOCKS_WAXED_OXIDIZED_CUT_COPPER_STAIRS)
         }
-        "minecraft:blocks/waxed_oxidized_lightning_rod" | "blocks/waxed_oxidized_lightning_rod" => {
-            Some(&BLOCKS_WAXED_OXIDIZED_LIGHTNING_ROD)
+        "minecraft:blocks\\waxed_oxidized_lightning_rod"
+        | "blocks\\waxed_oxidized_lightning_rod" => Some(&BLOCKS_WAXED_OXIDIZED_LIGHTNING_ROD),
+        "minecraft:blocks\\waxed_weathered_chiseled_copper"
+        | "blocks\\waxed_weathered_chiseled_copper" => {
+            Some(&BLOCKS_WAXED_WEATHERED_CHISELED_COPPER)
         }
-        "minecraft:blocks/waxed_weathered_chiseled_copper"
-        | "blocks/waxed_weathered_chiseled_copper" => Some(&BLOCKS_WAXED_WEATHERED_CHISELED_COPPER),
-        "minecraft:blocks/waxed_weathered_copper" | "blocks/waxed_weathered_copper" => {
+        "minecraft:blocks\\waxed_weathered_copper" | "blocks\\waxed_weathered_copper" => {
             Some(&BLOCKS_WAXED_WEATHERED_COPPER)
         }
-        "minecraft:blocks/waxed_weathered_copper_bars" | "blocks/waxed_weathered_copper_bars" => {
+        "minecraft:blocks\\waxed_weathered_copper_bars" | "blocks\\waxed_weathered_copper_bars" => {
             Some(&BLOCKS_WAXED_WEATHERED_COPPER_BARS)
         }
-        "minecraft:blocks/waxed_weathered_copper_bulb" | "blocks/waxed_weathered_copper_bulb" => {
+        "minecraft:blocks\\waxed_weathered_copper_bulb" | "blocks\\waxed_weathered_copper_bulb" => {
             Some(&BLOCKS_WAXED_WEATHERED_COPPER_BULB)
         }
-        "minecraft:blocks/waxed_weathered_copper_chain" | "blocks/waxed_weathered_copper_chain" => {
-            Some(&BLOCKS_WAXED_WEATHERED_COPPER_CHAIN)
-        }
-        "minecraft:blocks/waxed_weathered_copper_chest" | "blocks/waxed_weathered_copper_chest" => {
-            Some(&BLOCKS_WAXED_WEATHERED_COPPER_CHEST)
-        }
-        "minecraft:blocks/waxed_weathered_copper_door" | "blocks/waxed_weathered_copper_door" => {
+        "minecraft:blocks\\waxed_weathered_copper_chain"
+        | "blocks\\waxed_weathered_copper_chain" => Some(&BLOCKS_WAXED_WEATHERED_COPPER_CHAIN),
+        "minecraft:blocks\\waxed_weathered_copper_chest"
+        | "blocks\\waxed_weathered_copper_chest" => Some(&BLOCKS_WAXED_WEATHERED_COPPER_CHEST),
+        "minecraft:blocks\\waxed_weathered_copper_door" | "blocks\\waxed_weathered_copper_door" => {
             Some(&BLOCKS_WAXED_WEATHERED_COPPER_DOOR)
         }
-        "minecraft:blocks/waxed_weathered_copper_golem_statue"
-        | "blocks/waxed_weathered_copper_golem_statue" => {
+        "minecraft:blocks\\waxed_weathered_copper_golem_statue"
+        | "blocks\\waxed_weathered_copper_golem_statue" => {
             Some(&BLOCKS_WAXED_WEATHERED_COPPER_GOLEM_STATUE)
         }
-        "minecraft:blocks/waxed_weathered_copper_grate" | "blocks/waxed_weathered_copper_grate" => {
-            Some(&BLOCKS_WAXED_WEATHERED_COPPER_GRATE)
+        "minecraft:blocks\\waxed_weathered_copper_grate"
+        | "blocks\\waxed_weathered_copper_grate" => Some(&BLOCKS_WAXED_WEATHERED_COPPER_GRATE),
+        "minecraft:blocks\\waxed_weathered_copper_lantern"
+        | "blocks\\waxed_weathered_copper_lantern" => Some(&BLOCKS_WAXED_WEATHERED_COPPER_LANTERN),
+        "minecraft:blocks\\waxed_weathered_copper_trapdoor"
+        | "blocks\\waxed_weathered_copper_trapdoor" => {
+            Some(&BLOCKS_WAXED_WEATHERED_COPPER_TRAPDOOR)
         }
-        "minecraft:blocks/waxed_weathered_copper_lantern"
-        | "blocks/waxed_weathered_copper_lantern" => Some(&BLOCKS_WAXED_WEATHERED_COPPER_LANTERN),
-        "minecraft:blocks/waxed_weathered_copper_trapdoor"
-        | "blocks/waxed_weathered_copper_trapdoor" => Some(&BLOCKS_WAXED_WEATHERED_COPPER_TRAPDOOR),
-        "minecraft:blocks/waxed_weathered_cut_copper" | "blocks/waxed_weathered_cut_copper" => {
+        "minecraft:blocks\\waxed_weathered_cut_copper" | "blocks\\waxed_weathered_cut_copper" => {
             Some(&BLOCKS_WAXED_WEATHERED_CUT_COPPER)
         }
-        "minecraft:blocks/waxed_weathered_cut_copper_slab"
-        | "blocks/waxed_weathered_cut_copper_slab" => Some(&BLOCKS_WAXED_WEATHERED_CUT_COPPER_SLAB),
-        "minecraft:blocks/waxed_weathered_cut_copper_stairs"
-        | "blocks/waxed_weathered_cut_copper_stairs" => {
+        "minecraft:blocks\\waxed_weathered_cut_copper_slab"
+        | "blocks\\waxed_weathered_cut_copper_slab" => {
+            Some(&BLOCKS_WAXED_WEATHERED_CUT_COPPER_SLAB)
+        }
+        "minecraft:blocks\\waxed_weathered_cut_copper_stairs"
+        | "blocks\\waxed_weathered_cut_copper_stairs" => {
             Some(&BLOCKS_WAXED_WEATHERED_CUT_COPPER_STAIRS)
         }
-        "minecraft:blocks/waxed_weathered_lightning_rod"
-        | "blocks/waxed_weathered_lightning_rod" => Some(&BLOCKS_WAXED_WEATHERED_LIGHTNING_ROD),
-        "minecraft:blocks/weathered_chiseled_copper" | "blocks/weathered_chiseled_copper" => {
+        "minecraft:blocks\\waxed_weathered_lightning_rod"
+        | "blocks\\waxed_weathered_lightning_rod" => Some(&BLOCKS_WAXED_WEATHERED_LIGHTNING_ROD),
+        "minecraft:blocks\\weathered_chiseled_copper" | "blocks\\weathered_chiseled_copper" => {
             Some(&BLOCKS_WEATHERED_CHISELED_COPPER)
         }
-        "minecraft:blocks/weathered_copper" | "blocks/weathered_copper" => {
+        "minecraft:blocks\\weathered_copper" | "blocks\\weathered_copper" => {
             Some(&BLOCKS_WEATHERED_COPPER)
         }
-        "minecraft:blocks/weathered_copper_bars" | "blocks/weathered_copper_bars" => {
+        "minecraft:blocks\\weathered_copper_bars" | "blocks\\weathered_copper_bars" => {
             Some(&BLOCKS_WEATHERED_COPPER_BARS)
         }
-        "minecraft:blocks/weathered_copper_bulb" | "blocks/weathered_copper_bulb" => {
+        "minecraft:blocks\\weathered_copper_bulb" | "blocks\\weathered_copper_bulb" => {
             Some(&BLOCKS_WEATHERED_COPPER_BULB)
         }
-        "minecraft:blocks/weathered_copper_chain" | "blocks/weathered_copper_chain" => {
+        "minecraft:blocks\\weathered_copper_chain" | "blocks\\weathered_copper_chain" => {
             Some(&BLOCKS_WEATHERED_COPPER_CHAIN)
         }
-        "minecraft:blocks/weathered_copper_chest" | "blocks/weathered_copper_chest" => {
+        "minecraft:blocks\\weathered_copper_chest" | "blocks\\weathered_copper_chest" => {
             Some(&BLOCKS_WEATHERED_COPPER_CHEST)
         }
-        "minecraft:blocks/weathered_copper_door" | "blocks/weathered_copper_door" => {
+        "minecraft:blocks\\weathered_copper_door" | "blocks\\weathered_copper_door" => {
             Some(&BLOCKS_WEATHERED_COPPER_DOOR)
         }
-        "minecraft:blocks/weathered_copper_golem_statue"
-        | "blocks/weathered_copper_golem_statue" => Some(&BLOCKS_WEATHERED_COPPER_GOLEM_STATUE),
-        "minecraft:blocks/weathered_copper_grate" | "blocks/weathered_copper_grate" => {
+        "minecraft:blocks\\weathered_copper_golem_statue"
+        | "blocks\\weathered_copper_golem_statue" => Some(&BLOCKS_WEATHERED_COPPER_GOLEM_STATUE),
+        "minecraft:blocks\\weathered_copper_grate" | "blocks\\weathered_copper_grate" => {
             Some(&BLOCKS_WEATHERED_COPPER_GRATE)
         }
-        "minecraft:blocks/weathered_copper_lantern" | "blocks/weathered_copper_lantern" => {
+        "minecraft:blocks\\weathered_copper_lantern" | "blocks\\weathered_copper_lantern" => {
             Some(&BLOCKS_WEATHERED_COPPER_LANTERN)
         }
-        "minecraft:blocks/weathered_copper_trapdoor" | "blocks/weathered_copper_trapdoor" => {
+        "minecraft:blocks\\weathered_copper_trapdoor" | "blocks\\weathered_copper_trapdoor" => {
             Some(&BLOCKS_WEATHERED_COPPER_TRAPDOOR)
         }
-        "minecraft:blocks/weathered_cut_copper" | "blocks/weathered_cut_copper" => {
+        "minecraft:blocks\\weathered_cut_copper" | "blocks\\weathered_cut_copper" => {
             Some(&BLOCKS_WEATHERED_CUT_COPPER)
         }
-        "minecraft:blocks/weathered_cut_copper_slab" | "blocks/weathered_cut_copper_slab" => {
+        "minecraft:blocks\\weathered_cut_copper_slab" | "blocks\\weathered_cut_copper_slab" => {
             Some(&BLOCKS_WEATHERED_CUT_COPPER_SLAB)
         }
-        "minecraft:blocks/weathered_cut_copper_stairs" | "blocks/weathered_cut_copper_stairs" => {
+        "minecraft:blocks\\weathered_cut_copper_stairs" | "blocks\\weathered_cut_copper_stairs" => {
             Some(&BLOCKS_WEATHERED_CUT_COPPER_STAIRS)
         }
-        "minecraft:blocks/weathered_lightning_rod" | "blocks/weathered_lightning_rod" => {
+        "minecraft:blocks\\weathered_lightning_rod" | "blocks\\weathered_lightning_rod" => {
             Some(&BLOCKS_WEATHERED_LIGHTNING_ROD)
         }
-        "minecraft:blocks/weeping_vines" | "blocks/weeping_vines" => Some(&BLOCKS_WEEPING_VINES),
-        "minecraft:blocks/weeping_vines_plant" | "blocks/weeping_vines_plant" => {
+        "minecraft:blocks\\weeping_vines" | "blocks\\weeping_vines" => Some(&BLOCKS_WEEPING_VINES),
+        "minecraft:blocks\\weeping_vines_plant" | "blocks\\weeping_vines_plant" => {
             Some(&BLOCKS_WEEPING_VINES_PLANT)
         }
-        "minecraft:blocks/wet_sponge" | "blocks/wet_sponge" => Some(&BLOCKS_WET_SPONGE),
-        "minecraft:blocks/wheat" | "blocks/wheat" => Some(&BLOCKS_WHEAT),
-        "minecraft:blocks/white_banner" | "blocks/white_banner" => Some(&BLOCKS_WHITE_BANNER),
-        "minecraft:blocks/white_bed" | "blocks/white_bed" => Some(&BLOCKS_WHITE_BED),
-        "minecraft:blocks/white_candle" | "blocks/white_candle" => Some(&BLOCKS_WHITE_CANDLE),
-        "minecraft:blocks/white_candle_cake" | "blocks/white_candle_cake" => {
+        "minecraft:blocks\\wet_sponge" | "blocks\\wet_sponge" => Some(&BLOCKS_WET_SPONGE),
+        "minecraft:blocks\\wheat" | "blocks\\wheat" => Some(&BLOCKS_WHEAT),
+        "minecraft:blocks\\white_banner" | "blocks\\white_banner" => Some(&BLOCKS_WHITE_BANNER),
+        "minecraft:blocks\\white_bed" | "blocks\\white_bed" => Some(&BLOCKS_WHITE_BED),
+        "minecraft:blocks\\white_candle" | "blocks\\white_candle" => Some(&BLOCKS_WHITE_CANDLE),
+        "minecraft:blocks\\white_candle_cake" | "blocks\\white_candle_cake" => {
             Some(&BLOCKS_WHITE_CANDLE_CAKE)
         }
-        "minecraft:blocks/white_carpet" | "blocks/white_carpet" => Some(&BLOCKS_WHITE_CARPET),
-        "minecraft:blocks/white_concrete" | "blocks/white_concrete" => Some(&BLOCKS_WHITE_CONCRETE),
-        "minecraft:blocks/white_concrete_powder" | "blocks/white_concrete_powder" => {
+        "minecraft:blocks\\white_carpet" | "blocks\\white_carpet" => Some(&BLOCKS_WHITE_CARPET),
+        "minecraft:blocks\\white_concrete" | "blocks\\white_concrete" => {
+            Some(&BLOCKS_WHITE_CONCRETE)
+        }
+        "minecraft:blocks\\white_concrete_powder" | "blocks\\white_concrete_powder" => {
             Some(&BLOCKS_WHITE_CONCRETE_POWDER)
         }
-        "minecraft:blocks/white_glazed_terracotta" | "blocks/white_glazed_terracotta" => {
+        "minecraft:blocks\\white_glazed_terracotta" | "blocks\\white_glazed_terracotta" => {
             Some(&BLOCKS_WHITE_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/white_shulker_box" | "blocks/white_shulker_box" => {
+        "minecraft:blocks\\white_shulker_box" | "blocks\\white_shulker_box" => {
             Some(&BLOCKS_WHITE_SHULKER_BOX)
         }
-        "minecraft:blocks/white_stained_glass" | "blocks/white_stained_glass" => {
+        "minecraft:blocks\\white_stained_glass" | "blocks\\white_stained_glass" => {
             Some(&BLOCKS_WHITE_STAINED_GLASS)
         }
-        "minecraft:blocks/white_stained_glass_pane" | "blocks/white_stained_glass_pane" => {
+        "minecraft:blocks\\white_stained_glass_pane" | "blocks\\white_stained_glass_pane" => {
             Some(&BLOCKS_WHITE_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/white_terracotta" | "blocks/white_terracotta" => {
+        "minecraft:blocks\\white_terracotta" | "blocks\\white_terracotta" => {
             Some(&BLOCKS_WHITE_TERRACOTTA)
         }
-        "minecraft:blocks/white_tulip" | "blocks/white_tulip" => Some(&BLOCKS_WHITE_TULIP),
-        "minecraft:blocks/white_wool" | "blocks/white_wool" => Some(&BLOCKS_WHITE_WOOL),
-        "minecraft:blocks/wildflowers" | "blocks/wildflowers" => Some(&BLOCKS_WILDFLOWERS),
-        "minecraft:blocks/wither_rose" | "blocks/wither_rose" => Some(&BLOCKS_WITHER_ROSE),
-        "minecraft:blocks/wither_skeleton_skull" | "blocks/wither_skeleton_skull" => {
+        "minecraft:blocks\\white_tulip" | "blocks\\white_tulip" => Some(&BLOCKS_WHITE_TULIP),
+        "minecraft:blocks\\white_wool" | "blocks\\white_wool" => Some(&BLOCKS_WHITE_WOOL),
+        "minecraft:blocks\\wildflowers" | "blocks\\wildflowers" => Some(&BLOCKS_WILDFLOWERS),
+        "minecraft:blocks\\wither_rose" | "blocks\\wither_rose" => Some(&BLOCKS_WITHER_ROSE),
+        "minecraft:blocks\\wither_skeleton_skull" | "blocks\\wither_skeleton_skull" => {
             Some(&BLOCKS_WITHER_SKELETON_SKULL)
         }
-        "minecraft:blocks/yellow_banner" | "blocks/yellow_banner" => Some(&BLOCKS_YELLOW_BANNER),
-        "minecraft:blocks/yellow_bed" | "blocks/yellow_bed" => Some(&BLOCKS_YELLOW_BED),
-        "minecraft:blocks/yellow_candle" | "blocks/yellow_candle" => Some(&BLOCKS_YELLOW_CANDLE),
-        "minecraft:blocks/yellow_candle_cake" | "blocks/yellow_candle_cake" => {
+        "minecraft:blocks\\yellow_banner" | "blocks\\yellow_banner" => Some(&BLOCKS_YELLOW_BANNER),
+        "minecraft:blocks\\yellow_bed" | "blocks\\yellow_bed" => Some(&BLOCKS_YELLOW_BED),
+        "minecraft:blocks\\yellow_candle" | "blocks\\yellow_candle" => Some(&BLOCKS_YELLOW_CANDLE),
+        "minecraft:blocks\\yellow_candle_cake" | "blocks\\yellow_candle_cake" => {
             Some(&BLOCKS_YELLOW_CANDLE_CAKE)
         }
-        "minecraft:blocks/yellow_carpet" | "blocks/yellow_carpet" => Some(&BLOCKS_YELLOW_CARPET),
-        "minecraft:blocks/yellow_concrete" | "blocks/yellow_concrete" => {
+        "minecraft:blocks\\yellow_carpet" | "blocks\\yellow_carpet" => Some(&BLOCKS_YELLOW_CARPET),
+        "minecraft:blocks\\yellow_concrete" | "blocks\\yellow_concrete" => {
             Some(&BLOCKS_YELLOW_CONCRETE)
         }
-        "minecraft:blocks/yellow_concrete_powder" | "blocks/yellow_concrete_powder" => {
+        "minecraft:blocks\\yellow_concrete_powder" | "blocks\\yellow_concrete_powder" => {
             Some(&BLOCKS_YELLOW_CONCRETE_POWDER)
         }
-        "minecraft:blocks/yellow_glazed_terracotta" | "blocks/yellow_glazed_terracotta" => {
+        "minecraft:blocks\\yellow_glazed_terracotta" | "blocks\\yellow_glazed_terracotta" => {
             Some(&BLOCKS_YELLOW_GLAZED_TERRACOTTA)
         }
-        "minecraft:blocks/yellow_shulker_box" | "blocks/yellow_shulker_box" => {
+        "minecraft:blocks\\yellow_shulker_box" | "blocks\\yellow_shulker_box" => {
             Some(&BLOCKS_YELLOW_SHULKER_BOX)
         }
-        "minecraft:blocks/yellow_stained_glass" | "blocks/yellow_stained_glass" => {
+        "minecraft:blocks\\yellow_stained_glass" | "blocks\\yellow_stained_glass" => {
             Some(&BLOCKS_YELLOW_STAINED_GLASS)
         }
-        "minecraft:blocks/yellow_stained_glass_pane" | "blocks/yellow_stained_glass_pane" => {
+        "minecraft:blocks\\yellow_stained_glass_pane" | "blocks\\yellow_stained_glass_pane" => {
             Some(&BLOCKS_YELLOW_STAINED_GLASS_PANE)
         }
-        "minecraft:blocks/yellow_terracotta" | "blocks/yellow_terracotta" => {
+        "minecraft:blocks\\yellow_terracotta" | "blocks\\yellow_terracotta" => {
             Some(&BLOCKS_YELLOW_TERRACOTTA)
         }
-        "minecraft:blocks/yellow_wool" | "blocks/yellow_wool" => Some(&BLOCKS_YELLOW_WOOL),
-        "minecraft:blocks/zombie_head" | "blocks/zombie_head" => Some(&BLOCKS_ZOMBIE_HEAD),
-        "minecraft:brush/armadillo" | "brush/armadillo" => Some(&BRUSH_ARMADILLO),
-        "minecraft:carve/pumpkin" | "carve/pumpkin" => Some(&CARVE_PUMPKIN),
-        "minecraft:charged_creeper/creeper" | "charged_creeper/creeper" => {
+        "minecraft:blocks\\yellow_wool" | "blocks\\yellow_wool" => Some(&BLOCKS_YELLOW_WOOL),
+        "minecraft:blocks\\zombie_head" | "blocks\\zombie_head" => Some(&BLOCKS_ZOMBIE_HEAD),
+        "minecraft:brush\\armadillo" | "brush\\armadillo" => Some(&BRUSH_ARMADILLO),
+        "minecraft:carve\\pumpkin" | "carve\\pumpkin" => Some(&CARVE_PUMPKIN),
+        "minecraft:charged_creeper\\creeper" | "charged_creeper\\creeper" => {
             Some(&CHARGED_CREEPER_CREEPER)
         }
-        "minecraft:charged_creeper/piglin" | "charged_creeper/piglin" => {
+        "minecraft:charged_creeper\\piglin" | "charged_creeper\\piglin" => {
             Some(&CHARGED_CREEPER_PIGLIN)
         }
-        "minecraft:charged_creeper/root" | "charged_creeper/root" => Some(&CHARGED_CREEPER_ROOT),
-        "minecraft:charged_creeper/skeleton" | "charged_creeper/skeleton" => {
+        "minecraft:charged_creeper\\root" | "charged_creeper\\root" => Some(&CHARGED_CREEPER_ROOT),
+        "minecraft:charged_creeper\\skeleton" | "charged_creeper\\skeleton" => {
             Some(&CHARGED_CREEPER_SKELETON)
         }
-        "minecraft:charged_creeper/wither_skeleton" | "charged_creeper/wither_skeleton" => {
+        "minecraft:charged_creeper\\wither_skeleton" | "charged_creeper\\wither_skeleton" => {
             Some(&CHARGED_CREEPER_WITHER_SKELETON)
         }
-        "minecraft:charged_creeper/zombie" | "charged_creeper/zombie" => {
+        "minecraft:charged_creeper\\zombie" | "charged_creeper\\zombie" => {
             Some(&CHARGED_CREEPER_ZOMBIE)
         }
-        "minecraft:chests/abandoned_mineshaft" | "chests/abandoned_mineshaft" => {
+        "minecraft:chests\\abandoned_mineshaft" | "chests\\abandoned_mineshaft" => {
             Some(&CHESTS_ABANDONED_MINESHAFT)
         }
-        "minecraft:chests/ancient_city" | "chests/ancient_city" => Some(&CHESTS_ANCIENT_CITY),
-        "minecraft:chests/ancient_city_ice_box" | "chests/ancient_city_ice_box" => {
+        "minecraft:chests\\ancient_city" | "chests\\ancient_city" => Some(&CHESTS_ANCIENT_CITY),
+        "minecraft:chests\\ancient_city_ice_box" | "chests\\ancient_city_ice_box" => {
             Some(&CHESTS_ANCIENT_CITY_ICE_BOX)
         }
-        "minecraft:chests/bastion_bridge" | "chests/bastion_bridge" => Some(&CHESTS_BASTION_BRIDGE),
-        "minecraft:chests/bastion_hoglin_stable" | "chests/bastion_hoglin_stable" => {
+        "minecraft:chests\\bastion_bridge" | "chests\\bastion_bridge" => {
+            Some(&CHESTS_BASTION_BRIDGE)
+        }
+        "minecraft:chests\\bastion_hoglin_stable" | "chests\\bastion_hoglin_stable" => {
             Some(&CHESTS_BASTION_HOGLIN_STABLE)
         }
-        "minecraft:chests/bastion_other" | "chests/bastion_other" => Some(&CHESTS_BASTION_OTHER),
-        "minecraft:chests/bastion_treasure" | "chests/bastion_treasure" => {
+        "minecraft:chests\\bastion_other" | "chests\\bastion_other" => Some(&CHESTS_BASTION_OTHER),
+        "minecraft:chests\\bastion_treasure" | "chests\\bastion_treasure" => {
             Some(&CHESTS_BASTION_TREASURE)
         }
-        "minecraft:chests/buried_treasure" | "chests/buried_treasure" => {
+        "minecraft:chests\\buried_treasure" | "chests\\buried_treasure" => {
             Some(&CHESTS_BURIED_TREASURE)
         }
-        "minecraft:chests/desert_pyramid" | "chests/desert_pyramid" => Some(&CHESTS_DESERT_PYRAMID),
-        "minecraft:chests/end_city_treasure" | "chests/end_city_treasure" => {
+        "minecraft:chests\\desert_pyramid" | "chests\\desert_pyramid" => {
+            Some(&CHESTS_DESERT_PYRAMID)
+        }
+        "minecraft:chests\\end_city_treasure" | "chests\\end_city_treasure" => {
             Some(&CHESTS_END_CITY_TREASURE)
         }
-        "minecraft:chests/igloo_chest" | "chests/igloo_chest" => Some(&CHESTS_IGLOO_CHEST),
-        "minecraft:chests/jungle_temple" | "chests/jungle_temple" => Some(&CHESTS_JUNGLE_TEMPLE),
-        "minecraft:chests/jungle_temple_dispenser" | "chests/jungle_temple_dispenser" => {
+        "minecraft:chests\\igloo_chest" | "chests\\igloo_chest" => Some(&CHESTS_IGLOO_CHEST),
+        "minecraft:chests\\jungle_temple" | "chests\\jungle_temple" => Some(&CHESTS_JUNGLE_TEMPLE),
+        "minecraft:chests\\jungle_temple_dispenser" | "chests\\jungle_temple_dispenser" => {
             Some(&CHESTS_JUNGLE_TEMPLE_DISPENSER)
         }
-        "minecraft:chests/nether_bridge" | "chests/nether_bridge" => Some(&CHESTS_NETHER_BRIDGE),
-        "minecraft:chests/pillager_outpost" | "chests/pillager_outpost" => {
+        "minecraft:chests\\nether_bridge" | "chests\\nether_bridge" => Some(&CHESTS_NETHER_BRIDGE),
+        "minecraft:chests\\pillager_outpost" | "chests\\pillager_outpost" => {
             Some(&CHESTS_PILLAGER_OUTPOST)
         }
-        "minecraft:chests/ruined_portal" | "chests/ruined_portal" => Some(&CHESTS_RUINED_PORTAL),
-        "minecraft:chests/shipwreck_map" | "chests/shipwreck_map" => Some(&CHESTS_SHIPWRECK_MAP),
-        "minecraft:chests/shipwreck_supply" | "chests/shipwreck_supply" => {
+        "minecraft:chests\\ruined_portal" | "chests\\ruined_portal" => Some(&CHESTS_RUINED_PORTAL),
+        "minecraft:chests\\shipwreck_map" | "chests\\shipwreck_map" => Some(&CHESTS_SHIPWRECK_MAP),
+        "minecraft:chests\\shipwreck_supply" | "chests\\shipwreck_supply" => {
             Some(&CHESTS_SHIPWRECK_SUPPLY)
         }
-        "minecraft:chests/shipwreck_treasure" | "chests/shipwreck_treasure" => {
+        "minecraft:chests\\shipwreck_treasure" | "chests\\shipwreck_treasure" => {
             Some(&CHESTS_SHIPWRECK_TREASURE)
         }
-        "minecraft:chests/simple_dungeon" | "chests/simple_dungeon" => Some(&CHESTS_SIMPLE_DUNGEON),
-        "minecraft:chests/spawn_bonus_chest" | "chests/spawn_bonus_chest" => {
+        "minecraft:chests\\simple_dungeon" | "chests\\simple_dungeon" => {
+            Some(&CHESTS_SIMPLE_DUNGEON)
+        }
+        "minecraft:chests\\spawn_bonus_chest" | "chests\\spawn_bonus_chest" => {
             Some(&CHESTS_SPAWN_BONUS_CHEST)
         }
-        "minecraft:chests/stronghold_corridor" | "chests/stronghold_corridor" => {
+        "minecraft:chests\\stronghold_corridor" | "chests\\stronghold_corridor" => {
             Some(&CHESTS_STRONGHOLD_CORRIDOR)
         }
-        "minecraft:chests/stronghold_crossing" | "chests/stronghold_crossing" => {
+        "minecraft:chests\\stronghold_crossing" | "chests\\stronghold_crossing" => {
             Some(&CHESTS_STRONGHOLD_CROSSING)
         }
-        "minecraft:chests/stronghold_library" | "chests/stronghold_library" => {
+        "minecraft:chests\\stronghold_library" | "chests\\stronghold_library" => {
             Some(&CHESTS_STRONGHOLD_LIBRARY)
         }
-        "minecraft:chests/trial_chambers/corridor" | "chests/trial_chambers/corridor" => {
+        "minecraft:chests\\trial_chambers\\corridor" | "chests\\trial_chambers\\corridor" => {
             Some(&CHESTS_TRIAL_CHAMBERS_CORRIDOR)
         }
-        "minecraft:chests/trial_chambers/entrance" | "chests/trial_chambers/entrance" => {
+        "minecraft:chests\\trial_chambers\\entrance" | "chests\\trial_chambers\\entrance" => {
             Some(&CHESTS_TRIAL_CHAMBERS_ENTRANCE)
         }
-        "minecraft:chests/trial_chambers/intersection" | "chests/trial_chambers/intersection" => {
-            Some(&CHESTS_TRIAL_CHAMBERS_INTERSECTION)
-        }
-        "minecraft:chests/trial_chambers/intersection_barrel"
-        | "chests/trial_chambers/intersection_barrel" => {
+        "minecraft:chests\\trial_chambers\\intersection"
+        | "chests\\trial_chambers\\intersection" => Some(&CHESTS_TRIAL_CHAMBERS_INTERSECTION),
+        "minecraft:chests\\trial_chambers\\intersection_barrel"
+        | "chests\\trial_chambers\\intersection_barrel" => {
             Some(&CHESTS_TRIAL_CHAMBERS_INTERSECTION_BARREL)
         }
-        "minecraft:chests/trial_chambers/reward" | "chests/trial_chambers/reward" => {
+        "minecraft:chests\\trial_chambers\\reward" | "chests\\trial_chambers\\reward" => {
             Some(&CHESTS_TRIAL_CHAMBERS_REWARD)
         }
-        "minecraft:chests/trial_chambers/reward_common" | "chests/trial_chambers/reward_common" => {
-            Some(&CHESTS_TRIAL_CHAMBERS_REWARD_COMMON)
-        }
-        "minecraft:chests/trial_chambers/reward_ominous"
-        | "chests/trial_chambers/reward_ominous" => Some(&CHESTS_TRIAL_CHAMBERS_REWARD_OMINOUS),
-        "minecraft:chests/trial_chambers/reward_ominous_common"
-        | "chests/trial_chambers/reward_ominous_common" => {
+        "minecraft:chests\\trial_chambers\\reward_common"
+        | "chests\\trial_chambers\\reward_common" => Some(&CHESTS_TRIAL_CHAMBERS_REWARD_COMMON),
+        "minecraft:chests\\trial_chambers\\reward_ominous"
+        | "chests\\trial_chambers\\reward_ominous" => Some(&CHESTS_TRIAL_CHAMBERS_REWARD_OMINOUS),
+        "minecraft:chests\\trial_chambers\\reward_ominous_common"
+        | "chests\\trial_chambers\\reward_ominous_common" => {
             Some(&CHESTS_TRIAL_CHAMBERS_REWARD_OMINOUS_COMMON)
         }
-        "minecraft:chests/trial_chambers/reward_ominous_rare"
-        | "chests/trial_chambers/reward_ominous_rare" => {
+        "minecraft:chests\\trial_chambers\\reward_ominous_rare"
+        | "chests\\trial_chambers\\reward_ominous_rare" => {
             Some(&CHESTS_TRIAL_CHAMBERS_REWARD_OMINOUS_RARE)
         }
-        "minecraft:chests/trial_chambers/reward_ominous_unique"
-        | "chests/trial_chambers/reward_ominous_unique" => {
+        "minecraft:chests\\trial_chambers\\reward_ominous_unique"
+        | "chests\\trial_chambers\\reward_ominous_unique" => {
             Some(&CHESTS_TRIAL_CHAMBERS_REWARD_OMINOUS_UNIQUE)
         }
-        "minecraft:chests/trial_chambers/reward_rare" | "chests/trial_chambers/reward_rare" => {
+        "minecraft:chests\\trial_chambers\\reward_rare" | "chests\\trial_chambers\\reward_rare" => {
             Some(&CHESTS_TRIAL_CHAMBERS_REWARD_RARE)
         }
-        "minecraft:chests/trial_chambers/reward_unique" | "chests/trial_chambers/reward_unique" => {
-            Some(&CHESTS_TRIAL_CHAMBERS_REWARD_UNIQUE)
-        }
-        "minecraft:chests/trial_chambers/supply" | "chests/trial_chambers/supply" => {
+        "minecraft:chests\\trial_chambers\\reward_unique"
+        | "chests\\trial_chambers\\reward_unique" => Some(&CHESTS_TRIAL_CHAMBERS_REWARD_UNIQUE),
+        "minecraft:chests\\trial_chambers\\supply" | "chests\\trial_chambers\\supply" => {
             Some(&CHESTS_TRIAL_CHAMBERS_SUPPLY)
         }
-        "minecraft:chests/underwater_ruin_big" | "chests/underwater_ruin_big" => {
+        "minecraft:chests\\underwater_ruin_big" | "chests\\underwater_ruin_big" => {
             Some(&CHESTS_UNDERWATER_RUIN_BIG)
         }
-        "minecraft:chests/underwater_ruin_small" | "chests/underwater_ruin_small" => {
+        "minecraft:chests\\underwater_ruin_small" | "chests\\underwater_ruin_small" => {
             Some(&CHESTS_UNDERWATER_RUIN_SMALL)
         }
-        "minecraft:chests/village/village_armorer" | "chests/village/village_armorer" => {
+        "minecraft:chests\\village\\village_armorer" | "chests\\village\\village_armorer" => {
             Some(&CHESTS_VILLAGE_VILLAGE_ARMORER)
         }
-        "minecraft:chests/village/village_butcher" | "chests/village/village_butcher" => {
+        "minecraft:chests\\village\\village_butcher" | "chests\\village\\village_butcher" => {
             Some(&CHESTS_VILLAGE_VILLAGE_BUTCHER)
         }
-        "minecraft:chests/village/village_cartographer" | "chests/village/village_cartographer" => {
-            Some(&CHESTS_VILLAGE_VILLAGE_CARTOGRAPHER)
-        }
-        "minecraft:chests/village/village_desert_house" | "chests/village/village_desert_house" => {
-            Some(&CHESTS_VILLAGE_VILLAGE_DESERT_HOUSE)
-        }
-        "minecraft:chests/village/village_fisher" | "chests/village/village_fisher" => {
+        "minecraft:chests\\village\\village_cartographer"
+        | "chests\\village\\village_cartographer" => Some(&CHESTS_VILLAGE_VILLAGE_CARTOGRAPHER),
+        "minecraft:chests\\village\\village_desert_house"
+        | "chests\\village\\village_desert_house" => Some(&CHESTS_VILLAGE_VILLAGE_DESERT_HOUSE),
+        "minecraft:chests\\village\\village_fisher" | "chests\\village\\village_fisher" => {
             Some(&CHESTS_VILLAGE_VILLAGE_FISHER)
         }
-        "minecraft:chests/village/village_fletcher" | "chests/village/village_fletcher" => {
+        "minecraft:chests\\village\\village_fletcher" | "chests\\village\\village_fletcher" => {
             Some(&CHESTS_VILLAGE_VILLAGE_FLETCHER)
         }
-        "minecraft:chests/village/village_mason" | "chests/village/village_mason" => {
+        "minecraft:chests\\village\\village_mason" | "chests\\village\\village_mason" => {
             Some(&CHESTS_VILLAGE_VILLAGE_MASON)
         }
-        "minecraft:chests/village/village_plains_house" | "chests/village/village_plains_house" => {
-            Some(&CHESTS_VILLAGE_VILLAGE_PLAINS_HOUSE)
-        }
-        "minecraft:chests/village/village_savanna_house"
-        | "chests/village/village_savanna_house" => Some(&CHESTS_VILLAGE_VILLAGE_SAVANNA_HOUSE),
-        "minecraft:chests/village/village_shepherd" | "chests/village/village_shepherd" => {
+        "minecraft:chests\\village\\village_plains_house"
+        | "chests\\village\\village_plains_house" => Some(&CHESTS_VILLAGE_VILLAGE_PLAINS_HOUSE),
+        "minecraft:chests\\village\\village_savanna_house"
+        | "chests\\village\\village_savanna_house" => Some(&CHESTS_VILLAGE_VILLAGE_SAVANNA_HOUSE),
+        "minecraft:chests\\village\\village_shepherd" | "chests\\village\\village_shepherd" => {
             Some(&CHESTS_VILLAGE_VILLAGE_SHEPHERD)
         }
-        "minecraft:chests/village/village_snowy_house" | "chests/village/village_snowy_house" => {
-            Some(&CHESTS_VILLAGE_VILLAGE_SNOWY_HOUSE)
-        }
-        "minecraft:chests/village/village_taiga_house" | "chests/village/village_taiga_house" => {
-            Some(&CHESTS_VILLAGE_VILLAGE_TAIGA_HOUSE)
-        }
-        "minecraft:chests/village/village_tannery" | "chests/village/village_tannery" => {
+        "minecraft:chests\\village\\village_snowy_house"
+        | "chests\\village\\village_snowy_house" => Some(&CHESTS_VILLAGE_VILLAGE_SNOWY_HOUSE),
+        "minecraft:chests\\village\\village_taiga_house"
+        | "chests\\village\\village_taiga_house" => Some(&CHESTS_VILLAGE_VILLAGE_TAIGA_HOUSE),
+        "minecraft:chests\\village\\village_tannery" | "chests\\village\\village_tannery" => {
             Some(&CHESTS_VILLAGE_VILLAGE_TANNERY)
         }
-        "minecraft:chests/village/village_temple" | "chests/village/village_temple" => {
+        "minecraft:chests\\village\\village_temple" | "chests\\village\\village_temple" => {
             Some(&CHESTS_VILLAGE_VILLAGE_TEMPLE)
         }
-        "minecraft:chests/village/village_toolsmith" | "chests/village/village_toolsmith" => {
+        "minecraft:chests\\village\\village_toolsmith" | "chests\\village\\village_toolsmith" => {
             Some(&CHESTS_VILLAGE_VILLAGE_TOOLSMITH)
         }
-        "minecraft:chests/village/village_weaponsmith" | "chests/village/village_weaponsmith" => {
-            Some(&CHESTS_VILLAGE_VILLAGE_WEAPONSMITH)
-        }
-        "minecraft:chests/woodland_mansion" | "chests/woodland_mansion" => {
+        "minecraft:chests\\village\\village_weaponsmith"
+        | "chests\\village\\village_weaponsmith" => Some(&CHESTS_VILLAGE_VILLAGE_WEAPONSMITH),
+        "minecraft:chests\\woodland_mansion" | "chests\\woodland_mansion" => {
             Some(&CHESTS_WOODLAND_MANSION)
         }
-        "minecraft:dispensers/trial_chambers/chamber" | "dispensers/trial_chambers/chamber" => {
+        "minecraft:dispensers\\trial_chambers\\chamber" | "dispensers\\trial_chambers\\chamber" => {
             Some(&DISPENSERS_TRIAL_CHAMBERS_CHAMBER)
         }
-        "minecraft:dispensers/trial_chambers/corridor" | "dispensers/trial_chambers/corridor" => {
-            Some(&DISPENSERS_TRIAL_CHAMBERS_CORRIDOR)
-        }
-        "minecraft:dispensers/trial_chambers/water" | "dispensers/trial_chambers/water" => {
+        "minecraft:dispensers\\trial_chambers\\corridor"
+        | "dispensers\\trial_chambers\\corridor" => Some(&DISPENSERS_TRIAL_CHAMBERS_CORRIDOR),
+        "minecraft:dispensers\\trial_chambers\\water" | "dispensers\\trial_chambers\\water" => {
             Some(&DISPENSERS_TRIAL_CHAMBERS_WATER)
         }
-        "minecraft:entities/allay" | "entities/allay" => Some(&ENTITIES_ALLAY),
-        "minecraft:entities/armadillo" | "entities/armadillo" => Some(&ENTITIES_ARMADILLO),
-        "minecraft:entities/armor_stand" | "entities/armor_stand" => Some(&ENTITIES_ARMOR_STAND),
-        "minecraft:entities/axolotl" | "entities/axolotl" => Some(&ENTITIES_AXOLOTL),
-        "minecraft:entities/bat" | "entities/bat" => Some(&ENTITIES_BAT),
-        "minecraft:entities/bee" | "entities/bee" => Some(&ENTITIES_BEE),
-        "minecraft:entities/blaze" | "entities/blaze" => Some(&ENTITIES_BLAZE),
-        "minecraft:entities/bogged" | "entities/bogged" => Some(&ENTITIES_BOGGED),
-        "minecraft:entities/breeze" | "entities/breeze" => Some(&ENTITIES_BREEZE),
-        "minecraft:entities/camel" | "entities/camel" => Some(&ENTITIES_CAMEL),
-        "minecraft:entities/camel_husk" | "entities/camel_husk" => Some(&ENTITIES_CAMEL_HUSK),
-        "minecraft:entities/cat" | "entities/cat" => Some(&ENTITIES_CAT),
-        "minecraft:entities/cave_spider" | "entities/cave_spider" => Some(&ENTITIES_CAVE_SPIDER),
-        "minecraft:entities/chicken" | "entities/chicken" => Some(&ENTITIES_CHICKEN),
-        "minecraft:entities/cod" | "entities/cod" => Some(&ENTITIES_COD),
-        "minecraft:entities/copper_golem" | "entities/copper_golem" => Some(&ENTITIES_COPPER_GOLEM),
-        "minecraft:entities/cow" | "entities/cow" => Some(&ENTITIES_COW),
-        "minecraft:entities/creaking" | "entities/creaking" => Some(&ENTITIES_CREAKING),
-        "minecraft:entities/creeper" | "entities/creeper" => Some(&ENTITIES_CREEPER),
-        "minecraft:entities/dolphin" | "entities/dolphin" => Some(&ENTITIES_DOLPHIN),
-        "minecraft:entities/donkey" | "entities/donkey" => Some(&ENTITIES_DONKEY),
-        "minecraft:entities/drowned" | "entities/drowned" => Some(&ENTITIES_DROWNED),
-        "minecraft:entities/elder_guardian" | "entities/elder_guardian" => {
+        "minecraft:entities\\allay" | "entities\\allay" => Some(&ENTITIES_ALLAY),
+        "minecraft:entities\\armadillo" | "entities\\armadillo" => Some(&ENTITIES_ARMADILLO),
+        "minecraft:entities\\armor_stand" | "entities\\armor_stand" => Some(&ENTITIES_ARMOR_STAND),
+        "minecraft:entities\\axolotl" | "entities\\axolotl" => Some(&ENTITIES_AXOLOTL),
+        "minecraft:entities\\bat" | "entities\\bat" => Some(&ENTITIES_BAT),
+        "minecraft:entities\\bee" | "entities\\bee" => Some(&ENTITIES_BEE),
+        "minecraft:entities\\blaze" | "entities\\blaze" => Some(&ENTITIES_BLAZE),
+        "minecraft:entities\\bogged" | "entities\\bogged" => Some(&ENTITIES_BOGGED),
+        "minecraft:entities\\breeze" | "entities\\breeze" => Some(&ENTITIES_BREEZE),
+        "minecraft:entities\\camel" | "entities\\camel" => Some(&ENTITIES_CAMEL),
+        "minecraft:entities\\camel_husk" | "entities\\camel_husk" => Some(&ENTITIES_CAMEL_HUSK),
+        "minecraft:entities\\cat" | "entities\\cat" => Some(&ENTITIES_CAT),
+        "minecraft:entities\\cave_spider" | "entities\\cave_spider" => Some(&ENTITIES_CAVE_SPIDER),
+        "minecraft:entities\\chicken" | "entities\\chicken" => Some(&ENTITIES_CHICKEN),
+        "minecraft:entities\\cod" | "entities\\cod" => Some(&ENTITIES_COD),
+        "minecraft:entities\\copper_golem" | "entities\\copper_golem" => {
+            Some(&ENTITIES_COPPER_GOLEM)
+        }
+        "minecraft:entities\\cow" | "entities\\cow" => Some(&ENTITIES_COW),
+        "minecraft:entities\\creaking" | "entities\\creaking" => Some(&ENTITIES_CREAKING),
+        "minecraft:entities\\creeper" | "entities\\creeper" => Some(&ENTITIES_CREEPER),
+        "minecraft:entities\\dolphin" | "entities\\dolphin" => Some(&ENTITIES_DOLPHIN),
+        "minecraft:entities\\donkey" | "entities\\donkey" => Some(&ENTITIES_DONKEY),
+        "minecraft:entities\\drowned" | "entities\\drowned" => Some(&ENTITIES_DROWNED),
+        "minecraft:entities\\elder_guardian" | "entities\\elder_guardian" => {
             Some(&ENTITIES_ELDER_GUARDIAN)
         }
-        "minecraft:entities/ender_dragon" | "entities/ender_dragon" => Some(&ENTITIES_ENDER_DRAGON),
-        "minecraft:entities/enderman" | "entities/enderman" => Some(&ENTITIES_ENDERMAN),
-        "minecraft:entities/endermite" | "entities/endermite" => Some(&ENTITIES_ENDERMITE),
-        "minecraft:entities/evoker" | "entities/evoker" => Some(&ENTITIES_EVOKER),
-        "minecraft:entities/fox" | "entities/fox" => Some(&ENTITIES_FOX),
-        "minecraft:entities/frog" | "entities/frog" => Some(&ENTITIES_FROG),
-        "minecraft:entities/ghast" | "entities/ghast" => Some(&ENTITIES_GHAST),
-        "minecraft:entities/giant" | "entities/giant" => Some(&ENTITIES_GIANT),
-        "minecraft:entities/glow_squid" | "entities/glow_squid" => Some(&ENTITIES_GLOW_SQUID),
-        "minecraft:entities/goat" | "entities/goat" => Some(&ENTITIES_GOAT),
-        "minecraft:entities/guardian" | "entities/guardian" => Some(&ENTITIES_GUARDIAN),
-        "minecraft:entities/happy_ghast" | "entities/happy_ghast" => Some(&ENTITIES_HAPPY_GHAST),
-        "minecraft:entities/hoglin" | "entities/hoglin" => Some(&ENTITIES_HOGLIN),
-        "minecraft:entities/horse" | "entities/horse" => Some(&ENTITIES_HORSE),
-        "minecraft:entities/husk" | "entities/husk" => Some(&ENTITIES_HUSK),
-        "minecraft:entities/illusioner" | "entities/illusioner" => Some(&ENTITIES_ILLUSIONER),
-        "minecraft:entities/iron_golem" | "entities/iron_golem" => Some(&ENTITIES_IRON_GOLEM),
-        "minecraft:entities/llama" | "entities/llama" => Some(&ENTITIES_LLAMA),
-        "minecraft:entities/magma_cube" | "entities/magma_cube" => Some(&ENTITIES_MAGMA_CUBE),
-        "minecraft:entities/mannequin" | "entities/mannequin" => Some(&ENTITIES_MANNEQUIN),
-        "minecraft:entities/mooshroom" | "entities/mooshroom" => Some(&ENTITIES_MOOSHROOM),
-        "minecraft:entities/mule" | "entities/mule" => Some(&ENTITIES_MULE),
-        "minecraft:entities/nautilus" | "entities/nautilus" => Some(&ENTITIES_NAUTILUS),
-        "minecraft:entities/ocelot" | "entities/ocelot" => Some(&ENTITIES_OCELOT),
-        "minecraft:entities/panda" | "entities/panda" => Some(&ENTITIES_PANDA),
-        "minecraft:entities/parched" | "entities/parched" => Some(&ENTITIES_PARCHED),
-        "minecraft:entities/parrot" | "entities/parrot" => Some(&ENTITIES_PARROT),
-        "minecraft:entities/phantom" | "entities/phantom" => Some(&ENTITIES_PHANTOM),
-        "minecraft:entities/pig" | "entities/pig" => Some(&ENTITIES_PIG),
-        "minecraft:entities/piglin" | "entities/piglin" => Some(&ENTITIES_PIGLIN),
-        "minecraft:entities/piglin_brute" | "entities/piglin_brute" => Some(&ENTITIES_PIGLIN_BRUTE),
-        "minecraft:entities/pillager" | "entities/pillager" => Some(&ENTITIES_PILLAGER),
-        "minecraft:entities/player" | "entities/player" => Some(&ENTITIES_PLAYER),
-        "minecraft:entities/polar_bear" | "entities/polar_bear" => Some(&ENTITIES_POLAR_BEAR),
-        "minecraft:entities/pufferfish" | "entities/pufferfish" => Some(&ENTITIES_PUFFERFISH),
-        "minecraft:entities/rabbit" | "entities/rabbit" => Some(&ENTITIES_RABBIT),
-        "minecraft:entities/ravager" | "entities/ravager" => Some(&ENTITIES_RAVAGER),
-        "minecraft:entities/salmon" | "entities/salmon" => Some(&ENTITIES_SALMON),
-        "minecraft:entities/sheep" | "entities/sheep" => Some(&ENTITIES_SHEEP),
-        "minecraft:entities/sheep/black" | "entities/sheep/black" => Some(&ENTITIES_SHEEP_BLACK),
-        "minecraft:entities/sheep/blue" | "entities/sheep/blue" => Some(&ENTITIES_SHEEP_BLUE),
-        "minecraft:entities/sheep/brown" | "entities/sheep/brown" => Some(&ENTITIES_SHEEP_BROWN),
-        "minecraft:entities/sheep/cyan" | "entities/sheep/cyan" => Some(&ENTITIES_SHEEP_CYAN),
-        "minecraft:entities/sheep/gray" | "entities/sheep/gray" => Some(&ENTITIES_SHEEP_GRAY),
-        "minecraft:entities/sheep/green" | "entities/sheep/green" => Some(&ENTITIES_SHEEP_GREEN),
-        "minecraft:entities/sheep/light_blue" | "entities/sheep/light_blue" => {
+        "minecraft:entities\\ender_dragon" | "entities\\ender_dragon" => {
+            Some(&ENTITIES_ENDER_DRAGON)
+        }
+        "minecraft:entities\\enderman" | "entities\\enderman" => Some(&ENTITIES_ENDERMAN),
+        "minecraft:entities\\endermite" | "entities\\endermite" => Some(&ENTITIES_ENDERMITE),
+        "minecraft:entities\\evoker" | "entities\\evoker" => Some(&ENTITIES_EVOKER),
+        "minecraft:entities\\fox" | "entities\\fox" => Some(&ENTITIES_FOX),
+        "minecraft:entities\\frog" | "entities\\frog" => Some(&ENTITIES_FROG),
+        "minecraft:entities\\ghast" | "entities\\ghast" => Some(&ENTITIES_GHAST),
+        "minecraft:entities\\giant" | "entities\\giant" => Some(&ENTITIES_GIANT),
+        "minecraft:entities\\glow_squid" | "entities\\glow_squid" => Some(&ENTITIES_GLOW_SQUID),
+        "minecraft:entities\\goat" | "entities\\goat" => Some(&ENTITIES_GOAT),
+        "minecraft:entities\\guardian" | "entities\\guardian" => Some(&ENTITIES_GUARDIAN),
+        "minecraft:entities\\happy_ghast" | "entities\\happy_ghast" => Some(&ENTITIES_HAPPY_GHAST),
+        "minecraft:entities\\hoglin" | "entities\\hoglin" => Some(&ENTITIES_HOGLIN),
+        "minecraft:entities\\horse" | "entities\\horse" => Some(&ENTITIES_HORSE),
+        "minecraft:entities\\husk" | "entities\\husk" => Some(&ENTITIES_HUSK),
+        "minecraft:entities\\illusioner" | "entities\\illusioner" => Some(&ENTITIES_ILLUSIONER),
+        "minecraft:entities\\iron_golem" | "entities\\iron_golem" => Some(&ENTITIES_IRON_GOLEM),
+        "minecraft:entities\\llama" | "entities\\llama" => Some(&ENTITIES_LLAMA),
+        "minecraft:entities\\magma_cube" | "entities\\magma_cube" => Some(&ENTITIES_MAGMA_CUBE),
+        "minecraft:entities\\mannequin" | "entities\\mannequin" => Some(&ENTITIES_MANNEQUIN),
+        "minecraft:entities\\mooshroom" | "entities\\mooshroom" => Some(&ENTITIES_MOOSHROOM),
+        "minecraft:entities\\mule" | "entities\\mule" => Some(&ENTITIES_MULE),
+        "minecraft:entities\\nautilus" | "entities\\nautilus" => Some(&ENTITIES_NAUTILUS),
+        "minecraft:entities\\ocelot" | "entities\\ocelot" => Some(&ENTITIES_OCELOT),
+        "minecraft:entities\\panda" | "entities\\panda" => Some(&ENTITIES_PANDA),
+        "minecraft:entities\\parched" | "entities\\parched" => Some(&ENTITIES_PARCHED),
+        "minecraft:entities\\parrot" | "entities\\parrot" => Some(&ENTITIES_PARROT),
+        "minecraft:entities\\phantom" | "entities\\phantom" => Some(&ENTITIES_PHANTOM),
+        "minecraft:entities\\pig" | "entities\\pig" => Some(&ENTITIES_PIG),
+        "minecraft:entities\\piglin" | "entities\\piglin" => Some(&ENTITIES_PIGLIN),
+        "minecraft:entities\\piglin_brute" | "entities\\piglin_brute" => {
+            Some(&ENTITIES_PIGLIN_BRUTE)
+        }
+        "minecraft:entities\\pillager" | "entities\\pillager" => Some(&ENTITIES_PILLAGER),
+        "minecraft:entities\\player" | "entities\\player" => Some(&ENTITIES_PLAYER),
+        "minecraft:entities\\polar_bear" | "entities\\polar_bear" => Some(&ENTITIES_POLAR_BEAR),
+        "minecraft:entities\\pufferfish" | "entities\\pufferfish" => Some(&ENTITIES_PUFFERFISH),
+        "minecraft:entities\\rabbit" | "entities\\rabbit" => Some(&ENTITIES_RABBIT),
+        "minecraft:entities\\ravager" | "entities\\ravager" => Some(&ENTITIES_RAVAGER),
+        "minecraft:entities\\salmon" | "entities\\salmon" => Some(&ENTITIES_SALMON),
+        "minecraft:entities\\sheep" | "entities\\sheep" => Some(&ENTITIES_SHEEP),
+        "minecraft:entities\\sheep\\black" | "entities\\sheep\\black" => {
+            Some(&ENTITIES_SHEEP_BLACK)
+        }
+        "minecraft:entities\\sheep\\blue" | "entities\\sheep\\blue" => Some(&ENTITIES_SHEEP_BLUE),
+        "minecraft:entities\\sheep\\brown" | "entities\\sheep\\brown" => {
+            Some(&ENTITIES_SHEEP_BROWN)
+        }
+        "minecraft:entities\\sheep\\cyan" | "entities\\sheep\\cyan" => Some(&ENTITIES_SHEEP_CYAN),
+        "minecraft:entities\\sheep\\gray" | "entities\\sheep\\gray" => Some(&ENTITIES_SHEEP_GRAY),
+        "minecraft:entities\\sheep\\green" | "entities\\sheep\\green" => {
+            Some(&ENTITIES_SHEEP_GREEN)
+        }
+        "minecraft:entities\\sheep\\light_blue" | "entities\\sheep\\light_blue" => {
             Some(&ENTITIES_SHEEP_LIGHT_BLUE)
         }
-        "minecraft:entities/sheep/light_gray" | "entities/sheep/light_gray" => {
+        "minecraft:entities\\sheep\\light_gray" | "entities\\sheep\\light_gray" => {
             Some(&ENTITIES_SHEEP_LIGHT_GRAY)
         }
-        "minecraft:entities/sheep/lime" | "entities/sheep/lime" => Some(&ENTITIES_SHEEP_LIME),
-        "minecraft:entities/sheep/magenta" | "entities/sheep/magenta" => {
+        "minecraft:entities\\sheep\\lime" | "entities\\sheep\\lime" => Some(&ENTITIES_SHEEP_LIME),
+        "minecraft:entities\\sheep\\magenta" | "entities\\sheep\\magenta" => {
             Some(&ENTITIES_SHEEP_MAGENTA)
         }
-        "minecraft:entities/sheep/orange" | "entities/sheep/orange" => Some(&ENTITIES_SHEEP_ORANGE),
-        "minecraft:entities/sheep/pink" | "entities/sheep/pink" => Some(&ENTITIES_SHEEP_PINK),
-        "minecraft:entities/sheep/purple" | "entities/sheep/purple" => Some(&ENTITIES_SHEEP_PURPLE),
-        "minecraft:entities/sheep/red" | "entities/sheep/red" => Some(&ENTITIES_SHEEP_RED),
-        "minecraft:entities/sheep/white" | "entities/sheep/white" => Some(&ENTITIES_SHEEP_WHITE),
-        "minecraft:entities/sheep/yellow" | "entities/sheep/yellow" => Some(&ENTITIES_SHEEP_YELLOW),
-        "minecraft:entities/shulker" | "entities/shulker" => Some(&ENTITIES_SHULKER),
-        "minecraft:entities/silverfish" | "entities/silverfish" => Some(&ENTITIES_SILVERFISH),
-        "minecraft:entities/skeleton" | "entities/skeleton" => Some(&ENTITIES_SKELETON),
-        "minecraft:entities/skeleton_horse" | "entities/skeleton_horse" => {
+        "minecraft:entities\\sheep\\orange" | "entities\\sheep\\orange" => {
+            Some(&ENTITIES_SHEEP_ORANGE)
+        }
+        "minecraft:entities\\sheep\\pink" | "entities\\sheep\\pink" => Some(&ENTITIES_SHEEP_PINK),
+        "minecraft:entities\\sheep\\purple" | "entities\\sheep\\purple" => {
+            Some(&ENTITIES_SHEEP_PURPLE)
+        }
+        "minecraft:entities\\sheep\\red" | "entities\\sheep\\red" => Some(&ENTITIES_SHEEP_RED),
+        "minecraft:entities\\sheep\\white" | "entities\\sheep\\white" => {
+            Some(&ENTITIES_SHEEP_WHITE)
+        }
+        "minecraft:entities\\sheep\\yellow" | "entities\\sheep\\yellow" => {
+            Some(&ENTITIES_SHEEP_YELLOW)
+        }
+        "minecraft:entities\\shulker" | "entities\\shulker" => Some(&ENTITIES_SHULKER),
+        "minecraft:entities\\silverfish" | "entities\\silverfish" => Some(&ENTITIES_SILVERFISH),
+        "minecraft:entities\\skeleton" | "entities\\skeleton" => Some(&ENTITIES_SKELETON),
+        "minecraft:entities\\skeleton_horse" | "entities\\skeleton_horse" => {
             Some(&ENTITIES_SKELETON_HORSE)
         }
-        "minecraft:entities/slime" | "entities/slime" => Some(&ENTITIES_SLIME),
-        "minecraft:entities/sniffer" | "entities/sniffer" => Some(&ENTITIES_SNIFFER),
-        "minecraft:entities/snow_golem" | "entities/snow_golem" => Some(&ENTITIES_SNOW_GOLEM),
-        "minecraft:entities/spider" | "entities/spider" => Some(&ENTITIES_SPIDER),
-        "minecraft:entities/squid" | "entities/squid" => Some(&ENTITIES_SQUID),
-        "minecraft:entities/stray" | "entities/stray" => Some(&ENTITIES_STRAY),
-        "minecraft:entities/strider" | "entities/strider" => Some(&ENTITIES_STRIDER),
-        "minecraft:entities/sulfur_cube" | "entities/sulfur_cube" => Some(&ENTITIES_SULFUR_CUBE),
-        "minecraft:entities/tadpole" | "entities/tadpole" => Some(&ENTITIES_TADPOLE),
-        "minecraft:entities/trader_llama" | "entities/trader_llama" => Some(&ENTITIES_TRADER_LLAMA),
-        "minecraft:entities/tropical_fish" | "entities/tropical_fish" => {
+        "minecraft:entities\\slime" | "entities\\slime" => Some(&ENTITIES_SLIME),
+        "minecraft:entities\\sniffer" | "entities\\sniffer" => Some(&ENTITIES_SNIFFER),
+        "minecraft:entities\\snow_golem" | "entities\\snow_golem" => Some(&ENTITIES_SNOW_GOLEM),
+        "minecraft:entities\\spider" | "entities\\spider" => Some(&ENTITIES_SPIDER),
+        "minecraft:entities\\squid" | "entities\\squid" => Some(&ENTITIES_SQUID),
+        "minecraft:entities\\stray" | "entities\\stray" => Some(&ENTITIES_STRAY),
+        "minecraft:entities\\strider" | "entities\\strider" => Some(&ENTITIES_STRIDER),
+        "minecraft:entities\\sulfur_cube" | "entities\\sulfur_cube" => Some(&ENTITIES_SULFUR_CUBE),
+        "minecraft:entities\\tadpole" | "entities\\tadpole" => Some(&ENTITIES_TADPOLE),
+        "minecraft:entities\\trader_llama" | "entities\\trader_llama" => {
+            Some(&ENTITIES_TRADER_LLAMA)
+        }
+        "minecraft:entities\\tropical_fish" | "entities\\tropical_fish" => {
             Some(&ENTITIES_TROPICAL_FISH)
         }
-        "minecraft:entities/turtle" | "entities/turtle" => Some(&ENTITIES_TURTLE),
-        "minecraft:entities/vex" | "entities/vex" => Some(&ENTITIES_VEX),
-        "minecraft:entities/villager" | "entities/villager" => Some(&ENTITIES_VILLAGER),
-        "minecraft:entities/vindicator" | "entities/vindicator" => Some(&ENTITIES_VINDICATOR),
-        "minecraft:entities/wandering_trader" | "entities/wandering_trader" => {
+        "minecraft:entities\\turtle" | "entities\\turtle" => Some(&ENTITIES_TURTLE),
+        "minecraft:entities\\vex" | "entities\\vex" => Some(&ENTITIES_VEX),
+        "minecraft:entities\\villager" | "entities\\villager" => Some(&ENTITIES_VILLAGER),
+        "minecraft:entities\\vindicator" | "entities\\vindicator" => Some(&ENTITIES_VINDICATOR),
+        "minecraft:entities\\wandering_trader" | "entities\\wandering_trader" => {
             Some(&ENTITIES_WANDERING_TRADER)
         }
-        "minecraft:entities/warden" | "entities/warden" => Some(&ENTITIES_WARDEN),
-        "minecraft:entities/witch" | "entities/witch" => Some(&ENTITIES_WITCH),
-        "minecraft:entities/wither" | "entities/wither" => Some(&ENTITIES_WITHER),
-        "minecraft:entities/wither_skeleton" | "entities/wither_skeleton" => {
+        "minecraft:entities\\warden" | "entities\\warden" => Some(&ENTITIES_WARDEN),
+        "minecraft:entities\\witch" | "entities\\witch" => Some(&ENTITIES_WITCH),
+        "minecraft:entities\\wither" | "entities\\wither" => Some(&ENTITIES_WITHER),
+        "minecraft:entities\\wither_skeleton" | "entities\\wither_skeleton" => {
             Some(&ENTITIES_WITHER_SKELETON)
         }
-        "minecraft:entities/wolf" | "entities/wolf" => Some(&ENTITIES_WOLF),
-        "minecraft:entities/zoglin" | "entities/zoglin" => Some(&ENTITIES_ZOGLIN),
-        "minecraft:entities/zombie" | "entities/zombie" => Some(&ENTITIES_ZOMBIE),
-        "minecraft:entities/zombie_horse" | "entities/zombie_horse" => Some(&ENTITIES_ZOMBIE_HORSE),
-        "minecraft:entities/zombie_nautilus" | "entities/zombie_nautilus" => {
+        "minecraft:entities\\wolf" | "entities\\wolf" => Some(&ENTITIES_WOLF),
+        "minecraft:entities\\zoglin" | "entities\\zoglin" => Some(&ENTITIES_ZOGLIN),
+        "minecraft:entities\\zombie" | "entities\\zombie" => Some(&ENTITIES_ZOMBIE),
+        "minecraft:entities\\zombie_horse" | "entities\\zombie_horse" => {
+            Some(&ENTITIES_ZOMBIE_HORSE)
+        }
+        "minecraft:entities\\zombie_nautilus" | "entities\\zombie_nautilus" => {
             Some(&ENTITIES_ZOMBIE_NAUTILUS)
         }
-        "minecraft:entities/zombie_villager" | "entities/zombie_villager" => {
+        "minecraft:entities\\zombie_villager" | "entities\\zombie_villager" => {
             Some(&ENTITIES_ZOMBIE_VILLAGER)
         }
-        "minecraft:entities/zombified_piglin" | "entities/zombified_piglin" => {
+        "minecraft:entities\\zombified_piglin" | "entities\\zombified_piglin" => {
             Some(&ENTITIES_ZOMBIFIED_PIGLIN)
         }
-        "minecraft:equipment/trial_chamber" | "equipment/trial_chamber" => {
+        "minecraft:equipment\\trial_chamber" | "equipment\\trial_chamber" => {
             Some(&EQUIPMENT_TRIAL_CHAMBER)
         }
-        "minecraft:equipment/trial_chamber_melee" | "equipment/trial_chamber_melee" => {
+        "minecraft:equipment\\trial_chamber_melee" | "equipment\\trial_chamber_melee" => {
             Some(&EQUIPMENT_TRIAL_CHAMBER_MELEE)
         }
-        "minecraft:equipment/trial_chamber_ranged" | "equipment/trial_chamber_ranged" => {
+        "minecraft:equipment\\trial_chamber_ranged" | "equipment\\trial_chamber_ranged" => {
             Some(&EQUIPMENT_TRIAL_CHAMBER_RANGED)
         }
-        "minecraft:gameplay/armadillo_shed" | "gameplay/armadillo_shed" => {
+        "minecraft:gameplay\\armadillo_shed" | "gameplay\\armadillo_shed" => {
             Some(&GAMEPLAY_ARMADILLO_SHED)
         }
-        "minecraft:gameplay/cat_morning_gift" | "gameplay/cat_morning_gift" => {
+        "minecraft:gameplay\\cat_morning_gift" | "gameplay\\cat_morning_gift" => {
             Some(&GAMEPLAY_CAT_MORNING_GIFT)
         }
-        "minecraft:gameplay/chicken_lay" | "gameplay/chicken_lay" => Some(&GAMEPLAY_CHICKEN_LAY),
-        "minecraft:gameplay/fishing" | "gameplay/fishing" => Some(&GAMEPLAY_FISHING),
-        "minecraft:gameplay/fishing/fish" | "gameplay/fishing/fish" => Some(&GAMEPLAY_FISHING_FISH),
-        "minecraft:gameplay/fishing/junk" | "gameplay/fishing/junk" => Some(&GAMEPLAY_FISHING_JUNK),
-        "minecraft:gameplay/fishing/treasure" | "gameplay/fishing/treasure" => {
+        "minecraft:gameplay\\chicken_lay" | "gameplay\\chicken_lay" => Some(&GAMEPLAY_CHICKEN_LAY),
+        "minecraft:gameplay\\fishing" | "gameplay\\fishing" => Some(&GAMEPLAY_FISHING),
+        "minecraft:gameplay\\fishing\\fish" | "gameplay\\fishing\\fish" => {
+            Some(&GAMEPLAY_FISHING_FISH)
+        }
+        "minecraft:gameplay\\fishing\\junk" | "gameplay\\fishing\\junk" => {
+            Some(&GAMEPLAY_FISHING_JUNK)
+        }
+        "minecraft:gameplay\\fishing\\treasure" | "gameplay\\fishing\\treasure" => {
             Some(&GAMEPLAY_FISHING_TREASURE)
         }
-        "minecraft:gameplay/hero_of_the_village/armorer_gift"
-        | "gameplay/hero_of_the_village/armorer_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\armorer_gift"
+        | "gameplay\\hero_of_the_village\\armorer_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_ARMORER_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/baby_gift"
-        | "gameplay/hero_of_the_village/baby_gift" => Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_BABY_GIFT),
-        "minecraft:gameplay/hero_of_the_village/butcher_gift"
-        | "gameplay/hero_of_the_village/butcher_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\baby_gift"
+        | "gameplay\\hero_of_the_village\\baby_gift" => {
+            Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_BABY_GIFT)
+        }
+        "minecraft:gameplay\\hero_of_the_village\\butcher_gift"
+        | "gameplay\\hero_of_the_village\\butcher_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_BUTCHER_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/cartographer_gift"
-        | "gameplay/hero_of_the_village/cartographer_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\cartographer_gift"
+        | "gameplay\\hero_of_the_village\\cartographer_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_CARTOGRAPHER_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/cleric_gift"
-        | "gameplay/hero_of_the_village/cleric_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\cleric_gift"
+        | "gameplay\\hero_of_the_village\\cleric_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_CLERIC_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/farmer_gift"
-        | "gameplay/hero_of_the_village/farmer_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\farmer_gift"
+        | "gameplay\\hero_of_the_village\\farmer_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_FARMER_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/fisherman_gift"
-        | "gameplay/hero_of_the_village/fisherman_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\fisherman_gift"
+        | "gameplay\\hero_of_the_village\\fisherman_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_FISHERMAN_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/fletcher_gift"
-        | "gameplay/hero_of_the_village/fletcher_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\fletcher_gift"
+        | "gameplay\\hero_of_the_village\\fletcher_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_FLETCHER_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/leatherworker_gift"
-        | "gameplay/hero_of_the_village/leatherworker_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\leatherworker_gift"
+        | "gameplay\\hero_of_the_village\\leatherworker_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_LEATHERWORKER_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/librarian_gift"
-        | "gameplay/hero_of_the_village/librarian_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\librarian_gift"
+        | "gameplay\\hero_of_the_village\\librarian_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_LIBRARIAN_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/mason_gift"
-        | "gameplay/hero_of_the_village/mason_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\mason_gift"
+        | "gameplay\\hero_of_the_village\\mason_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_MASON_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/shepherd_gift"
-        | "gameplay/hero_of_the_village/shepherd_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\shepherd_gift"
+        | "gameplay\\hero_of_the_village\\shepherd_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_SHEPHERD_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/toolsmith_gift"
-        | "gameplay/hero_of_the_village/toolsmith_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\toolsmith_gift"
+        | "gameplay\\hero_of_the_village\\toolsmith_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_TOOLSMITH_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/unemployed_gift"
-        | "gameplay/hero_of_the_village/unemployed_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\unemployed_gift"
+        | "gameplay\\hero_of_the_village\\unemployed_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_UNEMPLOYED_GIFT)
         }
-        "minecraft:gameplay/hero_of_the_village/weaponsmith_gift"
-        | "gameplay/hero_of_the_village/weaponsmith_gift" => {
+        "minecraft:gameplay\\hero_of_the_village\\weaponsmith_gift"
+        | "gameplay\\hero_of_the_village\\weaponsmith_gift" => {
             Some(&GAMEPLAY_HERO_OF_THE_VILLAGE_WEAPONSMITH_GIFT)
         }
-        "minecraft:gameplay/panda_sneeze" | "gameplay/panda_sneeze" => Some(&GAMEPLAY_PANDA_SNEEZE),
-        "minecraft:gameplay/piglin_bartering" | "gameplay/piglin_bartering" => {
+        "minecraft:gameplay\\panda_sneeze" | "gameplay\\panda_sneeze" => {
+            Some(&GAMEPLAY_PANDA_SNEEZE)
+        }
+        "minecraft:gameplay\\piglin_bartering" | "gameplay\\piglin_bartering" => {
             Some(&GAMEPLAY_PIGLIN_BARTERING)
         }
-        "minecraft:gameplay/sniffer_digging" | "gameplay/sniffer_digging" => {
+        "minecraft:gameplay\\sniffer_digging" | "gameplay\\sniffer_digging" => {
             Some(&GAMEPLAY_SNIFFER_DIGGING)
         }
-        "minecraft:gameplay/turtle_grow" | "gameplay/turtle_grow" => Some(&GAMEPLAY_TURTLE_GROW),
-        "minecraft:harvest/beehive" | "harvest/beehive" => Some(&HARVEST_BEEHIVE),
-        "minecraft:harvest/cave_vine" | "harvest/cave_vine" => Some(&HARVEST_CAVE_VINE),
-        "minecraft:harvest/sweet_berry_bush" | "harvest/sweet_berry_bush" => {
+        "minecraft:gameplay\\turtle_grow" | "gameplay\\turtle_grow" => Some(&GAMEPLAY_TURTLE_GROW),
+        "minecraft:harvest\\beehive" | "harvest\\beehive" => Some(&HARVEST_BEEHIVE),
+        "minecraft:harvest\\cave_vine" | "harvest\\cave_vine" => Some(&HARVEST_CAVE_VINE),
+        "minecraft:harvest\\sweet_berry_bush" | "harvest\\sweet_berry_bush" => {
             Some(&HARVEST_SWEET_BERRY_BUSH)
         }
-        "minecraft:pots/trial_chambers/corridor" | "pots/trial_chambers/corridor" => {
+        "minecraft:pots\\trial_chambers\\corridor" | "pots\\trial_chambers\\corridor" => {
             Some(&POTS_TRIAL_CHAMBERS_CORRIDOR)
         }
-        "minecraft:shearing/bogged" | "shearing/bogged" => Some(&SHEARING_BOGGED),
-        "minecraft:shearing/mooshroom" | "shearing/mooshroom" => Some(&SHEARING_MOOSHROOM),
-        "minecraft:shearing/mooshroom/brown" | "shearing/mooshroom/brown" => {
+        "minecraft:shearing\\bogged" | "shearing\\bogged" => Some(&SHEARING_BOGGED),
+        "minecraft:shearing\\mooshroom" | "shearing\\mooshroom" => Some(&SHEARING_MOOSHROOM),
+        "minecraft:shearing\\mooshroom\\brown" | "shearing\\mooshroom\\brown" => {
             Some(&SHEARING_MOOSHROOM_BROWN)
         }
-        "minecraft:shearing/mooshroom/red" | "shearing/mooshroom/red" => {
+        "minecraft:shearing\\mooshroom\\red" | "shearing\\mooshroom\\red" => {
             Some(&SHEARING_MOOSHROOM_RED)
         }
-        "minecraft:shearing/sheep" | "shearing/sheep" => Some(&SHEARING_SHEEP),
-        "minecraft:shearing/sheep/black" | "shearing/sheep/black" => Some(&SHEARING_SHEEP_BLACK),
-        "minecraft:shearing/sheep/blue" | "shearing/sheep/blue" => Some(&SHEARING_SHEEP_BLUE),
-        "minecraft:shearing/sheep/brown" | "shearing/sheep/brown" => Some(&SHEARING_SHEEP_BROWN),
-        "minecraft:shearing/sheep/cyan" | "shearing/sheep/cyan" => Some(&SHEARING_SHEEP_CYAN),
-        "minecraft:shearing/sheep/gray" | "shearing/sheep/gray" => Some(&SHEARING_SHEEP_GRAY),
-        "minecraft:shearing/sheep/green" | "shearing/sheep/green" => Some(&SHEARING_SHEEP_GREEN),
-        "minecraft:shearing/sheep/light_blue" | "shearing/sheep/light_blue" => {
+        "minecraft:shearing\\sheep" | "shearing\\sheep" => Some(&SHEARING_SHEEP),
+        "minecraft:shearing\\sheep\\black" | "shearing\\sheep\\black" => {
+            Some(&SHEARING_SHEEP_BLACK)
+        }
+        "minecraft:shearing\\sheep\\blue" | "shearing\\sheep\\blue" => Some(&SHEARING_SHEEP_BLUE),
+        "minecraft:shearing\\sheep\\brown" | "shearing\\sheep\\brown" => {
+            Some(&SHEARING_SHEEP_BROWN)
+        }
+        "minecraft:shearing\\sheep\\cyan" | "shearing\\sheep\\cyan" => Some(&SHEARING_SHEEP_CYAN),
+        "minecraft:shearing\\sheep\\gray" | "shearing\\sheep\\gray" => Some(&SHEARING_SHEEP_GRAY),
+        "minecraft:shearing\\sheep\\green" | "shearing\\sheep\\green" => {
+            Some(&SHEARING_SHEEP_GREEN)
+        }
+        "minecraft:shearing\\sheep\\light_blue" | "shearing\\sheep\\light_blue" => {
             Some(&SHEARING_SHEEP_LIGHT_BLUE)
         }
-        "minecraft:shearing/sheep/light_gray" | "shearing/sheep/light_gray" => {
+        "minecraft:shearing\\sheep\\light_gray" | "shearing\\sheep\\light_gray" => {
             Some(&SHEARING_SHEEP_LIGHT_GRAY)
         }
-        "minecraft:shearing/sheep/lime" | "shearing/sheep/lime" => Some(&SHEARING_SHEEP_LIME),
-        "minecraft:shearing/sheep/magenta" | "shearing/sheep/magenta" => {
+        "minecraft:shearing\\sheep\\lime" | "shearing\\sheep\\lime" => Some(&SHEARING_SHEEP_LIME),
+        "minecraft:shearing\\sheep\\magenta" | "shearing\\sheep\\magenta" => {
             Some(&SHEARING_SHEEP_MAGENTA)
         }
-        "minecraft:shearing/sheep/orange" | "shearing/sheep/orange" => Some(&SHEARING_SHEEP_ORANGE),
-        "minecraft:shearing/sheep/pink" | "shearing/sheep/pink" => Some(&SHEARING_SHEEP_PINK),
-        "minecraft:shearing/sheep/purple" | "shearing/sheep/purple" => Some(&SHEARING_SHEEP_PURPLE),
-        "minecraft:shearing/sheep/red" | "shearing/sheep/red" => Some(&SHEARING_SHEEP_RED),
-        "minecraft:shearing/sheep/white" | "shearing/sheep/white" => Some(&SHEARING_SHEEP_WHITE),
-        "minecraft:shearing/sheep/yellow" | "shearing/sheep/yellow" => Some(&SHEARING_SHEEP_YELLOW),
-        "minecraft:shearing/snow_golem" | "shearing/snow_golem" => Some(&SHEARING_SNOW_GOLEM),
-        "minecraft:spawners/ominous/trial_chamber/consumables"
-        | "spawners/ominous/trial_chamber/consumables" => {
+        "minecraft:shearing\\sheep\\orange" | "shearing\\sheep\\orange" => {
+            Some(&SHEARING_SHEEP_ORANGE)
+        }
+        "minecraft:shearing\\sheep\\pink" | "shearing\\sheep\\pink" => Some(&SHEARING_SHEEP_PINK),
+        "minecraft:shearing\\sheep\\purple" | "shearing\\sheep\\purple" => {
+            Some(&SHEARING_SHEEP_PURPLE)
+        }
+        "minecraft:shearing\\sheep\\red" | "shearing\\sheep\\red" => Some(&SHEARING_SHEEP_RED),
+        "minecraft:shearing\\sheep\\white" | "shearing\\sheep\\white" => {
+            Some(&SHEARING_SHEEP_WHITE)
+        }
+        "minecraft:shearing\\sheep\\yellow" | "shearing\\sheep\\yellow" => {
+            Some(&SHEARING_SHEEP_YELLOW)
+        }
+        "minecraft:shearing\\snow_golem" | "shearing\\snow_golem" => Some(&SHEARING_SNOW_GOLEM),
+        "minecraft:spawners\\ominous\\trial_chamber\\consumables"
+        | "spawners\\ominous\\trial_chamber\\consumables" => {
             Some(&SPAWNERS_OMINOUS_TRIAL_CHAMBER_CONSUMABLES)
         }
-        "minecraft:spawners/ominous/trial_chamber/key" | "spawners/ominous/trial_chamber/key" => {
-            Some(&SPAWNERS_OMINOUS_TRIAL_CHAMBER_KEY)
-        }
-        "minecraft:spawners/trial_chamber/consumables" | "spawners/trial_chamber/consumables" => {
-            Some(&SPAWNERS_TRIAL_CHAMBER_CONSUMABLES)
-        }
-        "minecraft:spawners/trial_chamber/items_to_drop_when_ominous"
-        | "spawners/trial_chamber/items_to_drop_when_ominous" => {
+        "minecraft:spawners\\ominous\\trial_chamber\\key"
+        | "spawners\\ominous\\trial_chamber\\key" => Some(&SPAWNERS_OMINOUS_TRIAL_CHAMBER_KEY),
+        "minecraft:spawners\\trial_chamber\\consumables"
+        | "spawners\\trial_chamber\\consumables" => Some(&SPAWNERS_TRIAL_CHAMBER_CONSUMABLES),
+        "minecraft:spawners\\trial_chamber\\items_to_drop_when_ominous"
+        | "spawners\\trial_chamber\\items_to_drop_when_ominous" => {
             Some(&SPAWNERS_TRIAL_CHAMBER_ITEMS_TO_DROP_WHEN_OMINOUS)
         }
-        "minecraft:spawners/trial_chamber/key" | "spawners/trial_chamber/key" => {
+        "minecraft:spawners\\trial_chamber\\key" | "spawners\\trial_chamber\\key" => {
             Some(&SPAWNERS_TRIAL_CHAMBER_KEY)
         }
-        "minecraft:till/rooted_dirt" | "till/rooted_dirt" => Some(&TILL_ROOTED_DIRT),
+        "minecraft:till\\rooted_dirt" | "till\\rooted_dirt" => Some(&TILL_ROOTED_DIRT),
         _ => None,
     }
 }

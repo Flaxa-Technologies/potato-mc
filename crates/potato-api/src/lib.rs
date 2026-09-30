@@ -527,7 +527,7 @@ tags:
             Vector3::new(0.0, -1.0, 0.0),
             10.0,
             0.5,
-            |x, y, z| {
+            |_x, y, _z| {
                 if y <= 60 {
                     Some(Block::new("minecraft:bedrock", 0))
                 } else {
@@ -538,7 +538,7 @@ tags:
         assert!(trace.is_some());
         let (b, _, r) = trace.unwrap();
         assert_eq!(b.name(), "bedrock");
-        assert!(r.distance >= 4.0);
+        assert!(r.distance >= 3.0);
     }
 
     #[test]

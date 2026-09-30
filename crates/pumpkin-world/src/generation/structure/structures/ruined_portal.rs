@@ -10,7 +10,7 @@ use pumpkin_util::{
 use crate::{
     ProtoChunk,
     generation::{
-        positions::chunk_pos::{get_center_x, get_center_z},
+        positions::chunk_pos::{start_block_x, start_block_z},
         structure::{
             piece::StructurePieceType,
             structures::{
@@ -40,6 +40,9 @@ const PORTALS: &[&str] = &[
     "ruined_portal/portal_8",
     "ruined_portal/portal_9",
     "ruined_portal/portal_10",
+];
+
+const GIANT_PORTALS: &[&str] = &[
     "ruined_portal/giant_portal_1",
     "ruined_portal/giant_portal_2",
     "ruined_portal/giant_portal_3",
@@ -173,22 +176,58 @@ impl StructureGenerator for RuinedPortalGenerator {
         &self,
         mut context: StructureGeneratorContext<'_>,
     ) -> Option<StructurePosition> {
-        let chunk_center_x = get_center_x(context.chunk_x);
-        let chunk_center_z = get_center_z(context.chunk_z);
+        // Vanilla RNG call order:
+        // 1. airPocket sample (nextFloat if 0 < prob < 1, nothing if 0 or 1)
+        // 2. giant portal check: nextFloat() < 0.05
+        // 3. nextInt(portals.len) — pick template
+        // 4. Rotation.getRandom: nextInt(4)
+        // 5. Mirror: nextFloat() < 0.5
+        let (vertical_placement, mut properties) =
+            RuinedPortalProperties::for_variant(self.variant);
 
+        // Step 1: airPocket probability draw (matches vanilla `sample(random, prob)`).
+        // Only calls nextFloat when 0 < prob < 1; we mirror this by reading the
+        // probability stored per-variant. Currently hardcoded per variant (0.0 or 1.0
+        // for most), so no random draw is needed for most variants.
+        // For the standard RuinedPortal variant (prob == 0.5), we must draw.
+        let air_pocket_prob = match self.variant {
+            StructureKeys::RuinedPortal => 0.5,        // two setups, each with 0.5 weight
+            StructureKeys::RuinedPortalMountain => 0.5, // also two setups
+            _ => if properties.air_pocket { 1.0 } else { 0.0 },
+        };
+        if air_pocket_prob > 0.0 && air_pocket_prob < 1.0 {
+            properties.air_pocket = context.random.next_f32() < air_pocket_prob;
+        }
+
+        // Step 2: 5% chance for giant portal (always draws nextFloat)
+        let pool = if context.random.next_f32() < 0.05 {
+            GIANT_PORTALS
+        } else {
+            PORTALS
+        };
+
+        // Step 3: pick template
+        let template_idx = context.random.next_bounded_i32(pool.len() as i32) as usize;
+        let template_name = pool[template_idx];
+        let template = get_template(template_name)?;
+
+        // Step 4: rotation
         let rotation_idx = context.random.next_bounded_i32(4) as u8;
         let rotation = Rotation::from_index(rotation_idx);
+
+        // Step 5: mirror
         let mirror = if context.random.next_f32() < 0.5 {
             Mirror::None
         } else {
             Mirror::FrontBack
         };
 
-        let (vertical_placement, properties) = RuinedPortalProperties::for_variant(self.variant);
-
-        let template_idx = context.random.next_bounded_i32(PORTALS.len() as i32) as usize;
-        let template_name = PORTALS[template_idx];
-        let template = get_template(template_name)?;
+        // Vanilla uses chunkPos.getWorldPosition() = (chunk_x * 16, 0, chunk_z * 16)
+        // as the templatePosition origin, NOT chunk_center minus pivot.
+        let base_x = start_block_x(context.chunk_x);
+        let base_z = start_block_z(context.chunk_z);
+        let center_x = base_x + 8;
+        let center_z = base_z + 8;
 
         let pivot = Vector3::new(template.size.x / 2, 0, template.size.z / 2);
 
@@ -197,26 +236,65 @@ impl StructureGenerator for RuinedPortalGenerator {
                 .height_sampler
                 .as_deref_mut()
                 .map_or(context.sea_level, |s| {
-                    s.estimate_ocean_floor_height(chunk_center_x, chunk_center_z)
+                    s.estimate_ocean_floor_height(center_x, center_z)
                 }),
-            VerticalPlacement::InNether => context.random.next_bounded_i32(45) + 45,
+            VerticalPlacement::InNether => {
+                // Vanilla: airPocket ? randomBetweenInclusive(32,100) : (nextFloat<0.5 ? nextInt(3)+27 : nextInt(72)+29)
+                if properties.air_pocket {
+                    context.random.next_bounded_i32(69) + 32
+                } else if context.random.next_f32() < 0.5 {
+                    context.random.next_bounded_i32(3) + 27
+                } else {
+                    context.random.next_bounded_i32(72) + 29
+                }
+            }
+            VerticalPlacement::InMountain => {
+                let surface_y = context
+                    .height_sampler
+                    .as_deref_mut()
+                    .map_or(64, |s| s.estimate_height(center_x, center_z));
+                // Vanilla: getRandomWithinInterval(random, 70, surfaceY - ySpan)
+                let max_y = surface_y - (template.size.y as i32);
+                if 70 < max_y {
+                    context.random.next_bounded_i32(max_y - 70) + 70
+                } else {
+                    max_y
+                }
+            }
+            VerticalPlacement::Underground => {
+                let surface_y = context
+                    .height_sampler
+                    .as_deref_mut()
+                    .map_or(64, |s| s.estimate_height(center_x, center_z));
+                // Vanilla: getRandomWithinInterval(random, minY, surfaceY - ySpan)
+                let min_y = context.min_y + 15;
+                let max_y = surface_y - (template.size.y as i32);
+                if min_y < max_y {
+                    context.random.next_bounded_i32(max_y - min_y) + min_y
+                } else {
+                    max_y
+                }
+            }
             VerticalPlacement::PartlyBuried => {
                 let surface_y = context
                     .height_sampler
                     .as_deref_mut()
-                    .map_or(64, |s| s.estimate_height(chunk_center_x, chunk_center_z));
-                surface_y - 2 - context.random.next_bounded_i32(3)
+                    .map_or(64, |s| s.estimate_height(center_x, center_z));
+                // Vanilla: surfaceYAtCenter - ySpan + randomBetweenInclusive(2, 8)
+                surface_y - (template.size.y as i32) + context.random.next_bounded_i32(7) + 2
             }
             _ => {
+                // OnLandSurface / OnOceanFloor already handled above
                 let surface_y = context
                     .height_sampler
                     .as_deref_mut()
-                    .map_or(64, |s| s.estimate_height(chunk_center_x, chunk_center_z));
+                    .map_or(64, |s| s.estimate_height(center_x, center_z));
                 surface_y - 1
             }
         };
 
-        let template_position = Vector3::new(chunk_center_x - pivot.x, y, chunk_center_z - pivot.z);
+        // templatePosition matches Vanilla: base position (chunk min X/Z) at computed Y.
+        let template_position = Vector3::new(base_x, y, base_z);
 
         let piece = RuinedPortalPiece::new(
             template,
@@ -233,7 +311,7 @@ impl StructureGenerator for RuinedPortalGenerator {
         collector.add_piece(Box::new(piece));
 
         Some(StructurePosition::new(
-            BlockPos::new(chunk_center_x, y, chunk_center_z),
+            BlockPos::new(center_x, y, center_z),
             collector,
         ))
     }
@@ -591,35 +669,29 @@ impl StructurePieceBase for RuinedPortalPiece {
         _seed: i64,
         chunk_box: &BlockBox,
     ) {
-        let bounding_box = self
-            .template
-            .get_bounding_box(&self.place_settings, self.template_position);
-        let center = Vector3::new(
-            i32::midpoint(bounding_box.min.x, bounding_box.max.x),
-            i32::midpoint(bounding_box.min.y, bounding_box.max.y),
-            i32::midpoint(bounding_box.min.z, bounding_box.max.z),
-        );
+        // Vanilla's postProcess only places blocks from the chunk that contains the
+        // structure's center (it uses a WorldGenLevel for cross-chunk access). In
+        // Pumpkin, ProtoChunk clips writes to its own 16×16 column, so we instead
+        // call place for *every* chunk that intersects (generate_in_chunk in mod.rs
+        // already handles that) and let chunk_box act as the per-chunk clip region.
+        // We must NOT enlarge chunk_box or the coordinate wrap-around in set_block_state
+        // will silently corrupt other positions.
 
-        if chunk_box.contains_pos(&center) {
-            let mut enlarged_box = *chunk_box;
-            enlarged_box.encompass(&bounding_box);
+        self.place_blocks(chunk, chunk_box);
+        self.spread_netherrack(random, chunk, chunk_box);
+        self.add_netherrack_drip_columns_below_portal(random, chunk, chunk_box);
 
-            self.place_blocks(chunk, &enlarged_box);
-            self.spread_netherrack(random, chunk, &enlarged_box);
-            self.add_netherrack_drip_columns_below_portal(random, chunk, &enlarged_box);
-
-            if self.properties.vines || self.properties.overgrown {
-                for x in self.piece.bounding_box.min.x..=self.piece.bounding_box.max.x {
-                    for y in self.piece.bounding_box.min.y..=self.piece.bounding_box.max.y {
-                        for z in self.piece.bounding_box.min.z..=self.piece.bounding_box.max.z {
-                            let pos = Vector3::new(x, y, z);
-                            if enlarged_box.contains_pos(&pos) {
-                                if self.properties.vines {
-                                    Self::maybe_add_vines(random, chunk, pos);
-                                }
-                                if self.properties.overgrown {
-                                    Self::maybe_add_leaves_above(random, chunk, pos);
-                                }
+        if self.properties.vines || self.properties.overgrown {
+            for x in self.piece.bounding_box.min.x..=self.piece.bounding_box.max.x {
+                for y in self.piece.bounding_box.min.y..=self.piece.bounding_box.max.y {
+                    for z in self.piece.bounding_box.min.z..=self.piece.bounding_box.max.z {
+                        let pos = Vector3::new(x, y, z);
+                        if chunk_box.contains_pos(&pos) {
+                            if self.properties.vines {
+                                Self::maybe_add_vines(random, chunk, pos);
+                            }
+                            if self.properties.overgrown {
+                                Self::maybe_add_leaves_above(random, chunk, pos);
                             }
                         }
                     }

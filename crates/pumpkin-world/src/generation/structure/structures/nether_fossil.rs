@@ -288,10 +288,12 @@ impl StructurePieceBase for NetherFossilPiece {
             .get_bounding_box(&self.place_settings, self.template_position);
 
         let fossil_bb = self.piece.bounding_box;
-        let mut enlarged_box = *chunk_box;
-        enlarged_box.encompass(&fossil_bb);
 
-        self.place_blocks(chunk, &enlarged_box);
+        // Do NOT enlarge chunk_box with the fossil bounding box: ProtoChunk.set_block_state
+        // wraps x/z with & 15, so writing outside the chunk's 16x16 region silently corrupts
+        // other positions. The generate_in_chunk loop already calls place() for every chunk
+        // that intersects this fossil, so each chunk clips to its own chunk_box.
+        self.place_blocks(chunk, chunk_box);
         Self::place_dried_ghast(chunk, seed, &fossil_bb, chunk_box);
     }
 }

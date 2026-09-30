@@ -1003,6 +1003,14 @@ pub fn evaluate_overworld_veins_volume_opt(
     stack: &[ChunkNoiseFunctionComponent],
     volume: &DensityVolume,
 ) -> Option<Option<[DensityBuffer; 2]>> {
+    evaluate_overworld_veins_volume_inner(stack, volume, true)
+}
+
+fn evaluate_overworld_veins_volume_inner(
+    stack: &[ChunkNoiseFunctionComponent],
+    volume: &DensityVolume,
+    allow_skip: bool,
+) -> Option<Option<[DensityBuffer; 2]>> {
     if stack.len() < 218 {
         return None;
     }
@@ -1069,7 +1077,7 @@ pub fn evaluate_overworld_veins_volume_opt(
     // Throughout the entire chunk, vein_toggle is strictly in (-0.4, 0.4), so OreVeinSampler::sample
     // will NEVER trigger. Returning None completely eliminates allocating 786 KB of buffers
     // and doing 98,304 interpolations per chunk!
-    if !any_vein_cells {
+    if allow_skip && !any_vein_cells {
         return Some(None);
     }
 
@@ -1202,14 +1210,9 @@ pub fn evaluate_overworld_veins_volume(
     ridged_buffer: &mut [f32],
     volume: &DensityVolume,
 ) -> bool {
-    if let Some(opt_veins) = evaluate_overworld_veins_volume_opt(stack, volume) {
-        if let Some([t, r]) = opt_veins {
-            toggle_buffer.copy_from_slice(&t);
-            ridged_buffer.copy_from_slice(&r);
-        } else {
-            toggle_buffer.fill(0.0);
-            ridged_buffer.fill(-1.0);
-        }
+    if let Some(Some([t, r])) = evaluate_overworld_veins_volume_inner(stack, volume, false) {
+        toggle_buffer.copy_from_slice(&t);
+        ridged_buffer.copy_from_slice(&r);
         return true;
     }
     false

@@ -1,0 +1,49 @@
+name: Build Windows Dev Binary
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-windows-dev:
+    name: Build Windows Dev (x86_64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Remove local toolchain override
+        shell: bash
+        run: rm -f rust-toolchain.toml rust-toolchain
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: windows-dev
+
+      - name: Build Dev Binary
+        run: cargo build -p pumpkin --bin pumpkin
+
+      - name: Prepare Artifact
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp target/debug/pumpkin.exe dist/potato-windows-dev.exe
+          ls -la dist/
+
+      - name: Upload Windows Dev Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: potato-windows-dev.exe
+          path: dist/potato-windows-dev.exe
+          retention-days: 7

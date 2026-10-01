@@ -242,6 +242,9 @@ webpki-root-certs = { version = "1.0.8", default-features = false }
 # ring-only: must match the provider the rest of the tree (wasmtime-wasi-http, rtc) uses
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 
+[profile.dev.package.pumpkin-data]
+opt-level = 1
+
 [profile.release.package.pumpkin-data]
 opt-level = 1
 

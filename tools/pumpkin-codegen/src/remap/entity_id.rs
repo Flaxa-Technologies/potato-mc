@@ -210,9 +210,29 @@ pub fn build() -> TokenStream {
     quote! {
         #static_values
 
+        #[inline]
+        pub const fn remap_26_3_to_26_2(entity_id: u16) -> u16 {
+            if entity_id < 33 {
+                entity_id
+            } else if entity_id == 33 {
+                0
+            } else if entity_id <= 105 {
+                entity_id - 1
+            } else if entity_id == 106 || entity_id == 107 {
+                0
+            } else {
+                entity_id - 3
+            }
+        }
+
         #[must_use]
         pub fn remap_entity_id_for_version(entity_id: u16, version: pumpkin_util::version::JavaMinecraftVersion) -> u16 {
+            if version >= pumpkin_util::version::JavaMinecraftVersion::V_26_3 {
+                return entity_id;
+            }
+            let entity_id = remap_26_3_to_26_2(entity_id);
             match version {
+                pumpkin_util::version::JavaMinecraftVersion::V_26_2 => entity_id,
                 #match_arms
                 _ => entity_id,
             }

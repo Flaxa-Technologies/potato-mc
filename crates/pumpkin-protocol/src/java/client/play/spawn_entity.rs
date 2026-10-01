@@ -23,6 +23,7 @@ const fn remap_object_type_for_version(entity_id: u16, _version: JavaMinecraftVe
         || entity_id == EntityType::MANGROVE_BOAT.id
         || entity_id == EntityType::CHERRY_BOAT.id
         || entity_id == EntityType::PALE_OAK_BOAT.id
+        || entity_id == EntityType::POPLAR_BOAT.id
         || entity_id == EntityType::BAMBOO_RAFT.id
         || entity_id == EntityType::OAK_CHEST_BOAT.id
         || entity_id == EntityType::SPRUCE_CHEST_BOAT.id
@@ -33,6 +34,7 @@ const fn remap_object_type_for_version(entity_id: u16, _version: JavaMinecraftVe
         || entity_id == EntityType::MANGROVE_CHEST_BOAT.id
         || entity_id == EntityType::CHERRY_CHEST_BOAT.id
         || entity_id == EntityType::PALE_OAK_CHEST_BOAT.id
+        || entity_id == EntityType::POPLAR_CHEST_BOAT.id
         || entity_id == EntityType::BAMBOO_CHEST_RAFT.id
     {
         1
